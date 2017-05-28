@@ -13,29 +13,29 @@ Core.Debug = Core.Debug || {};
 
 Core.Debug = (function (Namespace) {
     Namespace.RunUnitTests = function(){
-        QUnit.module('Core.Debug');
-        QUnit.test('Core.Debug.CheckDependency()', function(Assert){
+        module('Core.Debug');
+        test('Core.Debug.CheckDependency()', function(){
 
             Core.Debug.DummyFunction = function(){};
 
-            Assert.expect(4);
+            expect(4);
 
-            Assert.equal(
+            equal(
                 Core.Debug.CheckDependency('Core.Debug.RunUnitTests', 'Core.Debug.DummyFunction', 'existing_function', true),
                 true
             );
 
-            Assert.equal(
+            equal(
                 Core.Debug.CheckDependency('Core.Debug.RunUnitTests', 'Core.Debug.DummyFunction2', 'existing_function', true),
                 false
             );
 
-            Assert.equal(
+            equal(
                 Core.Debug.CheckDependency('Core.Debug.RunUnitTests', 'Core.Debug2.DummyFunction2', 'existing_function', true),
                 false
                 );
 
-            Assert.equal(
+            equal(
                 Core.Debug.CheckDependency('Core.Debug.RunUnitTests', 'nonexisting_function', 'nonexisting_function', true),
                 false
             );

@@ -241,7 +241,6 @@ fieldset select {
 
 .TicketCompose fieldset #Subject {
     width: 50%;
-    max-width: 614px;
 }
 
 fieldset.Columns .Column {
@@ -323,16 +322,6 @@ fieldset div.Field {
  */
 textarea {
     font-family: monospace,fixed;
-}
-
-/**
- * @subsection  Input Readonly
- */
-input[type=text][readonly],
-input[type=password][readonly],
-input[type=email][readonly],
-textarea[readonly] {
-    background-color: #DDD;
 }
 
 /**

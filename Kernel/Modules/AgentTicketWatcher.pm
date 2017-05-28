@@ -13,8 +13,8 @@ use warnings;
 
 our $ObjectManagerDisabled = 1;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -49,18 +49,11 @@ sub Run {
     if ( $ConfigObject->Get('Ticket::WatcherGroup') ) {
         @Groups = @{ $ConfigObject->Get('Ticket::WatcherGroup') };
     }
-
-    my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
-    my $Access      = 1;
+    my $Access = 1;
     if (@Groups) {
         $Access = 0;
         for my $Group (@Groups) {
-            my $HasPermission = $GroupObject->PermissionCheck(
-                UserID    => $Self->{UserID},
-                GroupName => $Group,
-                Type      => 'rw',
-            );
-            if ($HasPermission) {
+            if ( $LayoutObject->{"UserIsGroup[$Group]"} eq 'Yes' ) {
                 $Access = 1;
             }
         }

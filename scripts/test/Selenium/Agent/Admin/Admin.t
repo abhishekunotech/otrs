@@ -104,8 +104,7 @@ $Selenium->RunTest(
             AdminSession
             AdminSignature
             AdminState
-            AdminSystemConfiguration
-            AdminSystemConfigurationGroup
+            AdminSysConfig
             AdminSystemAddress
             AdminSystemMaintenance
             AdminType

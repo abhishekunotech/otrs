@@ -22,16 +22,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::Activity - Activities lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All Process Management Activity functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ActivityObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::Activity');
 
 =cut
@@ -46,7 +52,7 @@ sub new {
     return $Self;
 }
 
-=head2 ActivityGet()
+=item ActivityGet()
 
     Get Activity info
     Returned activity dialogs are limited to given interface
@@ -146,7 +152,7 @@ sub ActivityGet {
     return $ActivityEntity;
 }
 
-=head2 ActivityList()
+=item ActivityList()
 
     Get a list of all Activities
 
@@ -175,12 +181,14 @@ sub ActivityList {
         return;
     }
 
-    my %ActivityList = map { $_ => $Activities->{$_}->{Name} || '' } keys %{$Activities};
+    my %ActivityList = map { $_ => $Activities->{$_}{Name} || '' } keys %{$Activities};
 
     return \%ActivityList;
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

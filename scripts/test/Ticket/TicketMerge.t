@@ -12,9 +12,8 @@ use utf8;
 
 use vars (qw($Self));
 
-my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Internal' );
+# get ticket object
+my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
@@ -46,23 +45,23 @@ for my $IDCount ( 0 .. $Limit ) {
     );
     push @TicketIDs, $TicketID;
 
-    if ( $TicketIDs[$IDCount] ) {
+    if ($TicketID) {
         $TicketCount++;
 
         # create the article
-        $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketIDs[$IDCount],
-            SenderType           => 'agent',
-            IsVisibleForCustomer => 0,
-            From                 => 'Some Agent <email@example.com>',
-            To                   => 'Some Customer A <customer-a@example.com>',
-            Subject              => 'some short description',
-            Body                 => 'the message text',
-            Charset              => 'ISO-8859-15',
-            MimeType             => 'text/plain',
-            HistoryType          => 'AddNote',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
+        $TicketObject->ArticleCreate(
+            TicketID       => $TicketIDs[$IDCount],
+            ArticleType    => 'note-internal',
+            SenderType     => 'agent',
+            From           => 'Some Agent <email@example.com>',
+            To             => 'Some Customer A <customer-a@example.com>',
+            Subject        => 'some short description',
+            Body           => 'the message text',
+            Charset        => 'ISO-8859-15',
+            MimeType       => 'text/plain',
+            HistoryType    => 'AddNote',
+            HistoryComment => 'Some free text!',
+            UserID         => 1,
         );
     }
 }
@@ -76,10 +75,10 @@ $Self->Is(
 # merge the tickets
 for my $IDCount ( 0 .. $Limit - 1 ) {
 
-    my $ArticleCountOrg = scalar $ArticleObject->ArticleList(
+    my $ArticleCountOrg = $TicketObject->ArticleCount(
         TicketID => $TicketIDs[$IDCount],
     );
-    my $ArticleCountMerge = scalar $ArticleObject->ArticleList(
+    my $ArticleCountMerge = $TicketObject->ArticleCount(
         TicketID => $TicketIDs[ $IDCount + 1 ],
     );
 
@@ -95,10 +94,10 @@ for my $IDCount ( 0 .. $Limit - 1 ) {
         $IDCount . ': Merged Ticket ID ' . $TicketIDs[$IDCount] . ' to ID ' . $TicketIDs[ $IDCount + 1 ],
     );
 
-    my $ArticleCountOrgMerged = scalar $ArticleObject->ArticleList(
+    my $ArticleCountOrgMerged = $TicketObject->ArticleCount(
         TicketID => $TicketIDs[$IDCount],
     );
-    my $ArticleCountMergeMerged = scalar $ArticleObject->ArticleList(
+    my $ArticleCountMergeMerged = $TicketObject->ArticleCount(
         TicketID => $TicketIDs[ $IDCount + 1 ],
     );
 

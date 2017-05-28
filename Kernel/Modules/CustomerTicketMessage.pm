@@ -84,7 +84,7 @@ sub Run {
     for my $DynamicFieldConfig ( @{$DynamicField} ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-        # extract the dynamic field value from the web request
+        # extract the dynamic field value form the web request
         $DynamicFieldValues{ $DynamicFieldConfig->{Name} } =
             $BackendObject->EditFieldValueGet(
             DynamicFieldConfig => $DynamicFieldConfig,
@@ -246,9 +246,6 @@ sub Run {
         return $Output;
     }
     elsif ( $Self->{Subaction} eq 'StoreNew' ) {
-
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-        my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Phone' );
 
         my $NextScreen = $Config->{NextScreenAfterNewTicket};
         my %Error;
@@ -608,20 +605,20 @@ sub Run {
             UserLogin => $Self->{UserLogin},
         );
         my $From      = "\"$FullName\" <$Self->{UserEmail}>";
-        my $ArticleID = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 1,
-            SenderType           => $Config->{SenderType},
-            From                 => $From,
-            To                   => $To,
-            Subject              => $GetParam{Subject},
-            Body                 => $GetParam{Body},
-            MimeType             => $MimeType,
-            Charset              => $LayoutObject->{UserCharset},
-            UserID               => $ConfigObject->Get('CustomerPanelUserID'),
-            HistoryType          => $Config->{HistoryType},
-            HistoryComment       => $Config->{HistoryComment} || '%%',
-            AutoResponseType     => ( $ConfigObject->Get('AutoResponseForWebTickets') )
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID         => $TicketID,
+            ArticleType      => $Config->{ArticleType},
+            SenderType       => $Config->{SenderType},
+            From             => $From,
+            To               => $To,
+            Subject          => $GetParam{Subject},
+            Body             => $GetParam{Body},
+            MimeType         => $MimeType,
+            Charset          => $LayoutObject->{UserCharset},
+            UserID           => $ConfigObject->Get('CustomerPanelUserID'),
+            HistoryType      => $Config->{HistoryType},
+            HistoryComment   => $Config->{HistoryComment} || '%%',
+            AutoResponseType => ( $ConfigObject->Get('AutoResponseForWebTickets') )
             ? 'auto reply'
             : '',
             OrigHeader => {
@@ -668,23 +665,30 @@ sub Run {
             my $ChatArticleID;
 
             if (@ChatMessageList) {
-                for my $Message (@ChatMessageList) {
-                    $Message->{MessageText} = $LayoutObject->Ascii2Html(
-                        Text        => $Message->{MessageText},
-                        LinkFeature => 1,
-                    );
-                }
+                my $JSONBody = $Kernel::OM->Get('Kernel::System::JSON')->Encode(
+                    Data => \@ChatMessageList,
+                );
 
-                my $ArticleChatBackend = $ArticleObject->BackendForChannel( ChannelName => 'Chat' );
+                my $ChatArticleType = 'chat-external';
 
-                $ChatArticleID = $ArticleChatBackend->ArticleCreate(
-                    TicketID             => $TicketID,
-                    SenderType           => $Config->{SenderType},
-                    ChatMessageList      => \@ChatMessageList,
-                    IsVisibleForCustomer => 1,
-                    UserID               => $ConfigObject->Get('CustomerPanelUserID'),
-                    HistoryType          => $Config->{HistoryType},
-                    HistoryComment       => $Config->{HistoryComment} || '%%',
+                $ChatArticleID = $TicketObject->ArticleCreate(
+
+                    #NoAgentNotify => $NoAgentNotify,
+                    TicketID    => $TicketID,
+                    ArticleType => $ChatArticleType,
+                    SenderType  => $Config->{SenderType},
+
+                    From => $From,
+
+                    # To               => $To,
+                    Subject        => $Kernel::OM->Get('Kernel::Language')->Translate('Chat'),
+                    Body           => $JSONBody,
+                    MimeType       => 'application/json',
+                    Charset        => $LayoutObject->{UserCharset},
+                    UserID         => $ConfigObject->Get('CustomerPanelUserID'),
+                    HistoryType    => $Config->{HistoryType},
+                    HistoryComment => $Config->{HistoryComment} || '%%',
+                    Queue          => $QueueObject->QueueLookup( QueueID => $NewQueueID ),
                 );
             }
             if ($ChatArticleID) {
@@ -732,7 +736,7 @@ sub Run {
             }
 
             # write existing file to backend
-            $ArticleBackendObject->ArticleWriteAttachment(
+            $TicketObject->ArticleWriteAttachment(
                 %{$Attachment},
                 ArticleID => $ArticleID,
                 UserID    => $ConfigObject->Get('CustomerPanelUserID'),
@@ -1044,6 +1048,13 @@ sub _MaskNew {
         OnlyDynamicFields => 1,
     );
 
+    # create a string with the quoted dynamic field names separated by commas
+    if ( IsArrayRefWithData($DynamicFieldNames) ) {
+        for my $Field ( @{$DynamicFieldNames} ) {
+            $Param{DynamicFieldNamesStrg} .= ", '" . $Field . "'";
+        }
+    }
+
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # get list type
@@ -1185,26 +1196,40 @@ sub _MaskNew {
             );
         }
 
-        $Param{ServiceStrg} = $LayoutObject->BuildSelection(
-            Data       => \%Services,
-            Name       => 'ServiceID',
-            SelectedID => $Param{ServiceID},
-            Class      => 'Modernize '
-                . ( $Config->{ServiceMandatory} ? 'Validate_Required ' : '' )
-                . ( $Param{Errors}->{ServiceIDInvalid} || '' ),
-            PossibleNone => 1,
-            TreeView     => $TreeView,
-            Sort         => 'TreeView',
-            Translation  => 0,
-            Max          => 200,
-        );
-        $LayoutObject->Block(
-            Name => 'TicketService',
-            Data => {
-                ServiceMandatory => $Config->{ServiceMandatory} || 0,
-                %Param,
-            },
-        );
+        if ( $Config->{ServiceMandatory} ) {
+            $Param{ServiceStrg} = $LayoutObject->BuildSelection(
+                Data         => \%Services,
+                Name         => 'ServiceID',
+                SelectedID   => $Param{ServiceID},
+                Class        => "Validate_Required Modernize " . ( $Param{Errors}->{ServiceIDInvalid} || '' ),
+                PossibleNone => 1,
+                TreeView     => $TreeView,
+                Sort         => 'TreeView',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketServiceMandatory',
+                Data => \%Param,
+            );
+        }
+        else {
+            $Param{ServiceStrg} = $LayoutObject->BuildSelection(
+                Data         => \%Services,
+                Name         => 'ServiceID',
+                SelectedID   => $Param{ServiceID},
+                Class        => 'Modernize',
+                PossibleNone => 1,
+                TreeView     => $TreeView,
+                Sort         => 'TreeView',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketService',
+                Data => \%Param,
+            );
+        }
 
         # reset previous ServiceID to reset SLA-List if no service is selected
         if ( !$Services{ $Param{ServiceID} || '' } ) {
@@ -1220,25 +1245,38 @@ sub _MaskNew {
                 );
             }
 
-            $Param{SLAStrg} = $LayoutObject->BuildSelection(
-                Data       => \%SLA,
-                Name       => 'SLAID',
-                SelectedID => $Param{SLAID},
-                Class      => 'Modernize '
-                    . ( $Config->{SLAMandatory} ? 'Validate_Required ' : '' )
-                    . ( $Param{Errors}->{SLAInvalid} || '' ),
-                PossibleNone => 1,
-                Sort         => 'AlphanumericValue',
-                Translation  => 0,
-                Max          => 200,
-            );
-            $LayoutObject->Block(
-                Name => 'TicketSLA',
-                Data => {
-                    SLAMandatory => $Config->{SLAMandatory} || 0,
-                    %Param,
-                    }
-            );
+            if ( $Config->{SLAMandatory} ) {
+                $Param{SLAStrg} = $LayoutObject->BuildSelection(
+                    Data         => \%SLA,
+                    Name         => 'SLAID',
+                    SelectedID   => $Param{SLAID},
+                    Class        => "Validate_Required Modernize " . ( $Param{Errors}->{SLAIDInvalid} || '' ),
+                    PossibleNone => 1,
+                    Sort         => 'AlphanumericValue',
+                    Translation  => 0,
+                    Max          => 200,
+                );
+                $LayoutObject->Block(
+                    Name => 'TicketSLAMandatory',
+                    Data => \%Param,
+                );
+            }
+            else {
+                $Param{SLAStrg} = $LayoutObject->BuildSelection(
+                    Data         => \%SLA,
+                    Name         => 'SLAID',
+                    SelectedID   => $Param{SLAID},
+                    Class        => 'Modernize',
+                    PossibleNone => 1,
+                    Sort         => 'AlphanumericValue',
+                    Translation  => 0,
+                    Max          => 200,
+                );
+                $LayoutObject->Block(
+                    Name => 'TicketSLA',
+                    Data => \%Param,
+                );
+            }
         }
     }
 
@@ -1331,8 +1369,8 @@ sub _MaskNew {
         $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-        # set up customer rich text editor
-        $LayoutObject->CustomerSetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }
@@ -1357,12 +1395,6 @@ sub _MaskNew {
             },
         );
     }
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'DynamicFieldNames',
-        Value => $DynamicFieldNames,
-    );
 
     # get output back
     return $LayoutObject->Output(

@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -212,19 +211,19 @@ my @Tests = (
             UserID => undef,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
-                Subject              => 'some short description',
-                Body                 => 'the message text',
-                HistoryType          => 'OwnerUpdate',
-                HistoryComment       => 'Some free text!',
-                From                 => 'Some Agent <email@example.com>',
-                To                   => 'Some Customer A <customer-a@example.com>',
-                Cc                   => 'Some Customer B <customer-b@example.com>',
-                ReplyTo              => 'Some Customer B <customer-b@example.com>',
-                MessageID            => '<asdasdasd.123@example.com>',
-                InReplyTo            => '<asdasdasd.12@example.com>',
+                ArticleType    => 'note-internal',
+                SenderType     => 'agent',
+                ContentType    => 'text/plain; charset=ISO-8859-15',
+                Subject        => 'some short description',
+                Body           => 'the message text',
+                HistoryType    => 'OwnerUpdate',
+                HistoryComment => 'Some free text!',
+                From           => 'Some Agent <email@example.com>',
+                To             => 'Some Customer A <customer-a@example.com>',
+                Cc             => 'Some Customer B <customer-b@example.com>',
+                ReplyTo        => 'Some Customer B <customer-b@example.com>',
+                MessageID      => '<asdasdasd.123@example.com>',
+                InReplyTo      => '<asdasdasd.12@example.com>',
                 References =>
                     '<asdasdasd.1@example.com> <asdasdasd.12@example.com>',
                 NoAgentNotify             => 0,
@@ -242,19 +241,19 @@ my @Tests = (
             UserID => $UserID,
             Ticket => undef,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
-                Subject              => 'some short description',
-                Body                 => 'the message text',
-                HistoryType          => 'OwnerUpdate',
-                HistoryComment       => 'Some free text!',
-                From                 => 'Some Agent <email@example.com>',
-                To                   => 'Some Customer A <customer-a@example.com>',
-                Cc                   => 'Some Customer B <customer-b@example.com>',
-                ReplyTo              => 'Some Customer B <customer-b@example.com>',
-                MessageID            => '<asdasdasd.123@example.com>',
-                InReplyTo            => '<asdasdasd.12@example.com>',
+                ArticleType    => 'note-internal',
+                SenderType     => 'agent',
+                ContentType    => 'text/plain; charset=ISO-8859-15',
+                Subject        => 'some short description',
+                Body           => 'the message text',
+                HistoryType    => 'OwnerUpdate',
+                HistoryComment => 'Some free text!',
+                From           => 'Some Agent <email@example.com>',
+                To             => 'Some Customer A <customer-a@example.com>',
+                Cc             => 'Some Customer B <customer-b@example.com>',
+                ReplyTo        => 'Some Customer B <customer-b@example.com>',
+                MessageID      => '<asdasdasd.123@example.com>',
+                InReplyTo      => '<asdasdasd.12@example.com>',
                 References =>
                     '<asdasdasd.1@example.com> <asdasdasd.12@example.com>',
                 NoAgentNotify             => 0,
@@ -312,19 +311,19 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
-                Subject              => 'some short description',
-                Body                 => 'the message text',
-                HistoryType          => 'OwnerUpdate',
-                HistoryComment       => 'Some free text!',
-                From                 => 'Some Agent <email@example.com>',
-                To                   => 'Some Customer A <customer-a@example.com>',
-                Cc                   => 'Some Customer B <customer-b@example.com>',
-                ReplyTo              => 'Some Customer B <customer-b@example.com>',
-                MessageID            => '<asdasdasd.123@example.com>',
-                InReplyTo            => '<asdasdasd.12@example.com>',
+                ArticleType    => 'note-internal',
+                SenderType     => 'agent',
+                ContentType    => 'text/plain; charset=ISO-8859-15',
+                Subject        => 'some short description',
+                Body           => 'the message text',
+                HistoryType    => 'OwnerUpdate',
+                HistoryComment => 'Some free text!',
+                From           => 'Some Agent <email@example.com>',
+                To             => 'Some Customer A <customer-a@example.com>',
+                Cc             => 'Some Customer B <customer-b@example.com>',
+                ReplyTo        => 'Some Customer B <customer-b@example.com>',
+                MessageID      => '<asdasdasd.123@example.com>',
+                InReplyTo      => '<asdasdasd.12@example.com>',
                 References =>
                     '<asdasdasd.1@example.com> <asdasdasd.12@example.com>',
                 NoAgentNotify             => 0,
@@ -341,9 +340,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     'äöüßÄÖÜ€исáéíúóúÁÉÍÓÚñÑ-カスタ-用迎使用-Язык',
                 Body =>
@@ -372,9 +371,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_Title>',
                 Body =>
@@ -403,9 +402,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_NotExisting> - tag not found',
                 Body =>
@@ -434,9 +433,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_NotExisting> - tag not found',
                 Body =>
@@ -465,9 +464,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_DynamicField_' . $TextFieldName . '_Value>',
                 Body =>
@@ -496,9 +495,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_DynamicField_' . $DropDownFieldName . '>',
                 Body =>
@@ -527,9 +526,9 @@ my @Tests = (
             UserID => $UserID,
             Ticket => \%Ticket,
             Config => {
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                ContentType          => 'text/plain; charset=ISO-8859-15',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                ContentType => 'text/plain; charset=ISO-8859-15',
                 Subject =>
                     '<OTRS_TICKET_DynamicField_' . $MultiSelectFieldName . '_Value>',
                 Body =>
@@ -565,8 +564,6 @@ my %ExcludedArtributes = (
     AutoResponseType                => 1,
 );
 
-my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
 for my $Test (@Tests) {
 
     # make a deep copy to avoid changing the definition
@@ -588,13 +585,12 @@ for my $Test (@Tests) {
         );
 
         # get last article
-        my @MetaArticles = $ArticleObject->ArticleList(
+        my @ArticleIDs = $TicketObject->ArticleIndex(
             TicketID => $TicketID,
-            OnlyLast => 1,
         );
-        my %Article = $ArticleObject->BackendForArticle( %{ $MetaArticles[-1] } )->ArticleGet(
-            %{ $MetaArticles[-1] },
-            UserID => 1,
+        my %Article = $TicketObject->ArticleGet(
+            ArticleID => $ArticleIDs[-1],
+            UserID    => 1,
         );
 
         ATTRIBUTE:

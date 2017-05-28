@@ -12,7 +12,7 @@ use strict;
 use warnings;
 use utf8;
 
-use parent qw(Kernel::System::Daemon::BaseDaemon);
+use base qw(Kernel::System::Daemon::BaseDaemon);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -27,13 +27,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Daemon::DaemonModules::SchedulerFutureTaskManager - daemon to manage scheduler future tasks
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Scheduler future task daemon
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 Create scheduler future task manager object.
 
@@ -136,6 +140,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

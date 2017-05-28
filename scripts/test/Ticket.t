@@ -12,17 +12,17 @@ use utf8;
 
 use vars (qw($Self));
 
-my $QueueObject          = $Kernel::OM->Get('Kernel::System::Queue');
-my $ServiceObject        = $Kernel::OM->Get('Kernel::System::Service');
-my $SLAObject            = $Kernel::OM->Get('Kernel::System::SLA');
-my $StateObject          = $Kernel::OM->Get('Kernel::System::State');
-my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Internal' );
-my $TimeObject           = $Kernel::OM->Get('Kernel::System::Time');
-my $TypeObject           = $Kernel::OM->Get('Kernel::System::Type');
-my $UserObject           = $Kernel::OM->Get('Kernel::System::User');
+# get needed objects
+my $QueueObject   = $Kernel::OM->Get('Kernel::System::Queue');
+my $ServiceObject = $Kernel::OM->Get('Kernel::System::Service');
+my $SLAObject     = $Kernel::OM->Get('Kernel::System::SLA');
+my $StateObject   = $Kernel::OM->Get('Kernel::System::State');
+my $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
+my $TimeObject    = $Kernel::OM->Get('Kernel::System::Time');
+my $TypeObject    = $Kernel::OM->Get('Kernel::System::Type');
+my $UserObject    = $Kernel::OM->Get('Kernel::System::User');
 
+# get helper object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase  => 1,
@@ -122,9 +122,9 @@ $Self->Is(
     'TicketGet() (TypeID)',
 );
 $Self->Is(
-    $Ticket{Closed},
+    $Ticket{SolutionTime},
     $Ticket{Created},
-    'Ticket created as closed as Close Time = Creation Time',
+    'Ticket created as closed as Solution Time = Creation Time',
 );
 
 my $TestUserLogin = $Helper->TestUserCreate(
@@ -193,10 +193,10 @@ $Self->Is(
     'TicketOwnerSet() (ChangeBy - System ID 1 now)',
 );
 
-my $ArticleID = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID,
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 0,
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID,
+    ArticleType => 'note-internal',
+    SenderType  => 'agent',
     From =>
         'Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent Some Agent <email@example.com>',
     To =>
@@ -234,19 +234,20 @@ If you feel the urge to write Perl modules, perlnewmod will give you good advice
 
 $Self->True(
     $ArticleID,
-    'ArticleCreate()'
+    'ArticleCreate()',
 );
 
 $Self->Is(
-    scalar $ArticleObject->ArticleList( TicketID => $TicketID ),
+    $TicketObject->ArticleCount( TicketID => $TicketID ),
     1,
     'ArticleCount',
 );
 
-my %Article = $ArticleBackendObject->ArticleGet(
-    TicketID  => $TicketID,
-    ArticleID => $ArticleID,
-    UserID    => 1,
+my %Article = $TicketObject->ArticleGet( ArticleID => $ArticleID );
+$Self->Is(
+    $Article{Title},
+    'Some Ticket_Title',
+    'ArticleGet()',
 );
 $Self->True(
     $Article{From} eq
@@ -255,44 +256,33 @@ $Self->True(
 );
 
 for my $Key (qw( Body Subject From To ReplyTo )) {
-    my $Success = $ArticleBackendObject->ArticleUpdate(
-        TicketID  => $TicketID,
+    my $Success = $TicketObject->ArticleUpdate(
         ArticleID => $ArticleID,
         Key       => $Key,
         Value     => "New $Key",
         UserID    => 1,
+        TicketID  => $TicketID,
     );
     $Self->True(
         $Success,
-        'ArticleUpdate()'
+        'ArticleUpdate()',
     );
-
-    my %Article2 = $ArticleBackendObject->ArticleGet(
-        TicketID  => $TicketID,
-        ArticleID => $ArticleID,
-        UserID    => 1,
-    );
+    my %Article2 = $TicketObject->ArticleGet( ArticleID => $ArticleID );
     $Self->Is(
         $Article2{$Key},
         "New $Key",
-        'ArticleUpdate()'
+        'ArticleUpdate()',
     );
 
     # set old value
-    $Success = $ArticleBackendObject->ArticleUpdate(
-        TicketID  => $TicketID,
+    $Success = $TicketObject->ArticleUpdate(
         ArticleID => $ArticleID,
         Key       => $Key,
         Value     => $Article{$Key},
         UserID    => 1,
+        TicketID  => $TicketID,
     );
 }
-
-$ArticleObject->ArticleSearchIndexBuild(
-    TicketID  => $TicketID,
-    ArticleID => $ArticleID,
-    UserID    => 1,
-);
 
 my $TicketSearchTicketNumber = substr $Ticket{TicketNumber}, 0, 10;
 my %TicketIDs = $TicketObject->TicketSearch(
@@ -317,19 +307,6 @@ $Self->True(
 $Self->True(
     $TicketIDs{$TicketID},
     'TicketSearch() (HASH:TicketNumber)',
-);
-
-# Test TicketNumber search condition '0', expecting no results, see bug#11461.
-%TicketIDs = $TicketObject->TicketSearch(
-    Result       => 'HASH',
-    Limit        => 100,
-    TicketNumber => 0,
-    UserID       => 1,
-    Permission   => 'rw',
-);
-$Self->True(
-    !$TicketIDs{$TicketID},
-    'TicketSearch() (HASH:TicketNumber eq 0)',
 );
 
 %TicketIDs = $TicketObject->TicketSearch(
@@ -525,7 +502,7 @@ $Self->False(
 %TicketIDs = $TicketObject->TicketSearch(
     Result              => 'HASH',
     Limit               => 100,
-    MIMEBase_Body       => 'write perl modules',
+    Body                => 'write perl modules',
     ConditionInline     => 1,
     ContentSearchPrefix => '*',
     ContentSearchSuffix => '*',
@@ -535,13 +512,13 @@ $Self->False(
 );
 $Self->True(
     $TicketIDs{$TicketID},
-    'TicketSearch() (HASH:MIMEBase_Body,StateType:Closed)',
+    'TicketSearch() (HASH:Body,StateType:Closed)',
 );
 
 %TicketIDs = $TicketObject->TicketSearch(
     Result              => 'HASH',
     Limit               => 100,
-    MIMEBase_Body       => 'write perl modules',
+    Body                => 'write perl modules',
     ConditionInline     => 1,
     ContentSearchPrefix => '*',
     ContentSearchSuffix => '*',
@@ -551,7 +528,7 @@ $Self->True(
 );
 $Self->True(
     !$TicketIDs{$TicketID},
-    'TicketSearch() (HASH:MIMEBase_,StateType:Open)',
+    'TicketSearch() (HASH:Body,StateType:Open)',
 );
 
 $TicketObject->MoveTicket(
@@ -655,7 +632,7 @@ for my $Condition (
 
         # result limit
         Limit               => 1000,
-        MIMEBase_From       => $Condition,
+        From                => $Condition,
         ConditionInline     => 1,
         ContentSearchPrefix => '*',
         ContentSearchSuffix => '*',
@@ -664,7 +641,7 @@ for my $Condition (
     );
     $Self->True(
         $TicketIDs{$TicketID},
-        "TicketSearch() (HASH:MIMEBase_From,ConditionInline,MIMEBase_From='$Condition')",
+        "TicketSearch() (HASH:From,ConditionInline,From='$Condition')",
     );
 }
 
@@ -691,17 +668,16 @@ for my $Condition (
 
         # result limit
         Limit               => 1000,
-        MIMEBase_From       => $Condition,
+        From                => $Condition,
         ConditionInline     => 1,
         ContentSearchPrefix => '*',
         ContentSearchSuffix => '*',
         UserID              => 1,
         Permission          => 'rw',
     );
-
     $Self->True(
         ( !$TicketIDs{$TicketID} ),
-        "TicketSearch() (HASH:MIMEBase_From,ConditionInline,MIMEBase_From='$Condition')",
+        "TicketSearch() (HASH:From,ConditionInline,From='$Condition')",
     );
 }
 
@@ -1361,6 +1337,46 @@ $Self->Is(
     'TicketGet() (Lock)',
 );
 
+%Article = $TicketObject->ArticleGet( ArticleID => $ArticleID );
+$Self->Is(
+    $Article{Title},
+    'Very long title 01234567890123456789012345678901234567890123456789'
+        . '0123456789012345678901234567890123456789012345678901234567890123456789'
+        . '0123456789012345678901234567890123456789012345678901234567890123456789'
+        . '0123456789012345678901234567890123456789',
+    'ArticleGet() (Title)',
+);
+$Self->Is(
+    $Article{Queue},
+    'Junk',
+    'ArticleGet() (Queue)',
+);
+$Self->Is(
+    $Article{Priority},
+    '2 low',
+    'ArticleGet() (Priority)',
+);
+$Self->Is(
+    $Article{State},
+    'open',
+    'ArticleGet() (State)',
+);
+$Self->Is(
+    $Article{Owner},
+    'root@localhost',
+    'ArticleGet() (Owner)',
+);
+$Self->Is(
+    $Article{Responsible},
+    'root@localhost',
+    'ArticleGet() (Responsible)',
+);
+$Self->Is(
+    $Article{Lock},
+    'lock',
+    'ArticleGet() (Lock)',
+);
+
 my @MoveQueueList = $TicketObject->MoveQueueList(
     TicketID => $TicketID,
     Type     => 'Name',
@@ -1421,14 +1437,14 @@ $Self->Is(
     'TicketAccountedTimeGet()',
 );
 
-my $AccountedTime2 = $ArticleObject->ArticleAccountedTimeGet(
+my $AccountedTime2 = $TicketObject->ArticleAccountedTimeGet(
     ArticleID => $ArticleID,
 );
 
 $Self->Is(
     $AccountedTime2,
     4132.56,
-    'ArticleAccountedTimeGet()'
+    'ArticleAccountedTimeGet()',
 );
 
 my ( $Sec, $Min, $Hour, $Day, $Month, $Year ) = $TimeObject->SystemTime2Date(

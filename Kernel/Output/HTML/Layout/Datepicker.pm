@@ -17,13 +17,17 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::Output::HTML::Layout::Datepicker - Datepicker data
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All valid functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 DatepickerGetVacationDays()
+=over 4
+
+=cut
+
+=item DatepickerGetVacationDays()
 
 Returns a hash of all vacation days defined in the system.
 
@@ -73,6 +77,8 @@ sub DatepickerGetVacationDays {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

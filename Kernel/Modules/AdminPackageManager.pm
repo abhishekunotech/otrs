@@ -407,12 +407,20 @@ sub Run {
                     elsif ( $Hash->{Tag} =~ /^(File)$/ ) {
 
                         # add human readable file size
-                        if ( defined $Hash->{Size} ) {
-                            $Hash->{Size} = $LayoutObject->HumanReadableDataSize(
-                                Size => $Hash->{Size},
-                            );
-                        }
+                        if ( $Hash->{Size} ) {
 
+                            # remove meta data in files
+                            if ( $Hash->{Size} > ( 1024 * 1024 ) ) {
+                                $Hash->{Size} = sprintf "%.1f MBytes",
+                                    ( $Hash->{Size} / ( 1024 * 1024 ) );
+                            }
+                            elsif ( $Hash->{Size} > 1024 ) {
+                                $Hash->{Size} = sprintf "%.1f KBytes", ( ( $Hash->{Size} / 1024 ) );
+                            }
+                            else {
+                                $Hash->{Size} = $Hash->{Size} . ' Bytes';
+                            }
+                        }
                         $LayoutObject->Block(
                             Name => "PackageItemFilelistFile",
                             Data => {
@@ -555,9 +563,6 @@ sub Run {
             return $LayoutObject->ErrorScreen( Message => $Package );
         }
         my %Structure = $PackageObject->PackageParse( String => $Package );
-
-        $Frontend{Name} = $Structure{Name}->{Content};
-
         $LayoutObject->Block(
             Name => 'Package',
             Data => { %Param, %Frontend, },
@@ -705,12 +710,20 @@ sub Run {
                     elsif ( $Hash->{Tag} =~ /^(File)$/ ) {
 
                         # add human readable file size
-                        if ( defined $Hash->{Size} ) {
-                            $Hash->{Size} = $LayoutObject->HumanReadableDataSize(
-                                Size => $Hash->{Size},
-                            );
-                        }
+                        if ( $Hash->{Size} ) {
 
+                            # remove meta data in files
+                            if ( $Hash->{Size} > ( 1024 * 1024 ) ) {
+                                $Hash->{Size} = sprintf "%.1f MBytes",
+                                    ( $Hash->{Size} / ( 1024 * 1024 ) );
+                            }
+                            elsif ( $Hash->{Size} > 1024 ) {
+                                $Hash->{Size} = sprintf "%.1f KBytes", ( ( $Hash->{Size} / 1024 ) );
+                            }
+                            else {
+                                $Hash->{Size} = $Hash->{Size} . ' Bytes';
+                            }
+                        }
                         $LayoutObject->Block(
                             Name => 'PackageItemFilelistFile',
                             Data => {

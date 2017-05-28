@@ -13,27 +13,23 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
 
 [% RenderBlockStart("Main") %]
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
-    <h1>[% Translate("GenericInterface Web Service Management") | html %]</h1>
-
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Web Service Management'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% SWITCH Data.Action %]
-        [% CASE 'Add' %]
-            [% BreadcrumbPath.push({ Name => Translate("Add Web Service"),}) %]
-        [% CASE 'Change' %]
-            [% USE EditTitle = String(Translate("Edit Web Service")) %]
-            [% BreadcrumbPath.push({ Name => EditTitle.append( ': ', Data.WebserviceData.Name ), }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
+    <h1>[% Translate("GenericInterface Web Service Management") | html %] - [% Translate(Data.Action) | html %]</h1>
+    <ul class="BreadCrumb">
+        <li>[% Translate("You are here") | html %]:</li>
+[% RenderBlockStart("WebservicePathElement") %]
+        <li>
+            <a href="[% Env("Baselink") %][% Data.Link %];Nav=[% Data.Nav | uri %]">[% Data.Name | html %]</a>
+        </li>
+[% RenderBlockEnd("WebservicePathElement") %]
+[% RenderBlockStart("WebservicePathElementNoLink") %]
+        <li>
+            [% Data.Name | html %]
+        </li>
+[% RenderBlockEnd("WebservicePathElementNoLink") %]
+    </ul>
 
     <div class="Clear"></div>
+
     <div class="SidebarColumn">
 [% RenderBlockStart("ActionList") %]
         <div class="WidgetSimple">
@@ -54,13 +50,13 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
                             <input type="hidden" name="Subaction" value="Add"/>
                             <input type="hidden" name="Nav" value="[% Data.Nav | html %]"/>
 
-                            <button class="CallForAction Fullsize Center" type="submit"><span><i class="fa fa-plus-square"></i>[% Translate("Add Web Service") | html %]</span></button>
+                            <button class="CallForAction Fullsize Center" type="submit"><span><i class="fa fa-plus-square"></i>[% Translate("Add web service") | html %]</span></button>
                         </form>
                     </li>
 [% RenderBlockEnd("ActionAdd") %]
 [% RenderBlockStart("ActionClone") %]
                     <li>
-                        <button id="CloneButton" class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-copy"></i> [% Translate("Clone Web Service") | html %]</span></button>
+                        <button id="CloneButton" class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-copy"></i> [% Translate("Clone web service") | html %]</span></button>
                         <div class="Hidden" id="CloneDialogContainer">
                             <div id="CloneDialog" class="InnerContent GenericInterfaceDialog">
                                 <form id="CloneForm" action="[% Env("CGIHandle") %]" method="post" enctype="multipart/form-data" name="CloneForm" class="Validate PreventMultipleSubmits">
@@ -94,7 +90,7 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
                             <input type="hidden" name="WebserviceID" value="[% Data.WebserviceID | html %]"/>
                             <input type="hidden" name="Nav" value="[% Data.Nav | html %]"/>
 
-                            <button class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-download"></i> [% Translate("Export Web Service") | html %]</span></button>
+                            <button class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-download"></i> [% Translate("Export web service") | html %]</span></button>
                         </form>
                     </li>
 [% RenderBlockEnd("ActionExport") %]
@@ -110,7 +106,7 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
                                         <div class="SpacingTop"></div>
                                         <label class="Mandatory" for="ConfigFile"><span class="Marker">*</span>[% Translate("Configuration File") | html %]:</label>
                                         <div class="Field">
-                                            <input id="ConfigFile" class="Validate_Required" type="file" maxlength="250" value="" name="ConfigFile"/>
+                                            <input id="ConfigFile" class=" W75pc Validate_Required" type="file" maxlength="250" value="" name="ConfigFile"/>
                                             <div id="ConfigFileError" class="TooltipErrorMessage"><p>[% Translate("This field is required.") | html %]</p></div>
                                             <div class="FieldExplanation">[% Translate("The file must be a valid web service configuration YAML file.") | html %]</div>
                                         </div>
@@ -132,7 +128,7 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
                             <input type="hidden" name="WebserviceID" value="[% Data.WebserviceID | html %]"/>
                             <input type="hidden" name="Nav" value="[% Data.Nav | html %]"/>
 
-                            <button class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-clock-o"></i> [% Translate("Configuration History") | html %]</span></button>
+                            <button class="CallForAction Fullsize Center HideActionOnChange" type="submit"><span><i class="fa fa-clock-o"></i> [% Translate("Configuration history") | html %]</span></button>
                         </form>
                     </li>
 [% RenderBlockEnd("ActionHistory") %]
@@ -313,6 +309,17 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
                     </div>
                 </div>
             </div>
+
+[% RenderBlockStart("ConfigSet") %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Core.Config.Set('Webservice.Transport', [% Data.TransportConfig %] );
+    Core.Config.Set('Webservice.Operation', [% Data.OperationConfig %] );
+    Core.Config.Set('Webservice.Invoker', [% Data.InvokerConfig %] );
+//]]></script>
+[% END %]
+[% RenderBlockEnd("ConfigSet") %]
+
 [% RenderBlockStart("DetailsCommunicationType") %]
             <div class="WidgetSimple Expanded">
                 <div class="Header">
@@ -377,11 +384,20 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
 [% RenderBlockStart("DetailsActionsRowDelete") %]
                                     <a id="Delete[% Data.ActionType | html %][% Data.Name | html %]" class="TrashCan Delete[% Data.ActionType | html %]" href="#" title="[% Translate("Delete this action") | html %]">
                                                 [% Translate("Delete this action") | html %]
-                                        <i class="fa fa-trash-o"></i>
                                     </a>
                                     <span>
                                                 [% Data.Name | html %]
                                     </span>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Core.Agent.Admin.GenericInterfaceWebservice.BindDeleteActionDialog({
+        ElementID:                  'Delete[% Data.ActionType | html %][% Data.Name | html %]',
+        ActionName:                 "[% Data.Name | html %]",
+        ActionType:                 "[% Data.ActionType | html %]",
+        ElementSelector:            '#Delete[% Data.ActionType | html %][% Data.Name | html %]'
+    });
+//]]></script>
+[% END %]
 [% RenderBlockEnd("DetailsActionsRowDelete") %]
                                 </td>
                                 <td>[% Translate(Data.Description) | html %]</td>
@@ -429,7 +445,14 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
 [% RenderBlockStart("SaveAndFinishButton") %]
                             [% Translate("or") | html %]
                             <button type="submit" id="SaveAndFinishButton" class="CallForAction" value="[% Translate("Save and finish") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
-                            <input autocomplete="off" type="hidden" name="ReturnToWebservice" id="ReturnToWebservice" value="" />
+                            <input type="hidden" name="ReturnToWebservice" id="ReturnToWebservice" value="" autocomplete="off" />
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+$('#SaveAndFinishButton').bind('click', function(){
+    $('#ReturnToWebservice').val(1);
+});
+//]]></script>
+[% END %]
 [% RenderBlockEnd("SaveAndFinishButton") %]
                             [% Translate("or") | html %]
                             <a href="[% Env("Baselink") %]Action=[% Env('Action') %]">[% Translate("Cancel") | html %]</a>
@@ -461,3 +484,24 @@ SET OTRSBusinessLinkLabelWithContractLevel = '<strong><a href="#" class="OTRSBus
     <div class="Clear"></div>
 </div>
 [% RenderBlockEnd("Main") %]
+
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+Core.Agent.Admin.GenericInterfaceWebservice.Init({
+    WebserviceID: $('#WebserviceID').val(),
+    Localization: {
+        CommunicationErrorMsg: [% Translate("An error occurred during communication.") | JSON %],
+        DeleteWebserviceMsg: [% Translate("Delete webservice") | JSON %],
+        DeleteOperationMsg: [% Translate("Delete operation") | JSON %],
+        DeleteInvokerMsg: [% Translate("Delete invoker") | JSON %],
+        CloneWebserviceMsg: [% Translate("Clone webservice") | JSON %],
+        ImportWebserviceMsg: [% Translate("Import webservice") | JSON %],
+        DeleteMsg: [% Translate("Delete") | JSON %],
+        CloneMsg: [% Translate("Clone") | JSON %],
+        ImportMsg: [% Translate("Import") | JSON %],
+        CancelMsg: [% Translate("Cancel") | JSON %]
+    },
+    Action: "[% Data.Action | html %]"
+});
+//]]></script>
+[% END %]

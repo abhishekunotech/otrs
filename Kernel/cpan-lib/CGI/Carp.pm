@@ -1,11 +1,6 @@
 package CGI::Carp;
 use if $] >= 5.019, 'deprecate';
 
-my $appease_cpants_kwalitee = q/
-use strict;
-use warnings;
-#/;
-
 =head1 NAME
 
 B<CGI::Carp> - CGI routines for writing to the HTTPD (or other) error log
@@ -327,7 +322,7 @@ use File::Spec;
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 
-$CGI::Carp::VERSION     = '4.32';
+$CGI::Carp::VERSION     = '4.21';
 $CGI::Carp::CUSTOM_MSG  = undef;
 $CGI::Carp::DIE_HANDLER = undef;
 $CGI::Carp::TO_BROWSER  = 1;

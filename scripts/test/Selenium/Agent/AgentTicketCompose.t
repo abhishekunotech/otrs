@@ -58,8 +58,8 @@ $Selenium->RunTest(
 
         $Helper->ConfigSettingChange(
             Valid => 1,
-            Key   => 'Ticket::Frontend::AgentTicketCompose###MessageIsVisibleForCustomer',
-            Value => '1'
+            Key   => 'Ticket::Frontend::AgentTicketCompose###DefaultArticleType',
+            Value => 'email-internal'
         );
 
         # use test email backend
@@ -190,7 +190,6 @@ $Selenium->RunTest(
                              Ticket state: <OTRS_TICKET_State>.\n
                              Ticket lock: <OTRS_TICKET_Lock>.\n
                              Ticket priority: <OTRS_TICKET_Priority>.\n
-                             Ticket created: <OTRS_TICKET_Created>.\n
                              DynamicField Text: <OTRS_TICKET_DynamicField_" . $DynamicFields{Text}->{Name} . "_Value>
                              DynamicField Dropdown: <OTRS_TICKET_DynamicField_"
                 . $DynamicFields{Dropdown}->{Name}
@@ -312,29 +311,22 @@ $Selenium->RunTest(
             );
         }
 
-        my $ArticleBackendObject
-            = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel( ChannelName => 'Email' );
-
         # create test email article
-        my $ArticleID = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 1,
-            SenderType           => 'customer',
-            Subject              => 'some short description',
-            Body                 => 'the message text',
-            Charset              => 'ISO-8859-15',
-            MimeType             => 'text/plain',
-            HistoryType          => 'EmailCustomer',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'email-external',
+            SenderType     => 'customer',
+            Subject        => 'some short description',
+            Body           => 'the message text',
+            Charset        => 'ISO-8859-15',
+            MimeType       => 'text/plain',
+            HistoryType    => 'EmailCustomer',
+            HistoryComment => 'Some free text!',
+            UserID         => 1,
         );
         $Self->True(
             $ArticleID,
             "Article is created - ID $ArticleID",
-        );
-
-        my %CreatedTicketData = $TicketObject->TicketGet(
-            TicketID => $TicketID,
         );
 
         # create test user and login
@@ -370,7 +362,7 @@ $Selenium->RunTest(
         # check AgentTicketCompose page
         for my $ID (
             qw(ToCustomer CcCustomer BccCustomer Subject RichText
-            FileUpload StateID IsVisibleForCustomer submitRichText)
+            FileUpload StateID ArticleTypeID submitRichText)
             )
         {
             my $Element = $Selenium->find_element( "#$ID", 'css' );
@@ -378,9 +370,9 @@ $Selenium->RunTest(
         }
 
         $Self->Is(
-            $Selenium->execute_script('return $("#IsVisibleForCustomer").val()'),
-            1,
-            "Default customer visibility is honored",
+            $Selenium->execute_script('return $("#ArticleTypeID option:selected").val()'),
+            2,
+            "Default article type is honored",
         );
 
         # test bug #11810 - http://bugs.otrs.org/show_bug.cgi?id=11810
@@ -398,21 +390,9 @@ $Selenium->RunTest(
             # check translated value
             $Self->True(
                 index( $Selenium->get_page_source(), $TransletedTicketValue ) > -1,
-                "Translated \'$Item\' value is found - $TransletedTicketValue .",
+                "Translated \'$Item\' value is found - $TicketData{$Item} .",
             );
         }
-
-        # Check if the transformed date value exists.
-        my $TranslatedTicketCreated = $LanguageObject->FormatTimeString(
-            $CreatedTicketData{Created},
-            'DateFormat',
-            'NoSeconds',
-        );
-
-        $Self->True(
-            index( $Selenium->get_page_source(), $TranslatedTicketCreated ) > -1,
-            "Translated \'Created\' value is found - $TranslatedTicketCreated.",
-        );
 
         for my $DynamicFieldType ( sort keys %DynamicFieldValues ) {
 
@@ -425,8 +405,7 @@ $Selenium->RunTest(
 
             # check dynamic field date format
             $Self->True(
-                index( $Selenium->get_page_source(), $DynamicFieldType . ': ' . $TransletedDynamicFieldValue . "\n" )
-                    > -1,
+                index( $Selenium->get_page_source(), $TransletedDynamicFieldValue ) > -1,
                 "Translated date format for  \'DynamicField_$DynamicFields{$DynamicFieldType}->{Name}\' value is found - $TransletedDynamicFieldValue.",
             );
         }
@@ -443,17 +422,18 @@ $Selenium->RunTest(
 
             # check dynamic field date format
             $Self->True(
-                index( $Selenium->get_page_source(), $DynamicFieldType . ': ' . $LanguageFormatDateValue . "\n" ) > -1,
+                index( $Selenium->get_page_source(), $LanguageFormatDateValue ) > -1,
                 "Translated date format for  \'DynamicField_$DynamicFields{$DynamicFieldType}->{Name}\' value is found - $LanguageFormatDateValue.",
             );
         }
 
         # input required fields and submit compose
+        my $AutoCompleteString = "\"$TestCustomer $TestCustomer\" <$TestCustomer\@localhost.com> ($TestCustomer)";
         $Selenium->find_element( "#ToCustomer", 'css' )->send_keys($TestCustomer);
 
         $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("li.ui-menu-item:visible").length' );
 
-        $Selenium->find_element("//*[text()='$TestCustomer']")->VerifiedClick();
+        $Selenium->find_element("//*[text()='$AutoCompleteString']")->VerifiedClick();
         $Selenium->find_element( "#RichText",       'css' )->send_keys('Selenium Compose Text');
         $Selenium->find_element( "#submitRichText", 'css' )->click();
 

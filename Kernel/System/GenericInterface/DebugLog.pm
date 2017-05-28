@@ -23,16 +23,22 @@ our @ObjectDependencies = (
 
 Kernel::System::GenericInterface::DebugLog - log interface for generic interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All log functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a debug log object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $DebugLogObject = $Kernel::OM->Get('Kernel::System::GenericInterface::DebugLog');
 
 =cut
@@ -50,7 +56,7 @@ sub new {
     return $Self;
 }
 
-=head2 LogAdd()
+=item LogAdd()
 
 add a communication bit to database
 if we don't already have a communication chain, create it
@@ -195,7 +201,7 @@ sub LogAdd {
     return 1;
 }
 
-=head2 LogGet()
+=item LogGet()
 
 get communication chain data
 
@@ -280,7 +286,7 @@ sub LogGet {
     return \%LogData;
 }
 
-=head2 LogGetWithData()
+=item LogGetWithData()
 
 get all individual entries for a communication chain
 
@@ -369,7 +375,7 @@ sub LogGetWithData {
     return $LogData;
 }
 
-=head2 LogDelete()
+=item LogDelete()
 
 delete a complete communication chain
 
@@ -511,7 +517,7 @@ sub LogDelete {
     return 1;
 }
 
-=head2 LogSearch()
+=item LogSearch()
 
 search for log chains based on several criteria
 when the parameter 'WithData' is set, the complete communication chains will be returned
@@ -730,7 +736,7 @@ sub LogSearch {
 
 =cut
 
-=head2 _LogAddChain()
+=item _LogAddChain()
 
 establish communication chain in database
 
@@ -830,6 +836,8 @@ sub _LogAddChain {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

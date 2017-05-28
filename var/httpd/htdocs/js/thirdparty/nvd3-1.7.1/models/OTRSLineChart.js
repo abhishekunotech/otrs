@@ -30,23 +30,13 @@ nv.models.OTRSlineChart = function() {
         , tooltips = true
         , tooltip = function(key, x, y, e, graph) {
             return '<h3>' + key + '</h3>' +
-// ---
-// OTRS
-// ---
-//                '<p>' +  y + ' at ' + x + '</p>'
-                '<p>' +  y + ' - ' + x + '</p>'
-// ---
+                '<p>' +  y + ' at ' + x + '</p>'
         }
         , x
         , y
         , state = nv.utils.state()
         , defaultState = null
-// ---
-// OTRS
-// ---
-//        , noData = 'No Data Available.'
-        , noData = Core.Language.Translate('No Data Available.')
-// ---
+        , noData = Core.Config.Get('NoDataAvailable')
         , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
         , duration = 250
         ;

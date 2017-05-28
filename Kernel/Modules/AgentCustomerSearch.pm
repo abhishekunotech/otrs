@@ -29,6 +29,9 @@ sub new {
 sub Run {
     my ( $Self, %Param ) = @_;
 
+    my $JSON = '';
+
+    # get needed objects
     my $ParamObject        = $Kernel::OM->Get('Kernel::System::Web::Request');
     my $EncodeObject       = $Kernel::OM->Get('Kernel::System::Encode');
     my $LayoutObject       = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
@@ -39,16 +42,14 @@ sub Run {
     # get config for frontend
     $Self->{Config} = $ConfigObject->Get("Ticket::Frontend::$Self->{Action}");
 
-    my $AutoCompleteConfig = $ConfigObject->Get('AutoComplete::Agent')->{CustomerSearch};
-    my $MaxResults = int( $ParamObject->GetParam( Param => 'MaxResults' ) || 0 )
-        || $AutoCompleteConfig->{MaxResultsDisplayed}
-        || 20;
-    my $IncludeUnknownTicketCustomers = int( $ParamObject->GetParam( Param => 'IncludeUnknownTicketCustomers' ) || 0 );
-    my $SearchTerm = $ParamObject->GetParam( Param => 'Term' ) || '';
+    # search customers
+    if ( !$Self->{Subaction} ) {
 
-    my $JSON = '';
-
-    if ( !$Self->{Subaction} || $Self->{Subaction} eq 'SearchCustomerUser' ) {
+        # get needed params
+        my $Search = $ParamObject->GetParam( Param => 'Term' ) || '';
+        my $MaxResults = int( $ParamObject->GetParam( Param => 'MaxResults' ) || 20 );
+        my $IncludeUnknownTicketCustomers
+            = int( $ParamObject->GetParam( Param => 'IncludeUnknownTicketCustomers' ) || 0 );
 
         my $UnknownTicketCustomerList;
 
@@ -56,20 +57,21 @@ sub Run {
 
             # add customers that are not saved in any backend
             $UnknownTicketCustomerList = $TicketObject->SearchUnknownTicketCustomers(
-                SearchTerm => $SearchTerm,
+                SearchTerm => $Search,
             );
         }
 
         # get customer list
         my %CustomerUserList = $CustomerUserObject->CustomerSearch(
-            Search => $SearchTerm,
+            Search => $Search,
         );
         map { $CustomerUserList{$_} = $UnknownTicketCustomerList->{$_} } keys %{$UnknownTicketCustomerList};
 
         # build data
         my @Data;
         CUSTOMERUSERID:
-        for my $CustomerUserID ( sort keys %CustomerUserList ) {
+        for my $CustomerUserID ( sort keys %CustomerUserList )
+        {
 
             my $CustomerValue = $CustomerUserList{$CustomerUserID};
 
@@ -77,10 +79,10 @@ sub Run {
             $CustomerValue =~ s/\n/ /gs;
             $CustomerValue =~ s/\r/ /gs;
 
-            if ( !( grep { $_->{Label} eq $CustomerValue } @Data ) ) {
+            if ( !( grep { $_->{CustomerValue} eq $CustomerValue } @Data ) ) {
                 push @Data, {
-                    Label => $CustomerValue,
-                    Value => $CustomerUserID,
+                    CustomerKey   => $CustomerUserID,
+                    CustomerValue => $CustomerValue,
                 };
             }
             last CUSTOMERUSERID if scalar @Data >= $MaxResults;
@@ -89,79 +91,6 @@ sub Run {
         # build JSON output
         $JSON = $LayoutObject->JSONEncode(
             Data => \@Data,
-        );
-    }
-
-    elsif ( $Self->{Subaction} eq 'SearchCustomerID' ) {
-
-        # Build the result list.
-        my $UnknownTicketCustomerList;
-
-        if ($IncludeUnknownTicketCustomers) {
-
-            # Add customers that are not saved in any backend.
-            $UnknownTicketCustomerList = $TicketObject->SearchUnknownTicketCustomers(
-                SearchTerm => $SearchTerm,
-            );
-        }
-
-        my %CustomerCompanyList = $Kernel::OM->Get('Kernel::System::CustomerCompany')->CustomerCompanyList(
-            Search => $SearchTerm,
-        );
-        map { $CustomerCompanyList{$_} = $UnknownTicketCustomerList->{$_} } keys %{$UnknownTicketCustomerList};
-
-        my @CustomerIDs = $CustomerUserObject->CustomerIDList(
-            SearchTerm => $SearchTerm,
-        );
-
-        # Add CustomerIDs for which no CustomerCompany are registered.
-        my %Seen;
-        for my $CustomerID (@CustomerIDs) {
-
-            # Skip duplicate entries.
-            next CUSTOMERID if $Seen{$CustomerID};
-            $Seen{$CustomerID} = 1;
-
-            # Identifies unknown companies.
-            if ( !exists $CustomerCompanyList{$CustomerID} ) {
-                $CustomerCompanyList{$CustomerID} = $CustomerID;
-            }
-        }
-
-        my @Data;
-
-        CUSTOMERID:
-        for my $CustomerID ( sort keys %CustomerCompanyList ) {
-            if ( !( grep { $_->{Value} eq $CustomerID } @Data ) ) {
-                push @Data, {
-                    Label => $CustomerCompanyList{$CustomerID},
-                    Value => $CustomerID,
-                };
-            }
-            last CUSTOMERID if scalar @Data >= $MaxResults;
-        }
-
-        # build JSON output
-        $JSON = $LayoutObject->JSONEncode(
-            Data => \@Data,
-        );
-    }
-
-    # Get all assigned customer ids from the given customer user id.
-    elsif ( $Self->{Subaction} eq 'AssignedCustomerIDs' ) {
-
-        my $CustomerUserID = $ParamObject->GetParam( Param => 'CustomerUserID' ) || '';
-
-        my @CustomerIDs;
-        if ($CustomerUserID) {
-            @CustomerIDs = $CustomerUserObject->CustomerIDs(
-                User => $CustomerUserID,
-            );
-        }
-
-        # build JSON output
-        $JSON = $LayoutObject->JSONEncode(
-            Data => \@CustomerIDs,
         );
     }
 
@@ -184,14 +113,6 @@ sub Run {
             $CustomerID = $CustomerData{UserCustomerID};
         }
 
-        my @CustomerIDs;
-
-        if ($CustomerUserID) {
-            @CustomerIDs = $CustomerUserObject->CustomerIDs(
-                User => $CustomerUserID,
-            );
-        }
-
         # build html for customer info table
         if ( $ConfigObject->Get('Ticket::Frontend::CustomerInfoCompose') ) {
 
@@ -206,7 +127,6 @@ sub Run {
             Data => {
                 CustomerID              => $CustomerID,
                 CustomerTableHTMLString => $CustomerTableHTMLString,
-                CustomerIDs             => \@CustomerIDs,
             },
         );
     }

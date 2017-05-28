@@ -9,7 +9,6 @@
 package Kernel::Output::HTML::ToolBar::TicketService;
 
 use Kernel::Language qw(Translatable);
-use parent 'Kernel::Output::HTML::Base';
 
 use strict;
 use warnings;
@@ -24,6 +23,19 @@ our @ObjectDependencies = (
     'Kernel::System::Ticket',
     'Kernel::Output::HTML::Layout',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;
@@ -80,7 +92,7 @@ sub Run {
         LockIDs    => \@ViewableLockIDs,
         UserID     => $Self->{UserID},
         Permission => $Permission,
-    ) || 0;
+    );
 
     my $Class = $Param{Config}->{CssClass};
     my $Icon  = $Param{Config}->{Icon};

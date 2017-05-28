@@ -22,16 +22,20 @@ our @ObjectDependencies = (
 
 Kernel::System::CSV - CSV lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All csv functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=item new()
 
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $CSVObject = $Kernel::OM->Get('Kernel::System::CSV');
 
 =cut
@@ -46,7 +50,7 @@ sub new {
     return $Self;
 }
 
-=head2 Array2CSV()
+=item Array2CSV()
 
 Returns a csv formatted string based on a array with head data.
 
@@ -222,7 +226,7 @@ sub Array2CSV {
     return $Output;
 }
 
-=head2 CSV2Array()
+=item CSV2Array()
 
 Returns an array with parsed csv data.
 
@@ -283,6 +287,8 @@ sub CSV2Array {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

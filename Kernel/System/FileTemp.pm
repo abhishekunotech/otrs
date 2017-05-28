@@ -21,16 +21,22 @@ our @ObjectDependencies = (
 
 Kernel::System::FileTemp - tmp files
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This module is managing temporary files and directories.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $FileTempObject = $Kernel::OM->Get('Kernel::System::FileTemp');
 
 =cut
@@ -47,7 +53,7 @@ sub new {
     return $Self;
 }
 
-=head2 TempFile()
+=item TempFile()
 
 returns an opened temporary file handle and its file name.
 Please note that you need to close the file handle for other processes to write to it.
@@ -75,7 +81,7 @@ sub TempFile {
     return ( $FH, $Filename );
 }
 
-=head2 TempDir()
+=item TempDir()
 
 returns a temp directory. The directory and its contents will be removed
 if the FileTemp object goes out of scope.
@@ -111,6 +117,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

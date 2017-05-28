@@ -22,9 +22,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Invoker::Test::Test - GenericInterface test Invoker backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Invoker->new();
@@ -51,7 +57,7 @@ sub new {
     return $Self;
 }
 
-=head2 PrepareRequest()
+=item PrepareRequest()
 
 prepare the invocation of the configured remote web service.
 
@@ -99,7 +105,7 @@ sub PrepareRequest {
     };
 }
 
-=head2 HandleResponse()
+=item HandleResponse()
 
 handle response data of the configured remote web service.
 
@@ -168,6 +174,8 @@ sub HandleResponse {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

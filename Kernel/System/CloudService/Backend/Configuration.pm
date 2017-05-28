@@ -28,16 +28,22 @@ our @ObjectDependencies = (
 
 Kernel::System::CloudService::Backend::Configuration
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 CloudService configuration backend.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $CloudServiceObject = $Kernel::OM->Get('Kernel::System::GenericInterface::CloudService');
 
 =cut
@@ -52,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 CloudServiceAdd()
+=item CloudServiceAdd()
 
 add new CloudServices
 
@@ -102,17 +108,22 @@ sub CloudServiceAdd {
     # dump config as string
     my $Config = $Kernel::OM->Get('Kernel::System::YAML')->Dump( Data => $Param{Config} );
 
+    # md5 of content
+    my $MD5 = $Kernel::OM->Get('Kernel::System::Main')->MD5sum(
+        String => $Param{Name},
+    );
+
     # get database object
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
     # sql
     return if !$DBObject->Do(
         SQL =>
-            'INSERT INTO cloud_service_config (name, config, valid_id, '
+            'INSERT INTO cloud_service_config (name, config, config_md5, valid_id, '
             . ' create_time, create_by, change_time, change_by)'
-            . ' VALUES (?, ?, ?, current_timestamp, ?, current_timestamp, ?)',
+            . ' VALUES (?, ?, ?, ?, current_timestamp, ?, current_timestamp, ?)',
         Bind => [
-            \$Param{Name}, \$Config, \$Param{ValidID},
+            \$Param{Name}, \$Config, \$MD5, \$Param{ValidID},
             \$Param{UserID}, \$Param{UserID},
         ],
     );
@@ -135,7 +146,7 @@ sub CloudServiceAdd {
     return $ID;
 }
 
-=head2 CloudServiceGet()
+=item CloudServiceGet()
 
 get CloudServices attributes
 
@@ -243,7 +254,7 @@ sub CloudServiceGet {
     return \%Data;
 }
 
-=head2 CloudServiceUpdate()
+=item CloudServiceUpdate()
 
 update CloudService attributes
 
@@ -336,7 +347,7 @@ sub CloudServiceUpdate {
     return 1;
 }
 
-=head2 CloudServiceDelete()
+=item CloudServiceDelete()
 
 delete a CloudService
 
@@ -383,7 +394,7 @@ sub CloudServiceDelete {
     return 1;
 }
 
-=head2 CloudServiceList()
+=item CloudServiceList()
 
 get CloudService list
 
@@ -453,6 +464,8 @@ sub CloudServiceList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

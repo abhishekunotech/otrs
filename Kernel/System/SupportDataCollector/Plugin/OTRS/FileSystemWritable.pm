@@ -11,7 +11,7 @@ package Kernel::System::SupportDataCollector::Plugin::OTRS::FileSystemWritable;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginBase);
+use base qw(Kernel::System::SupportDataCollector::PluginBase);
 
 use Kernel::Language qw(Translatable);
 

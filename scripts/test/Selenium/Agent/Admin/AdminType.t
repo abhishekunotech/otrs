@@ -46,12 +46,6 @@ $Selenium->RunTest(
         $Selenium->find_element( "table thead tr th", 'css' );
         $Selenium->find_element( "table tbody tr td", 'css' );
 
-        # check breadcrumb on Overview screen
-        $Self->True(
-            $Selenium->find_element( '.BreadCrumb', 'css' ),
-            "Breadcrumb is found on Overview screen.",
-        );
-
         # click 'add new type' link
         $Selenium->find_element("//a[contains(\@href, \'Action=AdminType;Subaction=Add' )]")->VerifiedClick();
 
@@ -72,24 +66,6 @@ $Selenium->RunTest(
             'Client side validation correctly detected missing input value',
         );
 
-        # check breadcrumb on Add screen
-        my $Count = 1;
-        for my $BreadcrumbText ( 'Type Management', 'Add Type' ) {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
-        }
-
-        # check form action
-        $Self->True(
-            $Selenium->find_element( '#Submit', 'css' ),
-            "Submit is found on Add screen.",
-        );
-
         # create a real test type
         my $TypeRandomID = "Type" . $Helper->GetRandomID();
 
@@ -107,26 +83,6 @@ $Selenium->RunTest(
 
         # go to new type again
         $Selenium->find_element( $TypeRandomID, 'link_text' )->VerifiedClick();
-
-        # check breadcrumb on Edit screen
-        $Count = 1;
-        for my $BreadcrumbText ( 'Type Management', 'Edit Type: ' . $TypeRandomID ) {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
-        }
-
-        # check form actions
-        for my $Action (qw(Submit SubmitAndContinue)) {
-            $Self->True(
-                $Selenium->find_element( "#$Action", 'css' ),
-                "$Action is found on Edit screen.",
-            );
-        }
 
         # check new type values
         $Self->Is(
@@ -164,7 +120,7 @@ $Selenium->RunTest(
                 "The ticket type is set as a default ticket type, so it cannot be set to invalid!"
                 ) > -1,
             "$TypeRandomID ticket type is set as a default ticket type, so it cannot be set to invalid!",
-        ) || die;
+        );
 
         # reset default ticket type
         $Helper->ConfigSettingChange(

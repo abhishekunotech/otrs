@@ -15,7 +15,7 @@ use utf8;
 use File::Path qw();
 use Time::HiRes qw(sleep);
 
-use parent qw(Kernel::System::Daemon::BaseDaemon);
+use base qw(Kernel::System::Daemon::BaseDaemon);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -32,13 +32,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker - worker daemon for the scheduler
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Scheduler worker daemon
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 Create scheduler task worker object.
 
@@ -249,7 +253,7 @@ sub Run {
             );
 
             # Force transactional events to run by discarding all objects before deleting the task.
-            $Kernel::OM->ObjectEventsHandle();
+            $Kernel::OM->ObjectsDiscard();
 
             $SchedulerDBObject->TaskDelete(
                 TaskID => $TaskID,
@@ -429,6 +433,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

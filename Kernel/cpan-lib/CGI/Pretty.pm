@@ -1,12 +1,10 @@
 package CGI::Pretty;
 
 use strict;
-use warnings;
-
 use if $] >= 5.019, 'deprecate';
 use CGI ();
 
-$CGI::Pretty::VERSION = '4.32';
+$CGI::Pretty::VERSION = '4.21';
 $CGI::DefaultClass = __PACKAGE__;
 @CGI::Pretty::ISA = qw( CGI );
 
@@ -63,6 +61,10 @@ the "pretty" functions will no longer output "pretty" HTML.
 =head1 Alternatives
 
 L<HTML::HTML5::Parser> + L<HTML::HTML5::Writer> + L<XML::LibXML::PrettyPrint>:
+
+    use HTML::HTML5::Parser qw();
+    use HTML::HTML5::Writer qw();
+    use XML::LibXML::PrettyPrint qw();
 
     print HTML::HTML5::Writer->new(
         start_tags => 'force',

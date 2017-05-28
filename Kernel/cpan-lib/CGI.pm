@@ -3,12 +3,7 @@ require 5.008001;
 use if $] >= 5.019, 'deprecate';
 use Carp 'croak';
 
-my $appease_cpants_kwalitee = q/
-use strict;
-use warnings;
-#/;
-
-$CGI::VERSION='4.32';
+$CGI::VERSION='4.21';
 
 use CGI::Util qw(rearrange rearrange_header make_attributes unescape escape expires ebcdic2ascii ascii2ebcdic);
 
@@ -28,7 +23,6 @@ $DISABLE_UPLOADS     = 0;
 $UNLINK_TMP_FILES    = 1;
 $LIST_CONTEXT_WARN   = 1;
 $ENCODE_ENTITIES     = q{&<>"'};
-$ALLOW_DELETE_CONTENT = 0;
 
 @SAVED_SYMBOLS = ();
 
@@ -96,7 +90,6 @@ sub initialize_globals {
     $BEEN_THERE = 0;
     $DTD_PUBLIC_IDENTIFIER = "";
     undef @QUERY_PARAM;
-    undef %QUERY_PARAM;
     undef %EXPORT;
     undef $QUERY_CHARSET;
     undef %QUERY_FIELDNAMES;
@@ -405,10 +398,9 @@ sub param {
 
 	# list context can be dangerous so warn:
 	# http://blog.gerv.net/2014.10/new-class-of-vulnerability-in-perl-web-applications
-	if ( wantarray && $LIST_CONTEXT_WARN == 1 ) {
+	if ( wantarray && $LIST_CONTEXT_WARN ) {
 		my ( $package, $filename, $line ) = caller;
 		if ( $package ne 'CGI' ) {
-			$LIST_CONTEXT_WARN++; # only warn once
 			warn "CGI::param called in list context from $filename line $line, this can lead to vulnerabilities. "
 				. 'See the warning in "Fetching the value or values of a single named parameter"';
 		}
@@ -1011,7 +1003,7 @@ sub read_postdata_putdata {
             
             #	      while (defined($data = $buffer->read)) { }
             my $buff;
-            my $unit = $CGI::MultipartBuffer::INITIAL_FILLUNIT;
+            my $unit = $MultipartBuffer::INITIAL_FILLUNIT;
             my $len  = $content_length;
             while ( $len > 0 ) {
                 my $read = $self->read_from_client( \$buf, $unit, 0 );
@@ -1040,7 +1032,7 @@ sub read_postdata_putdata {
         my ($data);
         local ($\) = '';
         my $totalbytes;
-        my $unit = $CGI::MultipartBuffer::INITIAL_FILLUNIT;
+        my $unit = $MultipartBuffer::INITIAL_FILLUNIT;
         my $len  = $content_length;
         $unit = $len;
         my $ZERO_LOOP_COUNTER =0;
@@ -1106,7 +1098,7 @@ sub SERVER_PUSH { 'multipart/x-mixed-replace;boundary="' . shift() . '"'; }
 # Create a new multipart buffer
 sub new_MultipartBuffer {
     my($self,$boundary,$length) = @_;
-    return CGI::MultipartBuffer->new($self,$boundary,$length);
+    return MultipartBuffer->new($self,$boundary,$length);
 }
 
 # Read data from a file handle
@@ -1248,7 +1240,7 @@ sub STORE {
     my $self = shift;
     my $tag  = shift;
     my $vals = shift;
-    my @vals = defined($vals) && index($vals,"\0")!=-1 ? split("\0",$vals) : $vals;
+    my @vals = index($vals,"\0")!=-1 ? split("\0",$vals) : $vals;
     $self->param(-name=>$tag,-value=>\@vals);
 }
 
@@ -3608,23 +3600,18 @@ sub _set_attributes {
 # Globals and stubs for other packages that we use.
 #########################################################
 
-######################## CGI::MultipartBuffer ####################
+######################## MultipartBuffer ####################
 
-package CGI::MultipartBuffer;
+package MultipartBuffer;
 
 $_DEBUG = 0;
 
 # how many bytes to read at a time.  We use
 # a 4K buffer by default.
-$MultipartBuffer::INITIAL_FILLUNIT ||= 1024 * 4;
-$MultipartBuffer::TIMEOUT          ||= 240*60; # 4 hour timeout for big files
-$MultipartBuffer::SPIN_LOOP_MAX    ||= 2000;   # bug fix for some Netscape servers
-$MultipartBuffer::CRLF             ||= $CGI::CRLF;
-
-$INITIAL_FILLUNIT = $MultipartBuffer::INITIAL_FILLUNIT;
-$TIMEOUT          = $MultipartBuffer::TIMEOUT;
-$SPIN_LOOP_MAX    = $MultipartBuffer::SPIN_LOOP_MAX;
-$CRLF             = $MultipartBuffer::CRLF;
+$INITIAL_FILLUNIT = 1024 * 4;
+$TIMEOUT = 240*60;       # 4 hour timeout for big files
+$SPIN_LOOP_MAX = 2000;  # bug fix for some Netscape servers
+$CRLF=$CGI::CRLF;
 
 sub new {
     my($package,$interface,$boundary,$length) = @_;
@@ -3858,10 +3845,10 @@ if ($^W) {
     $CGI::CGI = '';
     $CGI::CGI=<<EOF;
     $CGI::VERSION;
-    $CGI::MultipartBuffer::SPIN_LOOP_MAX;
-    $CGI::MultipartBuffer::CRLF;
-    $CGI::MultipartBuffer::TIMEOUT;
-    $CGI::MultipartBuffer::INITIAL_FILLUNIT;
+    $MultipartBuffer::SPIN_LOOP_MAX;
+    $MultipartBuffer::CRLF;
+    $MultipartBuffer::TIMEOUT;
+    $MultipartBuffer::INITIAL_FILLUNIT;
 EOF
     ;
 }

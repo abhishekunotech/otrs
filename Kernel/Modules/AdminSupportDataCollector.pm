@@ -220,12 +220,11 @@ sub _SupportDataCollectorView {
                     Data => $Entry,
                 );
 
-                if ( $Entry->{Message} || $Entry->{MessageFormatted} ) {
+                if ( $Entry->{Message} ) {
                     $LayoutObject->Block(
                         Name => 'SupportDataSubEntryMessage',
                         Data => {
-                            Message          => $Entry->{Message},
-                            MessageFormatted => $Entry->{MessageFormatted},
+                            Message => $Entry->{Message},
                         },
                     );
                 }

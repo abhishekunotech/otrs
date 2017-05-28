@@ -32,31 +32,21 @@ nv.models.OTRSstackedAreaChart = function() {
         , tooltips = true
         , tooltip = function(key, x, y, e, graph) {
             return '<h3>' + key + '</h3>' +
-// ---
-// OTRS
-// ---
-//                '<p>' +  y + ' on ' + x + '</p>'
-                '<p>' +  y + ' - ' + x + '</p>'
-// ---
+                '<p>' +  y + ' on ' + x + '</p>'
         }
         , x //can be accessed via chart.xScale()
         , y //can be accessed via chart.yScale()
         , yAxisTickFormat = d3.format(',.2f')
         , state = nv.utils.state()
         , defaultState = null
-// ---
-// OTRS
-// ---
-//        , noData = 'No Data Available.'
-        , noData = Core.Language.Translate('No Data Available.')
-// ---
+        , noData = Core.Config.Get('NoDataAvailable')
         , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState','renderEnd')
         , controlWidth = 250
 // ---
 // OTRS
 // ---
-//        , cData = ['Stacked','Stream','Expanded']
-        , cData = [ Core.Language.Translate('Stacked'), Core.Language.Translate('Stream'), Core.Language.Translate('Expanded') ]
+//    , cData = ['Stacked','Stream','Expanded']
+        , cData = [ Core.Config.Get('Stacked') || 'Stacked', Core.Config.Get('Stream') || 'Stream', Core.Config.Get('Expanded') || 'Expanded' ]
 // ---
         , controlLabels = {}
         , duration = 250
@@ -207,38 +197,20 @@ nv.models.OTRSstackedAreaChart = function() {
             if (showControls) {
                 var controlsData = [
                     {
-// ---
-// OTRS
-// ---
-//                        key: controlLabels.stacked || 'Stacked',
-//                        metaKey: 'Stacked',
-                        key: controlLabels.stacked || Core.Language.Translate('Stacked'),
-                        metaKey: Core.Language.Translate('Stacked'),
-// ---
+                        key: controlLabels.stacked || Core.Config.Get('Stacked') || 'Stacked',
+                        metaKey: Core.Config.Get('Stacked') || 'Stacked',
                         disabled: stacked.style() != 'stack',
                         style: 'stack'
                     },
                     {
-// ---
-// OTRS
-// ---
-//                        key: controlLabels.stream || 'Stream',
-//                        metaKey: 'Stream',
-                        key: controlLabels.stream || Core.Language.Translate('Stream'),
-                        metaKey: Core.Language.Translate('Stream'),
-// ---
+                        key: controlLabels.stream || Core.Config.Get('Stream') || 'Stream',
+                        metaKey: Core.Config.Get('Stream') || 'Stream',
                         disabled: stacked.style() != 'stream',
                         style: 'stream'
                     },
                     {
-// ---
-// OTRS
-// ---
-//                        key: controlLabels.expanded || 'Expanded',
-//                        metaKey: 'Expanded',
-                        key: controlLabels.expanded || Core.Language.Translate('Expanded'),
-                        metaKey: Core.Language.Translate('Expanded'),
-// ---
+                        key: controlLabels.expanded || Core.Config.Get('Expanded') || 'Expanded',
+                        metaKey: Core.Config.Get('Expanded') || 'Expanded',
                         disabled: stacked.style() != 'expand',
                         style: 'expand'
                     },

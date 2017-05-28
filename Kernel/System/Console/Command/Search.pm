@@ -11,7 +11,7 @@ package Kernel::System::Console::Command::Search;
 use strict;
 use warnings;
 
-use parent qw(
+use base qw(
     Kernel::System::Console::BaseCommand
     Kernel::System::Console::Command::List
 );

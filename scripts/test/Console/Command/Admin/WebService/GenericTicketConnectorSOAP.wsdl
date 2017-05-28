@@ -1214,6 +1214,11 @@ WARNING: This WSDL file is for Development and Test purposes ONLY!
                 type="tns:OTRS_TicketGetResponse_Attachment" maxOccurs="unbounded" minOccurs="0">
             </xsd:element>
             <xsd:element
+                name="AttachmentIDOfHTMLBody"
+                type="xsd:string"
+                maxOccurs="1">
+            </xsd:element>
+            <xsd:element
                 name="Body"
                 type="xsd:string"
                 maxOccurs="1">
@@ -1854,31 +1859,31 @@ WARNING: This WSDL file is for Development and Test purposes ONLY!
                     type="tns:OTRS_TicketSearch_TicketFlag" minOccurs="0">
                 </xsd:element>
                 <xsd:element
-                    name="MIMEBase_From"
+                    name="From"
                     type="xsd:string"
                     minOccurs="0"
                     maxOccurs="1">
                 </xsd:element>
                 <xsd:element
-                    name="MIMEBase_To"
+                    name="To"
                     type="xsd:string"
                     minOccurs="0"
                     maxOccurs="1">
                 </xsd:element>
                 <xsd:element
-                    name="MIMEBase_Cc"
+                    name="Cc"
                     type="xsd:string"
                     minOccurs="0"
                     maxOccurs="1">
                 </xsd:element>
                 <xsd:element
-                    name="MIMEBase_Subject"
+                    name="Subject"
                     type="xsd:string"
                     minOccurs="0"
                     maxOccurs="1">
                 </xsd:element>
                 <xsd:element
-                    name="MIMEBase_Body"
+                    name="Body"
                     type="xsd:string"
                     minOccurs="0"
                     maxOccurs="1">

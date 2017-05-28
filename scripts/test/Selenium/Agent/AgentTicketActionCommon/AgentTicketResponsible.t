@@ -128,7 +128,7 @@ $Selenium->RunTest(
 
         # check page
         for my $ID (
-            qw(Title NewResponsibleID Subject RichText FileUpload IsVisibleForCustomer submitRichText)
+            qw(Title NewResponsibleID Subject RichText FileUpload ArticleTypeID submitRichText)
             )
         {
             my $Element = $Selenium->find_element( "#$ID", 'css' );
@@ -136,37 +136,14 @@ $Selenium->RunTest(
             $Element->is_displayed();
         }
 
-        # check client side validation
-        $Selenium->find_element( "#Subject",  'css' )->send_keys('Test');
-        $Selenium->find_element( "#RichText", 'css' )->send_keys('Test');
-        $Selenium->execute_script(
-            "\$('#NewResponsibleID').val('').trigger('redraw.InputField').trigger('change');"
-        );
-        $Selenium->find_element( "#submitRichText", 'css' )->VerifiedSubmit();
-
-        $Self->Is(
-            $Selenium->execute_script(
-                "return \$('#NewResponsibleID').hasClass('Error')"
-            ),
-            '1',
-            'Client side validation correctly detected missing input value',
-        );
-
-        # reload screen to get a consistent state
-        $Selenium->VerifiedRefresh();
-
-        #$Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentTicketResponsible;TicketID=$TicketID");
-
-        $Selenium->find_element( "#Subject",  'css' )->send_keys('Test');
-        $Selenium->find_element( "#RichText", 'css' )->send_keys('Test');
-
         # change ticket user responsible
         $Selenium->execute_script(
             "\$('#NewResponsibleID').val('$UserID[1]').trigger('redraw.InputField').trigger('change');"
         );
+        $Selenium->find_element( "#Subject",        'css' )->send_keys('Test');
+        $Selenium->find_element( "#RichText",       'css' )->send_keys('Test');
         $Selenium->find_element( "#submitRichText", 'css' )->click();
 
-        # switch window back
         $Selenium->WaitFor( WindowCount => 1 );
         $Selenium->switch_to_window( $Handles->[0] );
 
@@ -176,7 +153,7 @@ $Selenium->RunTest(
         # wait until page has loaded, if necessary
         $Selenium->WaitFor(
             JavaScript =>
-                'return typeof($) === "function" && $(".WidgetSimple").length && $("div.TicketZoom").length;'
+                'return typeof($) === "function" && $(".WidgetSimple").length;'
         );
 
         # make sure the cache is correct
@@ -194,13 +171,14 @@ $Selenium->RunTest(
             $Ticket{ResponsibleID},
             $UserID[1],
             'New responsible correctly set',
-        ) || die 'New responsible not correctly set';
+        );
 
         # delete created test tickets
         my $Success = $TicketObject->TicketDelete(
             TicketID => $TicketID,
             UserID   => $UserID[0],
-        );
+        ) || die 'New responsible not correctly set';
+
         $Self->True(
             $Success,
             "Ticket is deleted - ID $TicketID",

@@ -25,14 +25,15 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
      * @name Init
      * @memberof Core.Agent.Admin.GenericInterfaceOperation
      * @function
+     * @param {Object} Params - Initialization and internationalization parameters.
      * @description
-     *      This function initialize the module functionality.
+     *      This function initialize the module.
      */
-    TargetNS.Init = function () {
-
-        TargetNS.WebserviceID = parseInt(Core.Config.Get('WebserviceID'), 10);
-        TargetNS.Operation = Core.Config.Get('Operation');
-        TargetNS.Action = 'AdminGenericInterfaceOperationDefault';
+    TargetNS.Init = function (Params) {
+        TargetNS.WebserviceID = parseInt(Params.WebserviceID, 10);
+        TargetNS.Operation = Params.Operation;
+        TargetNS.Action = Params.Action;
+        TargetNS.Localization = Params.Localization;
 
         $('#MappingInboundConfigureButton').on('click', function() {
             TargetNS.Redirect('MappingInbound');
@@ -41,17 +42,6 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
         $('#MappingOutboundConfigureButton').on('click', function() {
             TargetNS.Redirect('MappingOutbound');
         });
-
-        $('#SaveAndFinishButton').on('click', function(){
-            $('#ReturnToWebservice').val(1);
-        });
-
-        $('.RegisterChange').on('change.RegisterChange keyup.RegisterChange', function () {
-            $('.HideOnChange').hide();
-            $('.ShowOnChange').show();
-        });
-
-        $('#DeleteButton').on('click', TargetNS.ShowDeleteDialog);
     };
 
     /**
@@ -65,20 +55,20 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
     TargetNS.ShowDeleteDialog = function(Event){
         Core.UI.Dialog.ShowContentDialog(
             $('#DeleteDialogContainer'),
-            Core.Language.Translate('Delete this Operation'),
+            TargetNS.Localization.DeleteOperationMsg,
             '240px',
             'Center',
             true,
             [
                {
-                   Label: Core.Language.Translate('Cancel'),
+                   Label: TargetNS.Localization.CancelMsg,
                    Class: 'Primary',
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('#DeleteDialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Delete'),
+                   Label: TargetNS.Localization.DeleteMsg,
                    Function: function () {
                        var Data = {
                             Action: TargetNS.Action,
@@ -89,7 +79,7 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
 
                         Core.AJAX.FunctionCall(Core.Config.Get('CGIHandle'), Data, function (Response) {
                             if (!Response || !Response.Success) {
-                                alert(Core.Language.Translate('An error occurred during communication.'));
+                                alert(TargetNS.Localization.CommunicationErrorMsg);
                                 return;
                             }
 
@@ -98,6 +88,7 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
                                 Subaction: 'Change',
                                 WebserviceID: TargetNS.WebserviceID
                             });
+
 
                         }, 'json');
 
@@ -137,8 +128,6 @@ Core.Agent.Admin.GenericInterfaceOperation = (function (TargetNS) {
             });
         }
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.GenericInterfaceOperation || {}));

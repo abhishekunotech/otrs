@@ -23,16 +23,22 @@ our @ObjectDependencies = (
 
 Kernel::System::MailAccount - to manage mail accounts
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All functions to manage the mail accounts.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $MailAccountObject = $Kernel::OM->Get('Kernel::System::MailAccount');
 
 =cut
@@ -47,7 +53,7 @@ sub new {
     return $Self;
 }
 
-=head2 MailAccountAdd()
+=item MailAccountAdd()
 
 adds a new mail account
 
@@ -141,7 +147,7 @@ sub MailAccountAdd {
     return $ID;
 }
 
-=head2 MailAccountGet()
+=item MailAccountGet()
 
 returns a hash of mail account data
 
@@ -215,7 +221,7 @@ sub MailAccountGet {
     return %Data;
 }
 
-=head2 MailAccountUpdate()
+=item MailAccountUpdate()
 
 update a new mail account
 
@@ -287,7 +293,7 @@ sub MailAccountUpdate {
     return 1;
 }
 
-=head2 MailAccountDelete()
+=item MailAccountDelete()
 
 deletes a mail account
 
@@ -318,7 +324,7 @@ sub MailAccountDelete {
     return 1;
 }
 
-=head2 MailAccountList()
+=item MailAccountList()
 
 returns a list (Key, Name) of all mail accounts
 
@@ -353,7 +359,7 @@ sub MailAccountList {
     return %Data;
 }
 
-=head2 MailAccountBackendList()
+=item MailAccountBackendList()
 
 returns a list of usable backends
 
@@ -389,7 +395,7 @@ sub MailAccountBackendList {
     return %Backends;
 }
 
-=head2 MailAccountFetch()
+=item MailAccountFetch()
 
 fetch emails by using backend
 
@@ -434,7 +440,7 @@ sub MailAccountFetch {
     return $Backend->Fetch(%Param);
 }
 
-=head2 MailAccountCheck()
+=item MailAccountCheck()
 
 Check inbound mail configuration
 
@@ -487,6 +493,8 @@ sub MailAccountCheck {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

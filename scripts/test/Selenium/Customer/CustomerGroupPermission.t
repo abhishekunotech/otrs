@@ -72,19 +72,19 @@ $Selenium->RunTest(
 
         # disable frontend service module
         my $FrontendCustomerTicketOverview
-            = $Kernel::OM->Get('Kernel::Config')->Get('CustomerFrontend::Navigation')->{CustomerTicketOverview};
+            = $Kernel::OM->Get('Kernel::Config')->Get('CustomerFrontend::Module')->{CustomerTicketOverview};
 
         # change the group for the CompanyTickets
-        for my $Key ( %{$FrontendCustomerTicketOverview} ) {
+        for my $NavBarItem ( @{ $FrontendCustomerTicketOverview->{NavBar} } ) {
 
-            if ( $FrontendCustomerTicketOverview->{$Key}->{Name} eq 'Company Tickets' ) {
-                push @{ $FrontendCustomerTicketOverview->{$Key}->{Group} }, $GroupName;
+            if ( $NavBarItem->{Name} eq 'Company Tickets' ) {
+                push @{ $NavBarItem->{Group} }, $GroupName;
             }
         }
 
         $Helper->ConfigSettingChange(
             Valid => 1,
-            Key   => 'CustomerFrontend::Navigation###CustomerTicketOverview',
+            Key   => 'CustomerFrontend::Module###CustomerTicketOverview',
             Value => $FrontendCustomerTicketOverview,
         );
 
@@ -102,7 +102,7 @@ $Selenium->RunTest(
         $Selenium->VerifiedGet("${ScriptAlias}customer.pl?Action=CustomerTicketOverview;Subaction=CompanyTickets");
 
         # check for customer user fatal error
-        my $ExpectedMsg = 'Please contact the administrator.';
+        my $ExpectedMsg = 'Please contact the administrator';
         $Self->True(
             index( $Selenium->get_page_source(), $ExpectedMsg ) > -1,
             "Customer fatal error message - found",
@@ -121,6 +121,13 @@ $Selenium->RunTest(
         $Self->True(
             $Success,
             "CustomerUser $TestCustomerUserLogin added to test group $GroupName with ro and rw rights"
+        );
+
+        # login test customer user again
+        $Selenium->Login(
+            Type     => 'Customer',
+            User     => $TestCustomerUserLogin,
+            Password => $TestCustomerUserLogin,
         );
 
         # navigate to CompanyTickets subaction screen again

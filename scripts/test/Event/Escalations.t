@@ -12,14 +12,13 @@ use utf8;
 
 use vars (qw($Self));
 
+# get helper object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase  => 1,
         UseTmpArticleDir => 1,
     },
 );
-
-# get helper object
 my $HelperObject = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
 # get needed objects
@@ -27,12 +26,11 @@ my $ConfigObject       = $Kernel::OM->Get('Kernel::Config');
 my $GenericAgentObject = $Kernel::OM->Get('Kernel::System::GenericAgent');
 my $QueueObject        = $Kernel::OM->Get('Kernel::System::Queue');
 my $TicketObject       = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject      = $Kernel::OM->Get('Kernel::System::Ticket::Article');
 my $TimeObject         = $Kernel::OM->Get('Kernel::System::Time');
 
 # make use to disable EstalationStopEvents modules
 $ConfigObject->Set(
-    Key   => 'Ticket::EventModulePost###4300-EscalationStopEvents',
+    Key   => 'Ticket::EventModulePost###920-EscalationStopEvents',
     Value => undef,
 );
 
@@ -185,18 +183,9 @@ for my $Hours ( sort keys %WorkingHours ) {
         # wait 1 second to have escalations
         $HelperObject->FixedTimeAddSeconds(1);
 
-        # Renew objects because of transaction.
-        $Kernel::OM->ObjectsDiscard(
-            Objects => [
-                'Kernel::System::Ticket',
-                'Kernel::System::Ticket::Article',
-                'Kernel::System::Ticket::Article::Backend::Phone',
-                'Kernel::System::Ticket::Article::Backend::Email',
-                'Kernel::System::Ticket::Article::Backend::Internal',
-            ],
-        );
-        $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
-        $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+        # renew object because of transaction
+        $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::Ticket'] );
+        $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         my %Ticket = $TicketObject->TicketGet( TicketID => $TicketID );
 
@@ -370,20 +359,20 @@ for my $Hours ( sort keys %WorkingHours ) {
         );
 
         # first response
-        my $ArticleID = $ArticleObject->BackendForChannel( ChannelName => 'Phone' )->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 1,
-            SenderType           => 'agent',
-            From                 => 'Agent Some Agent Some Agent <email@example.com>',
-            To                   => 'Customer A <customer-a@example.com>',
-            Cc                   => 'Customer B <customer-b@example.com>',
-            ReplyTo              => 'Customer B <customer-b@example.com>',
-            Subject              => 'first response',
-            Body                 => 'irgendwie und sowieso',
-            ContentType          => 'text/plain; charset=ISO-8859-15',
-            HistoryType          => 'OwnerUpdate',
-            HistoryComment       => 'first response',
-            UserID               => 1,
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'phone',
+            SenderType     => 'agent',
+            From           => 'Agent Some Agent Some Agent <email@example.com>',
+            To             => 'Customer A <customer-a@example.com>',
+            Cc             => 'Customer B <customer-b@example.com>',
+            ReplyTo        => 'Customer B <customer-b@example.com>',
+            Subject        => 'first response',
+            Body           => 'irgendwie und sowieso',
+            ContentType    => 'text/plain; charset=ISO-8859-15',
+            HistoryType    => 'OwnerUpdate',
+            HistoryComment => 'first response',
+            UserID         => 1,
             NoAgentNotify => 1,    # if you don't want to send agent notifications
         );
 
@@ -395,18 +384,9 @@ for my $Hours ( sort keys %WorkingHours ) {
             $NumEvents{EscalationUpdateTimeStart}++;
         }
 
-        # Renew objects because of transaction.
-        $Kernel::OM->ObjectsDiscard(
-            Objects => [
-                'Kernel::System::Ticket',
-                'Kernel::System::Ticket::Article',
-                'Kernel::System::Ticket::Article::Backend::Phone',
-                'Kernel::System::Ticket::Article::Backend::Email',
-                'Kernel::System::Ticket::Article::Backend::Internal',
-            ],
-        );
-        $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
-        $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+        # renew object because of transaction
+        $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::Ticket'] );
+        $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         $CheckNumEvents->(
             GenericAgentObject => $GenericAgentObject,
@@ -446,35 +426,26 @@ for my $Hours ( sort keys %WorkingHours ) {
 
         # trigger an update
         # a note internal does not make the update time escalation go away
-        my $ArticleID = $ArticleObject->BackendForChannel( ChannelName => 'Internal' )->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 0,
-            SenderType           => 'agent',
-            From                 => 'Agent Some Agent Some Agent <email@example.com>',
-            To                   => 'Customer A <customer-a@example.com>',
-            Cc                   => 'Customert B <customer-b@example.com>',
-            ReplyTo              => 'Customer B <customer-b@example.com>',
-            Subject              => 'some short description',
-            Body                 => 'irgendwie und sowieso',
-            ContentType          => 'text/plain; charset=ISO-8859-15',
-            HistoryType          => 'OwnerUpdate',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'note-internal',
+            SenderType     => 'agent',
+            From           => 'Agent Some Agent Some Agent <email@example.com>',
+            To             => 'Customer A <customer-a@example.com>',
+            Cc             => 'Customert B <customer-b@example.com>',
+            ReplyTo        => 'Customer B <customer-b@example.com>',
+            Subject        => 'some short description',
+            Body           => 'irgendwie und sowieso',
+            ContentType    => 'text/plain; charset=ISO-8859-15',
+            HistoryType    => 'OwnerUpdate',
+            HistoryComment => 'Some free text!',
+            UserID         => 1,
             NoAgentNotify => 1,    # if you don't want to send agent notifications
         );
 
-        # Renew objects because of transaction.
-        $Kernel::OM->ObjectsDiscard(
-            Objects => [
-                'Kernel::System::Ticket',
-                'Kernel::System::Ticket::Article',
-                'Kernel::System::Ticket::Article::Backend::Phone',
-                'Kernel::System::Ticket::Article::Backend::Email',
-                'Kernel::System::Ticket::Article::Backend::Internal',
-            ],
-        );
-        $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
-        $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+        # renew object because of transaction
+        $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::Ticket'] );
+        $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         $CheckNumEvents->(
             GenericAgentObject => $GenericAgentObject,
@@ -487,84 +458,6 @@ for my $Hours ( sort keys %WorkingHours ) {
     }
 
 }
-
-# Add case when escalation time is greater than rest of working day time.
-# Escalation destination times must be moved to the next working day (see bug#11243).
-my @TimeWorkingHours = ( '9', '10', '11', '12', '13', '14', '15', '16', '17' );
-my @Days = qw(Mon Tue Wed Thu Fri);
-my %Week;
-
-for my $Day (@Days) {
-    $Week{$Day} = \@TimeWorkingHours;
-}
-
-# Set working hours.
-$ConfigObject->Set(
-    Key   => 'TimeWorkingHours',
-    Value => \%Week,
-);
-
-# Set fixed time for testing.
-$HelperObject->FixedTimeSet(
-    $TimeObject->TimeStamp2SystemTime( String => '2017-04-26 17:50:00' ),
-);
-
-my $RandomNumber = $HelperObject->GetRandomNumber();
-
-# Create test queue.
-my $QueueName = "Queue-$RandomNumber";
-my $QueueID   = $QueueObject->QueueAdd(
-    Name                => $QueueName,
-    ValidID             => 1,
-    GroupID             => 1,
-    FirstResponseTime   => 30,
-    FirstResponseNotify => 80,
-    UpdateTime          => 40,
-    UpdateNotify        => 80,
-    SolutionTime        => 50,
-    SolutionNotify      => 80,
-    SystemAddressID     => 1,
-    SalutationID        => 1,
-    SignatureID         => 1,
-    UserID              => 1,
-    Comment             => "Test Queue",
-);
-$Self->True( $QueueID, "$QueueName is created" );
-
-# Create test ticket.
-my $TicketID = $TicketObject->TicketCreate(
-    Title      => "Ticket-$RandomNumber",
-    QueueID    => $QueueID,
-    Lock       => 'unlock',
-    PriorityID => 1,
-    StateID    => 1,
-    OwnerID    => 1,
-    UserID     => 1,
-);
-$Self->True( $TicketID, "TicketID $TicketID is created" );
-
-# Renew object because of transaction.
-$Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::Ticket'] );
-$TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
-
-# Get created ticket and check created and escalation destination times.
-my %Ticket = $TicketObject->TicketGet( TicketID => $TicketID );
-
-$Self->Is(
-    $Ticket{Created},
-    '2017-04-26 17:50:00',
-    "Created time '$Ticket{Created}' is correct"
-);
-$Self->Is(
-    $Ticket{EscalationDestinationDate},
-    '2017-04-27 09:20:00',
-    "Escalation time '$Ticket{EscalationDestinationDate}' is correct"
-);
-$Self->Is(
-    $Ticket{SolutionTimeDestinationDate},
-    '2017-04-27 09:40:00',
-    "Solution time '$Ticket{SolutionTimeDestinationDate}' is correct"
-);
 
 # cleanup is done by RestoreDatabase.
 

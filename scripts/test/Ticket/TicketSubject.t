@@ -45,6 +45,11 @@ for my $TicketHook ( 'Ticket#', 'Call#', 'Ticket' ) {
 
         my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
+        $Self->True(
+            $TicketObject->isa('Kernel::System::Ticket::Number::DateChecksum'),
+            "TicketObject loaded the correct backend",
+        );
+
         # check GetTNByString
         my $Tn = $TicketObject->TicketCreateNumber() || 'NONE!!!';
         my $String = 'Re: ' . $TicketObject->TicketSubjectBuild(

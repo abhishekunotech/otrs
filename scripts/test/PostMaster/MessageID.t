@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -15,12 +14,10 @@ use vars (qw($Self));
 
 use Kernel::System::PostMaster;
 
-my $ConfigObject         = $Kernel::OM->Get('Kernel::Config');
-my $MainObject           = $Kernel::OM->Get('Kernel::System::Main');
-my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-    ChannelName => 'Email',
-);
+# get needed objects
+my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+my $MainObject   = $Kernel::OM->Get('Kernel::System::Main');
+my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
@@ -78,15 +75,14 @@ for my $File (qw(1 2 3 5 6 11 21)) {
         ' Run() - NewTicket',
     );
 
-    my %Article = $ArticleBackendObject->ArticleGetByMessageID(
+    my $TicketID = $TicketObject->ArticleGetTicketIDOfMessageID(
         MessageID => $MessageID,
-        UserID    => 1,
     );
 
     $Self->Is(
-        $Article{TicketID},
+        $TicketID,
         $Return[1],
-        "ArticleGetByMessageID - TicketID for message ID $MessageID"
+        "ArticleGetTicketIDOfMessageID - TicketID for message ID $MessageID"
     );
 }
 

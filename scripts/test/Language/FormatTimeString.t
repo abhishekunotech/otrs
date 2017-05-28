@@ -38,33 +38,17 @@ my @Tests = (
         Result         => '2014-01-10',
     },
     {
-        Name           => 'Default format, only time passed',
-        DateFormatName => 'DateFormatLong',
-        DateFormat     => '%T - %D.%M.%Y',
-        Short          => 0,
-        Time           => '22:12:06',
-        Result         => '22:12:06',
-    },
-    {
-        Name           => 'Default format, malformed date/time',
-        DateFormatName => 'DateFormatLong',
-        DateFormat     => '%T - %D.%M.%Y',
-        Short          => 0,
-        Time           => 'INVALID',
-        Result         => 'INVALID',
-    },
-    {
         Name           => 'Time zone on day border',
-        UserTimeZone   => 'Europe/Berlin',
+        UserTimeZone   => -1,
         DateFormatName => 'DateFormatLong',
         DateFormat     => '%T - %D.%M.%Y',
         Short          => 0,
-        Time           => '2014-01-09 23:34:05',
-        Result         => '00:34:05 - 10.01.2014 (Europe/Berlin)',
+        Time           => '2014-01-10 00:00:00',
+        Result         => '23:00:00 - 09.01.2014 (-1)',
     },
     {
         Name           => 'Time zone on day border for DateFormatShort (TimeZone not applied)',
-        UserTimeZone   => 'Europe/Berlin',
+        UserTimeZone   => -1,
         DateFormatName => 'DateFormatShort',
         DateFormat     => '%T - %D.%M.%Y',
         Short          => 0,
@@ -81,21 +65,16 @@ my @Tests = (
     },
     {
         Name           => 'All tags test, with timezone',
-        UserTimeZone   => 'Europe/Berlin',
+        UserTimeZone   => -1,
         DateFormatName => 'DateFormatLong',
         DateFormat     => '%A %B %T - %D.%M.%Y',
         Short          => 0,
         Time           => '2014-01-10 11:12:13',
-        Result         => 'Fr Jan 12:12:13 - 10.01.2014 (Europe/Berlin)',
+        Result         => 'Fr Jan 10:12:13 - 10.01.2014 (-1)',
     },
 );
 
 for my $Test (@Tests) {
-
-    $Kernel::OM->Get('Kernel::Config')->Set(
-        Key   => 'OTRSTimeZone',
-        Value => 'UTC',
-    );
 
     # discard language object
     $Kernel::OM->ObjectsDiscard(
@@ -109,7 +88,6 @@ for my $Test (@Tests) {
             UserLanguage => 'de',
         },
     );
-
     my $LanguageObject = $Kernel::OM->Get('Kernel::Language');
 
     $LanguageObject->{ $Test->{DateFormatName} } = $Test->{DateFormat};

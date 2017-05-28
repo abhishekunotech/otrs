@@ -137,7 +137,7 @@ sub yaml_dump {
     }
     else {
         bless $value, "CODE" if $class;
-        eval { require B::Deparse };
+        eval { use B::Deparse };
         return if $@;
         my $deparse = B::Deparse->new();
         eval {

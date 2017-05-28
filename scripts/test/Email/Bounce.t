@@ -12,21 +12,14 @@ use utf8;
 use vars (qw($Self));
 
 $Kernel::OM->Get('Kernel::Config')->Set(
-    Key   => 'OTRSTimeZone',
-    Value => 'UTC',
-);
-
-$Kernel::OM->Get('Kernel::Config')->Set(
     Key   => 'SendmailModule',
     Value => 'Kernel::System::Email::DoNotSendEmail',
 );
 
+local $ENV{TZ} = 'UTC';
 my $Helper     = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-my $SystemTime = $Kernel::OM->Create(
-    'Kernel::System::DateTime',
-    ObjectParams => {
-        String => '2014-01-01 12:00:00',
-    },
+my $SystemTime = $Kernel::OM->Get('Kernel::System::Time')->TimeStamp2SystemTime(
+    String => '2014-01-01 12:00:00',
 );
 $Helper->FixedTimeSet($SystemTime);
 

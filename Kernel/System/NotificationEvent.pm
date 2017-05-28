@@ -11,7 +11,6 @@ package Kernel::System::NotificationEvent;
 use strict;
 use warnings;
 
-use Kernel::Language qw(Translatable);
 use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = (
@@ -26,16 +25,22 @@ our @ObjectDependencies = (
 
 Kernel::System::NotificationEvent - to manage the notifications
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All functions to manage the notification and the notification jobs.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $NotificationEventObject = $Kernel::OM->Get('Kernel::System::NotificationEvent');
 
 =cut
@@ -49,10 +54,11 @@ sub new {
 
     $Self->{CacheType} = 'NotificationEvent';
     $Self->{CacheTTL}  = 60 * 60 * 24 * 20;
+
     return $Self;
 }
 
-=head2 NotificationList()
+=item NotificationList()
 
 returns a hash of all notifications
 
@@ -127,7 +133,7 @@ sub NotificationList {
     return %Result;
 }
 
-=head2 NotificationGet()
+=item NotificationGet()
 
 returns a hash of the notification data
 
@@ -258,7 +264,7 @@ sub NotificationGet {
     return %Data;
 }
 
-=head2 NotificationAdd()
+=item NotificationAdd()
 
 adds a new notification to the database
 
@@ -423,7 +429,7 @@ sub NotificationAdd {
     return $ID;
 }
 
-=head2 NotificationUpdate()
+=item NotificationUpdate()
 
 update a notification in database
 
@@ -574,7 +580,7 @@ sub NotificationUpdate {
     return 1;
 }
 
-=head2 NotificationDelete()
+=item NotificationDelete()
 
 deletes an notification from the database
 
@@ -672,7 +678,7 @@ sub NotificationDelete {
     return 1;
 }
 
-=head2 NotificationEventCheck()
+=item NotificationEventCheck()
 
 returns array of notification affected by event
 
@@ -721,7 +727,7 @@ sub NotificationEventCheck {
     return @IDs;
 }
 
-=head2 NotificationImport()
+=item NotificationImport()
 
 import an Notification YAML file/content
 
@@ -770,7 +776,7 @@ sub NotificationImport {
         return {
             Success => 0,
             Message =>
-                Translatable("Couldn't read Notification configuration file. Please make sure the file is valid."),
+                "Couldn't read Notification configuration file. Please make sure the file is valid.",
         };
     }
 
@@ -830,6 +836,8 @@ sub NotificationImport {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

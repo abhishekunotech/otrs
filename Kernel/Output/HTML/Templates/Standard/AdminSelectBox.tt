@@ -10,16 +10,6 @@
     <h1>[% Translate("SQL Box") | html %]</h1>
 
     <div class="SidebarColumn">
-[% RenderBlockStart("ResultFilter") %]
-        <div class="WidgetSimple">
-            <div class="Header">
-                <h2><label for="FilterResults">[% Translate("Filter for Results") | html %]</label></h2>
-            </div>
-            <div class="Content">
-                <input type="text" id="FilterResults" class="FilterBox" placeholder="[% Translate("Just start typing to filter...") | html %]" name="FilterResults" value="" title="[% Translate("Filter for results") | html %]">
-            </div>
-        </div>
-[% RenderBlockEnd("ResultFilter") %]
         <div class="WidgetSimple">
             <div class="Header">
                 <h2>[% Translate("Hint") | html %]</h2>
@@ -90,6 +80,21 @@
                         <div class="Field SpacingTop">
                             <button class="Primary CallForAction" type="submit" id="Run" value="[% Translate("Run Query") | html %]"><span>[% Translate("Run Query") | html %]</span></button>
                         </div>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+Core.Form.Validate.SetSubmitFunction($('#AdminSelectBoxForm'), function (Form) {
+    Form.submit();
+
+    if ($('#ResultFormat option:selected').text() !== 'CSV'
+        && $('#ResultFormat option:selected').text() !== 'Excel'
+     ) {
+        window.setTimeout(function(){
+            Core.Form.DisableForm( $(Form) );
+        }, 0);
+    }
+});
+//]]></script>
+[% END %]
                     </fieldset>
                 </form>
             </div>
@@ -98,10 +103,10 @@
 [% RenderBlockStart("Result") %]
         <div class="WidgetSimple">
             <div class="Header">
-                <h2>[% Data.MatchesFound | html %] [% Translate("Results") | html %]</h2>
+                <h2>[% Translate("Results") | html %]</h2>
             </div>
             <div class="Content">
-                <table class="DataTable" id="Results">
+                <table class="DataTable">
                     <thead>
                         <tr>
 [% RenderBlockStart("ColumnHead") %]
@@ -123,9 +128,6 @@
 [% RenderBlockEnd("Cell") %]
                         </tr>
 [% RenderBlockEnd("Row") %]
-                        <tr class="FilterMessage Hidden">
-                            <td colspan="999">[% Translate("No matches found.") | html %]</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>

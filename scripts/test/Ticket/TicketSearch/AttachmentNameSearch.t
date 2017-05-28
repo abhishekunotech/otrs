@@ -14,15 +14,23 @@ use vars (qw($Self));
 
 use Kernel::System::VariableCheck qw(:all);
 
-my $ConfigObject         = $Kernel::OM->Get('Kernel::Config');
-my $MainObject           = $Kernel::OM->Get('Kernel::System::Main');
-my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Internal' );
+# get needed objects
+my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
+# initially set article storage to DB, so that subsequent FS tests succeed.
+$ConfigObject->Set(
+    Key   => 'Ticket::StorageModule',
+    Value => "Kernel::System::Ticket::ArticleStorageDB",
+);
+
+my $MainObject   = $Kernel::OM->Get('Kernel::System::Main');
+my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
+# get helper object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase  => 1,
+        UseTmpArticleDir => 1,
         UseTmpArticleDir => 1,
     },
 );
@@ -30,6 +38,7 @@ my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
 my $UserID = 1;
 
+# get a random id
 my $RandomID = $Helper->GetRandomID();
 
 $ConfigObject->Set(
@@ -39,7 +48,7 @@ $ConfigObject->Set(
 
 my @TicketIDs;
 
-# Create two test tickets.
+# create 2 tickets
 for my $Item ( 1 .. 2 ) {
     my $TicketID = $TicketObject->TicketCreate(
         Title => ( $Item == 1 ) ? ( $RandomID . 'Ticket One Title' ) : ( $RandomID . 'Ticket Two Title ' . $RandomID ),
@@ -52,12 +61,14 @@ for my $Item ( 1 .. 2 ) {
         OwnerID      => 1,
         UserID       => 1,
     );
+
+    # sanity check
     $Self->True(
         $TicketID,
-        "TicketCreate() successful for Ticket ID $TicketID"
+        "TicketCreate() successful for Ticket ID $TicketID",
     );
 
-    # Get the ticket entry.
+    # get the Ticket entry
     my %TicketEntry = $TicketObject->TicketGet(
         TicketID      => $TicketID,
         DynamicFields => 0,
@@ -66,7 +77,7 @@ for my $Item ( 1 .. 2 ) {
 
     $Self->True(
         IsHashRefWithData( \%TicketEntry ),
-        "TicketGet() successful for Local TicketGet ID $TicketID"
+        "TicketGet() successful for Local TicketGet ID $TicketID",
     );
 
     push @TicketIDs, $TicketID;
@@ -74,38 +85,38 @@ for my $Item ( 1 .. 2 ) {
 
 my $TicketCounter = 1;
 
-# Create test articles and attachments.
+# create articles and attachments
 TICKET:
 for my $TicketID (@TicketIDs) {
 
-    # Create two articles per ticket.
+    # create 2 articles per ticket
     ARTICLE:
     for my $ArticleCounter ( 1 .. 2 ) {
-        my $ArticleID = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            SenderType           => 'agent',
-            IsVisibleForCustomer => 1,
-            From                 => 'Agent Some Agent Some Agent <email@example.com>',
-            To                   => 'Customer A <customer-a@example.com>',
-            Cc                   => 'Customer B <customer-b@example.com>',
-            ReplyTo              => 'Customer B <customer-b@example.com>',
-            Subject              => 'Ticket' . $TicketCounter . ' Article' . $ArticleCounter . ' ' . $RandomID,
-            Body                 => 'A text for the body, Title äöüßÄÖÜ€ис',
-            ContentType          => 'text/plain; charset=ISO-8859-15',
-            HistoryType          => 'OwnerUpdate',
-            HistoryComment       => 'first article',
-            UserID               => 1,
-            NoAgentNotify        => 1,
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'note-external',
+            SenderType     => 'agent',
+            From           => 'Agent Some Agent Some Agent <email@example.com>',
+            To             => 'Customer A <customer-a@example.com>',
+            Cc             => 'Customer B <customer-b@example.com>',
+            ReplyTo        => 'Customer B <customer-b@example.com>',
+            Subject        => 'Ticket' . $TicketCounter . 'Article' . $ArticleCounter . $RandomID,
+            Body           => 'A text for the body, Title äöüßÄÖÜ€ис',
+            ContentType    => 'text/plain; charset=ISO-8859-15',
+            HistoryType    => 'OwnerUpdate',
+            HistoryComment => 'first article',
+            UserID         => 1,
+            NoAgentNotify  => 1,
         );
 
         $Self->True(
             $ArticleID,
-            'Article created'
+            'Article created',
         );
 
         next ARTICLE if $ArticleCounter == 1;
 
-        # Add attachment only to the second article.
+        # add attachment only to second article
         my $Location = $ConfigObject->Get('Home')
             . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.txt";
 
@@ -115,9 +126,9 @@ for my $TicketID (@TicketIDs) {
             Type     => 'Local',
         );
 
-        my $ArticleWriteAttachment = $ArticleBackendObject->ArticleWriteAttachment(
+        my $ArticleWriteAttachment = $TicketObject->ArticleWriteAttachment(
             Content     => ${$ContentRef},
-            Filename    => $RandomID . '.txt',
+            Filename    => 'StdAttachment-Test1' . $RandomID . '.txt',
             ContentType => 'txt',
             ArticleID   => $ArticleID,
             UserID      => 1,
@@ -125,42 +136,36 @@ for my $TicketID (@TicketIDs) {
 
         $Self->True(
             $ArticleWriteAttachment,
-            'Attachment created'
-        );
-
-        $ArticleObject->ArticleSearchIndexBuild(
-            TicketID  => $TicketID,
-            ArticleID => $ArticleID,
-            UserID    => 1,
+            'Attachment created',
         );
     }
     $TicketCounter++;
 }
 
-# Add an internal article to second ticket.
-my $ArticleID = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketIDs[1],
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 0,
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'Ticket2 Article3 ' . $RandomID,
-    Body                 => 'A text for the body, Title äöüßÄÖÜ€ис',
-    ContentType          => 'text/plain; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'first article',
-    UserID               => 1,
-    NoAgentNotify        => 1,
+# add an internal article
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID       => $TicketIDs[1],
+    ArticleType    => 'note-internal',
+    SenderType     => 'agent',
+    From           => 'Agent Some Agent Some Agent <email@example.com>',
+    To             => 'Customer A <customer-a@example.com>',
+    Cc             => 'Customer B <customer-b@example.com>',
+    ReplyTo        => 'Customer B <customer-b@example.com>',
+    Subject        => 'Ticket2Article3' . $RandomID,
+    Body           => 'A text for the body, Title äöüßÄÖÜ€ис',
+    ContentType    => 'text/plain; charset=ISO-8859-15',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'first article',
+    UserID         => 1,
+    NoAgentNotify  => 1,
 );
 
 $Self->True(
     $ArticleID,
-    'Article created'
+    'Article created',
 );
 
-# Add attachment only to the internal article.
+# add attachment only to second article
 my $Location = $ConfigObject->Get('Home') . '/scripts/test/sample/StdAttachment/StdAttachment-Test1.txt';
 
 my $ContentRef = $MainObject->FileRead(
@@ -169,9 +174,9 @@ my $ContentRef = $MainObject->FileRead(
     Type     => 'Local',
 );
 
-my $ArticleWriteAttachment = $ArticleBackendObject->ArticleWriteAttachment(
+my $ArticleWriteAttachment = $TicketObject->ArticleWriteAttachment(
     Content     => ${$ContentRef},
-    Filename    => $RandomID . '.txt',
+    Filename    => 'StdAttachment-Test1' . $RandomID . '.txt',
     ContentType => 'txt',
     ArticleID   => $ArticleID,
     UserID      => 1,
@@ -179,22 +184,16 @@ my $ArticleWriteAttachment = $ArticleBackendObject->ArticleWriteAttachment(
 
 $Self->True(
     $ArticleWriteAttachment,
-    'Attachment created'
+    'Attachment created',
 );
 
-$ArticleObject->ArticleSearchIndexBuild(
-    TicketID  => $TicketIDs[1],
-    ArticleID => $ArticleID,
-    UserID    => 1,
-);
-
-# Actual tests.
+# actual tests
 my @Tests = (
     {
         Name   => 'AttachmentName',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[0], $TicketIDs[1] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[0], $TicketIDs[1] ],
@@ -202,28 +201,28 @@ my @Tests = (
     {
         Name   => 'AttachmentName nonexisting',
         Config => {
-            MIMEBase_AttachmentName => 'nonexisting-attachment-name-search.txt',
-            UserID                  => 1,
+            AttachmentName => 'nonexisting-attachment-name-search.txt',
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [],
-        ExpectedResultsArticleStorageFS => [],    # does not consider attachment name
+        ExpectedResultsArticleStorageFS => [ $TicketIDs[0], $TicketIDs[1] ],    # does not consider attachment name
     },
     {
         Name   => 'AttachmentName Ticket1 Article1',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket1 Article1 ' . $RandomID,
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket1Article1' . $RandomID,
+            UserID         => 1,
         },
-        ExpectedResultsArticleStorageDB => [],
-        ExpectedResultsArticleStorageFS => [],
+        ExpectedResultsArticleStorageDB => [ $TicketIDs[0] ],
+        ExpectedResultsArticleStorageFS => [ $TicketIDs[0] ],
     },
     {
         Name   => 'AttachmentName Ticket1 Article2',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket1 Article2 ' . $RandomID,
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket1Article2' . $RandomID,
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[0] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[0] ],
@@ -231,19 +230,19 @@ my @Tests = (
     {
         Name   => 'AttachmentName Ticket2 Article1',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket2 Article1 ' . $RandomID,
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket2Article1' . $RandomID,
+            UserID         => 1,
         },
-        ExpectedResultsArticleStorageDB => [],
-        ExpectedResultsArticleStorageFS => [],
+        ExpectedResultsArticleStorageDB => [ $TicketIDs[1] ],
+        ExpectedResultsArticleStorageFS => [ $TicketIDs[1] ],
     },
     {
         Name   => 'AttachmentName Ticket2 Article2',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket2 Article2 ' . $RandomID,
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket2Article2' . $RandomID,
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[1] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[1] ],
@@ -251,9 +250,9 @@ my @Tests = (
     {
         Name   => 'AttachmentName Ticket2 Article3',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket2 Article3 ' . $RandomID,
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket2Article3' . $RandomID,
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[1] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[1] ],
@@ -261,9 +260,9 @@ my @Tests = (
     {
         Name   => 'AttachmentName Title Ticket 1',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            Title                   => $RandomID . 'Ticket One Title',
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Title          => $RandomID . 'Ticket One Title',
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[0] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[0] ],
@@ -271,9 +270,9 @@ my @Tests = (
     {
         Name   => 'AttachmentName Title (Like) Ticket 1',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            Title                   => $RandomID . '*Title',
-            UserID                  => 1,
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Title          => $RandomID . '*Title',
+            UserID         => 1,
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[0] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[0] ],
@@ -281,8 +280,8 @@ my @Tests = (
     {
         Name   => 'AttachmentName (AsCustomer)',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            CustomerUserID          => 'customerOne@example.com',
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            CustomerUserID => 'customerOne@example.com',
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[0], $TicketIDs[1] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[0], $TicketIDs[1] ],
@@ -290,9 +289,9 @@ my @Tests = (
     {
         Name   => 'AttachmentName (AsCustomer) Ticket2 Article2',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket2 Article2 ' . $RandomID,
-            CustomerUserID          => 'customerOne@example.com',
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket2Article2' . $RandomID,
+            CustomerUserID => 'customerOne@example.com',
         },
         ExpectedResultsArticleStorageDB => [ $TicketIDs[1] ],
         ExpectedResultsArticleStorageFS => [ $TicketIDs[1] ],
@@ -300,9 +299,9 @@ my @Tests = (
     {
         Name   => 'AttachmentName (AsCustomer) Ticket2 Article3',
         Config => {
-            MIMEBase_AttachmentName => $RandomID . '.txt',
-            MIMEBase_Subject        => 'Ticket2 Article3 ' . $RandomID,
-            CustomerUserID          => 'customerOne@example.com',
+            AttachmentName => 'StdAttachment-Test1' . $RandomID . '.txt',
+            Subject        => 'Ticket2Article3' . $RandomID,
+            CustomerUserID => 'customerOne@example.com',
         },
         ExpectedResultsArticleStorageDB => [],
         ExpectedResultsArticleStorageFS => [],
@@ -311,14 +310,14 @@ my @Tests = (
 
 for my $Test (@Tests) {
 
-    # Attachment name search must work for both ArticleStorageDB and ArticleStorageFS.
+    # attachment name is not considering for searches using ArticleSotrageFS
     for my $StorageBackend (qw(ArticleStorageDB ArticleStorageFS)) {
 
         # For the search it is enough to change the config, the TicketObject does not
-        #   have to be recreated to use the different base class.
+        # have to be recreated to use the different base class
         $ConfigObject->Set(
-            Key   => 'Ticket::Article::Backend::MIMEBase###ArticleStorage',
-            Value => "Kernel::System::Ticket::Article::Backend::MIMEBase::$StorageBackend",
+            Key   => 'Ticket::StorageModule',
+            Value => "Kernel::System::Ticket::$StorageBackend",
         );
 
         my @FoundTicketIDs = $TicketObject->TicketSearch(
@@ -330,7 +329,7 @@ for my $Test (@Tests) {
             ContentSearchPrefix => '*',
             ContentSearchSuffix => '*',
             FullTextIndex       => 1,
-            TicketID            => \@TicketIDs,
+            TicketID            => [@TicketIDs],
             %{ $Test->{Config} },
             Limit => 2,
         );
@@ -340,11 +339,11 @@ for my $Test (@Tests) {
         $Self->IsDeeply(
             \@FoundTicketIDs,
             $Test->{"ExpectedResults$StorageBackend"},
-            "$Test->{Name} $StorageBackend TicketSearch()"
+            "$Test->{Name} $StorageBackend TicketSearch() -"
         );
     }
 }
 
-# Cleanup is done by RestoreDatabase.
+# cleanup is done by RestoreDatabase.
 
 1;

@@ -11,8 +11,8 @@ package Kernel::Modules::AgentTicketService;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -405,7 +405,7 @@ sub Run {
                 %{ $Filters{$FilterColumn}->{Search} },
                 %ColumnFilter,
                 Result => 'COUNT',
-            ) || 0;
+            );
         }
 
         if ( $FilterColumn eq $Filter ) {
@@ -476,7 +476,7 @@ sub Run {
             Permission => $Permission,
             UserID     => $Self->{UserID},
             Result     => 'COUNT',
-        ) || 0;
+        );
     }
 
     # add the count for the custom services
@@ -500,7 +500,7 @@ sub Run {
             Permission => $Permission,
             UserID     => $Self->{UserID},
             Result     => 'COUNT',
-        ) || 0;
+        );
 
         next SERVICEID if !$Count;
 

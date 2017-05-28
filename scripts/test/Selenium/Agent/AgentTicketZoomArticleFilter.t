@@ -18,24 +18,33 @@ my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 $Selenium->RunTest(
     sub {
 
+        # get helper object
+        $Kernel::OM->ObjectParamAdd(
+            'Kernel::System::UnitTest::Helper' => {
+                RestoreSystemConfiguration => 1,
+            },
+        );
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
+        # get syconfig object
+        my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
+
         # enable article filter
-        $Helper->ConfigSettingChange(
+        $SysConfigObject->ConfigItemUpdate(
             Valid => 1,
             Key   => 'Ticket::Frontend::TicketArticleFilter',
             Value => 1,
         );
 
         # set ZoomExpandSort to reverse
-        $Helper->ConfigSettingChange(
+        $SysConfigObject->ConfigItemUpdate(
             Valid => 1,
             Key   => 'Ticket::Frontend::ZoomExpandSort',
             Value => 'reverse',
         );
 
         # set 3 max article per page
-        $Helper->ConfigSettingChange(
+        $SysConfigObject->ConfigItemUpdate(
             Valid => 1,
             Key   => 'Ticket::Frontend::MaxArticlesPerPage',
             Value => 3,
@@ -44,40 +53,34 @@ $Selenium->RunTest(
         # get test data
         my @Tests = (
             {
-                Backend              => 'Phone',
-                IsVisibleForCustomer => 1,
-                SenderType           => 'customer',
-                Subject              => 'First Test Article',
+                ArticleType => 'phone',
+                SenderType  => 'customer',
+                Subject     => 'First Test Article',
             },
             {
-                Backend              => 'Email',
-                IsVisibleForCustomer => 1,
-                SenderType           => 'system',
-                Subject              => 'Second Test Article',
+                ArticleType => 'email-external',
+                SenderType  => 'system',
+                Subject     => 'Second Test Article',
             },
             {
-                Backend              => 'Internal',
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                Subject              => 'Third Test Article',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                Subject     => 'Third Test Article',
             },
             {
-                Backend              => 'Phone',
-                IsVisibleForCustomer => 1,
-                SenderType           => 'customer',
-                Subject              => 'Fourth Test Article',
+                ArticleType => 'phone',
+                SenderType  => 'customer',
+                Subject     => 'Fourth Test Article',
             },
             {
-                Backend              => 'Email',
-                IsVisibleForCustomer => 1,
-                SenderType           => 'system',
-                Subject              => 'Fifth Test Article',
+                ArticleType => 'email-external',
+                SenderType  => 'system',
+                Subject     => 'Fifth Test Article',
             },
             {
-                Backend              => 'Internal',
-                IsVisibleForCustomer => 0,
-                SenderType           => 'agent',
-                Subject              => 'Sixth Test Article',
+                ArticleType => 'note-internal',
+                SenderType  => 'agent',
+                Subject     => 'Sixth Test Article',
             }
         );
 
@@ -97,8 +100,8 @@ $Selenium->RunTest(
             UserLogin => $TestUserLogin,
         );
 
-        my $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+        # get ticket object
+        my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         # create test ticket
         my $TicketID = $TicketObject->TicketCreate(
@@ -118,19 +121,18 @@ $Selenium->RunTest(
 
         # create test articles
         for my $Test (@Tests) {
-            my $ArticleID
-                = $Kernel::OM->Get("Kernel::System::Ticket::Article::Backend::$Test->{Backend}")->ArticleCreate(
-                TicketID             => $TicketID,
-                IsVisibleForCustomer => $Test->{IsVisibleForCustomer},
-                SenderType           => $Test->{SenderType},
-                Subject              => $Test->{Subject},
-                Body                 => 'Selenium body article',
-                Charset              => 'ISO-8859-15',
-                MimeType             => 'text/plain',
-                HistoryType          => 'AddNote',
-                HistoryComment       => 'Some free text!',
-                UserID               => $TestUserID,
-                );
+            my $ArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $TicketID,
+                ArticleType    => $Test->{ArticleType},
+                SenderType     => $Test->{SenderType},
+                Subject        => $Test->{Subject},
+                Body           => 'Selenium body article',
+                Charset        => 'ISO-8859-15',
+                MimeType       => 'text/plain',
+                HistoryType    => 'AddNote',
+                HistoryComment => 'Some free text!',
+                UserID         => $TestUserID,
+            );
             $Self->True(
                 $ArticleID,
                 "Article $Test->{Subject} - created",
@@ -186,20 +188,20 @@ $Selenium->RunTest(
         # click on article filter, open popup dialog
         $Selenium->find_element( "#SetArticleFilter", 'css' )->click();
 
-        my %CommunicationChannel = $Kernel::OM->Get('Kernel::System::CommunicationChannel')->ChannelGet(
-            ChannelName => 'Phone',
+        # get phone ArticleTypeID
+        my $PhoneArticleTypeID = $TicketObject->ArticleTypeLookup(
+            ArticleType => 'phone',
         );
 
         # get customer ArticleSenderTypeID
-        my $CustomerSenderTypeID = $ArticleObject->ArticleSenderTypeLookup(
+        my $CustomerSenderTypeID = $TicketObject->ArticleSenderTypeLookup(
             SenderType => 'customer',
         );
 
-        # select phone backend and customer as article sender type for article filter
+        # select phone as article type and customer as article sender type for article filter
         $Selenium->execute_script(
-            "\$('#CommunicationChannelFilter').val('$CommunicationChannel{ChannelID}').trigger('redraw.InputField').trigger('change');"
+            "\$('#ArticleTypeFilter').val('$PhoneArticleTypeID').trigger('redraw.InputField').trigger('change');"
         );
-
         $Selenium->execute_script(
             "\$('#ArticleSenderTypeFilter').val('$CustomerSenderTypeID').trigger('redraw.InputField').trigger('change');"
         );
@@ -221,7 +223,6 @@ $Selenium->RunTest(
         # verify we now only have first and fourth article on screen and there numeration is intact
         my @ArticlesFilterOn = ( 'Article #1 – First Test Article', 'Article #4 – Fourth Test Article' );
         for my $ArticleFilterOn (@ArticlesFilterOn) {
-
             $Self->True(
                 index( $Selenium->get_page_source(), $ArticleFilterOn ) > -1,
                 "ZoomExpandSort: reverse - $ArticleFilterOn found on page with original numeration - article filter on",

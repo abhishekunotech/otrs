@@ -19,12 +19,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::System::Ticket::TicketACL - ticket ACL lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All ticket ACL functions.
 
+=over 4
 
-=head2 TicketAcl()
+=cut
+
+=item TicketAcl()
 
 Restricts the Data parameter sent to a subset of it, depending on a group of user defied rules
 called ACLs. The reduced subset can be access from TicketACLData() if ReturnType parameter is set
@@ -917,7 +920,7 @@ sub TicketAcl {
     return 1;
 }
 
-=head2 TicketAclData()
+=item TicketAclData()
 
 return the current ACL data hash after TicketAcl()
 
@@ -931,7 +934,7 @@ sub TicketAclData {
     return %{ $Self->{TicketAclData} || {} };
 }
 
-=head2 TicketAclActionData()
+=item TicketAclActionData()
 
 return the current ACL action data hash after TicketAcl()
 
@@ -952,7 +955,7 @@ sub TicketAclActionData {
 
 =cut
 
-=head2 _GetChecks()
+=item _GetChecks()
 
 creates two check hashes (one for current data updatable via AJAX refreshes and another for
 static ticket data stored in the DB) with the required data to use as a basis to match the ACLs
@@ -1162,8 +1165,7 @@ sub _GetChecks {
 
         # compare if data is different and skip on same data
         if (
-            $Checks{DynamicField}->{$TicketAttribute}
-            && !DataIsDifferent(
+            !DataIsDifferent(
                 Data1 => $Checks{Ticket}->{$TicketAttribute},
                 Data2 => $Checks{DynamicField}->{$TicketAttribute},
             )
@@ -2042,7 +2044,7 @@ sub _GetChecks {
     };
 }
 
-=head2 _CompareMatchWithData()
+=item _CompareMatchWithData()
 
 Compares a properties element with the data sent to the ACL, the compare results varies on how the
 ACL properties where defined including normal, negated, regular expression and negated regular
@@ -2187,6 +2189,8 @@ sub _CompareMatchWithData {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

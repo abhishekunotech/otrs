@@ -24,9 +24,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Transport::SOAP - GenericInterface network transport interface for HTTP::SOAP
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Transport->new();
@@ -52,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 ProviderProcessRequest()
+=item ProviderProcessRequest()
 
 Process an incoming web service request. This function has to read the request data
 from from the web server process.
@@ -188,16 +194,6 @@ sub ProviderProcessRequest {
     # if no chunked transfer encoding was used, read request directly
     if ( !$Chunked ) {
         read STDIN, $Content, $Length;
-
-        # If there is no STDIN data it might be caused by fastcgi already having read the request.
-        # In this case we need to get the data from CGI.
-        my $RequestMethod = $ENV{'REQUEST_METHOD'} || 'GET';
-        if ( !IsStringWithData($Content) && $RequestMethod ne 'GET' ) {
-            my $ParamName = $RequestMethod . 'DATA';
-            $Content = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam(
-                Param => $ParamName,
-            );
-        }
     }
 
     # check if we have content
@@ -294,7 +290,7 @@ sub ProviderProcessRequest {
     };
 }
 
-=head2 ProviderGenerateResponse()
+=item ProviderGenerateResponse()
 
 Generates response for an incoming web service request.
 
@@ -430,7 +426,7 @@ sub ProviderGenerateResponse {
     );
 }
 
-=head2 RequesterPerformRequest()
+=item RequesterPerformRequest()
 
 Prepare data payload as XML structure, generate an outgoing web service request,
 receive the response and return its data.
@@ -787,7 +783,7 @@ sub RequesterPerformRequest {
 
 =begin Internal:
 
-=head2 _Error()
+=item _Error()
 
 Take error parameters from request processing.
 Error message is written to debugger, written to environment for response.
@@ -834,7 +830,7 @@ sub _Error {
     };
 }
 
-=head2 _Output()
+=item _Output()
 
 Generate http response for provider and send it back to remote system.
 Environment variables are checked for potential error messages.
@@ -915,16 +911,6 @@ sub _Output {
     my $ConfigKeepAlive = $Kernel::OM->Get('Kernel::Config')->Get('SOAP::Keep-Alive');
     my $Connection = $ConfigKeepAlive ? 'Keep-Alive' : 'close';
 
-    # prepare additional headers
-    my $AdditionalHeaderStrg = '';
-    if ( IsHashRefWithData( $Self->{TransportConfig}->{Config}->{AdditionalHeaders} ) ) {
-        my %AdditionalHeaders = %{ $Self->{TransportConfig}->{Config}->{AdditionalHeaders} };
-        for my $AdditionalHeader ( sort keys %AdditionalHeaders ) {
-            $AdditionalHeaderStrg
-                .= $AdditionalHeader . ': ' . ( $AdditionalHeaders{$AdditionalHeader} || '' ) . "\r\n";
-        }
-    }
-
     # in the constructor of this module STDIN and STDOUT are set to binmode without any additional
     # layer (according to the documentation this is the same as set :raw). Previous solutions for
     # binary responses requires the set of :raw or :utf8 according to IO layers.
@@ -943,7 +929,6 @@ sub _Output {
     print STDOUT "Content-Type: $ContentType; charset=UTF-8\r\n";
     print STDOUT "Content-Length: $ContentLength\r\n";
     print STDOUT "Connection: $Connection\r\n";
-    print STDOUT $AdditionalHeaderStrg;
     print STDOUT "\r\n";
     print STDOUT $Param{Content};
 
@@ -953,7 +938,7 @@ sub _Output {
     };
 }
 
-=head2 _SOAPOutputRecursion()
+=item _SOAPOutputRecursion()
 
 Turn Perl data structure to a structure usable for SOAP::Lite.
 The structure may contain multiple levels with scalars, array refs and hash refs.
@@ -1208,7 +1193,7 @@ sub _SOAPOutputRecursion {
     };
 }
 
-=head2 _SOAPOutputHashRecursion()
+=item _SOAPOutputHashRecursion()
 
 This is a part of _SOAPOutputRecursion.
 It contains the functions to process a hash key/value pair.
@@ -1268,7 +1253,7 @@ sub _SOAPOutputHashRecursion {
     };
 }
 
-=head2 _SOAPOutputProcessString()
+=item _SOAPOutputProcessString()
 
 This is a part of _SOAPOutputRecursion.
 It contains functions to quote invalid XML characters and encode the string
@@ -1286,13 +1271,9 @@ sub _SOAPOutputProcessString {
 
     return '' if !defined $Param{Data};
 
-    # Escape characters that are invalid in XML (or might cause problems).
+    # escape characters that are invalid in XML
     $Param{Data} =~ s{ & }{&amp;}xmsg;
     $Param{Data} =~ s{ < }{&lt;}xmsg;
-    $Param{Data} =~ s{ > }{&gt;}xmsg;
-
-    # Remove restricted characters #x1-#x8, #xB-#xC, #xE-#x1F, #x7F-#x84 and #x86-#x9F.
-    $Param{Data} =~ s{ [\x01-\x08|\x0B-\x0C|\x0E-\x1F|\x7F-\x84|\x86-\x9F] }{}msxg;
 
     return $Param{Data};
 }
@@ -1300,6 +1281,8 @@ sub _SOAPOutputProcessString {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

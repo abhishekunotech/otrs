@@ -23,7 +23,7 @@ Core.UI.Floater = (function (TargetNS) {
     /**
      * @private
      * @name InitFloaters
-     * @memberof Core.UI
+     * @memberof Core.Agent
      * @function
      * @description
      *      This function initializes iframe floaters on links with certain trigger attributes. To provide
@@ -38,7 +38,7 @@ Core.UI.Floater = (function (TargetNS) {
         /**
          * @private
          * @name CreateFloaterOpenTimeout
-         * @memberof Core.UI.Floater.Init
+         * @memberof Core.Agent.InitFloaters
          * @function
          * @param {jQueryObject} $Element
          * @param {Function} TimeoutFunction
@@ -52,7 +52,7 @@ Core.UI.Floater = (function (TargetNS) {
         /**
          * @private
          * @name ClearFloaterOpenTimeout
-         * @memberof Core.UI.Floater.Init
+         * @memberof Core.Agent.InitFloaters
          * @function
          * @param {jQueryObject} $Element
          * @description
@@ -67,7 +67,7 @@ Core.UI.Floater = (function (TargetNS) {
         /**
          * @private
          * @name CreateFloaterOpenTimeout
-         * @memberof Core.UI.Floater.Init
+         * @memberof Core.Agent.InitFloaters
          * @function
          * @param {jQueryObject} $Element
          * @param {Function} TimeoutFunction
@@ -81,7 +81,7 @@ Core.UI.Floater = (function (TargetNS) {
         /**
          * @private
          * @name ClearFloaterCloseTimeout
-         * @memberof Core.UI.Floater.Init
+         * @memberof Core.Agent.InitFloaters
          * @function
          * @param {jQueryObject} $Element
          * @description
@@ -96,7 +96,7 @@ Core.UI.Floater = (function (TargetNS) {
         /**
          * @private
          * @name RemoveActiveFloater
-         * @memberof Core.UI.Floater.Init
+         * @memberof Core.Agent.RemoveActiveFloater
          * @function
          * @param {jQueryObject} $FloaterObj
          * @description
@@ -170,8 +170,7 @@ Core.UI.Floater = (function (TargetNS) {
                     FloaterWidth,
                     $FloaterObj,
                     Margin = 25,
-                    iFrameURL = $TriggerObj.data('floater-url'),
-                    FloaterTemplate = Core.Template.Render('MetaFloater');
+                    iFrameURL = $TriggerObj.data('floater-url');
 
                 if (!iFrameURL) {
                     return false;
@@ -185,19 +184,19 @@ Core.UI.Floater = (function (TargetNS) {
                 $('[data-trigger="floater"]').removeClass('FloaterOpen');
                 $TriggerObj.addClass('FloaterOpen');
 
-                $FloaterObj = $(FloaterTemplate);
+                $FloaterObj = $('#AppWrapper > .MetaFloater.Hidden').clone();
 
                 // only one floater at the same time, so close other ones
                 $('body > div.MetaFloater:visible').remove();
 
                 // show floater to be able to calculate its width
-                $FloaterObj.appendTo('body').css('display', 'none');
+                $FloaterObj.removeClass('Hidden').appendTo('body').css('display', 'none');
 
                 // calculate floater dimensions
                 FloaterWidth = parseInt($FloaterObj.outerWidth(), 10);
 
                 // set left position
-                if (TriggerOffset.left - ViewportWidth / 50 < FloaterWidth / 2) {
+                if (TriggerOffset.left < FloaterWidth / 2) {
 
                     // case 1: trigger element on far left side without enough space to show the floater
                     $FloaterObj.addClass('Left').css({
@@ -205,7 +204,7 @@ Core.UI.Floater = (function (TargetNS) {
                         left: TriggerOffset.left
                     });
                 }
-                else if (ViewportWidth - TriggerOffset.left + ($TriggerObj.outerWidth() / 2) - ViewportWidth / 50 < FloaterWidth / 2) {
+                else if (ViewportWidth - TriggerOffset.left + ($TriggerObj.outerWidth() / 2) < FloaterWidth / 2) {
 
                     // case 2: trigger element on far right side
                     $FloaterObj.addClass('Right').css({
@@ -258,8 +257,6 @@ Core.UI.Floater = (function (TargetNS) {
             });
         });
     }
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_GLOBAL');
 
     return TargetNS;
 }(Core.UI.Floater || {}));

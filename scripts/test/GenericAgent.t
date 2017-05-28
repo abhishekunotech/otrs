@@ -119,16 +119,16 @@ my $TicketID = $TicketObject->TicketCreate(
     UserID       => 1,
 );
 
-my $ArticleID = $Kernel::OM->Get('Kernel::System::Ticket::Article::Backend::Internal')->ArticleCreate(
-    TicketID             => $TicketID,
-    IsVisibleForCustomer => 0,
-    SenderType           => 'agent',
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'some short description',
-    Body                 => 'the message text Perl modules provide a range of
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID,
+    ArticleType => 'note-internal',
+    SenderType  => 'agent',
+    From        => 'Agent Some Agent Some Agent <email@example.com>',
+    To          => 'Customer A <customer-a@example.com>',
+    Cc          => 'Customer B <customer-b@example.com>',
+    ReplyTo     => 'Customer B <customer-b@example.com>',
+    Subject     => 'some short description',
+    Body        => 'the message text Perl modules provide a range of
 ',
 
     #    MessageID => '<asdasdasd.123@example.com>',
@@ -159,11 +159,11 @@ my %NewJob = (
     Name => $Name,
     Data => {
         TicketNumber                 => $Ticket{TicketNumber},
-        MIMEBase_From                => '',
-        MIMEBase_Body                => '',
-        MIMEBase_To                  => '',
-        MIMEBase_Cc                  => '',
-        MIMEBase_Subject             => '',
+        From                         => '',
+        Body                         => '',
+        To                           => '',
+        Cc                           => '',
+        Subject                      => '',
         CustomerID                   => '',
         CustomerUserLogin            => 'customerUnitTest@example.com',
         TimeSearchType               => 'TimePoint',
@@ -179,6 +179,7 @@ my %NewJob = (
         NewTitle                     => 'some new title',
         NewStateID                   => 2,
         NewPriorityID                => 3,
+        NewNoteBody                  => '',
         NewCustomerUserLogin         => '',
         NewOwnerID                   => 1,
         NewModule                    => '',
@@ -187,11 +188,9 @@ my %NewJob = (
         NewSendNoNotification        => 0,
         NewDelete                    => 0,
         NewCustomerID                => '',
-        NewNoteFrom                  => 'From',
-        NewNoteBody                  => 'Body',
-        NewNoteSubject               => 'Subject',
-        NewNoteIsVisibleForCustomer  => '1',
+        NewNoteSubject               => '',
         NewLockID                    => 2,
+        NewNoteFrom                  => '',
         DynamicField_TicketFreeKey2  => 'Test',
         DynamicField_TicketFreeText2 => 'Value 2',
         NewCMD                       => '',
@@ -275,12 +274,12 @@ $Self->Is(
     "JobGet() - DynamicField_TicketFreeText2",
 );
 $Self->True(
-    !$GetParam{MIMEBase_From},
-    "JobGet() - MIMEBase_From",
+    !$GetParam{From},
+    "JobGet() - From",
 );
 $Self->True(
-    !$GetParam{MIMEBase_Body} || '',
-    "JobGet() - MIMEBase_Body",
+    !$GetParam{Body} || '',
+    "JobGet() - Body",
 );
 $Self->True(
     !$GetParam{ScheduleLastRun} || '',
@@ -380,41 +379,6 @@ $Self->Is(
     "TicketGet() - DynamicField_TicketFreeText2",
 );
 
-my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my @MetaArticles  = $ArticleObject->ArticleList(
-    TicketID => $TicketID,
-    OnlyLast => 1,
-    UserID   => 1,
-);
-
-my %NoteArticle = $ArticleObject->BackendForArticle( %{ $MetaArticles[0] } )->ArticleGet(
-    %{ $MetaArticles[0] },
-    UserID => 1,
-);
-
-$Self->Is(
-    $NoteArticle{From},
-    'From',
-    'Notification article From found',
-);
-
-$Self->True(
-    scalar $NoteArticle{Subject} =~ m{Subject},
-    'Notification article Subject found',
-);
-
-$Self->Is(
-    $NoteArticle{Body},
-    'Body',
-    'Notification article Body found',
-);
-
-$Self->Is(
-    $NoteArticle{IsVisibleForCustomer},
-    1,
-    'Notification article IsVisibleForCustomer found',
-);
-
 $Self->True(
     $TicketObject->TicketDelete(
         TicketID => $TicketID,
@@ -461,12 +425,12 @@ $Self->Is(
     "JobGet() - DynamicField_TicketFreeText2",
 );
 $Self->True(
-    !$GetParam{MIMEBase_From},
-    "JobGet() - MIMEBase_From",
+    !$GetParam{From},
+    "JobGet() - From",
 );
 $Self->True(
-    !$GetParam{MIMEBase_Body} || '',
-    "JobGet() - MIMEBase_Body",
+    !$GetParam{Body} || '',
+    "JobGet() - Body",
 );
 $Self->True(
     $GetParam{ScheduleLastRun} || '',
@@ -488,10 +452,10 @@ $Self->True(
 );
 
 # add
-$GetParam{MIMEBase_From} = 'Some From';
-$GetParam{MIMEBase_Body} = 'Some Body';
-$GetParam{Title}         = 'some new new title';
-$JobAdd                  = $GenericAgentObject->JobAdd(
+$GetParam{From}  = 'Some From';
+$GetParam{Body}  = 'Some Body';
+$GetParam{Title} = 'some new new title';
+$JobAdd          = $GenericAgentObject->JobAdd(
     Name   => $Name,
     Data   => \%GetParam,
     UserID => 1,
@@ -539,14 +503,14 @@ $Self->Is(
     "JobGet() - DynamicField_TicketFreeText2",
 );
 $Self->Is(
-    $GetParam{MIMEBase_From} || '',
+    $GetParam{From} || '',
     'Some From',
-    "JobGet() - MIMEBase_From",
+    "JobGet() - From",
 );
 $Self->Is(
-    $GetParam{MIMEBase_Body} || '',
+    $GetParam{Body} || '',
     'Some Body',
-    "JobGet() - MIMEBase_Body",
+    "JobGet() - Body",
 );
 $Self->True(
     $GetParam{ScheduleLastRun} || '',

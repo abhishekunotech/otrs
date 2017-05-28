@@ -19,9 +19,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Operation::Session::Common - Base class for Session Operations
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 CreateSessionID()
+=over 4
+
+=cut
+
+=item CreateSessionID()
 
 performs user authentication and return a new SessionID value
 
@@ -86,6 +92,36 @@ sub CreateSessionID {
     # login is invalid
     return if !$User;
 
+    my $GroupObjectName = $UserType eq 'User' ? 'Kernel::System::Group' : 'Kernel::System::CustomerGroup';
+
+    # get groups rw/ro
+    for my $Type (qw(rw ro)) {
+
+        my %GroupData;
+        if ( $GroupObjectName eq 'Kernel::System::Group' ) {
+            %GroupData = $Kernel::OM->Get('Kernel::System::Group')->PermissionUserGet(
+                UserID => $UserData{UserID},
+                Type   => $Type,
+            );
+        }
+        else {
+            %GroupData = $Kernel::OM->Get('Kernel::System::CustomerGroup')->GroupMemberList(
+                UserID => $UserData{UserID},
+                Type   => $Type,
+                Result => 'HASH',
+            );
+        }
+
+        for ( sort keys %GroupData ) {
+            if ( $Type eq 'rw' ) {
+                $UserData{"UserIsGroup[$GroupData{$_}]"} = 'Yes';
+            }
+            else {
+                $UserData{"UserIsGroupRo[$GroupData{$_}]"} = 'Yes';
+            }
+        }
+    }
+
     # create new session id
     my $NewSessionID = $Kernel::OM->Get('Kernel::System::AuthSession')->CreateSessionID(
         %UserData,
@@ -99,6 +135,8 @@ sub CreateSessionID {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

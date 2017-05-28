@@ -26,7 +26,6 @@
                     <Description Translatable="1">Configure Processes.</Description>
                     <Block>System</Block>
                     <Prio>750</Prio>
-                    <IconBig>fa-sitemap</IconBig>
                 </NavBarModule>
             </FrontendModuleReg>
         </Setting>
@@ -153,15 +152,13 @@
                 <Loader>
                     <CSS>Core.Agent.TicketProcess.css</CSS>
                     <JavaScript>Core.Agent.CustomerSearch.js</JavaScript>
-                    <JavaScript>Core.Agent.CustomerSearchAutoComplete.js</JavaScript>
                     <JavaScript>Core.Agent.TicketAction.js</JavaScript>
                     <JavaScript>Core.Agent.TicketProcess.js</JavaScript>
-                    <JavaScript>Core.TicketProcess.js</JavaScript>
                 </Loader>
             </FrontendModuleReg>
         </Setting>
     </ConfigItem>
-    <ConfigItem Name="Ticket::EventModulePost###9800-TicketProcessTransitions" Required="0" Valid="1">
+    <ConfigItem Name="Ticket::EventModulePost###998-TicketProcessTransitions" Required="0" Valid="1">
         <Description Translatable="1">Event module registration. For more performance you can define a trigger event (e. g. Event =&gt; TicketCreate).</Description>
         <Group>ProcessManagement</Group>
         <SubGroup>Core::Ticket</SubGroup>
@@ -292,9 +289,6 @@
                 </NavBar>
                 <Loader>
                     <CSS>Core.Customer.TicketProcess.css</CSS>
-                    <JavaScript>Core.TicketProcess.js</JavaScript>
-                    <JavaScript>Core.Customer.TicketProcess.js</JavaScript>
-                    <JavaScript>Core.TicketProcess.js</JavaScript>
                 </Loader>
             </FrontendModuleReg>
         </Setting>

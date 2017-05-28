@@ -34,7 +34,7 @@ Exporter::export_ok_tags('all');
 
 Kernel::System::VariableCheck - helper functions to check variables
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Provides several helper functions to check variables, e.g.
 if a variable is a string, a hash ref etc. This is helpful for
@@ -91,7 +91,11 @@ The functions can be grouped as follows:
 
 =head1 PUBLIC INTERFACE
 
-=head2 IsString()
+=over 4
+
+=cut
+
+=item IsString()
 
 test supplied data to determine if it is a string - an empty string is valid
 
@@ -113,7 +117,7 @@ sub IsString {
     return 1;
 }
 
-=head2 IsStringWithData()
+=item IsStringWithData()
 
 test supplied data to determine if it is a non zero-length string
 
@@ -134,7 +138,7 @@ sub IsStringWithData {
     return 1;
 }
 
-=head2 IsArrayRefWithData()
+=item IsArrayRefWithData()
 
 test supplied data to determine if it is an array reference and contains at least one key
 
@@ -159,7 +163,7 @@ sub IsArrayRefWithData {
     return 1;
 }
 
-=head2 IsHashRefWithData()
+=item IsHashRefWithData()
 
 test supplied data to determine if it is a hash reference and contains at least one key/value pair
 
@@ -184,7 +188,7 @@ sub IsHashRefWithData {
     return 1;
 }
 
-=head2 IsNumber()
+=item IsNumber()
 
 test supplied data to determine if it is a number
 (integer, floating point, possible exponent, positive or negative)
@@ -208,7 +212,7 @@ sub IsNumber {
     return 1;
 }
 
-=head2 IsInteger()
+=item IsInteger()
 
 test supplied data to determine if it is an integer (only digits, positive or negative)
 
@@ -229,7 +233,7 @@ sub IsInteger {
     return 1;
 }
 
-=head2 IsPositiveInteger()
+=item IsPositiveInteger()
 
 test supplied data to determine if it is a positive integer (only digits and positive)
 
@@ -250,7 +254,7 @@ sub IsPositiveInteger {
     return 1;
 }
 
-=head2 IsIPv4Address()
+=item IsIPv4Address()
 
 test supplied data to determine if it is a valid IPv4 address (syntax check only)
 
@@ -282,7 +286,7 @@ sub IsIPv4Address {
     return 1;
 }
 
-=head2 IsIPv6Address()
+=item IsIPv6Address()
 
 test supplied data to determine if it is a valid IPv6 address (syntax check only)
 shorthand notation and mixed IPv6/IPv4 notation allowed
@@ -366,7 +370,7 @@ sub IsIPv6Address {
     return 1;
 }
 
-=head2 IsMD5Sum()
+=item IsMD5Sum()
 
 test supplied data to determine if it is an C<MD5> sum (32 hex characters)
 
@@ -387,7 +391,7 @@ sub IsMD5Sum {
     return 1;
 }
 
-=head2 DataIsDifferent()
+=item DataIsDifferent()
 
 compares two data structures with each other. Returns 1 if
 they are different, undef otherwise.
@@ -395,7 +399,7 @@ they are different, undef otherwise.
 Data parameters need to be passed by reference and can be SCALAR,
 ARRAY or HASH.
 
-    my $DataIsDifferent = DataIsDifferent(
+    my $DataIsDifferent = DataDiff(
         Data1 => \$Data1,
         Data2 => \$Data2,
     );
@@ -529,6 +533,8 @@ sub DataIsDifferent {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

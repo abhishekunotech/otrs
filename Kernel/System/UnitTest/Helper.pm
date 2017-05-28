@@ -8,17 +8,12 @@
 
 package Kernel::System::UnitTest::Helper;
 ## nofilter(TidyAll::Plugin::OTRS::Perl::Time)
-## nofilter(TidyAll::Plugin::OTRS::Migrations::OTRS6::DateTime)
 
 use strict;
 use warnings;
 
 use File::Path qw(rmtree);
 
-# Load DateTime so that we can override functions for the FixedTimeSet().
-use DateTime;
-
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::System::SysConfig;
 
 our @ObjectDependencies = (
@@ -27,25 +22,28 @@ our @ObjectDependencies = (
     'Kernel::System::Cache',
     'Kernel::System::CustomerUser',
     'Kernel::System::Group',
-    'Kernel::System::Log',
     'Kernel::System::Main',
     'Kernel::System::UnitTest',
     'Kernel::System::User',
-    'Kernel::System::XML',
 );
 
 =head1 NAME
 
 Kernel::System::UnitTest::Helper - unit test helper functions
 
+=over 4
 
-=head2 new()
+=cut
+
+=item new()
 
 construct a helper object.
 
     use Kernel::System::ObjectManager;
     local $Kernel::OM = Kernel::System::ObjectManager->new(
         'Kernel::System::UnitTest::Helper' => {
+            RestoreSystemConfiguration => 1,        # optional, save ZZZAuto.pm
+                                                    # and restore it in the destructor
             RestoreDatabase            => 1,        # runs the test in a transaction,
                                                     # and roll it back in the destructor
                                                     #
@@ -70,6 +68,15 @@ sub new {
     $Self->{Debug} = $Param{Debug} || 0;
 
     $Self->{UnitTestObject} = $Kernel::OM->Get('Kernel::System::UnitTest');
+
+    # make backup of system configuration if needed
+    if ( $Param{RestoreSystemConfiguration} ) {
+        $Self->{SysConfigObject} = Kernel::System::SysConfig->new();
+
+        $Self->{SysConfigBackup} = $Self->{SysConfigObject}->Download();
+
+        $Self->{UnitTestObject}->True( 1, 'Creating backup of the system configuration.' );
+    }
 
     # Remove any leftover custom files from aborted previous runs.
     $Self->CustomFileCleanup();
@@ -102,7 +109,7 @@ sub new {
     return $Self;
 }
 
-=head2 GetRandomID()
+=item GetRandomID()
 
 creates a random ID that can be used in tests as a unique identifier.
 
@@ -119,7 +126,7 @@ sub GetRandomID {
     return 'test' . $Self->GetRandomNumber();
 }
 
-=head2 GetRandomNumber()
+=item GetRandomNumber()
 
 creates a random Number that can be used in tests as a unique identifier.
 
@@ -141,10 +148,10 @@ sub GetRandomNumber {
 
     my $Prefix = $PID . substr time(), -5, 5;
 
-    return $Prefix . sprintf( '%.05d', ( $GetRandomNumberPrevious{$Prefix}++ || 0 ) );
+    return $Prefix . $GetRandomNumberPrevious{$Prefix}++ || 0;
 }
 
-=head2 TestUserCreate()
+=item TestUserCreate()
 
 creates a test user that can be used in tests. It will
 be set to invalid automatically during the destructor. Returns
@@ -234,7 +241,7 @@ sub TestUserCreate {
     return $TestUserLogin;
 }
 
-=head2 TestCustomerUserCreate()
+=item TestCustomerUserCreate()
 
 creates a test customer user that can be used in tests. It will
 be set to invalid automatically during the destructor. Returns
@@ -296,7 +303,7 @@ sub TestCustomerUserCreate {
     return $TestUser;
 }
 
-=head2 BeginWork()
+=item BeginWork()
 
     $Helper->BeginWork()
 
@@ -311,7 +318,7 @@ sub BeginWork {
     return $DBObject->{dbh}->begin_work();
 }
 
-=head2 Rollback()
+=item Rollback()
 
     $Helper->Rollback()
 
@@ -330,7 +337,7 @@ sub Rollback {
     return 1;
 }
 
-=head2 GetTestHTTPHostname()
+=item GetTestHTTPHostname()
 
 returns a hostname for HTTP based tests, possibly including the port.
 
@@ -364,35 +371,24 @@ sub GetTestHTTPHostname {
 
 my $FixedTime;
 
-=head2 FixedTimeSet()
+=item FixedTimeSet()
 
 makes it possible to override the system time as long as this object lives.
 You can pass an optional time parameter that should be used, if not,
 the current system time will be used.
 
-All calls to methods of Kernel::System::Time and Kernel::System::DateTime will
-use the given time afterwards.
-
-    $HelperObject->FixedTimeSet(366475757);         # with Timestamp
-    $HelperObject->FixedTimeSet($DateTimeObject);   # with previously created DateTime object
-    $HelperObject->FixedTimeSet();                  # set to current date and time
-
-Returns:
-    Timestamp
+All regular perl calls to time(), localtime() and gmtime() will use this
+fixed time afterwards. If this object goes out of scope, the 'normal' system
+time will be used again.
 
 =cut
 
 sub FixedTimeSet {
     my ( $Self, $TimeToSave ) = @_;
 
-    if ( $TimeToSave && ref $TimeToSave eq 'Kernel::System::DateTime' ) {
-        $FixedTime = $TimeToSave->ToEpoch();
-    }
-    else {
-        $FixedTime = $TimeToSave // CORE::time()
-    }
+    $FixedTime = $TimeToSave // CORE::time();
 
-    # This is needed to reload objects that directly use the native time functions
+    # This is needed to reload objects that directly use the time functions
     #   to get a hold of the overrides.
     my @Objects = (
         'Kernel::System::Time',
@@ -414,7 +410,7 @@ sub FixedTimeSet {
     return $FixedTime;
 }
 
-=head2 FixedTimeUnset()
+=item FixedTimeUnset()
 
 restores the regular system time behaviour.
 
@@ -424,10 +420,11 @@ sub FixedTimeUnset {
     my ($Self) = @_;
 
     undef $FixedTime;
+
     return;
 }
 
-=head2 FixedTimeAddSeconds()
+=item FixedTimeAddSeconds()
 
 adds a number of seconds to the fixed system time which was previously
 set by FixedTimeSet(). You can pass a negative value to go back in time.
@@ -437,14 +434,13 @@ set by FixedTimeSet(). You can pass a negative value to go back in time.
 sub FixedTimeAddSeconds {
     my ( $Self, $SecondsToAdd ) = @_;
 
-    return if !defined $FixedTime;
+    return if ( !defined $FixedTime );
     $FixedTime += $SecondsToAdd;
     return;
 }
 
 # See http://perldoc.perl.org/5.10.0/perlsub.html#Overriding-Built-in-Functions
 BEGIN {
-    no warnings 'redefine';
     *CORE::GLOBAL::time = sub {
         return defined $FixedTime ? $FixedTime : CORE::time();
     };
@@ -462,20 +458,6 @@ BEGIN {
         }
         return CORE::gmtime($Time);
     };
-
-    # Newer versions of DateTime provide a function _core_time() to override for time simulations.
-    *DateTime::_core_time = sub {    ## no critic
-        return defined $FixedTime ? $FixedTime : CORE::time();
-    };
-
-    # Make sure versions of DateTime also use _core_time() it by overriding now() as well.
-    *DateTime::now = sub {
-        my $Self = shift;
-        return $Self->from_epoch(
-            epoch => $Self->_core_time(),
-            @_
-        );
-    };
 }
 
 sub DESTROY {
@@ -484,10 +466,11 @@ sub DESTROY {
     # reset time freeze
     FixedTimeUnset();
 
-    # FixedDateTimeObjectUnset();
-
-    # Cleanup temporary database if it was set up.
-    $Self->TestDatabaseCleanup() if $Self->{ProvideTestDatabase};
+    # restore system configuration if needed
+    if ( $Self->{SysConfigBackup} ) {
+        $Self->{SysConfigObject}->Upload( Content => $Self->{SysConfigBackup} );
+        $Self->{UnitTestObject}->True( 1, 'Restored the system configuration' );
+    }
 
     # Remove any custom files.
     $Self->CustomFileCleanup();
@@ -577,7 +560,7 @@ sub DESTROY {
     }
 }
 
-=head2 ConfigSettingChange()
+=item ConfigSettingChange()
 
 temporarily change a configuration setting system wide to another value,
 both in the current ConfigObject and also in the system configuration on disk.
@@ -663,10 +646,10 @@ Please note that this will not work correctly in clustered environments.
 
     $Helper->CustomCodeActivate(
         Code => q^
-use Kernel::System::WebUserAgent;
 package Kernel::System::WebUserAgent;
 use strict;
 use warnings;
+use Kernel::System::WebUserAgent;
 {
     no warnings 'redefine';
     sub Request {
@@ -726,7 +709,7 @@ sub CustomFileCleanup {
     return 1;
 }
 
-=head2 UseTmpArticleDir()
+=item UseTmpArticleDir()
 
 switch the article storage directory to a temporary one to prevent collisions;
 
@@ -749,7 +732,7 @@ sub UseTmpArticleDir {
 
     $Self->ConfigSettingChange(
         Valid => 1,
-        Key   => 'Ticket::Article::Backend::MIMEBase###ArticleDataDir',
+        Key   => 'ArticleDir',
         Value => $TmpArticleDir,
     );
 
@@ -758,309 +741,9 @@ sub UseTmpArticleDir {
     return 1;
 }
 
-=head2 ProvideTestDatabase()
-
-Provide temporary database for the test. Please first define test database settings in C<Config.pm>, i.e:
-
-    $Self->{TestDatabase} = {
-        DatabaseDSN  => 'DBI:mysql:database=otrs_test;host=127.0.0.1;',
-        DatabaseUser => 'otrs_test',
-        DatabasePw   => 'otrs_test',
-    };
-
-The method call will override global database configuration for duration of the test, i.e. temporary database will
-receive all calls sent over system C<DBObject>.
-
-All database contents will be automatically dropped when the Helper object is destroyed.
-
-    $Helper->ProvideTestDatabase(
-        DatabaseXMLString => $XML,      # (optional) OTRS database XML schema to execute
-                                        # or
-        DatabaseXMLFiles => [           # (optional) List of XML files to load and execute
-            '/opt/otrs/scripts/database/otrs-schema.xml',
-            '/opt/otrs/scripts/database/otrs-initial_insert.xml',
-        ],
-    );
-
-This method returns 'undef' in case the test database is not configured. If it is configured, but the supplied XML cannot be read or executed, this method will C<die()> to interrupt the test with an error.
-
-=cut
-
-sub ProvideTestDatabase {
-    my ( $Self, %Param ) = @_;
-
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-
-    my $TestDatabase = $ConfigObject->Get('TestDatabase');
-    return if !$TestDatabase;
-
-    for (qw(DatabaseDSN DatabaseUser DatabasePw)) {
-        if ( !$TestDatabase->{$_} ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "Need $_ in TestDatabase!",
-            );
-            return;
-        }
-    }
-
-    my %EscapedSettings;
-    for my $Key (qw(DatabaseDSN DatabaseUser DatabasePw)) {
-
-        # Override database connection settings in memory.
-        $ConfigObject->Set(
-            Key   => "Test$Key",
-            Value => $TestDatabase->{$Key},
-        );
-
-        # Escape quotes in database settings.
-        $EscapedSettings{$Key} = $TestDatabase->{$Key};
-        $EscapedSettings{$Key} =~ s/'/\\'/g;
-    }
-
-    # Override database connection settings system wide.
-    my $Identifier  = 'TestDatabase';
-    my $PackageName = "ZZZZUnitTest$Identifier";
-    $Self->CustomCodeActivate(
-        Code => qq^
-# OTRS config file (automatically generated)
-# VERSION:1.1
-package Kernel::Config::Files::$PackageName;
-use strict;
-use warnings;
-no warnings 'redefine';
-use utf8;
-sub Load {
-    my (\$File, \$Self) = \@_;
-    \$Self->{TestDatabaseDSN}  = '$EscapedSettings{DatabaseDSN}';
-    \$Self->{TestDatabaseUser} = '$EscapedSettings{DatabaseUser}';
-    \$Self->{TestDatabasePw}   = '$EscapedSettings{DatabasePw}';
-}
-1;^,
-        Identifier => $Identifier,
-    );
-
-    # Discard already instanced database object.
-    $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::DB'] );
-
-    # Delete cache.
-    $Kernel::OM->Get('Kernel::System::Cache')->CleanUp();
-
-    $Self->{ProvideTestDatabase} = 1;
-
-    # Clear test database.
-    my $Success = $Self->TestDatabaseCleanup();
-    if ( !$Success ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => 'Error clearing temporary database!',
-        );
-        die 'Error clearing temporary database!';
-    }
-
-    # Load supplied XML files.
-    if ( IsArrayRefWithData( $Param{DatabaseXMLFiles} ) ) {
-        $Param{DatabaseXMLString} //= '';
-
-        my $Index = 0;
-        my $Count = scalar @{ $Param{DatabaseXMLFiles} };
-
-        XMLFILE:
-        for my $XMLFile ( @{ $Param{DatabaseXMLFiles} } ) {
-            next XMLFILE if !$XMLFile;
-
-            # Load XML contents.
-            my $XML = $Kernel::OM->Get('Kernel::System::Main')->FileRead(
-                Location => $XMLFile,
-            );
-            if ( !$XML ) {
-                $Kernel::OM->Get('Kernel::System::Log')->Log(
-                    Priority => 'error',
-                    Message  => "Could not load '$XMLFile'!",
-                );
-                die "Could not load '$XMLFile'!";
-            }
-
-            # Concatenate the file contents, but make sure to remove duplicated XML tags first.
-            #   - First file should get only end tag removed.
-            #   - Last file should get only start tags removed.
-            #   - Any other file should get both start and end tags removed.
-            $XML = ${$XML};
-            if ( $Index != 0 ) {
-                $XML =~ s/<\?xml .*? \?>//xm;
-                $XML =~ s/<database .*? >//xm;
-            }
-            if ( $Index != $Count - 1 ) {
-                $XML =~ s/<\/database .*? >//xm;
-            }
-            $Param{DatabaseXMLString} .= $XML;
-
-            $Index++;
-        }
-    }
-
-    # Execute supplied XML.
-    if ( $Param{DatabaseXMLString} ) {
-        my $Success = $Self->DatabaseXMLExecute( XML => $Param{DatabaseXMLString} );
-        if ( !$Success ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => 'Error executing supplied XML!',
-            );
-            die 'Error executing supplied XML!';
-        }
-    }
-
-    return 1;
-}
-
-=head2 TestDatabaseCleanup()
-
-Clears temporary database used in the test. Always call C<ProvideTestDatabase()> called first, in
-order to set it up.
-
-Please note that all database contents will be dropped, USE WITH CARE!
-
-    $Helper->TestDatabaseCleanup();
-
-=cut
-
-sub TestDatabaseCleanup {
-    my ( $Self, %Param ) = @_;
-
-    if ( !$Self->{ProvideTestDatabase} ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => 'Please call ProvideTestDatabase() first!',
-        );
-        return;
-    }
-
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
-    # Get a list of all tables in database.
-    my @Tables = $DBObject->ListTables();
-
-    if ( scalar @Tables ) {
-        my $TableList = join ', ', sort @Tables;
-        my $DBType = $DBObject->{'DB::Type'};
-
-        if ( $DBType eq 'mysql' ) {
-
-            # Turn off checking foreign key constraints temporarily.
-            $DBObject->Do( SQL => 'SET foreign_key_checks = 0' );
-
-            # Drop all found tables in the database in same statement.
-            $DBObject->Do( SQL => "DROP TABLE $TableList" );
-
-            # Turn back on checking foreign key constraints.
-            $DBObject->Do( SQL => 'SET foreign_key_checks = 1' );
-        }
-        elsif ( $DBType eq 'postgresql' ) {
-
-            # Drop all found tables in the database in same statement.
-            $DBObject->Do( SQL => "DROP TABLE $TableList" );
-        }
-        elsif ( $DBType eq 'oracle' ) {
-
-            # Drop each found table in the database in a separate statement.
-            for my $Table (@Tables) {
-                $DBObject->Do( SQL => "DROP TABLE $Table CASCADE CONSTRAINTS" );
-            }
-        }
-
-        # Check if all tables have been dropped.
-        @Tables = $DBObject->ListTables();
-        return if scalar @Tables;
-    }
-
-    return 1;
-}
-
-=head2 DatabaseXMLExecute()
-
-Execute supplied XML against current database. Content of supplied XML or XMLFilename parameter must be valid OTRS
-database XML schema.
-
-    $Helper->DatabaseXMLExecute(
-        XML => $XML,     # OTRS database XML schema to execute
-    );
-
-Alternatively, it can also load an XML file to execute:
-
-    $Helper->DatabaseXMLExecute(
-        XMLFile => '/path/to/file',  # OTRS database XML file to execute
-    );
-
-=cut
-
-sub DatabaseXMLExecute {
-    my ( $Self, %Param ) = @_;
-
-    if ( !$Param{XML} && !$Param{XMLFile} ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => 'Need XML or XMLFile!',
-        );
-        return;
-    }
-
-    my $XML = $Param{XML};
-
-    if ( !$XML ) {
-
-        $XML = $Kernel::OM->Get('Kernel::System::Main')->FileRead(
-            Location => $Param{XMLFile},
-        );
-        if ( !$XML ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "Could not load '$Param{XMLFile}'!",
-            );
-            die "Could not load '$Param{XMLFile}'!";
-        }
-        $XML = ${$XML};
-    }
-
-    my @XMLArray = $Kernel::OM->Get('Kernel::System::XML')->XMLParse( String => $XML );
-    if ( !@XMLArray ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => 'Could not parse XML!',
-        );
-        die 'Could not parse XML!';
-    }
-
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
-    my @SQLPre = $DBObject->SQLProcessor(
-        Database => \@XMLArray,
-    );
-    if ( !@SQLPre ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => 'Could not generate SQL!',
-        );
-        die 'Could not generate SQL!';
-    }
-
-    my @SQLPost = $DBObject->SQLProcessorPost();
-
-    for my $SQL ( @SQLPre, @SQLPost ) {
-        my $Success = $DBObject->Do( SQL => $SQL );
-        if ( !$Success ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => 'Database action failed: ' . $DBObject->Error(),
-            );
-            die 'Database action failed: ' . $DBObject->Error();
-        }
-    }
-
-    return 1;
-}
-
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

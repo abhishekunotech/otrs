@@ -6,6 +6,7 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
+[% InsertTemplate("AgentCustomerSearch.tt") %]
 <form action="[% Env("CGIHandle") %]" method="post" enctype="multipart/form-data" name="compose" id="ComposeTicket" class="Validate PreventMultipleSubmits">
     <input type="hidden" name="Action" value="[% Env("Action") %]"/>
     <input type="hidden" name="Subaction" value="SendEmail"/>
@@ -16,7 +17,6 @@
     <input type="hidden" name="FormID" value="[% Data.FormID | html %]"/>
     <input type="hidden" name="ResponseID" value="[% Data.ResponseID | html %]"/>
     <input type="hidden" name="ReplyArticleID" value="[% Data.ReplyArticleID | html %]"/>
-    <input type="hidden" name="IsVisibleForCustomerPresent" value="1"/>
     <div class="LayoutPopup ARIARoleMain">
         <div class="Header">
             <h1>[% Translate("Compose Answer for %s%s%s", Config('Ticket::Hook'), Config('Ticket::HookDivider'), Data.TicketNumber) | html %] &mdash; [% Data.Title | html %]</h1>
@@ -52,19 +52,13 @@
 
                         <div id="ToCustomerServerError" class="TooltipErrorMessage">
 [% RenderBlockStart("ToIsLocalAddressServerErrorMsg") %]
-                            <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.To) | html %]</p>
+                    <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.To) | html %]</p>
 [% RenderBlockEnd("ToIsLocalAddressServerErrorMsg") %]
 
 [% RenderBlockStart("ToServerErrorMsg") %]
                             <p>[% Translate("Please include at least one recipient") | html %]</p>
 [% RenderBlockEnd("ToServerErrorMsg") %]
                         </div>
-                    [% IF Data.OptionCustomerUserAddressBook %]
-                        <a href="#" data-recipient-field-label="[% Translate("To") | html %]" data-recipient-field="To" id="OptionCustomerUserAddressBookToCustomer" class="OptionCustomerUserAddressBook AdditionlFieldIcon" title="[% Translate("Select one or more recipients from the customer user address book.") | html %]">
-                            <span>[% Translate("Customer user address book") | html %]</span>
-                            <i class="fa fa-address-book-o"></i>
-                        </a>
-                    [% END %]
                     </div>
                     <div class="Clear"></div>
 
@@ -123,23 +117,35 @@
 [% RenderBlockEnd("MultipleCustomerCounter") %]
                     </div>
                     <div class="Clear"></div>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    $('.CustomerTicketRemove').bind('click', function () {
+        Core.Agent.CustomerSearch.RemoveCustomerTicket( $(this) );
+        return false;
+    });
+//]]></script>
+[% END %]
+
+[% RenderBlockStart("PreFilledTo") %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+[% RenderBlockStart("PreFilledToRow") %]
+    Core.Agent.CustomerSearch.AddTicketCustomer( 'ToCustomer', [% Data.Email | JSON %] );
+[% RenderBlockEnd("PreFilledToRow") %]
+//]]></script>
+[% END %]
+[% RenderBlockEnd("PreFilledTo") %]
 
                     <label for="CcCustomer">[% Translate("Cc") | html %]:</label>
                     <div class="Field">
                         <input id="CcCustomer" type="text" name="CcCustomer" value="" class="CustomerAutoComplete W75pc [% Data.CcIsLocalAddress | html %] [% Data.CcInvalid | html %]" autocomplete="off" />
 
-                        <div id="CcCustomerServerError" class="TooltipErrorMessage">
+                    <div id="CcCustomerServerError" class="TooltipErrorMessage">
 [% RenderBlockStart("CcIsLocalAddressServerErrorMsg") %]
-                            <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.Cc) | html %]</p>
+                    <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.Cc) | html %]</p>
 [% RenderBlockEnd("CcIsLocalAddressServerErrorMsg") %]
+                    </div>
 
-                        </div>
-                    [% IF Data.OptionCustomerUserAddressBook %]
-                        <a href="#" data-recipient-field-label="[% Translate("Cc") | html %]" data-recipient-field="Cc" id="OptionCustomerUserAddressBookCcCustomer" class="OptionCustomerUserAddressBook AdditionlFieldIcon" title="[% Translate("Select one or more recipients from the customer user address book.") | html %]">
-                            <span>[% Translate("Customer user address book") | html %]</span>
-                            <i class="fa fa-address-book-o"></i>
-                        </a>
-                    [% END %]
                     </div>
                     <div class="Clear"></div>
 
@@ -201,21 +207,26 @@
                     </div>
                     <div class="Clear"></div>
 
+[% RenderBlockStart("PreFilledCc") %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+[% RenderBlockStart("PreFilledCcRow") %]
+    Core.Agent.CustomerSearch.AddTicketCustomer( 'CcCustomer', [% Data.Email | JSON %] );
+[% RenderBlockEnd("PreFilledCcRow") %]
+//]]></script>
+[% END %]
+[% RenderBlockEnd("PreFilledCc") %]
+
                     <label for="BccCustomer">[% Translate("Bcc") | html %]:</label>
                     <div class="Field">
                         <input id="BccCustomer" type="text" name="BccCustomer" value="" class="CustomerAutoComplete W75pc [% Data.BccIsLocalAddress | html %] [% Data.BccInvalid | html %]" autocomplete="off" />
 
-                        <div id="BccCustomerServerError" class="TooltipErrorMessage">
+                    <div id="BccCustomerServerError" class="TooltipErrorMessage">
 [% RenderBlockStart("BccIsLocalAddressServerErrorMsg") %]
-                            <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.Bcc) | html %]</p>
+                    <p>[% Translate("This address is registered as system address and cannot be used: %s", Data.Bcc) | html %]</p>
 [% RenderBlockEnd("BccIsLocalAddressServerErrorMsg") %]
-                        </div>
-                    [% IF Data.OptionCustomerUserAddressBook %]
-                        <a href="#" data-recipient-field-label="[% Translate("Bcc") | html %]" data-recipient-field="Bcc" id="OptionCustomerUserAddressBookBccCustomer" class="OptionCustomerUserAddressBook AdditionlFieldIcon" title="[% Translate("Select one or more recipients from the customer user address book.") | html %]">
-                            <span>[% Translate("Customer user address book") | html %]</span>
-                            <i class="fa fa-address-book-o"></i>
-                        </a>
-                    [% END %]
+                    </div>
+
                     </div>
                     <div class="Clear"></div>
 
@@ -291,9 +302,6 @@
                     <div class="Field">
                         [% Data.Value %]
                         <div id="[% Data.Name | html %]ServerError" class="TooltipErrorMessage"><p>[% Data.Invalid | html %]</p></div>
-                        [% IF Data.FieldExplanation.length %]
-                            <p class="FieldExplanation">[% Translate(Data.FieldExplanation) | html %]</p>
-                        [% END %]
                     </div>
                     <div class="Clear"></div>
 [% RenderBlockEnd("Option") %]
@@ -303,6 +311,14 @@
                     <div class="Field">
 
 <!-- OutputFilterHook_TicketOptionsBegin -->
+
+[% RenderBlockStart("SpellCheck") %]
+                        <a href="#" id="OptionSpellCheck">[ [% Translate("Spell check") | html %] ]</a>
+[% RenderBlockEnd("SpellCheck") %]
+[% RenderBlockStart("AddressBook") %]
+                        <a href="#" id="OptionAddressBook">[ [% Translate("Address book") | html %] ]</a>
+[% RenderBlockEnd("AddressBook") %]
+
 <!-- OutputFilterHook_TicketOptionsEnd -->
 
                     </div>
@@ -313,6 +329,9 @@
 
                     <label class="Mandatory" for="RichText"><span class="Marker">*</span>[% Translate("Text") | html %]:</label>
                     <div class="RichTextField">
+[% RenderBlockStart("RichText") %]
+[% InsertTemplate("RichTextEditor.tt") %]
+[% RenderBlockEnd("RichText") %]
                         <textarea id="RichText" name="Body" rows="15" cols="[% Config("Ticket::Frontend::TextAreaEmail") %]" class="RichText Validate_Required [% Data.BodyInvalid | html %]">[% Data.ResponseFormat %]</textarea>
                         <div id="RichTextError" class="TooltipErrorMessage"><p>[% Translate("This field is required.") | html %]</p></div>
                         <div id="RichTextServerError" class="TooltipErrorMessage"><p>[% Translate("This field is required.") | html %]</p></div>
@@ -324,9 +343,19 @@
                         <ul>
 [% RenderBlockStart("Attachment") %]
                             <li>
-                                <button type="button" id="AttachmentDeleteButton[% Data.FileID | html %]" name="AttachmentDeleteButton[% Data.FileID | html %]" value="[% Translate("Delete") | html %]" class="CallForAction Inline Small SpacingRight"><span>[% Translate("Delete") | html %]</span></button>
+                                [% Data.Filename | html %] ([% Data.Filesize | html %])
+                                <button type="button" id="AttachmentDeleteButton[% Data.FileID | html %]" name="AttachmentDeleteButton[% Data.FileID | html %]" value="[% Translate("Delete") | html %]" class="SpacingLeft">[% Translate("Delete") | html %]</button>
                                 <input type="hidden" id="AttachmentDelete[% Data.FileID | html %]" name="AttachmentDelete[% Data.FileID | html %]" />
-                                [% Data.Filename | html %] ([% Data.Filesize | Localize('Filesize') | html %])
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    $('#AttachmentDeleteButton[% Data.FileID | html %]').bind('click', function () {
+        var $Form = $('#AttachmentDeleteButton[% Data.FileID | html %]').closest('form');
+        $('#AttachmentDelete[% Data.FileID | html %]').val(1);
+        Core.Form.Validate.DisableValidation($Form);
+        $Form.trigger('submit');
+    });
+//]]></script>
+[% END %]
                             </li>
 [% RenderBlockEnd("Attachment") %]
                             <li>
@@ -334,12 +363,28 @@
                                 <input type="hidden" id="AttachmentUpload" name="AttachmentUpload" value="0" />
                             </li>
                         </ul>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    $('#FileUpload').bind('change', function () {
+        var $Form = $('#FileUpload').closest('form');
+        Core.Form.Validate.DisableValidation($Form);
+        $Form.find('#AttachmentUpload').val('1').end().submit();
+    });
+//]]></script>
+[% END %]
                     </div>
                     <div class="Clear"></div>
 
                     <label for="StateID">[% Translate("Next ticket state") | html %]:</label>
                     <div class="Field">
                         [% Data.NextStatesStrg %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    $('#StateID').bind('change', function (Event) {
+        Core.AJAX.FormUpdate($('#ComposeTicket'), 'AJAXUpdate', 'StateID', [ [% Data.DynamicFieldNamesStrg %] ]);
+    });
+//]]></script>
+[% END %]
                     </div>
                     <div class="Clear"></div>
 
@@ -352,13 +397,13 @@
                     </div>
                     <div class="Clear"></div>
 
-[% RenderBlockStart("IsVisibleForCustomer") %]
-                    <label for="IsVisibleForCustomer">[% Translate("Visible for customer") | html %]:</label>
+[% RenderBlockStart("ArticleType") %]
+                    <label for="ArticleTypeID">[% Translate("Article type") | html %]:</label>
                     <div class="Field">
-                        <input type="checkbox" id="IsVisibleForCustomer" name="IsVisibleForCustomer" value="1" [% IF Data.IsVisibleForCustomer %]checked="checked"[% END %]/>
+                        [% Data.ArticleTypesStrg %]
                     </div>
                     <div class="Clear"></div>
-[% RenderBlockEnd("IsVisibleForCustomer") %]
+[% RenderBlockEnd("ArticleType") %]
 [% RenderBlockStart("DynamicField") %]
                     <div class="Row Row_DynamicField_[% Data.Name | html %]">
                         [% Data.Label %]
@@ -413,3 +458,11 @@
         </div>
     </div>
 </form>
+
+#Layers
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Core.Agent.TicketAction.Init();
+
+    //]]></script>
+[% END %]

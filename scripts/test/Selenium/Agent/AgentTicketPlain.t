@@ -46,9 +46,8 @@ $Selenium->RunTest(
             Password => $TestUserLogin,
         );
 
-        my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-        my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
+        # get ticket object
+        my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         # create test ticket
         my $TicketNumber = $TicketObject->TicketCreateNumber();
@@ -72,17 +71,17 @@ $Selenium->RunTest(
         # create test email article
         my $TicketSubject = "test 1";
         my $TicketBody    = "This is the first test.";
-        my $ArticleID     = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 1,
-            SenderType           => 'customer',
-            Subject              => $TicketSubject,
-            Body                 => $TicketBody,
-            Charset              => 'ISO-8859-15',
-            MimeType             => 'text/plain',
-            HistoryType          => 'EmailCustomer',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
+        my $ArticleID     = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'email-external',
+            SenderType     => 'customer',
+            Subject        => $TicketSubject,
+            Body           => $TicketBody,
+            Charset        => 'ISO-8859-15',
+            MimeType       => 'text/plain',
+            HistoryType    => 'EmailCustomer',
+            HistoryComment => 'Some free text!',
+            UserID         => 1,
         );
         $Self->True(
             $ArticleID,
@@ -99,8 +98,7 @@ $Selenium->RunTest(
             Result   => 'SCALAR',
         );
 
-        my $Success = $ArticleBackendObject->ArticleWritePlain(
-            TicketID  => $TicketID,
+        my $Success = $TicketObject->ArticleWritePlain(
             ArticleID => $ArticleID,
             Email     => ${$ContentRef},
             UserID    => 1,

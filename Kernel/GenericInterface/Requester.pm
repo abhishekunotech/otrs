@@ -26,12 +26,20 @@ our @ObjectDependencies = (
 
 Kernel::GenericInterface::Requester - GenericInterface handler for sending web service requests to remote providers
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object. Do not create it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $RequesterObject = $Kernel::OM->Get('Kernel::GenericInterface::Requester');
 
 =cut
@@ -46,7 +54,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 receives the current incoming web service request, handles it,
 and returns an appropriate answer based on the configured requested
@@ -417,6 +425,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

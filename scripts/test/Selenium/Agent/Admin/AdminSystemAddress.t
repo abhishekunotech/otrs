@@ -15,24 +15,6 @@ use vars (qw($Self));
 # get selenium object
 my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 
-my $CheckBreadcrumb = sub {
-
-    my %Param = @_;
-
-    my $BreadcrumbText = $Param{BreadcrumbText} || '';
-    my $Count = 1;
-
-    for my $BreadcrumbText ( 'System Email Addresses Management', $BreadcrumbText ) {
-        $Self->Is(
-            $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-            $BreadcrumbText,
-            "Breadcrumb text '$BreadcrumbText' is found on screen"
-        );
-
-        $Count++;
-    }
-};
-
 $Selenium->RunTest(
     sub {
 
@@ -63,9 +45,8 @@ $Selenium->RunTest(
         );
 
         # add test Queue
-        my $QueueObject   = $Kernel::OM->Get('Kernel::System::Queue');
         my $QueueRandomID = "queue" . $Helper->GetRandomID();
-        my $QueueID       = $QueueObject->QueueAdd(
+        my $QueueID       = $Kernel::OM->Get('Kernel::System::Queue')->QueueAdd(
             Name            => $QueueRandomID,
             ValidID         => 1,
             GroupID         => 1,
@@ -91,12 +72,6 @@ $Selenium->RunTest(
         $Selenium->find_element( "table thead tr th", 'css' );
         $Selenium->find_element( "table tbody tr td", 'css' );
 
-        # check breadcrumb on Overview screen
-        $Self->True(
-            $Selenium->find_element( '.BreadCrumb', 'css' ),
-            "Breadcrumb is found on Overview screen.",
-        );
-
         # click 'Add system address'
         $Selenium->find_element("//a[contains(\@href, \'Action=AdminSystemAddress;Subaction=Add')]")->VerifiedClick();
 
@@ -109,9 +84,6 @@ $Selenium->RunTest(
             $Element->is_enabled();
             $Element->is_displayed();
         }
-
-        # check breadcrumb on Add screen
-        $CheckBreadcrumb->( BreadcrumbText => 'Add System Email Address' );
 
         # check client side validation
         $Selenium->find_element( "#Name", 'css' )->clear();
@@ -140,57 +112,6 @@ $Selenium->RunTest(
             "$SysAddRandom found on page",
         );
 
-        # click 'Add system address'
-        $Selenium->find_element("//a[contains(\@href, \'Action=AdminSystemAddress;Subaction=Add')]")->VerifiedClick();
-
-        $Selenium->find_element( "#Name",     'css' )->send_keys($SysAddRandom);
-        $Selenium->find_element( "#Realname", 'css' )->send_keys($SysAddRandom);
-        $Selenium->execute_script("\$('#QueueID').val('$QueueID').trigger('redraw.InputField').trigger('change');");
-        $Selenium->find_element( "#Comment", 'css' )->send_keys($SysAddComment);
-        $Selenium->find_element( "#Name",    'css' )->VerifiedSubmit();
-
-        # wait until page has finished loading
-        $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("#DialogButton1").length' );
-
-        # Confirm JS error.
-        $Selenium->find_element( "#DialogButton1", 'css' )->click();
-
-        $Self->Is(
-            $Selenium->execute_script(
-                "return \$('#Name').hasClass('ServerError')"
-            ),
-            '1',
-            'Client side validation correctly detected existing name error',
-        );
-
-        # Get created system address ID.
-        my %SysAddList = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressList(
-            Valid => 1,
-        );
-        %SysAddList = reverse %SysAddList;
-
-        # Update queue with created system address.
-        my $QueueUpdate = $QueueObject->QueueUpdate(
-            QueueID         => $QueueID,
-            Name            => $QueueRandomID,
-            ValidID         => 1,
-            GroupID         => 1,
-            SystemAddressID => $SysAddList{$SysAddRandom},
-            SalutationID    => 1,
-            SignatureID     => 1,
-            UserID          => 1,
-            FollowUpID      => 1,
-            Comment         => 'Some Comment2',
-            FollowUpLock    => 1,
-        );
-        $Self->True(
-            $QueueUpdate,
-            "QueueID $QueueID is updated with system address ID $SysAddList{$SysAddRandom}"
-        );
-
-        # click 'Go to overview'
-        $Selenium->find_element("//a[contains(\@href, \'Action=AdminSystemAddress')]")->VerifiedClick();
-
         # go to the new test SystemAddress and check values
         $Selenium->find_element( $SysAddRandom, 'link_text' )->VerifiedClick();
         $Self->Is(
@@ -218,48 +139,6 @@ $Selenium->RunTest(
             $SysAddComment,
             "#Comment stored value",
         );
-
-        # Verify field explanation for valid field when system address is used in one or more queues.
-        $Self->Is(
-            $Selenium->execute_script(
-                "return \$('#ValidID').parent().find('.FieldExplanation').text().trim()",
-            ),
-            "This system address cannot be set to invalid, because it is used in one or more queue(s).",
-            "Valid field explanation correct"
-        );
-
-        # Verify invalid options are not available as selection.
-        $Self->False(
-            $Selenium->execute_script(
-                "return \$('#ValidID option[Value=2]').length"
-            ),
-            "Invalid options are disabled for system address which is used in queue."
-        );
-
-        # Update queue to the default system address.
-        $QueueUpdate = $QueueObject->QueueUpdate(
-            QueueID         => $QueueID,
-            Name            => $QueueRandomID,
-            ValidID         => 1,
-            GroupID         => 1,
-            SystemAddressID => 1,
-            SalutationID    => 1,
-            SignatureID     => 1,
-            UserID          => 1,
-            FollowUpID      => 1,
-            Comment         => 'Some Comment2',
-            FollowUpLock    => 1,
-        );
-        $Self->True(
-            $QueueUpdate,
-            "QueueID $QueueID is updated with system address ID $SysAddList{$SysAddRandom}"
-        );
-
-        # Check breadcrumb on Edit screen.
-        $CheckBreadcrumb->( BreadcrumbText => 'Edit System Email Address: ' . $SysAddRandom );
-
-        # Refresh screen.
-        $Selenium->VerifiedRefresh();
 
         # edit test SystemAddress and set it to invalid
         $Selenium->find_element( "#Realname", 'css' )->send_keys(" Edited");

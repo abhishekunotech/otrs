@@ -24,11 +24,13 @@ our @ObjectDependencies = (
 
 Kernel::System::Crypt::PGP - pgp crypt backend lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This is a sub module of Kernel::System::Crypt and contains all pgp functions.
 
 =head1 PUBLIC INTERFACE
+
+=over 4
 
 =cut
 
@@ -53,7 +55,7 @@ sub new {
     return $Self;
 }
 
-=head2 Check()
+=item Check()
 
 check if environment is working
 
@@ -83,18 +85,9 @@ sub Check {
     return;
 }
 
-=head2 Crypt()
+=item Crypt()
 
 crypt a message
-
-    my $Message = $CryptObject->Crypt(
-        Message => $Message,
-        Key     => [
-            $PGPPublicKeyID,
-            $PGPPublicKeyID2,
-            # ...
-        ],
-    );
 
     my $Message = $CryptObject->Crypt(
         Message => $Message,
@@ -107,33 +100,15 @@ sub Crypt {
     my ( $Self, %Param ) = @_;
 
     # check needed stuff
-    for my $Needed (qw( Message Key )) {
-        if ( !$Param{$Needed} ) {
+    for my $ParamName (qw( Message Key )) {
+        if ( !$Param{$ParamName} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $Needed!"
+                Message  => "Need $ParamName!"
             );
             return;
         }
     }
-
-    my @PublicKeys;
-    if ( ref $Param{Key} eq 'ARRAY' ) {
-        @PublicKeys = @{ $Param{Key} };
-    }
-    elsif ( ref $Param{Key} eq '' ) {
-        push @PublicKeys, $Param{Key};
-    }
-
-    if ( !@PublicKeys ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Message  => "Got no keys!",
-            Priority => 'error',
-        );
-        return;
-    }
-
-    my $KeyStr = join ' ', map {"-r $_"} @PublicKeys;
 
     $Kernel::OM->Get('Kernel::System::Encode')->EncodeOutput( \$Param{Message} );
 
@@ -146,7 +121,7 @@ sub Crypt {
 
     my ( $FHCrypt, $FilenameCrypt ) = $FileTempObject->TempFile();
     close $FHCrypt;
-    my $GPGOptions = "--always-trust --yes --encrypt --armor -o $FilenameCrypt $KeyStr $Filename";
+    my $GPGOptions = "--always-trust --yes --encrypt --armor -o $FilenameCrypt -r $Param{Key} $Filename";
     my $LogMessage = qx{$Self->{GPGBin} $GPGOptions 2>&1};
 
     # get crypted content
@@ -155,7 +130,7 @@ sub Crypt {
     return $$CryptedDataRef;
 }
 
-=head2 Decrypt()
+=item Decrypt()
 
 Decrypt a message and returns a hash (Successful, Message, Data)
 
@@ -214,7 +189,7 @@ sub Decrypt {
     return %Return;
 }
 
-=head2 Sign()
+=item Sign()
 
 sign a message
 
@@ -244,10 +219,6 @@ sub Sign {
     my $SigType      = $Param{Type} && $Param{Type} eq 'Detached'
         ? '--detach-sign --armor'
         : '--clearsign';
-    my $DigestAlgorithm = $Kernel::OM->Get('Kernel::Config')->Get('PGP::Options::DigestPreference') || '';
-    if ($DigestAlgorithm) {
-        $DigestAlgorithm = '--personal-digest-preferences ' . uc $DigestAlgorithm;
-    }
 
     # get temp file object
     my $FileTempObject = $Kernel::OM->Get('Kernel::System::FileTemp');
@@ -270,7 +241,7 @@ sub Sign {
     my ( $FHPhrase, $FilePhrase ) = $FileTempObject->TempFile();
     print $FHPhrase $Pw;
     close $FHPhrase;
-    my $GPGOptions = qq{--passphrase-fd 0 --default-key $Param{Key} -o $FileSign $SigType $DigestAlgorithm $Filename};
+    my $GPGOptions = qq{--passphrase-fd 0 --default-key $Param{Key} -o $FileSign $SigType $Filename};
     my $LogMessage = qx{$Self->{GPGBin} $GPGOptions <$FilePhrase 2>&1};
 
     # error
@@ -290,7 +261,7 @@ sub Sign {
     return $$SignedDataRef;
 }
 
-=head2 Verify()
+=item Verify()
 
 verify a message signature and returns a hash (Successful, Message, Data)
 
@@ -634,7 +605,7 @@ sub Verify {
     return %Return;
 }
 
-=head2 KeySearch()
+=item KeySearch()
 
 returns a array with search result (private and public keys)
 
@@ -654,7 +625,7 @@ sub KeySearch {
     return @Result;
 }
 
-=head2 PrivateKeySearch()
+=item PrivateKeySearch()
 
 returns an array with search result (private keys)
 
@@ -674,7 +645,7 @@ sub PrivateKeySearch {
     return $Self->_ParseGPGKeyList( GPGOutputLines => \@GPGOutputLines );
 }
 
-=head2 PublicKeySearch()
+=item PublicKeySearch()
 
 returns an array with search result (public keys)
 
@@ -694,7 +665,7 @@ sub PublicKeySearch {
     return $Self->_ParseGPGKeyList( GPGOutputLines => \@GPGOutputLines );
 }
 
-=head2 PublicKeyGet()
+=item PublicKeyGet()
 
 returns public key in ascii
 
@@ -735,7 +706,7 @@ sub PublicKeyGet {
     return $LogMessage;
 }
 
-=head2 SecretKeyGet()
+=item SecretKeyGet()
 
 returns secret key in ascii
 
@@ -776,7 +747,7 @@ sub SecretKeyGet {
     return $LogMessage;
 }
 
-=head2 PublicKeyDelete()
+=item PublicKeyDelete()
 
 remove public key from key ring
 
@@ -816,7 +787,7 @@ sub PublicKeyDelete {
     return 1;
 }
 
-=head2 SecretKeyDelete()
+=item SecretKeyDelete()
 
 remove secret key from key ring
 
@@ -872,7 +843,7 @@ sub SecretKeyDelete {
     return 1;
 }
 
-=head2 KeyAdd()
+=item KeyAdd()
 
 add key to key ring
 
@@ -984,7 +955,7 @@ sub _DecryptPart {
     }
 }
 
-=head2 _HandleLog()
+=item _HandleLog()
 
 Clean and build the log
 
@@ -1045,7 +1016,7 @@ sub _HandleLog {
     return %ComputableLog;
 }
 
-=head2 _ParseGPGKeyList()
+=item _ParseGPGKeyList()
 
 parses given key list (as received from gpg) and returns an array with key infos
 
@@ -1204,6 +1175,8 @@ sub _CryptedWithKey {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

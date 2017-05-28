@@ -204,7 +204,7 @@ Core.UI.InputFields = (function (TargetNS) {
     TargetNS.Activate = function ($Context) {
 
         // Check SysConfig
-        if (parseInt(Core.Config.Get('InputFieldsActivated'), 10) === 1) {
+        if (Core.Config.Get('InputFieldsActivated') === 1) {
 
             // Initialize select fields on all applicable fields
             TargetNS.InitSelect($('select.Modernize', $Context));
@@ -287,7 +287,7 @@ Core.UI.InputFields = (function (TargetNS) {
             return;
         }
 
-        $SearchObj.prop('readonly', false);
+        $SearchObj.removeAttr('readonly', 'readonly');
         $InputContainerObj.removeClass('AlreadyDisabled');
 
         // Check if there are only empty and disabled options
@@ -302,7 +302,7 @@ Core.UI.InputFields = (function (TargetNS) {
             // Disable the field, add the tooltip and dash string
             $SearchObj
                 .attr('readonly', 'readonly')
-                .attr('title', Core.Language.Translate('Not available'));
+                .attr('title', Core.Config.Get('InputFieldsNotAvailable'));
 
             // when the original field does no longer provide any valid options,
             // we also want to remove existing selections
@@ -313,8 +313,7 @@ Core.UI.InputFields = (function (TargetNS) {
 
             // Enable the field, remove the tooltip and dash string
             $SearchObj
-                .removeAttr('title')
-                .prop('readonly', false)
+                .removeAttr('readonly title')
                 .val('');
         }
     }
@@ -350,11 +349,7 @@ Core.UI.InputFields = (function (TargetNS) {
         // If the dropdown of the field is opened, close it (by calling blur event)
         // TODO: nicer way to find opened select elements
         $('select.Modernize').each(function () {
-            var Selector = Core.App.EscapeSelector($(this).data('modernized'));
-            if (!Selector) {
-                return;
-            }
-            $('#' + Selector).filter('[aria-expanded=true]').trigger('blur');
+            $('#' + Core.App.EscapeSelector($(this).data('modernized'))).filter('[aria-expanded=true]').trigger('blur');
         });
     }
 
@@ -377,6 +372,7 @@ Core.UI.InputFields = (function (TargetNS) {
             MoreBox = false,
             Multiple = ($SelectObj.attr('multiple') !== '' && $SelectObj.attr('multiple') !== undefined) ? true : false,
             PossibleNone = false,
+            MoreString = Core.Config.Get('InputFieldsMore'),
             MaxWidth,
             $SearchObj = $InputContainerObj.find('.InputField_Search'),
             $TempMoreObj;
@@ -424,7 +420,7 @@ Core.UI.InputFields = (function (TargetNS) {
             if (SelectionLength > 1) {
                 $TempMoreObj = $('<div />').hide()
                     .addClass('InputField_More')
-                    .text(Core.Language.Translate("and %s more...").replace(/%s/, '##'))
+                    .text(MoreString.replace(/%s/, '##'))
                     .appendTo($InputContainerObj);
 
                 // Save place for string
@@ -466,13 +462,13 @@ Core.UI.InputFields = (function (TargetNS) {
                     $RemoveObj.addClass('Remove')
                         .append(
                             $('<a />').attr('href', '#')
-                                .attr('title', Core.Language.Translate('Remove selection'))
+                                .attr('title', Core.Config.Get('InputFieldsRemoveSelection'))
                                 .text('x')
                                 .attr('role', 'button')
                                 .attr('tabindex', '-1')
                                 .attr(
                                     'aria-label',
-                                    Core.Language.Translate('Remove selection') + ': ' + Text
+                                    Core.Config.Get('InputFieldsRemoveSelection') + ': ' + Text
                                 )
                                 .off('click.InputField').on('click.InputField', function () {
                                     var HasEmptyElement = $SelectObj.find('option[value=""]').length === 0 ? false : true,
@@ -546,7 +542,7 @@ Core.UI.InputFields = (function (TargetNS) {
                                     OffsetLeft + 'px'
                                 )
                                 .text(
-                                    Core.Language.Translate("and %s more...").replace(/%s/, SelectionLength - i)
+                                    MoreString.replace(/%s/, SelectionLength - i)
                                 )
                                 .on('click.InputField', function () {
                                     $SearchObj.trigger('focus');
@@ -1781,8 +1777,8 @@ Core.UI.InputFields = (function (TargetNS) {
                             .attr('href', '#')
                             .attr('role', 'button')
                             .attr('tabindex', '-1')
-                            .text(Core.Language.Translate('Select all'))
-                            .attr('aria-label', Core.Language.Translate('Select all'))
+                            .text(Core.Config.Get('InputFieldsSelectAll'))
+                            .attr('aria-label', Core.Config.Get('InputFieldsSelectAll'))
                             .appendTo($ToolbarObj)
                             .wrap('<li />');
                         RegisterActionEvent($TreeObj, $SelectAllObj, 'SelectAll');
@@ -1792,8 +1788,8 @@ Core.UI.InputFields = (function (TargetNS) {
                             .attr('href', '#')
                             .attr('role', 'button')
                             .attr('tabindex', '-1')
-                            .text(Core.Language.Translate('Clear all'))
-                            .attr('aria-label', Core.Language.Translate('Clear all'))
+                            .text(Core.Config.Get('InputFieldsClearAll'))
+                            .attr('aria-label', Core.Config.Get('InputFieldsClearAll'))
                             .appendTo($ToolbarObj)
                             .wrap('<li />');
                         RegisterActionEvent($TreeObj, $ClearAllObj, 'ClearAll');
@@ -1806,8 +1802,8 @@ Core.UI.InputFields = (function (TargetNS) {
                             .attr('href', '#')
                             .attr('role', 'button')
                             .attr('tabindex', '-1')
-                            .text(Core.Language.Translate('Filters'))
-                            .attr('aria-label', Core.Language.Translate('Filters'))
+                            .text(Core.Config.Get('InputFieldsFilters'))
+                            .attr('aria-label', Core.Config.Get('InputFieldsFilters'))
                             .appendTo($ToolbarObj)
                             .wrap('<li />');
                         RegisterFilterEvent($SelectObj, $InputContainerObj, $ToolbarContainerObj, $FiltersObj, 'ShowFilters');
@@ -1934,8 +1930,8 @@ Core.UI.InputFields = (function (TargetNS) {
                             .attr('href', '#')
                             .attr('role', 'button')
                             .attr('tabindex', '-1')
-                            .text(Core.Language.Translate('Confirm'))
-                            .attr('aria-label', Core.Language.Translate('Confirm'))
+                            .text(Core.Config.Get('InputFieldsConfirm'))
+                            .attr('aria-label', Core.Config.Get('InputFieldsConfirm'))
                             .appendTo($ToolbarObj)
                             .prepend('<i class="fa fa-check-square-o" /> ')
                             .wrap('<li />');
@@ -2017,7 +2013,7 @@ Core.UI.InputFields = (function (TargetNS) {
 
                                 // Add no match node
                                 NoMatchNodeJSON = {
-                                    text: Core.Language.Translate('No matches found.'),
+                                    text: Core.Config.Get('InputFieldsNoMatchMsg'),
                                     state: {
                                         disabled: true
                                     },
@@ -2040,12 +2036,12 @@ Core.UI.InputFields = (function (TargetNS) {
                                 $ClearSearchObj = $('<a />').insertAfter($SearchObj);
                                 $ClearSearchObj.addClass('InputField_Action InputField_ClearSearch')
                                     .attr('href', '#')
-                                    .attr('title', Core.Language.Translate('Clear search'))
+                                    .attr('title', Core.Config.Get('InputFieldsClearSearch'))
                                     .css(($('body').hasClass('RTL') ? 'left' : 'right'), Config.SelectionBoxOffsetRight + 'px')
                                     .append($('<i />').addClass('fa fa-times-circle'))
                                     .attr('role', 'button')
                                     .attr('tabindex', '-1')
-                                    .attr('aria-label', Core.Language.Translate('Clear search'))
+                                    .attr('aria-label', Core.Config.Get('InputFieldsClearSearch'))
                                     .off('click.InputField').on('click.InputField', function () {
 
                                         // Reset the search field
@@ -2283,8 +2279,6 @@ Core.UI.InputFields = (function (TargetNS) {
             Core.App.Publish('Event.UI.InputFields.Resize');
         }, 100);
     });
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_GLOBAL');
 
     return TargetNS;
 }(Core.UI.InputFields || {}));

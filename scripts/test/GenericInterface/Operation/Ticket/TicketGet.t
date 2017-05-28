@@ -21,6 +21,7 @@ use Kernel::GenericInterface::Operation::Ticket::TicketGet;
 
 use Kernel::System::VariableCheck qw(:all);
 
+# get config object
 my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
 # disable SessionCheckRemoteIP setting
@@ -29,9 +30,11 @@ $ConfigObject->Set(
     Value => 0,
 );
 
-# Skip SSL certificate verification.
+# get helper object
+# skip SSL certificate verification
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
+
         SkipSSLVerify => 1,
     },
 );
@@ -76,7 +79,6 @@ my %SkipFields = (
     Created                   => 1,
     Changed                   => 1,
     UnlockTimeout             => 1,
-    CreateTimeUnix            => 1,
 );
 
 # create dynamic field properties
@@ -237,7 +239,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryOne ) {
-    if ( !defined $TicketEntryOne{$Key} ) {
+    if ( !$TicketEntryOne{$Key} ) {
         $TicketEntryOne{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -288,7 +290,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryOneDF ) {
-    if ( !defined $TicketEntryOneDF{$Key} ) {
+    if ( !$TicketEntryOneDF{$Key} ) {
         $TicketEntryOneDF{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -376,7 +378,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryTwo ) {
-    if ( !defined $TicketEntryTwo{$Key} ) {
+    if ( !$TicketEntryTwo{$Key} ) {
         $TicketEntryTwo{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -398,7 +400,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryTwoDF ) {
-    if ( !defined $TicketEntryTwoDF{$Key} ) {
+    if ( !$TicketEntryTwoDF{$Key} ) {
         $TicketEntryTwoDF{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -445,7 +447,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryThree ) {
-    if ( !defined $TicketEntryThree{$Key} ) {
+    if ( !$TicketEntryThree{$Key} ) {
         $TicketEntryThree{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -475,116 +477,83 @@ $Self->True(
     "TicketCreate() successful for Ticket Four ID $TicketID4",
 );
 
-my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Internal' );
-
 # first article
-my $ArticleID41 = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID4,
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 1,
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'first article',
-    Body                 => 'A text for the body, Title äöüßÄÖÜ€ис',
-    ContentType          => 'text/plain; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'first article',
-    UserID               => 1,
-    NoAgentNotify        => 1,
+my $ArticleID41 = $TicketObject->ArticleCreate(
+    TicketID       => $TicketID4,
+    ArticleType    => 'phone',
+    SenderType     => 'agent',
+    From           => 'Agent Some Agent Some Agent <email@example.com>',
+    To             => 'Customer A <customer-a@example.com>',
+    Cc             => 'Customer B <customer-b@example.com>',
+    ReplyTo        => 'Customer B <customer-b@example.com>',
+    Subject        => 'first article',
+    Body           => 'A text for the body, Title äöüßÄÖÜ€ис',
+    ContentType    => 'text/plain; charset=ISO-8859-15',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'first article',
+    UserID         => 1,
+    NoAgentNotify  => 1,
 );
 
 # second article
-my $ArticleID42 = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID4,
-    SenderType           => 'customer',
-    IsVisibleForCustomer => 1,
-    From                 => 'A not Real Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'second article',
-    Body                 => 'A text for the body, not too long',
-    ContentType          => 'text/plain; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'second article',
-    UserID               => 1,
-    NoAgentNotify        => 1,
+my $ArticleID42 = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID4,
+    ArticleType => 'phone',
+    SenderType  => 'customer',
+    From        => 'A not Real Agent <email@example.com>',
+    To          => 'Customer A <customer-a@example.com>',
+    Cc          => 'Customer B <customer-b@example.com>',
+    ReplyTo     => 'Customer B <customer-b@example.com>',
+    Subject     => 'second article',
+    Body        => 'A text for the body, not too long',
+    ContentType => 'text/plain; charset=ISO-8859-15',
+
+    #    Attachment     => \@Attachments,
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'second article',
+    UserID         => 1,
+    NoAgentNotify  => 1,
 );
 
 # third article
-my $ArticleID43 = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID4,
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 0,
-    From                 => 'A not Real Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'second article',
-    Body                 => 'A text for the body, not too long',
-    ContentType          => 'text/plain; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'second article',
-    UserID               => 1,
-    NoAgentNotify        => 1,
+my $ArticleID43 = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID4,
+    ArticleType => 'note-internal',
+    SenderType  => 'customer',
+    From        => 'A not Real Agent <email@example.com>',
+    To          => 'Customer A <customer-a@example.com>',
+    Cc          => 'Customer B <customer-b@example.com>',
+    ReplyTo     => 'Customer B <customer-b@example.com>',
+    Subject     => 'second article',
+    Body        => 'A text for the body, not too long',
+    ContentType => 'text/plain; charset=ISO-8859-15',
+
+    #    Attachment     => \@Attachments,
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'second article',
+    UserID         => 1,
+    NoAgentNotify  => 1,
 );
 
-# Helper method to retrieve article content for supplied list of articles.
-#
-#    $ArticleContentGet->(
-#        TicketID             => 123,           # (required)
-#        Articles             => \@Articles,    # (required)
-#        DynamicFields        => 1,             # (optional) Include dynamic field values
-#    );
-#
-my $ArticleContentGet = sub {
-    my (%Param) = @_;
+# save articles without attachments
+my @ArticleWithoutAttachments = $TicketObject->ArticleGet(
+    TicketID => $TicketID4,
+    UserID   => 1,
+);
 
-    if (
-        !$Param{TicketID}
-        && !IsArrayRefWithData( $Param{Articles} )
-        )
-    {
-        return;
-    }
+for my $Article (@ArticleWithoutAttachments) {
 
-    my @ArticleContents;
-    for my $Article ( @{ $Param{Articles} } ) {
-        my %ArticleContent = $ArticleBackendObject->ArticleGet(
-            %Param,
-            ArticleID => $Article->{ArticleID},
-            UserID    => 1,
-        );
-
-        for my $Key ( sort keys %ArticleContent ) {
-            if ( !defined $ArticleContent{$Key} ) {
-                $ArticleContent{$Key} = '';
-            }
-            if ( $SkipFields{$Key} ) {
-                delete $ArticleContent{$Key};
-            }
+    for my $Key ( sort keys %{$Article} ) {
+        if ( !$Article->{$Key} ) {
+            $Article->{$Key} = '';
         }
-
-        push @ArticleContents, \%ArticleContent;
+        if ( $SkipFields{$Key} ) {
+            delete $Article->{$Key};
+        }
     }
+}
 
-    return @ArticleContents;
-};
-
-# Get article contents (no attachments).
-my @Articles = $ArticleObject->ArticleList(
-    TicketID => $TicketID4,
-);
-my @ArticleWithoutAttachments = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID4,
-);
-
-# Add attachments to article.
+# file checks
 for my $File (qw(xls txt doc png pdf)) {
     my $Location = $ConfigObject->Get('Home')
         . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.$File";
@@ -595,7 +564,7 @@ for my $File (qw(xls txt doc png pdf)) {
         Type     => 'Local',
     );
 
-    my $ArticleWriteAttachment = $ArticleBackendObject->ArticleWriteAttachment(
+    my $ArticleWriteAttachment = $TicketObject->ArticleWriteAttachment(
         Content     => ${$ContentRef},
         Filename    => "StdAttachment-Test1.$File",
         ContentType => $File,
@@ -604,7 +573,6 @@ for my $File (qw(xls txt doc png pdf)) {
     );
 }
 
-# Add test article dynamic field.
 my $ArticleFieldID = $DynamicFieldObject->DynamicFieldAdd(
     Name       => "ADFA$RandomID",
     FieldOrder => 9993,
@@ -630,7 +598,7 @@ $BackendObject->ValueSet(
     UserID             => 1,
 );
 
-# Add a second article dynamic field to force an array reference in remote result and make it easier to check.
+# Add a second article dynamic field to force an array reference in remote result and make it easier to check
 my $ArticleFieldID2 = $DynamicFieldObject->DynamicFieldAdd(
     Name       => "ADFA2$RandomID",
     FieldOrder => 9999,
@@ -649,49 +617,36 @@ push @TestFieldConfig, $DynamicFieldObject->DynamicFieldGet(
     ID => $ArticleFieldID2,
 );
 
-# Get article contents (attachments).
-my @ArticleBox = $ArticleContentGet->(
-    Articles => \@Articles,
+# get articles and attachments
+my @ArticleBox = $TicketObject->ArticleGet(
     TicketID => $TicketID4,
+    UserID   => 1,
 );
 
-# Get article contents (attachments + dynamic fields).
-my @ArticleBoxDF = $ArticleContentGet->(
-    Articles      => \@Articles,
+# get articles and attachments
+my @ArticleBoxDF = $TicketObject->ArticleGet(
     TicketID      => $TicketID4,
+    UserID        => 1,
     DynamicFields => 1,
 );
 
-# Get article contents (attachments + visible to customers).
-@Articles = $ArticleObject->ArticleList(
-    TicketID             => $TicketID4,
-    IsVisibleForCustomer => 1,
-    UserID               => 1,
-);
-my @ArticleBoxTypeCustomer = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID4,
+my $CustomerArticleTypes = [ $TicketObject->ArticleTypeList( Type => 'Customer' ) ];
+my @ArticleBoxTypeCustomer = $TicketObject->ArticleGet(
+    TicketID    => $TicketID4,
+    UserID      => 1,
+    ArticleType => $CustomerArticleTypes,
 );
 
-# Get article contents (attachments + created by agents).
-@Articles = $ArticleObject->ArticleList(
-    TicketID   => $TicketID4,
-    SenderType => 'agent',
-    UserID     => 1,
-);
-my @ArticleBoxSenderAgent = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID4,
+my @ArticleBoxSenderAgent = $TicketObject->ArticleGet(
+    TicketID          => $TicketID4,
+    ArticleSenderType => ['agent'],
+    UserID            => 1,
 );
 
-# Get article contents (attachments + created by customers).
-@Articles = $ArticleObject->ArticleList(
-    TicketID   => $TicketID4,
-    SenderType => 'customer',
-);
-my @ArticleBoxSenderCustomer = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID4,
+my @ArticleBoxSenderCustomer = $TicketObject->ArticleGet(
+    TicketID          => $TicketID4,
+    ArticleSenderType => ['customer'],
+    UserID            => 1,
 );
 
 # Get the list of dynamic fields for object ticket.
@@ -700,106 +655,63 @@ my $TicketDynamicFieldList = $DynamicFieldObject->DynamicFieldList(
     ResultType => 'HASH',
 );
 
-# Get article contents (attachments + without content).
-@Articles = $ArticleObject->ArticleList(
-    TicketID => $TicketID4,
-);
-my @ArticleBoxAttachmentsWithoutContent = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID4,
-);
-
-# Create a lookup list for easy ticket dynamic field search.
+# Crate a lookup list for easy search
 my %TicketDynamicFieldLookup = map { 'DynamicField_' . $_ => 1 } values %{$TicketDynamicFieldList};
 
-# Helper method to retrieve article attachment content for supplied list of articles.
-#
-#    $ArticleAttachmentContentGet->(
-#        Articles  => \@Articles,    # (required)
-#        NoContent => 1,             # (optional) Omit actual attachment content, return only meta data
-#        HTMLBody  => 1,             # (optional) Include HTML body attachment content
-#    );
-#
-my $ArticleAttachmentContentGet = sub {
-    my (%Param) = @_;
+# start article loop
+ARTICLE:
+for my $Article (
+    @ArticleBox, @ArticleBoxDF, @ArticleBoxTypeCustomer, @ArticleBoxSenderAgent,
+    @ArticleBoxSenderCustomer
+    )
+{
 
-    if ( !IsArrayRefWithData( $Param{Articles} ) ) {
-        return;
+    for my $Key ( sort keys %{$Article} ) {
+        if ( !$Article->{$Key} ) {
+            $Article->{$Key} = '';
+        }
+        if ( $SkipFields{$Key} ) {
+            delete $Article->{$Key};
+        }
+        if ( $TicketDynamicFieldLookup{$Key} ) {
+            delete $Article->{$Key};
+        }
     }
 
-    my @Articles = @{ $Param{Articles} };
+    # get attachment index (without attachments)
+    my %AtmIndex = $TicketObject->ArticleAttachmentIndex(
+        ContentPath                => $Article->{ContentPath},
+        ArticleID                  => $Article->{ArticleID},
+        StripPlainBodyAsAttachment => 3,
+        Article                    => $Article,
+        UserID                     => 1,
+    );
 
-    ARTICLE:
-    for my $Article (@Articles) {
+    next ARTICLE if !IsHashRefWithData( \%AtmIndex );
 
-        for my $Key ( sort keys %{$Article} ) {
-            if ( !defined $Article->{$Key} ) {
-                $Article->{$Key} = '';
-            }
-            if ( $SkipFields{$Key} ) {
-                delete $Article->{$Key};
-            }
-            if ( $TicketDynamicFieldLookup{$Key} ) {
-                delete $Article->{$Key};
-            }
-        }
-
-        # Get attachment index.
-        my %AtmIndex = $ArticleBackendObject->ArticleAttachmentIndex(
-            ArticleID        => $Article->{ArticleID},
-            UserID           => 1,
-            ExcludePlainText => 1,
-            ExcludeHTMLBody  => $Param{HTMLBody} ? 0 : 1,
+    my @Attachments;
+    ATTACHMENT:
+    for my $FileID ( sort keys %AtmIndex ) {
+        next ATTACHMENT if !$FileID;
+        my %Attachment = $TicketObject->ArticleAttachment(
+            ArticleID => $Article->{ArticleID},
+            FileID    => $FileID,
+            UserID    => 1,
         );
 
-        next ARTICLE if !IsHashRefWithData( \%AtmIndex );
+        next ATTACHMENT if !IsHashRefWithData( \%Attachment );
 
-        my @Attachments;
-        ATTACHMENT:
-        for my $FileID ( sort keys %AtmIndex ) {
-            next ATTACHMENT if !$FileID;
-            my %Attachment = $ArticleBackendObject->ArticleAttachment(
-                ArticleID => $Article->{ArticleID},
-                FileID    => $FileID,
-                UserID    => 1,
-            );
-
-            next ATTACHMENT if !IsHashRefWithData( \%Attachment );
-
-            $Attachment{FileID} = $FileID;
-
-            # convert content to base64
-            $Attachment{Content}            = $Param{NoContent} ? '' : encode_base64( $Attachment{Content} );
-            $Attachment{ContentID}          = '';
-            $Attachment{ContentAlternative} = '';
-            push @Attachments, {%Attachment};
-        }
-
-        # set Attachments data
-        $Article->{Attachment} = \@Attachments;
+        # convert content to base64
+        $Attachment{Content}            = encode_base64( $Attachment{Content} );
+        $Attachment{ContentID}          = '';
+        $Attachment{ContentAlternative} = '';
+        push @Attachments, {%Attachment};
     }
-};
 
-# Insert attachment content.
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleBox,
-);
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleBoxDF,
-);
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleBoxTypeCustomer,
-);
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleBoxSenderAgent,
-);
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleBoxSenderCustomer,
-);
-$ArticleAttachmentContentGet->(
-    Articles  => \@ArticleBoxAttachmentsWithoutContent,
-    NoContent => 1,
-);
+    # set Attachments data
+    $Article->{Attachment} = \@Attachments;
+
+}    # finish article loop
 
 # Get the list of dynamic fields for object ticket.
 my $ArticleDynamicFieldList = $DynamicFieldObject->DynamicFieldList(
@@ -807,7 +719,7 @@ my $ArticleDynamicFieldList = $DynamicFieldObject->DynamicFieldList(
     ResultType => 'HASH',
 );
 
-# Create a lookup list for easy article dynamic field search.
+# Crate a lookup list for easy search
 my @ArticleDynamicFields = sort values %{$ArticleDynamicFieldList};
 
 ARTICLE:
@@ -842,7 +754,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryFour ) {
-    if ( !defined $TicketEntryFour{$Key} ) {
+    if ( !$TicketEntryFour{$Key} ) {
         $TicketEntryFour{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -857,7 +769,7 @@ my %TicketEntryFourDF = $TicketObject->TicketGet(
 );
 
 for my $Key ( sort keys %TicketEntryFourDF ) {
-    if ( !defined $TicketEntryFourDF{$Key} ) {
+    if ( !$TicketEntryFourDF{$Key} ) {
         $TicketEntryFourDF{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -907,7 +819,7 @@ $Self->True(
 );
 
 for my $Key ( sort keys %TicketEntryFive ) {
-    if ( !defined $TicketEntryFive{$Key} ) {
+    if ( !$TicketEntryFive{$Key} ) {
         $TicketEntryFive{$Key} = '';
     }
     if ( $SkipFields{$Key} ) {
@@ -916,16 +828,16 @@ for my $Key ( sort keys %TicketEntryFive ) {
 }
 
 # first article
-my $ArticleID51 = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID5,
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 1,
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'first article',
-    Body                 => '
+my $ArticleID51 = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID5,
+    ArticleType => 'phone',
+    SenderType  => 'agent',
+    From        => 'Agent Some Agent Some Agent <email@example.com>',
+    To          => 'Customer A <customer-a@example.com>',
+    Cc          => 'Customer B <customer-b@example.com>',
+    ReplyTo     => 'Customer B <customer-b@example.com>',
+    Subject     => 'first article',
+    Body        => '
 <!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head><body style="font-family:Geneva,Helvetica,Arial,sans-serif; font-size: 12px;"><ol>
     <li>test</li>
 </ol></body></html>',
@@ -935,21 +847,21 @@ my $ArticleID51 = $ArticleBackendObject->ArticleCreate(
     UserID         => 1,
     NoAgentNotify  => 1,
 );
-my $ArticleID52 = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID5,
-    SenderType           => 'agent',
-    IsVisibleForCustomer => 1,
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Cc                   => 'Customer B <customer-b@example.com>',
-    ReplyTo              => 'Customer B <customer-b@example.com>',
-    Subject              => 'first article',
-    Body                 => 'Test',
-    ContentType          => 'text/plain; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'first article',
-    UserID               => 1,
-    NoAgentNotify        => 1,
+my $ArticleID52 = $TicketObject->ArticleCreate(
+    TicketID       => $TicketID5,
+    ArticleType    => 'phone',
+    SenderType     => 'agent',
+    From           => 'Agent Some Agent Some Agent <email@example.com>',
+    To             => 'Customer A <customer-a@example.com>',
+    Cc             => 'Customer B <customer-b@example.com>',
+    ReplyTo        => 'Customer B <customer-b@example.com>',
+    Subject        => 'first article',
+    Body           => 'Test',
+    ContentType    => 'text/plain; charset=ISO-8859-15',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'first article',
+    UserID         => 1,
+    NoAgentNotify  => 1,
 );
 
 for my $File (qw(txt)) {
@@ -962,7 +874,7 @@ for my $File (qw(txt)) {
         Type     => 'Local',
     );
 
-    my $ArticleWriteAttachment = $ArticleBackendObject->ArticleWriteAttachment(
+    my $ArticleWriteAttachment = $TicketObject->ArticleWriteAttachment(
         Content     => ${$ContentRef},
         Filename    => "StdAttachment-Test1.$File",
         ContentType => $File,
@@ -971,20 +883,73 @@ for my $File (qw(txt)) {
     );
 }
 
-# Get article contents (attachments + HTML body).
-@Articles = $ArticleObject->ArticleList(
+# save articles
+my @ArticleWithHTMLBody = $TicketObject->ArticleGet(
     TicketID => $TicketID5,
-);
-my @ArticleWithHTMLBody = $ArticleContentGet->(
-    Articles => \@Articles,
-    TicketID => $TicketID5,
+    UserID   => 1,
 );
 
-# Insert attachment content.
-$ArticleAttachmentContentGet->(
-    Articles => \@ArticleWithHTMLBody,
-    HTMLBody => 1,
-);
+for my $Article (@ArticleWithHTMLBody) {
+
+    for my $Key ( sort keys %{$Article} ) {
+        if ( !$Article->{$Key} ) {
+            $Article->{$Key} = '';
+        }
+        if ( $SkipFields{$Key} ) {
+            delete $Article->{$Key};
+        }
+    }
+}
+
+ARTICLE:
+for my $Article (@ArticleWithHTMLBody) {
+
+    for my $Key ( sort keys %{$Article} ) {
+        if ( !$Article->{$Key} ) {
+            $Article->{$Key} = '';
+        }
+        if ( $SkipFields{$Key} ) {
+            delete $Article->{$Key};
+        }
+        if ( $TicketDynamicFieldLookup{$Key} ) {
+            delete $Article->{$Key};
+        }
+    }
+
+    # get attachment index (without attachments)
+    my %AtmIndex = $TicketObject->ArticleAttachmentIndex(
+        ContentPath                => $Article->{ContentPath},
+        ArticleID                  => $Article->{ArticleID},
+        StripPlainBodyAsAttachment => 2,
+        Article                    => $Article,
+        UserID                     => 1,
+    );
+
+    next ARTICLE if !IsHashRefWithData( \%AtmIndex );
+
+    my @Attachments;
+    ATTACHMENT:
+    for my $FileID ( sort keys %AtmIndex ) {
+        next ATTACHMENT if !$FileID;
+        my %Attachment = $TicketObject->ArticleAttachment(
+            ArticleID => $Article->{ArticleID},
+            FileID    => $FileID,
+            UserID    => 1,
+        );
+
+        next ATTACHMENT if !IsHashRefWithData( \%Attachment );
+
+        # convert content to base64
+        $Attachment{Content}            = encode_base64( $Attachment{Content} );
+        $Attachment{ContentID}          = '';
+        $Attachment{ContentAlternative} = '';
+        push @Attachments, {%Attachment};
+    }
+
+    # set Attachments data
+    $Article->{Attachment} = \@Attachments;
+
+}    # finish article loop
 
 # set web-service name
 my $WebserviceName = '-Test-' . $RandomID;
@@ -1373,39 +1338,6 @@ my @Tests = (
         Operation => 'TicketGet',
     },
     {
-        Name           => 'Test Ticket 4 With All Articles and Attachments (without contents)',
-        SuccessRequest => '1',
-        RequestData    => {
-            TicketID              => $TicketID4,
-            AllArticles           => 1,
-            Attachments           => 1,
-            GetAttachmentContents => 0,
-        },
-        ExpectedReturnRemoteData => {
-            Success => 1,
-            Data    => {
-                Ticket => {
-                    %TicketEntryFour,
-                    Article => \@ArticleBoxAttachmentsWithoutContent,
-                },
-            },
-        },
-        ExpectedReturnLocalData => {
-            Success => 1,
-            Data    => {
-                Ticket => [
-                    {
-                        (
-                            %TicketEntryFour,
-                            Article => \@ArticleBoxAttachmentsWithoutContent,
-                            )
-                    },
-                ],
-            },
-        },
-        Operation => 'TicketGet',
-    },
-    {
         Name           => 'Test Ticket 4 With All Articles and Attachments and DynamicFields',
         SuccessRequest => '1',
         RequestData    => {
@@ -1438,6 +1370,7 @@ my @Tests = (
         },
         Operation => 'TicketGet',
     },
+
     {
         Name           => 'Test Ticket 4 With All Articles and Attachments (With sessionID)',
         SuccessRequest => '1',
@@ -1466,42 +1399,6 @@ my @Tests = (
                         (
                             %TicketEntryFour,
                             Article => \@ArticleBox,
-                            )
-                    },
-                ],
-            },
-        },
-        Operation => 'TicketGet',
-    },
-    {
-        Name           => 'Test Ticket 4 With All Articles and Attachments (With sessionID without contents)',
-        SuccessRequest => '1',
-        RequestData    => {
-            TicketID              => $TicketID4,
-            AllArticles           => 1,
-            Attachments           => 1,
-            GetAttachmentContents => 0,
-        },
-        Auth => {
-            SessionID => $NewSessionID,
-        },
-        ExpectedReturnRemoteData => {
-            Success => 1,
-            Data    => {
-                Ticket => {
-                    %TicketEntryFour,
-                    Article => \@ArticleBoxAttachmentsWithoutContent,
-                },
-            },
-        },
-        ExpectedReturnLocalData => {
-            Success => 1,
-            Data    => {
-                Ticket => [
-                    {
-                        (
-                            %TicketEntryFour,
-                            Article => \@ArticleBoxAttachmentsWithoutContent,
                             )
                     },
                 ],
@@ -1626,7 +1523,7 @@ my @Tests = (
             Data    => {
                 Ticket => {
                     %TicketEntryFour,
-                    Article => \@ArticleBoxSenderAgent,
+                    Article => $ArticleBoxSenderAgent[0],
                 },
             },
         },
@@ -1658,7 +1555,7 @@ my @Tests = (
             Data    => {
                 Ticket => {
                     %TicketEntryFour,
-                    Article => \@ArticleBoxSenderAgent,
+                    Article => $ArticleBoxSenderAgent[0],
                 },
             },
         },
@@ -1691,7 +1588,7 @@ my @Tests = (
             Data    => {
                 Ticket => {
                     %TicketEntryFour,
-                    Article => $ArticleBoxSenderCustomer[0],
+                    Article => \@ArticleBoxSenderCustomer,
                 },
             },
         },
@@ -1838,7 +1735,7 @@ for my $Test (@Tests) {
         if ( ref $LocalResult->{Data}->{Ticket} eq 'ARRAY' ) {
             for my $Item ( @{ $LocalResult->{Data}->{Ticket} } ) {
                 for my $Key ( sort keys %{$Item} ) {
-                    if ( !defined $Item->{$Key} ) {
+                    if ( !$Item->{$Key} ) {
                         $Item->{$Key} = '';
                     }
                     if ( $SkipFields{$Key} ) {
@@ -1846,7 +1743,7 @@ for my $Test (@Tests) {
                     }
                     if ( $Key eq 'DynamicField' ) {
                         for my $DF ( @{ $Item->{$Key} } ) {
-                            if ( !defined $DF->{Value} ) {
+                            if ( !$DF->{Value} ) {
                                 $DF->{Value} = '';
                             }
                         }
@@ -1857,7 +1754,7 @@ for my $Test (@Tests) {
                 if ( defined $Item->{Article} ) {
                     for my $Article ( @{ $Item->{Article} } ) {
                         for my $Key ( sort keys %{$Article} ) {
-                            if ( !defined $Article->{$Key} ) {
+                            if ( !$Article->{$Key} ) {
                                 $Article->{$Key} = '';
                             }
                             if ( $SkipFields{$Key} ) {
@@ -1873,7 +1770,7 @@ for my $Test (@Tests) {
 
                             if ( $Key eq 'DynamicField' ) {
                                 for my $DF ( @{ $Article->{$Key} } ) {
-                                    if ( !defined $DF->{Value} ) {
+                                    if ( !$DF->{Value} ) {
                                         $DF->{Value} = '';
                                     }
                                 }
@@ -1892,7 +1789,7 @@ for my $Test (@Tests) {
             if ( ref $RequesterResult->{Data}->{Ticket} eq 'ARRAY' ) {
                 for my $Item ( @{ $RequesterResult->{Data}->{Ticket} } ) {
                     for my $Key ( sort keys %{$Item} ) {
-                        if ( !defined $Item->{$Key} ) {
+                        if ( !$Item->{$Key} ) {
                             $Item->{$Key} = '';
                         }
                         if ( $SkipFields{$Key} ) {
@@ -1900,7 +1797,7 @@ for my $Test (@Tests) {
                         }
                         if ( $Key eq 'DynamicField' ) {
                             for my $DF ( @{ $Item->{$Key} } ) {
-                                if ( !defined $DF->{Value} ) {
+                                if ( !$DF->{Value} ) {
                                     $DF->{Value} = '';
                                 }
                             }
@@ -1910,7 +1807,7 @@ for my $Test (@Tests) {
             }
             elsif ( ref $RequesterResult->{Data}->{Ticket} eq 'HASH' ) {
                 for my $Key ( sort keys %{ $RequesterResult->{Data}->{Ticket} } ) {
-                    if ( !defined $RequesterResult->{Data}->{Ticket}->{$Key} ) {
+                    if ( !$RequesterResult->{Data}->{Ticket}->{$Key} ) {
                         $RequesterResult->{Data}->{Ticket}->{$Key} = '';
                     }
                     if ( $SkipFields{$Key} ) {
@@ -1918,7 +1815,7 @@ for my $Test (@Tests) {
                     }
                     if ( $Key eq 'DynamicField' ) {
                         for my $DF ( @{ $RequesterResult->{Data}->{Ticket}->{$Key} } ) {
-                            if ( !defined $DF->{Value} ) {
+                            if ( !$DF->{Value} ) {
                                 $DF->{Value} = '';
                             }
                         }
@@ -1930,7 +1827,7 @@ for my $Test (@Tests) {
                     if ( ref $RequesterResult->{Data}->{Ticket}->{Article} eq 'ARRAY' ) {
                         for my $Article ( @{ $RequesterResult->{Data}->{Ticket}->{Article} } ) {
                             for my $Key ( sort keys %{$Article} ) {
-                                if ( !defined $Article->{$Key} ) {
+                                if ( !$Article->{$Key} ) {
                                     $Article->{$Key} = '';
                                 }
                                 if ( $SkipFields{$Key} ) {
@@ -1944,7 +1841,7 @@ for my $Test (@Tests) {
                                 }
                                 if ( $Key eq 'DynamicField' ) {
                                     for my $DF ( @{ $Article->{$Key} } ) {
-                                        if ( !defined $DF->{Value} ) {
+                                        if ( !$DF->{Value} ) {
                                             $DF->{Value} = '';
                                         }
                                     }
@@ -1954,7 +1851,7 @@ for my $Test (@Tests) {
                     }
                     elsif ( ref $RequesterResult->{Data}->{Ticket}->{Article} eq 'HASH' ) {
                         for my $Key ( sort keys %{ $RequesterResult->{Data}->{Ticket}->{Article} } ) {
-                            if ( !defined $RequesterResult->{Data}->{Ticket}->{Article}->{$Key} ) {
+                            if ( !$RequesterResult->{Data}->{Ticket}->{Article}->{$Key} ) {
                                 $RequesterResult->{Data}->{Ticket}->{Article}->{$Key} = '';
                             }
                             if ( $SkipFields{$Key} ) {
@@ -1968,7 +1865,7 @@ for my $Test (@Tests) {
                             }
                             if ( $Key eq 'DynamicField' ) {
                                 for my $DF ( @{ $RequesterResult->{Data}->{Ticket}->{Article}->{$Key} } ) {
-                                    if ( !defined $DF->{Value} ) {
+                                    if ( !$DF->{Value} ) {
                                         $DF->{Value} = '';
                                     }
                                 }

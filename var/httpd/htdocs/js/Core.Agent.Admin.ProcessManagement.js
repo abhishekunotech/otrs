@@ -24,54 +24,6 @@ Core.Agent.Admin = Core.Agent.Admin || {};
 Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
 
     /**
-     * @name Init
-     * @memberof Core.Agent.Admin.ProcessManagement
-     * @function
-     * @description
-     *      This function initializes the module functionality.
-     */
-    TargetNS.Init = function () {
-
-        // Initialize Popup response (Redirect and close Popup)
-        InitProcessPopupsResponse();
-
-        // Initialize table filter
-        Core.UI.Table.InitTableFilter($('#Filter'), $('#Processes'), 0);
-
-        // Depending on Subaction initialize specific functions
-        if (Core.Config.Get('Subaction') === 'ActivityNew' ||
-          Core.Config.Get('Subaction') === 'ActivityEdit') {
-            TargetNS.InitActivityEdit();
-        }
-        else if (Core.Config.Get('Subaction') === 'ActivityDialogNew' ||
-          Core.Config.Get('Subaction') === 'ActivityDialogEdit') {
-            TargetNS.InitActivityDialogEdit();
-        }
-        else if (Core.Config.Get('Subaction') === 'TransitionNew' ||
-          Core.Config.Get('Subaction') === 'TransitionEdit') {
-            TargetNS.InitTransitionEdit();
-        }
-        else if (Core.Config.Get('Subaction') === 'TransitionActionNew' ||
-          Core.Config.Get('Subaction') === 'TransitionActionEdit') {
-            TargetNS.InitTransitionActionEdit();
-        }
-        else if (Core.Config.Get('Subaction') === 'ProcessEdit') {
-            TargetNS.InitProcessEdit();
-        }
-        else if (Core.Config.Get('Subaction') === 'ProcessPrint') {
-            $('.ProcessPrint').on('click', function() {
-                window.print();
-                return false;
-            });
-        }
-
-        // Depending on Action initialize specific functions
-        if (Core.Config.Get('Action') === 'AdminProcessManagementPath') {
-           TargetNS.InitPathEdit();
-        }
-    };
-
-    /**
      * @private
      * @name InitProcessPopups
      * @memberof Core.Agent.Admin.ProcessManagement
@@ -80,7 +32,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
      *      Initializes needed popup handler.
      */
     function InitProcessPopups() {
-        $('a.AsPopup').on('click', function () {
+        $('a.AsPopup').bind('click', function () {
             var Matches,
                 PopupType = 'Process';
 
@@ -97,7 +49,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             return false;
         });
 
-        $('a.AsPopup_Redirect').on('click', function () {
+        $('a.AsPopup_Redirect').bind('click', function () {
             var $Form = $(this).closest('form');
 
             $('#PopupRedirect').val(1);
@@ -109,10 +61,10 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             $('#PopupRedirectStartActivityID').val($(this).data('startactivityid'));
 
             if ($(this).hasClass('Edit_Confirm')) {
-                if (window.confirm(Core.Language.Translate('As soon as you use this button or link, you will leave this screen and its current state will be saved automatically. Do you want to continue?'))) {
+                if (window.confirm(Core.Agent.Admin.ProcessManagement.Localization.EditConfirm)) {
                     // Remove onbeforeunload event only if there is no validation pending on form submit
                     if (!($Form.hasClass("Validate"))) {
-                        $(window).off("beforeunload.PMPopup");
+                        $(window).unbind("beforeunload.PMPopup");
                     }
                     $(this).closest('form').submit();
                 }
@@ -120,74 +72,17 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             else {
                 // Remove onbeforeunload event only if there is no validation pending on form submit
                 if (!($Form.hasClass("Validate"))) {
-                    $(window).off("beforeunload.PMPopup");
+                    $(window).unbind("beforeunload.PMPopup");
                 }
                 $(this).closest('form').submit();
             }
             return false;
         });
 
-        $('a.GoBack').on('click', function () {
+        $('a.GoBack').bind('click', function () {
             // Remove onbeforeunload event (which is only needed if you close the popup via the window "X")
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
         });
-    }
-
-    /**
-     * @private
-     * @name InitProcessPopupsResponse
-     * @memberof Core.Agent.Admin.ProcessManagement
-     * @function
-     * @description
-     *      Initializes redirect and close popups response.
-     */
-    function InitProcessPopupsResponse() {
-        var Redirect = Core.Config.Get('Redirect'),
-            ClosePopup = Core.Config.Get('ClosePopup'),
-            Data;
-
-        if (typeof Redirect !== 'undefined') {
-
-            Data = {
-                Action: Redirect.Action,
-                Subaction: Redirect.Subaction,
-                ID: Redirect.ID,
-                EntityID: Redirect.EntityID,
-                Field: Redirect.Field,
-                StartActivityID: Redirect.StartActivityID
-            };
-
-            // send results to main window
-            window.opener.Core.Agent.Admin.ProcessManagement.UpdateConfig(Redirect.ConfigJSON);
-
-            // reload popup
-            Core.App.InternalRedirect(Data);
-        }
-        else if (typeof ClosePopup !== 'undefined') {
-
-            window.opener.Core.Agent.Admin.ProcessManagement.UpdateScreensPath(window, function (WindowObject) {
-                //send results to main window
-                WindowObject.opener.Core.Agent.Admin.ProcessManagement.UpdateConfig(ClosePopup.ConfigJSON);
-
-                // update accordion
-                WindowObject.opener.Core.Agent.Admin.ProcessManagement.UpdateAccordion();
-
-                // update sync message
-                WindowObject.opener.Core.Agent.Admin.ProcessManagement.UpdateSyncMessage();
-
-                // redraw canvas
-                WindowObject.opener.Core.Agent.Admin.ProcessManagement.Canvas.Redraw();
-
-                // remove overlay
-                WindowObject.opener.Core.Agent.Admin.ProcessManagement.HideOverlay();
-
-                // remove onbeforeunload event (which is only needed if you close the popup via the window "X")
-                $(WindowObject).off("beforeunload.PMPopup");
-
-                // close popup
-                WindowObject.close();
-            });
-        }
     }
 
     /**
@@ -212,14 +107,14 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             true,
             [
                {
-                   Label: Core.Language.Translate('Cancel'),
+                   Label: TargetNS.Localization.CancelMsg,
+                   Class: 'Primary',
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('.Dialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Delete'),
-                   Class: 'Primary',
+                   Label: TargetNS.Localization.DeleteMsg,
                    Function: function () {
                        var Data = {
                                Action: 'AdminProcessManagement',
@@ -272,20 +167,20 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
 
         Core.UI.Dialog.ShowContentDialog(
             $('#Dialogs #' + DialogID),
-            Core.Language.Translate('Delete Entity'),
+            TargetNS.Localization.DeleteEntityTitle,
             '240px',
             'Center',
             true,
             [
                {
-                   Label: Core.Language.Translate('Cancel'),
+                   Label: TargetNS.Localization.CancelMsg,
+                   Class: 'Primary',
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('.Dialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Delete'),
-                   Class: 'Primary',
+                   Label: TargetNS.Localization.DeleteMsg,
                    Function: function () {
                        var Data = {
                                Action: 'AdminProcessManagement',
@@ -327,7 +222,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
      *      Initializes the event handler to delete entities.
      */
     function InitDeleteEntity() {
-        $('a.DeleteEntity').on('click.DeleteEntity', function () {
+        $('a.DeleteEntity').bind('click.DeleteEntity', function () {
             var EntityID = $(this).closest('li').data('entity'),
                 EntityName = $(this).closest('li').clone().children().remove().end().text(),
                 ItemID = $(this).closest('li').data('id'),
@@ -486,7 +381,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                     TargetNS.Canvas.MakeDraggable();
                 }
                 else {
-                    alert(Core.Language.Translate('This Activity is already used in the Process. You cannot add it twice!'));
+                    alert(Core.Agent.Admin.ProcessManagement.Localization.ActivityAlreadyPlaced);
                 }
             }
             else {
@@ -564,7 +459,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                                 alert(Response.Message);
                             }
                             else {
-                                alert(Core.Language.Translate('Error during AJAX communication'));
+                                alert('Error during AJAX communication');
                             }
 
                             TargetNS.Canvas.ShowActivityAddActivityDialogError(Activity);
@@ -628,7 +523,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             // if a dummy activity exists, another transition was placed to the canvas but not yet
             // connected to an end point. One cannot place two unconnected transitions on the canvas.
             if ($('#Dummy').length && DummyActivityConnected(ProcessEntityID)) {
-              alert(Core.Language.Translate('An unconnected transition is already placed on the canvas. Please connect this transition first before placing another transition.'));
+              alert(Core.Agent.Admin.ProcessManagement.Localization.UnconnectedTransition);
               return false;
             }
 
@@ -641,7 +536,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                 // If this transition is already bind to this activity
                 // you cannot bind it a second time
                 if (Path[Activity] && typeof Path[Activity][EntityID] !== 'undefined') {
-                    alert(Core.Language.Translate('This Transition is already used for this Activity. You cannot use it twice!'));
+                    alert(Core.Agent.Admin.ProcessManagement.Localization.TransitionAlreadyPlaced);
                     return false;
                 }
 
@@ -698,7 +593,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                     typeof Path[Transition.StartActivity][Transition.TransitionID].TransitionAction !== 'undefined' &&
                     ($.inArray(EntityID, Path[Transition.StartActivity][Transition.TransitionID].TransitionAction) >= 0)
                 ) {
-                    alert(Core.Language.Translate('This TransitionAction is already used in this Path. You cannot use it twice!'));
+                    alert(Core.Agent.Admin.ProcessManagement.Localization.TransitionActionAlreadyPlaced);
                     return false;
                 }
 
@@ -895,7 +790,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                     alert(Response.Message);
                 }
                 else {
-                    alert(Core.Language.Translate('Error during AJAX communication'));
+                    alert('Error during AJAX communication');
                 }
                 return false;
             }
@@ -924,6 +819,18 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
     };
 
     /**
+     * @name InitProcessOverview
+     * @memberof Core.Agent.Admin.ProcessManagement
+     * @function
+     * @description
+     *      Initialize process overview screen.
+     */
+    TargetNS.InitProcessOverview = function() {
+        InitProcessPopups();
+        Core.UI.Table.InitTableFilter($('#Filter'), $('#Processes'), 0);
+    };
+
+    /**
      * @name InitProcessEdit
      * @memberof Core.Agent.Admin.ProcessManagement
      * @function
@@ -931,18 +838,16 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
      *      Initialize process edit screen.
      */
     TargetNS.InitProcessEdit = function () {
-      var ConfigProcess = Core.Config.Get('ConfigProcess');
-
         // Get Process Data
         TargetNS.ProcessData = {
-            Process: ConfigProcess.Process,
-            Activity: ConfigProcess.Activity,
-            ActivityDialog: ConfigProcess.ActivityDialog,
-            Transition: ConfigProcess.Transition,
-            TransitionAction: ConfigProcess.TransitionAction
+            Process: Core.Config.Get('Config.Process'),
+            Activity: Core.Config.Get('Config.Activity'),
+            ActivityDialog: Core.Config.Get('Config.ActivityDialog'),
+            Transition: Core.Config.Get('Config.Transition'),
+            TransitionAction: Core.Config.Get('Config.TransitionAction')
         };
 
-        TargetNS.ProcessLayout = ConfigProcess.ProcessLayout;
+        TargetNS.ProcessLayout = Core.Config.Get('Config.ProcessLayout');
 
         // Initialize Accordion in the sidebar
         Core.UI.Accordion.Init($('ul#ProcessElements'), 'li.AccordionElement h2 a', 'div.Content');
@@ -963,14 +868,19 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         InitDeleteEntity();
 
         // Initialize DeleteProcess
-        $('#ProcessDelete').on('click.ProcessDelete', function (Event) {
+        $('#ProcessDelete').bind('click.ProcessDelete', function (Event) {
             ShowDeleteProcessConfirmationDialog($(Event.target).closest('a'));
             Event.stopPropagation();
             return false;
         });
 
+        $('#SubmitAndContinue').bind('click', function() {
+            $('#ContinueAfterSave').val(1);
+            $('#Submit').click();
+        });
+
         // Init submit function
-        $('#Submit').on('click', function () {
+        $('#Submit').bind('click', function () {
             var ProcessEntityID = $('#ProcessEntityID').val(),
                 StartActivity;
 
@@ -1000,7 +910,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         });
 
         // Init Canvas Resizing Functions
-        $('#ExtendCanvasHeight').on('click', function () {
+        $('#ExtendCanvasHeight').bind('click', function () {
             TargetNS.Canvas.Extend({
                 Width: 0,
                 Height: 150
@@ -1008,7 +918,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             return false;
         });
 
-        $('#ExtendCanvasWidth').on('click', function () {
+        $('#ExtendCanvasWidth').bind('click', function () {
             TargetNS.Canvas.Extend({
                 Width: 150,
                 Height: 0
@@ -1016,13 +926,13 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             return false;
         });
 
-        $('#ShowEntityIDs').on('click', function() {
+        $('#ShowEntityIDs').bind('click', function() {
             if ($(this).hasClass('Visible')) {
-                $(this).removeClass('Visible').text(Core.Language.Translate('Show EntityIDs'));
+                $(this).removeClass('Visible').text(Core.Agent.Admin.ProcessManagement.Localization.ShowEntityIDs);
                 $('em.EntityID').remove();
             }
             else {
-                $(this).addClass('Visible').text(Core.Language.Translate('Hide EntityIDs'));
+                $(this).addClass('Visible').text(Core.Agent.Admin.ProcessManagement.Localization.HideEntityIDs);
                 TargetNS.Canvas.ShowEntityIDs();
             }
             return false;
@@ -1053,7 +963,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         // Initialize list filter
         Core.UI.Table.InitTableFilter($('#FilterAvailableActivityDialogs'), $('#AvailableActivityDialogs'));
 
-        $('#Submit').on('click', function() {
+        $('#Submit').bind('click', function() {
             $('#ActivityForm').submit();
         });
 
@@ -1063,7 +973,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             $('input[name=ActivityDialogs]').val(Core.JSON.Stringify(Core.UI.AllocationList.GetResult('#AssignedActivityDialogs', 'id')));
 
             // not needed for normal submit
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
 
             Form.submit();
         });
@@ -1072,12 +982,12 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         InitProcessPopups();
 
         // Init handling of closing popup with the OS functionality ("X")
-        $(window).off("beforeunload.PMPopup").on("beforeunload.PMPopup", function () {
+        $(window).unbind("beforeunload.PMPopup").bind("beforeunload.PMPopup", function () {
             window.opener.Core.Agent.Admin.ProcessManagement.HandlePopupClose();
         });
 
-        $('.ClosePopup').on("click", function () {
-            $(window).off("beforeunload.PMPopup");
+        $('.ClosePopup').bind("click", function () {
+            $(window).unbind("beforeunload.PMPopup");
         });
     };
 
@@ -1127,7 +1037,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         // Initialize list filter
         Core.UI.Table.InitTableFilter($('#FilterAvailableFields'), $('#AvailableFields'));
 
-        $('#Submit').on('click', function() {
+        $('#Submit').bind('click', function() {
             $('#ActivityDialogForm').submit();
             return false;
         });
@@ -1157,13 +1067,13 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             $('input[name=FieldDetails]').val(Core.JSON.Stringify(FieldDetails));
 
             // not needed for normal submit
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
 
             Form.submit();
         });
 
         // Init Fields modal overlay
-        $('.FieldDetailsOverlay').off('click').on('click', function () {
+        $('.FieldDetailsOverlay').unbind('click').bind('click', function () {
             var FieldConfig = $(this).closest('li').data('config'),
                 $Element = $(this),
                 Fieldname = $.trim($(this).closest('li').data('id')),
@@ -1176,13 +1086,13 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             // Open dialog
             Core.UI.Dialog.ShowContentDialog(
                 $('#Dialogs #FieldDetails'),
-                Core.Language.Translate('Edit Field Details') + ': ' + FieldNameTranslated,
+                TargetNS.Localization.DialogTitle + ': ' + FieldNameTranslated,
                 '200px',
                 'Center',
                 true,
                 [
                      {
-                         Label: Core.Language.Translate('Save'),
+                         Label: TargetNS.Localization.SaveMsg,
                          Class: 'Primary',
                          Function: function () {
                              var FieldConfigElement = {};
@@ -1200,7 +1110,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
 
                                  // show error if internal article type is set for an interface different than AgentInterface
                                  if ($('#Interface').val() !== 'AgentInterface' && $('#ArticleType').val().match(/-int/i)){
-                                     window.alert(Core.Language.Translate('Customer interface does not support internal article types.'));
+                                     window.alert(Core.Agent.Admin.ProcessManagement.Localization.WrongArticleTypeMsg);
                                      return false;
                                  }
 
@@ -1214,7 +1124,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                          }
                      },
                      {
-                         Label: Core.Language.Translate('Cancel'),
+                         Label: TargetNS.Localization.CancelMsg,
                          Function: function () {
                              Core.UI.Dialog.CloseDialog($('.Dialog'));
                          }
@@ -1299,12 +1209,12 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         InitProcessPopups();
 
         // Init handling of closing popup with the OS functionality ("X")
-        $(window).off("beforeunload.PMPopup").on("beforeunload.PMPopup", function () {
+        $(window).unbind("beforeunload.PMPopup").bind("beforeunload.PMPopup", function () {
             window.opener.Core.Agent.Admin.ProcessManagement.HandlePopupClose();
         });
 
-        $('.ClosePopup').on("click", function () {
-            $(window).off("beforeunload.PMPopup");
+        $('.ClosePopup').bind("click", function () {
+            $(window).unbind("beforeunload.PMPopup");
         });
     };
 
@@ -1318,7 +1228,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
     TargetNS.InitTransitionEdit = function () {
 
         // Init addition of new conditions
-        $('#ConditionAdd').on('click', function() {
+        $('#ConditionAdd').bind('click', function() {
             // get current parent index
             var CurrentParentIndex = parseInt($(this).prev('.WidgetSimple').first().attr('id').replace(/Condition\[/g, '').replace(/\]/g, ''), 10),
                 // in case we add a whole new condition, the fieldindex must be 1
@@ -1338,7 +1248,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                 $(this).closest('.WidgetSimple').remove();
             }
             else {
-                alert(Core.Language.Translate("Sorry, the only existing condition can't be removed."));
+                alert("Sorry, the only existing condition can't be removed.");
             }
 
             return false;
@@ -1366,13 +1276,13 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                 $(this).parent().closest('fieldset').remove();
             }
             else {
-                alert(Core.Language.Translate("Sorry, the only existing field can't be removed."));
+                alert("Sorry, the only existing field can't be removed.");
             }
 
             return false;
         });
 
-        $('#Submit').on('click', function() {
+        $('#Submit').bind('click', function() {
             $('#TransitionForm').submit();
             return false;
         });
@@ -1382,18 +1292,18 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             $('input[name=ConditionConfig]').val(Core.JSON.Stringify(ConditionConfig));
 
             // not needed for normal submit
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
 
             Form.submit();
         });
 
         // Init handling of closing popup with the OS functionality ("X")
-        $(window).off("beforeunload.PMPopup").on("beforeunload.PMPopup", function () {
+        $(window).unbind("beforeunload.PMPopup").bind("beforeunload.PMPopup", function () {
             window.opener.Core.Agent.Admin.ProcessManagement.HandlePopupClose();
         });
 
-        $('.ClosePopup').on("click", function () {
-            $(window).off("beforeunload.PMPopup");
+        $('.ClosePopup').bind("click", function () {
+            $(window).unbind("beforeunload.PMPopup");
         });
 
         Core.UI.InputFields.Init();
@@ -1409,7 +1319,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
      */
     TargetNS.InitTransitionActionEdit = function () {
         // Init addition of new config parameters
-        $('#ConfigAdd').on('click', function() {
+        $('#ConfigAdd').bind('click', function() {
             // get the index for the newly to be added element
             // therefore, we search the preceding fieldset and the first
             // label in it to get its "for"-attribute which contains the index
@@ -1437,19 +1347,19 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
                 $(this).closest('fieldset').remove();
             }
             else {
-                alert(Core.Language.Translate("Sorry, the only existing parameter can't be removed."));
+                alert("Sorry, the only existing parameter can't be removed.");
             }
             return false;
         });
 
-        $('#Submit').on('click', function() {
+        $('#Submit').bind('click', function() {
             $('#TransitionForm').submit();
             return false;
         });
 
         Core.Form.Validate.SetSubmitFunction($('#TransitionForm'), function (Form) {
             // not needed for normal submit
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
 
             Form.submit();
         });
@@ -1457,12 +1367,12 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         InitProcessPopups();
 
         // Init handling of closing popup with the OS functionality ("X")
-        $(window).off("beforeunload.PMPopup").on("beforeunload.PMPopup", function () {
+        $(window).unbind("beforeunload.PMPopup").bind("beforeunload.PMPopup", function () {
             window.opener.Core.Agent.Admin.ProcessManagement.HandlePopupClose();
         });
 
-        $('.ClosePopup').on("click", function () {
-            $(window).off("beforeunload.PMPopup");
+        $('.ClosePopup').bind("click", function () {
+            $(window).unbind("beforeunload.PMPopup");
         });
     };
 
@@ -1474,9 +1384,9 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
      *      Initialize path edit screen.
      */
     TargetNS.InitPathEdit = function () {
-        var CurrentProcessEntityID = Core.Config.Get('ProcessEntityID'),
-            CurrentTransitionEntityID = Core.Config.Get('TransitionEntityID'),
-            StartActivityID = Core.Config.Get('StartActivityID'),
+        var CurrentProcessEntityID = Core.Config.Get('Config.ProcessEntityID'),
+            CurrentTransitionEntityID = Core.Config.Get('Config.TransitionEntityID'),
+            StartActivityID = Core.Config.Get('Config.StartActivityID'),
             ActivityInfo = window.opener.Core.Agent.Admin.ProcessManagement.ProcessData.Activity,
             PathInfo = window.opener.Core.Agent.Admin.ProcessManagement.ProcessData.Process[CurrentProcessEntityID].Path,
             StartActivityEntityID = '', EndActivityEntityID = '',
@@ -1517,11 +1427,11 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         }
 
         // if transition select is updated, also update transition edit link
-        $('#Transition').on('change', function () {
+        $('#Transition').bind('change', function () {
            $('#EditPath a').data('entity', $(this).val());
         });
 
-        $('#Submit').on('click', function() {
+        $('#Submit').bind('click', function() {
             $('#PathForm').submit();
             return false;
         });
@@ -1548,7 +1458,7 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             $('#TransitionInfo').val(Core.JSON.Stringify(TransitionInfo));
 
             // not needed for normal submit
-            $(window).off("beforeunload.PMPopup");
+            $(window).unbind("beforeunload.PMPopup");
 
             Form.submit();
         });
@@ -1557,12 +1467,12 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
         InitProcessPopups();
 
         // Init handling of closing popup with the OS functionality ("X")
-        $(window).off("beforeunload.PMPopup").on("beforeunload.PMPopup", function () {
+        $(window).unbind("beforeunload.PMPopup").bind("beforeunload.PMPopup", function () {
             window.opener.Core.Agent.Admin.ProcessManagement.HandlePopupClose();
         });
 
-        $('.ClosePopup').on("click", function () {
-            $(window).off("beforeunload.PMPopup");
+        $('.ClosePopup').bind("click", function () {
+            $(window).unbind("beforeunload.PMPopup");
         });
     };
 
@@ -1696,8 +1606,6 @@ Core.Agent.Admin.ProcessManagement = (function (TargetNS) {
             });
         }
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.ProcessManagement || {}));

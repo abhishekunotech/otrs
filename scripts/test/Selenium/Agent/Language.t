@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -41,35 +40,18 @@ $Selenium->RunTest(
         my $ScriptAlias = $ConfigObject->Get('ScriptAlias');
 
         # navigate to AgentPReferences screen
-        $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentPreferences;Subaction=Group;Group=UserProfile");
+        $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentPreferences");
 
         my @Languages = sort keys %{ $ConfigObject->Get('DefaultUsedLanguages') };
 
+        Language:
         for my $Language (@Languages) {
 
             # check for the language selection box
             $Selenium->execute_script(
                 "\$('#UserLanguage').val('$Language').trigger('redraw.InputField').trigger('change');"
             );
-            $Selenium->execute_script(
-                "\$('#UserLanguage').closest('.WidgetSimple').find('.SettingUpdateBox').find('button').trigger('click');"
-            );
-
-            # wait for the ajax call to finish
-            $Selenium->WaitFor(
-                JavaScript =>
-                    "return !\$('#UserLanguage').closest('.WidgetSimple').hasClass('HasOverlay')"
-            );
-
-            # Verify right value for user language is selected.
-            $Self->Is(
-                $Selenium->find_element( "#UserLanguage", 'css' )->get_value(),
-                $Language,
-                "Selected value for UserLanguage field is correct"
-            );
-
-            # reload the screen
-            $Selenium->VerifiedRefresh();
+            $Selenium->find_element( "select#UserLanguage", 'css' )->VerifiedSubmit();
 
             # now check if the language was correctly applied in the interface
             my $LanguageObject = Kernel::Language->new(
@@ -77,14 +59,18 @@ $Selenium->RunTest(
             );
 
             my $Element = $Selenium->find_element( 'Label[for=UserLanguage]', 'css' );
-            my $Label = $Element->get_text();
-            $Label =~ s/^\s+|\s+$//g;
-            my $Expected = $LanguageObject->Translate('Language');
-            $Expected =~ s/^\s+|\s+$//g;
             $Self->Is(
-                $Label,
-                $Expected,
+                substr( $Element->get_text(), 0, -1 ),
+                $LanguageObject->Get('Language'),
                 "String 'Language' in $Language",
+            );
+
+            $Self->True(
+                index(
+                    $Selenium->get_page_source(),
+                    $LanguageObject->Get('Preferences updated successfully!')
+                    ) > -1,
+                "Success notification in $Language",
             );
         }
     }

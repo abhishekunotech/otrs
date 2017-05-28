@@ -114,21 +114,19 @@ sub Run {
                 Lock     => 'lock',
                 UserID   => $Self->{UserID},
             );
+            if (
+                $TicketObject->TicketOwnerSet(
+                    TicketID  => $Self->{TicketID},
+                    UserID    => $Self->{UserID},
+                    NewUserID => $Self->{UserID},
+                )
+                )
+            {
 
-            my $Success = $TicketObject->TicketOwnerSet(
-                TicketID  => $Self->{TicketID},
-                UserID    => $Self->{UserID},
-                NewUserID => $Self->{UserID},
-            );
-
-            # show lock state
-            if ($Success) {
-                $LayoutObject->Block(
-                    Name => 'PropertiesLock',
-                    Data => {
-                        %Param,
-                        TicketID => $Self->{TicketID},
-                    },
+                # show lock state
+                $OutputNotify = $LayoutObject->Notify(
+                    Data => "$Ticket{TicketNumber}: "
+                        . $LayoutObject->{LanguageObject}->Translate("Ticket locked."),
                 );
             }
         }
@@ -200,7 +198,7 @@ sub Run {
     for my $DynamicFieldConfig ( @{$DynamicField} ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-        # extract the dynamic field value from the web request
+        # extract the dynamic field value form the web request
         $DynamicFieldValues{ $DynamicFieldConfig->{Name} } =
             $DynamicFieldBackendObject->EditFieldValueGet(
             DynamicFieldConfig => $DynamicFieldConfig,
@@ -681,9 +679,6 @@ sub Run {
 
             my $From;
 
-            my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-            my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Phone' );
-
             if ( lc $Config->{SenderType} eq 'customer' ) {
 
                 # get customer email address
@@ -701,20 +696,12 @@ sub Run {
                     }
                 }
                 else {
-                    # Use customer data as From, if possible.
-                    my @MetaArticles = $ArticleObject->ArticleList(
-                        SenderType => 'customer',
-                        OnlyLast   => 1,
+                    # Use customer data as From, if possible
+                    my %LastCustomerArticle = $TicketObject->ArticleLastCustomerArticle(
+                        TicketID      => $Self->{TicketID},
+                        DynamicFields => 0,
                     );
-                    if (@MetaArticles) {
-                        my %LastCustomerArticle
-                            = $ArticleObject->BackendForArticle( %{ $MetaArticles[0] } )->ArticleGet(
-                            %{ $MetaArticles[0] },
-                            DynamicFields => 0,
-                            UserID        => $Self->{UserID},
-                            );
-                        $From = $LastCustomerArticle{From};
-                    }
+                    $From = $LastCustomerArticle{From};
                 }
             }
 
@@ -727,19 +714,19 @@ sub Run {
                 );
             }
 
-            my $ArticleID = $ArticleBackendObject->ArticleCreate(
-                TicketID             => $Self->{TicketID},
-                IsVisibleForCustomer => 1,
-                SenderType           => $Config->{SenderType},
-                From                 => $From,
-                Subject              => $GetParam{Subject},
-                Body                 => $GetParam{Body},
-                MimeType             => $MimeType,
-                Charset              => $LayoutObject->{UserCharset},
-                UserID               => $Self->{UserID},
-                HistoryType          => $Config->{HistoryType},
-                HistoryComment       => $Config->{HistoryComment} || '%%',
-                UnlockOnAway         => 1,
+            my $ArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $Self->{TicketID},
+                ArticleType    => $Config->{ArticleType},
+                SenderType     => $Config->{SenderType},
+                From           => $From,
+                Subject        => $GetParam{Subject},
+                Body           => $GetParam{Body},
+                MimeType       => $MimeType,
+                Charset        => $LayoutObject->{UserCharset},
+                UserID         => $Self->{UserID},
+                HistoryType    => $Config->{HistoryType},
+                HistoryComment => $Config->{HistoryComment} || '%%',
+                UnlockOnAway   => 1,
             );
 
             # show error of creating article
@@ -759,9 +746,8 @@ sub Run {
 
             # write attachments
             for my $Attachment (@AttachmentData) {
-                $ArticleBackendObject->ArticleWriteAttachment(
+                $TicketObject->ArticleWriteAttachment(
                     %{$Attachment},
-                    TicketID  => $Self->{TicketID},
                     ArticleID => $ArticleID,
                     UserID    => $Self->{UserID},
                 );
@@ -1092,18 +1078,19 @@ sub _MaskPhone {
         OnlyDynamicFields => 1
     );
 
+    # create a string with the quoted dynamic field names separated by commas
+    if ( IsArrayRefWithData($DynamicFieldNames) ) {
+        for my $Field ( @{$DynamicFieldNames} ) {
+            $Param{DynamicFieldNamesStrg} .= ", '" . $Field . "'";
+        }
+    }
+
     # get needed objects
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # get config of frontend module
     my $Config = $ConfigObject->Get("Ticket::Frontend::$Self->{Action}");
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'DynamicFieldNames',
-        Value => $DynamicFieldNames,
-    );
 
     # build next states string
     my %Selected;
@@ -1125,11 +1112,8 @@ sub _MaskPhone {
     # customer info string
     if ( $ConfigObject->Get('Ticket::Frontend::CustomerInfoCompose') ) {
         $Param{CustomerTable} = $LayoutObject->AgentCustomerViewTable(
-            Data => {
-                %{ $Param{CustomerData} },
-                TicketID => $Self->{TicketID},
-            },
-            Max => $ConfigObject->Get('Ticket::Frontend::CustomerInfoComposeMaxSize'),
+            Data => $Param{CustomerData},
+            Max  => $ConfigObject->Get('Ticket::Frontend::CustomerInfoComposeMaxSize'),
         );
         $LayoutObject->Block(
             Name => 'CustomerTable',
@@ -1255,6 +1239,18 @@ sub _MaskPhone {
         );
     }
 
+    # show spell check
+    if ( $LayoutObject->{BrowserSpellChecker} ) {
+        $LayoutObject->Block(
+            Name => 'TicketOptions',
+            Data => {},
+        );
+        $LayoutObject->Block(
+            Name => 'SpellCheck',
+            Data => {},
+        );
+    }
+
     # show attachments
     ATTACHMENT:
     for my $Attachment ( @{ $Param{Attachments} } ) {
@@ -1280,8 +1276,8 @@ sub _MaskPhone {
         $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-        # set up rich text editor
-        $LayoutObject->SetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }

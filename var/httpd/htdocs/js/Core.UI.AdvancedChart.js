@@ -124,7 +124,7 @@ Core.UI.AdvancedChart = (function (TargetNS) {
                     return;
                 }
                 // Ignore sum col
-                if (typeof HeadingElement === 'undefined' ||  HeadingElement === 'Sum') {
+                if (HeadingElement === 'Sum') {
                     return;
                 }
 
@@ -358,6 +358,10 @@ Core.UI.AdvancedChart = (function (TargetNS) {
             PreferencesData = Options.PreferencesData,
             Counter = 0;
 
+        // First RawData element is not needed
+        RawData.shift();
+        Headings = RawData.shift();
+
         if (PreferencesData && typeof PreferencesData.Bar !== 'undefined') {
             PreferencesData = PreferencesData.Bar;
         }
@@ -365,66 +369,60 @@ Core.UI.AdvancedChart = (function (TargetNS) {
             PreferencesData = {};
         }
 
-        if (RawData !== null) {
-            // First RawData element is not needed
-            RawData.shift();
-            Headings = RawData.shift();
+        $.each(RawData, function(DataIndex, DataElement) {
+            var InnerCounter = 0,
+                ResultLine;
 
-            $.each(RawData, function(DataIndex, DataElement) {
-                var InnerCounter = 0,
-                    ResultLine;
+            // Ignore sum row
+            if (DataElement[0] === 'Sum') {
+                return;
+            }
 
-                // Ignore sum row
-                if (DataElement[0] === 'Sum') {
+            ResultLine = {
+                key: DataElement[0],
+                color: Colors[Counter % Colors.length],
+                disabled: (PreferencesData && PreferencesData.Filter && $.inArray(DataElement[0], PreferencesData.Filter) === -1) ? true : false,
+                values: []
+            };
+
+            $.each(Headings, function(HeadingIndex, HeadingElement){
+                var Value;
+
+                InnerCounter++;
+
+                // First element is x axis label
+                if (HeadingIndex === 0){
+                    return;
+                }
+                // Ignore sum col
+                if (HeadingElement === 'Sum') {
                     return;
                 }
 
-                ResultLine = {
-                    key: DataElement[0],
-                    color: Colors[Counter % Colors.length],
-                    disabled: (PreferencesData && PreferencesData.Filter && $.inArray(DataElement[0], PreferencesData.Filter) === -1) ? true : false,
-                    values: []
-                };
+                Value = parseFloat(DataElement[HeadingIndex]);
 
-                $.each(Headings, function(HeadingIndex, HeadingElement){
-                    var Value;
+                if (isNaN(Value)) {
+                    return;
+                }
 
-                    InnerCounter++;
+                // Check if value is a floating point number and not an integer
+                if (Value % 1) {
+                    ValueFormat = ',1f'; // Set y axis format to float
+                }
 
-                    // First element is x axis label
-                    if (HeadingIndex === 0){
-                        return;
-                    }
-                    // Ignore sum col
-                    if (typeof HeadingElement === 'undefined' ||  HeadingElement === 'Sum') {
-                        return;
-                    }
-
-                    Value = parseFloat(DataElement[HeadingIndex]);
-
-                    if (isNaN(Value)) {
-                        return;
-                    }
-
-                    // Check if value is a floating point number and not an integer
-                    if (Value % 1) {
-                        ValueFormat = ',1f'; // Set y axis format to float
-                    }
-
-                    // nv d3 does not work correcly with non numeric values
-                    // because it could happen that x axis headings occur multiple
-                    // times (such as Thu 18 for two different months), we
-                    // add a custom label for uniquity of the headings which is being
-                    // removed later (see OTRSmultiBarChart.js)
-                    ResultLine.values.push({
-                        x: '__LABEL_START__' + InnerCounter + '__LABEL_END__' + HeadingElement + ' ',
-                        y: Value
-                    });
+                // nv d3 does not work correcly with non numeric values
+                // because it could happen that x axis headings occur multiple
+                // times (such as Thu 18 for two different months), we
+                // add a custom label for uniquity of the headings which is being
+                // removed later (see OTRSmultiBarChart.js)
+                ResultLine.values.push({
+                    x: '__LABEL_START__' + InnerCounter + '__LABEL_END__' + HeadingElement + ' ',
+                    y: Value
                 });
-                ResultData.push(ResultLine);
-                Counter++;
             });
-        }
+            ResultData.push(ResultLine);
+            Counter++;
+        });
 
         // production mode
         nv.dev = false;
@@ -554,7 +552,7 @@ Core.UI.AdvancedChart = (function (TargetNS) {
                     return;
                 }
                 // Ignore sum col
-                if (typeof HeadingElement === 'undefined' ||  HeadingElement === 'Sum') {
+                if (HeadingElement === 'Sum') {
                     return;
                 }
 
@@ -688,14 +686,6 @@ Core.UI.AdvancedChart = (function (TargetNS) {
                 DrawLineChart(RawData, Element, Options);
                 break;
         }
-
-        $('#download-svg').on('click', function() {
-            // window.btoa() does not work because it does not support Unicode DOM strings.
-            this.href = TargetNS.ConvertSVGtoBase64($('#svg-container'));
-        });
-        $('#download-png').on('click', function() {
-            this.href = TargetNS.ConvertSVGtoPNG($('#svg-container'));
-        });
     };
 
     /**

@@ -22,15 +22,19 @@ $Selenium->RunTest(
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
         # get dashboard MOTD plugin default sysconfig
-        my %MOTDConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %MOTDConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name    => 'DashboardBackend###0210-MOTD',
             Default => 1,
         );
 
+        # set dashboard MOTD plugin to valid
+        my %MOTDConfigUpdate = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $MOTDConfig{Setting}->[1]->{Hash}->[1]->{Item} };
+
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'DashboardBackend###0210-MOTD',
-            Value => $MOTDConfig{EffectiveValue},
+            Value => \%MOTDConfigUpdate,
         );
 
         # # create test user and login

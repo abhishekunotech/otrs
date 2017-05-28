@@ -12,12 +12,10 @@ use utf8;
 
 use vars (qw($Self %Param));
 
-my $ConfigObject         = $Kernel::OM->Get('Kernel::Config');
-my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-my $UploadCacheObject    = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
-my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-    ChannelName => 'Internal',
-);
+# get needed objects
+my $ConfigObject      = $Kernel::OM->Get('Kernel::Config');
+my $TicketObject      = $Kernel::OM->Get('Kernel::System::Ticket');
+my $UploadCacheObject = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
@@ -59,22 +57,22 @@ Special case from Lotus Notes:
 </body>
 </html>';
 
-my $ArticleID = $ArticleBackendObject->ArticleCreate(
-    TicketID             => $TicketID,
-    IsVisibleForCustomer => 0,
-    SenderType           => 'agent',
-    From                 => 'Some Agent <email@example.com>',
-    To                   => 'Some Customer <customer@example.com>',
-    Subject              => 'Fax Agreement laalala',
-    Body                 => $HTML,
-    ContentType          => 'text/html; charset=ISO-8859-15',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'Some free text!',
-    UserID               => 1,
-    NoAgentNotify        => 1,                                        # if you don't want to send agent notifications
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID       => $TicketID,
+    ArticleType    => 'note-internal',
+    SenderType     => 'agent',
+    From           => 'Some Agent <email@example.com>',
+    To             => 'Some Customer <customer@example.com>',
+    Subject        => 'Fax Agreement laalala',
+    Body           => $HTML,
+    ContentType    => 'text/html; charset=ISO-8859-15',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'Some free text!',
+    UserID         => 1,
+    NoAgentNotify  => 1,                                        # if you don't want to send agent notifications
 );
 
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'some.html',
     MimeType    => 'text/html',
     ContentType => 'text/html',
@@ -84,7 +82,7 @@ $ArticleBackendObject->ArticleWriteAttachment(
     UserID      => 1,
 );
 
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'image.png',
     MimeType    => 'image/png',
     ContentType => 'image/png',
@@ -94,7 +92,7 @@ $ArticleBackendObject->ArticleWriteAttachment(
     UserID      => 1,
 );
 
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'image2.png',
     MimeType    => 'image/png',
     ContentType => 'image/png',
@@ -102,7 +100,7 @@ $ArticleBackendObject->ArticleWriteAttachment(
     ArticleID   => $ArticleID,
     UserID      => 1,
 );
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'image3.png',
     MimeType    => 'image/png',
     ContentType => 'image/png',
@@ -110,7 +108,7 @@ $ArticleBackendObject->ArticleWriteAttachment(
     ArticleID   => $ArticleID,
     UserID      => 1,
 );
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'image4.png',
     MimeType    => 'image/png',
     ContentType => 'image/png',
@@ -119,7 +117,7 @@ $ArticleBackendObject->ArticleWriteAttachment(
     ArticleID   => $ArticleID,
     UserID      => 1,
 );
-$ArticleBackendObject->ArticleWriteAttachment(
+$TicketObject->ArticleWriteAttachment(
     Filename    => 'image.bmp',
     MimeType    => 'image/bmp',
     ContentType => 'image/bmp',

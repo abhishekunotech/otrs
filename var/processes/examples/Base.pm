@@ -148,6 +148,15 @@ sub DynamicFieldsAdd {
     return %Response;
 }
 
+sub DependencyCheck {
+    my ( $Self, %Param ) = @_;
+
+    # no Dependencies
+    return (
+        Success => 1,
+    );
+}
+
 1;
 
 =back

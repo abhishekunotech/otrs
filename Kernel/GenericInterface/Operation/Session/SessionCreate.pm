@@ -13,7 +13,7 @@ use warnings;
 
 use Kernel::System::VariableCheck qw(IsStringWithData IsHashRefWithData);
 
-use parent qw(
+use base qw(
     Kernel::GenericInterface::Operation::Common
     Kernel::GenericInterface::Operation::Session::Common
 );
@@ -24,9 +24,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Operation::Ticket::SessionCreate - GenericInterface Session Create Operation backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Operation->new();
@@ -58,7 +64,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 Retrieve a new session id value.
 
@@ -123,6 +129,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

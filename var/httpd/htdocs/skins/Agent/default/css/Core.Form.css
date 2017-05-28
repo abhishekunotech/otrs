@@ -118,7 +118,6 @@ a.Reset {
     vertical-align: middle;
     cursor: pointer;
     position: relative;
-    z-index: 999;
 }
 
 button.Add,
@@ -159,7 +158,6 @@ a.TrashCan i.fa-trash-o {
     position: absolute;
     left: 0px;
     top: 4px;
-    z-index: 998;
 }
 
 button.Reset,
@@ -209,23 +207,6 @@ button.Reset:active {
     margin: 0 3px 0 0;
 }
 
-.AdditionlFieldIcon {
-    width: 16px;
-    height: 16px;
-    margin-left: 3px;
-    display: inline-block;
-    color: #333;
-}
-
-.AdditionlFieldIcon span {
-    position: absolute;
-    left: -9999px;
-    top: -9999px;
-}
-
-.RTL .AdditionlFieldIcon {
-    margin: 0 3px 0 0;
-}
 
 /**
  * @subsection    GenericAgent ClearSelect
@@ -491,16 +472,6 @@ form label.LabelError {
     color: #555;
 }
 
-#EmailRecipientsList span,
-#EmailRecipientsList a.Collapse {
-    display: none;
-}
-
-#EmailRecipientsList.Expanded span,
-#EmailRecipientsList.Expanded a.Expand {
-    display: inline;
-}
-
 /**
  * @note        Give the user a hint about linked label elements (they are clickable and
  *                  give focus to the linked element.
@@ -511,9 +482,7 @@ form label[for] {
 }
 
 form input.Error,
-form textarea.Error,
-form input.Error:focus,
-form textarea.Error:focus {
+form textarea.Error {
     border-color: #ff505e;
 }
 
@@ -716,16 +685,15 @@ fieldset.TableLike.Narrow > .Row > label,
 fieldset.TableLike.Narrow > .Value,
 fieldset.TableLike.Narrow > .Row > .Value {
     line-height: 1.3em;
-}
-
-fieldset.TableLike.Narrow > label,
-fieldset.TableLike.Narrow > .Row > label,
-fieldset.TableLike.Narrow > .Value,
-fieldset.TableLike.Narrow > .Row > .Value,
-fieldset.TableLike > label,
-fieldset.TableLike > .Row > label {
-    word-wrap: break-word;
     overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 iframe.Signature {

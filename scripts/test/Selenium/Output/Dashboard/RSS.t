@@ -30,15 +30,19 @@ $Selenium->RunTest(
         );
 
         # get dashboard RSS plugin default sysconfig
-        my %RSSConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %RSSConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name    => 'DashboardBackend###0410-RSS',
             Default => 1,
         );
 
+        # set dashboard RSS plugin to valid
+        %RSSConfig = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $RSSConfig{Setting}->[1]->{Hash}->[1]->{Item} };
+
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'DashboardBackend###0410-RSS',
-            Value => $RSSConfig{EffectiveValue},
+            Value => \%RSSConfig,
         );
 
         # Avoid SSL errors on old test platforms.
@@ -58,9 +62,6 @@ $Selenium->RunTest(
             User     => $TestUserLogin,
             Password => $TestUserLogin,
         );
-
-        # wait for RSS plugin to show up
-        $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("#Dashboard0410-RSS").length' );
 
         # test if RSS plugin shows correct link
         my $RSSLink = "https://www.otrs.com/";

@@ -13,7 +13,10 @@ use warnings;
 
 use MIME::Base64;
 
+use Date::Pcalc
+    qw(Add_Delta_YMD Add_Delta_DHMS Add_Delta_Days Days_in_Month Day_of_Week Day_of_Week_Abbreviation Day_of_Week_to_Text Monday_of_Week Week_of_Year);
 use POSIX qw(ceil);
+use Storable qw();
 
 use Kernel::Language qw(Translatable);
 use Kernel::System::VariableCheck qw(:all);
@@ -29,7 +32,6 @@ our @ObjectDependencies = (
     'Kernel::System::Group',
     'Kernel::System::Log',
     'Kernel::System::Main',
-    'Kernel::System::Storable',
     'Kernel::System::Time',
     'Kernel::System::User',
     'Kernel::System::XML',
@@ -39,35 +41,37 @@ our @ObjectDependencies = (
 
 Kernel::System::Stats - stats lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All stats functions.
 
 =head2 Explanation for the time zone parameter
 
-The time zone parameter is available, if the statistic is a dynamic statistic. The selected periods in the frontend are time zone neutral and for the
-search parameters, the selection will be converted to the OTRS time zone, because the times
-are stored within this time zone in the database.
+The time zone parameter is available, if the system use UTC as system time and the TimeZoneUser feature is active
+and the statistic is a dynamic statistic. The selected periods in the frontend are time zone neutral and for the
+search parameters, the selection will be converted to UTC time based on the selected time zone, because the times
+are stored as UTC time in the database (if the system is configured correctly).
 
-This means e.g. if an absolute period of time from 2015-08-01 00:00:00 to 2015-09-10 23:59:59 and a time zone with an offset of +6 hours has been selected,
-the period will be converted from the +6 time zone to the OTRS time zone for the search parameter,
-so that the right time will be used for searching the database. Given that the OTRS time zone is set to UTC, this
-would result in a period of 2015-07-31 18:00:00 to 2015-09-10 17:59:59 UTC.
+This means e.g. if a absolute period of time from 2015 2015-08-01 00:00:00 to 2015-09-10 23:59:59 and a time zone +6 has been selected,
+the time zone (+6) will be subtracted (with "_SubtractTimeZone") from the selected absolute time period for the search parameter,
+so that the right UTC time will be used for the absolute period of time. For the example this would be the 2015-07-31 18:00:00 to 2015-09-10 17:59:59.
 
-For a relative time period, e. g. the last 10 full days, and a time zone with an offset of +10 hours, a DateTime object with the +10 time zone will be created
-for the current time. For the period end date, this date will be taken and extended to the end of the day. Then, 10 full days will be subtracted from this.
-This is the start of the period, which will be extended to 00:00:00. Start and end date will be converted to the time zone of OTRS to search the database.
-
-Example for relative time period 'last 10 full days' with selected time zone offset +10 hours, current date/time within this time zone 2015-09-10 16:00:00, OTRS time zone is UTC:
-End date: 2015-09-10 16:00:00 -> extended to 2015-09-10 23:59:59 -> 2015-09-10 13:59:59 OTRS time zone (UTC)
-Start date: 2015-09-10 16:00:00 - 10 days -> 2015-08-31 16:00:00 -> extended to 00:00:00: 2015-09-01 00:00:00 -> 2015-08-31 14:00:00 OTRS time zone (UTC)
+For a relative time period, e.g. a relative period of the last full 10 days and the time zone +10, first the selected
+time zone will be added (with "_AddTimeZone") to the current UTC time, so that the right relative period of time will be used for the frontend output.
+For the example, we have the current UTC time 2015-09-10 16:00:00, that means for the selected relative period and time zone (+10) the period of time
+from 2015-09-01 00:00:00 to 2015-09-10 23:59:59. From the period of time will be substracted the selected time zone (+10) to get the correct UTC time
+for the search in the database (as for the absolute time). In this case that would be the period of time from 2015-08-31 14:00:00 to 2015-09-10 13:59:59.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=item new()
 
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $StatsObject = $Kernel::OM->Get('Kernel::System::Stats');
 
 =cut
@@ -85,7 +89,7 @@ sub new {
     return $Self;
 }
 
-=head2 StatsAdd()
+=item StatsAdd()
 
 add new empty stats
 
@@ -175,7 +179,7 @@ sub StatsAdd {
     return $StatID;
 }
 
-=head2 StatsGet()
+=item StatsGet()
 
 get a hash ref of the stats you need
 
@@ -244,9 +248,15 @@ sub StatsGet {
         }
     }
 
-    # time zone
-    if ( defined $StatsXML->{TimeZone}->[1]->{Content} ) {
-        $Stat{TimeZone} = $StatsXML->{TimeZone}->[1]->{Content};
+  # provide the time zone field only, if the system use not UTC as system time or the TimeZoneUser feature is not active
+    if (
+        !$Kernel::OM->Get('Kernel::System::Time')->ServerLocalTimeOffsetSeconds()
+        && $Kernel::OM->Get('Kernel::Config')->Get('TimeZoneUser')
+        )
+    {
+        if ( defined $StatsXML->{TimeZone}->[1]->{Content} ) {
+            $Stat{TimeZone} = $StatsXML->{TimeZone}->[1]->{Content};
+        }
     }
 
     # process all arrays
@@ -402,7 +412,7 @@ sub StatsGet {
     return \%Stat;
 }
 
-=head2 StatsUpdate()
+=item StatsUpdate()
 
 update a stat
 
@@ -568,7 +578,7 @@ sub StatsUpdate {
     return 1;
 }
 
-=head2 StatsDelete()
+=item StatsDelete()
 
 delete a stats
 
@@ -648,7 +658,7 @@ sub StatsDelete {
     return 1;
 }
 
-=head2 StatsListGet()
+=item StatsListGet()
 
 fetches all statistics that the current user may see
 
@@ -770,7 +780,7 @@ sub StatsListGet {
     return \%Result;
 }
 
-=head2 GetStatsList()
+=item GetStatsList()
 
 lists all stats id's
 
@@ -817,7 +827,7 @@ sub GetStatsList {
     return \@SortArray;
 }
 
-=head2 SumBuild()
+=item SumBuild()
 
 build sum in x or/and y axis
 
@@ -901,7 +911,7 @@ sub SumBuild {
     return @Data;
 }
 
-=head2 GetStatsObjectAttributes()
+=item GetStatsObjectAttributes()
 
 Get all attributes from the object in dependence of the use
 
@@ -950,7 +960,7 @@ sub GetStatsObjectAttributes {
     return @ObjectAttributes;
 }
 
-=head2 GetStaticFiles()
+=item GetStaticFiles()
 
 Get all static files
 
@@ -1030,7 +1040,7 @@ sub GetStaticFiles {
     return \%Filelist;
 }
 
-=head2 GetDynamicFiles()
+=item GetDynamicFiles()
 
 Get all static objects
 
@@ -1060,7 +1070,7 @@ sub GetDynamicFiles {
     return \%Filelist;
 }
 
-=head2 GetObjectName()
+=item GetObjectName()
 
 Get the name of a dynamic object
 
@@ -1092,7 +1102,7 @@ sub GetObjectName {
     return $Name;
 }
 
-=head2 GetObjectBehaviours()
+=item GetObjectBehaviours()
 
 get behaviours that a statistic supports
 
@@ -1134,7 +1144,7 @@ sub GetObjectBehaviours {
     return \%ObjectBehaviours;
 }
 
-=head2 ObjectFileCheck()
+=item ObjectFileCheck()
 
 check readable object file
 
@@ -1163,7 +1173,7 @@ sub ObjectFileCheck {
     return;
 }
 
-=head2 Export()
+=item Export()
 
 get content from stats for export
 
@@ -1277,7 +1287,7 @@ sub Export {
     return \%File;
 }
 
-=head2 Import()
+=item Import()
 
 import a stats from xml file
 
@@ -1512,7 +1522,7 @@ sub Import {
     return $StatID;
 }
 
-=head2 GetParams()
+=item GetParams()
 
     get all edit params from stats for view
 
@@ -1551,7 +1561,7 @@ sub GetParams {
     return \@Params;
 }
 
-=head2 StatsRun()
+=item StatsRun()
 
 run a statistic.
 
@@ -1652,7 +1662,7 @@ sub StatsRun {
     return \@Result;
 }
 
-=head2 StatsResultCacheCompute()
+=item StatsResultCacheCompute()
 
 computes stats results and adds them to the cache.
 This can be used to precompute stats data e. g. for dashboard widgets in a cron job.
@@ -1743,7 +1753,7 @@ sub StatsResultCacheCompute {
     );
 }
 
-=head2 StatsResultCacheGet()
+=item StatsResultCacheGet()
 
 gets cached statistic results. Will never run the statistic.
 This can be used to fetch cached stats data e. g. for stats widgets in the dashboard.
@@ -1825,14 +1835,14 @@ sub StatsResultCacheGet {
     );
 }
 
-=head2 StringAndTimestamp2Filename()
+=item StringAndTimestamp2Filename()
 
 builds a filename with a string and a timestamp.
 (space will be replaced with _ and - e.g. Title-of-File_2006-12-31_11-59)
 
     my $Filename = $StatsObject->StringAndTimestamp2Filename(
         String   => 'Title',
-        TimeZone => 'Europe/Berlin',  # optional
+        TimeZone => '+2',  # optional
     );
 
 =cut
@@ -1848,32 +1858,32 @@ sub StringAndTimestamp2Filename {
         return;
     }
 
-    my $DateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
-    if ( defined $Param{TimeZone} ) {
-        $DateTimeObject->ToTimeZone( TimeZone => $Param{TimeZone} );
-    }
+    # get time object
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
-    my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
-    $Param{String} = $MainObject->FilenameCleanUp(
+    my ( $s, $m, $h, $D, $M, $Y ) = $TimeObject->SystemTime2Date(
+        SystemTime => $TimeObject->SystemTime(),
+    );
+    $M = sprintf( "%02d", $M );
+    $D = sprintf( "%02d", $D );
+    $h = sprintf( "%02d", $h );
+    $m = sprintf( "%02d", $m );
+
+    $Param{String} = $Kernel::OM->Get('Kernel::System::Main')->FilenameCleanUp(
         Filename => $Param{String},
         Type     => 'Attachment',
     );
 
-    my $Filename = $Param{String} . '_';
-    $Filename .= $DateTimeObject->Format( Format => '%Y-%m-%d_%H:%M' );
+    my $Filename = $Param{String} . '_' . "$Y-$M-$D" . '_' . "$h-$m";
 
-    if ( defined $Param{TimeZone} ) {
-        my $TimeZone = $MainObject->FilenameCleanUp(
-            Filename => $Param{TimeZone},
-            Type     => 'Attachment',
-        );
-        $Filename .= '_TimeZone_' . $TimeZone;
+    if ( $Param{TimeZone} ) {
+        $Filename .= '_TimeZone_' . $Param{TimeZone};
     }
 
     return $Filename;
 }
 
-=head2 StatNumber2StatID()
+=item StatNumber2StatID()
 
 insert the stat number get the stat id
 
@@ -1909,7 +1919,7 @@ sub StatNumber2StatID {
     return;
 }
 
-=head2 StatsInstall()
+=item StatsInstall()
 
 installs stats
 
@@ -1986,7 +1996,7 @@ sub StatsInstall {
     return 1;
 }
 
-=head2 StatsUninstall()
+=item StatsUninstall()
 
 uninstalls stats
 
@@ -2045,7 +2055,7 @@ sub StatsUninstall {
     return 1;
 }
 
-=head2 StatsCleanUp()
+=item StatsCleanUp()
 
 removed stats with not existing backend file
 
@@ -2103,7 +2113,7 @@ sub StatsCleanUp {
 
 =begin Internal:
 
-=head2 _GenerateStaticStats()
+=item _GenerateStaticStats()
 
     take the stat configuration and get the stat table
 
@@ -2185,7 +2195,7 @@ sub _GenerateStaticStats {
     return @Result;
 }
 
-=head2 _GenerateDynamicStats()
+=item _GenerateDynamicStats()
 
     take the stat configuration and get the stat table
 
@@ -2197,7 +2207,7 @@ sub _GenerateStaticStats {
         UseAsRestriction => \UseAsRestrictionElements,
         Title            => 'TicketStat',
         StatID           => 123,
-        TimeZone         => 'Europe/Berlin',   # optional,
+        TimeZone         => '+2',   # optional,
         Cache            => 1,      # optional,
         Preview          => 1,      # optional, generate fake data
         UserID           => $UserID,
@@ -2259,7 +2269,7 @@ sub _GenerateDynamicStats {
             next ELEMENT if !$Element->{Selected};
 
             # Clone the element as we are going to modify it - avoid modifying the original data
-            $Element = ${ $Kernel::OM->Get('Kernel::System::Storable')->Clone( Data => \$Element ) };
+            $Element = ${ Storable::dclone( \$Element ) };
 
             delete $Element->{Selected};
             delete $Element->{Fixed};
@@ -2270,11 +2280,11 @@ sub _GenerateDynamicStats {
                     my $TimeStamp = $TimeObject->CurrentTimestamp();
 
                     # add the selected timezone to the current timestamp
-                    # to get the real start timestamp for the selected timezone
+                    # to get the real start timestamp for the selectd timezone
                     if ( $Param{TimeZone} ) {
-                        $TimeStamp = $Self->_FromOTRSTimeZone(
-                            String   => $TimeStamp,
-                            TimeZone => $Param{TimeZone},
+                        $TimeStamp = $Self->_AddTimeZone(
+                            TimeStamp => $TimeStamp,
+                            TimeZone  => $Param{TimeZone},
                         );
                     }
 
@@ -2293,9 +2303,9 @@ sub _GenerateDynamicStats {
                     my $CountPast = $Element->{TimeRelativeCount} + $CountUpcoming;
 
                     if ( $Element->{TimeRelativeUnit} eq 'Year' ) {
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, $CountUpcoming, 0, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, $CountUpcoming, 0, 0 );
                         $Element->{TimeStop} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, 12, 31, 23, 59, 59 );
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, -$CountPast, 0, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, -$CountPast, 0, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, 1, 1, 0, 0, 0 );
 
                     }
@@ -2304,13 +2314,11 @@ sub _GenerateDynamicStats {
                         # $CountUpcoming was reduced by 1 before, this has to be reverted for half-year
                         $CountUpcoming++;
 
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD(
-                            $Y, $M, $D, 0, ( $M > 6 ? 1 : 0 ) * 6 - $M + ( 6 * $CountUpcoming ),
-                            0
-                        );
+                        ( $Y, $M, $D )
+                            = Add_Delta_YMD( $Y, $M, $D, 0, ( $M > 6 ? 1 : 0 ) * 6 - $M + ( 6 * $CountUpcoming ), 0 );
                         $Element->{TimeStop} = sprintf(
                             "%04d-%02d-%02d %02d:%02d:%02d",
-                            $Y, $M, $Self->_DaysInMonth( $Y, $M ),
+                            $Y, $M, Days_in_Month( $Y, $M ),
                             23, 59, 59
                         );
 
@@ -2321,7 +2329,7 @@ sub _GenerateDynamicStats {
                         #     With the fix, example 1 will mean last half-year and example 2 will mean
                         #     last two half-years
                         $CountPast++;
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, -$CountPast * 6 + 1, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, -$CountPast * 6 + 1, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, 1, 0, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Quarter' ) {
@@ -2331,10 +2339,10 @@ sub _GenerateDynamicStats {
 
                         my $LastQuarter = ceil( $M / 3 ) - 1;
                         ( $Y, $M, $D )
-                            = $Self->_AddDeltaYMD( $Y, $M, $D, 0, $LastQuarter * 3 - $M + ( 3 * $CountUpcoming ), 0 );
+                            = Add_Delta_YMD( $Y, $M, $D, 0, $LastQuarter * 3 - $M + ( 3 * $CountUpcoming ), 0 );
                         $Element->{TimeStop} = sprintf(
                             "%04d-%02d-%02d %02d:%02d:%02d",
-                            $Y, $M, $Self->_DaysInMonth( $Y, $M ),
+                            $Y, $M, Days_in_Month( $Y, $M ),
                             23, 59, 59
                         );
 
@@ -2345,17 +2353,17 @@ sub _GenerateDynamicStats {
                         #     With the fix, example 1 will mean last quarter and example 2 will mean
                         #     last two quarters
                         $CountPast++;
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, -$CountPast * 3 + 1, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, -$CountPast * 3 + 1, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, 1, 0, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Month' ) {
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, $CountUpcoming, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, $CountUpcoming, 0 );
                         $Element->{TimeStop} = sprintf(
                             "%04d-%02d-%02d %02d:%02d:%02d",
-                            $Y, $M, $Self->_DaysInMonth( $Y, $M ),
+                            $Y, $M, Days_in_Month( $Y, $M ),
                             23, 59, 59
                         );
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, -$CountPast, 0 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, -$CountPast, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, 1, 0, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Week' ) {
@@ -2363,7 +2371,7 @@ sub _GenerateDynamicStats {
                         # $CountUpcoming was reduced by 1 before, this has to be reverted for week
                         $CountUpcoming++;
 
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, 0, ( $CountUpcoming * 7 ) - 1 );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, 0, ( $CountUpcoming * 7 ) - 1 );
                         $Element->{TimeStop} = sprintf(
                             "%04d-%02d-%02d %02d:%02d:%02d",
                             $Y, $M, $D, 23, 59, 59
@@ -2376,37 +2384,31 @@ sub _GenerateDynamicStats {
                         #     With the fix, example 1 will mean last week and example 2 will mean
                         #     last two weeks
                         $CountPast++;
-                        ( $Y, $M, $D ) = $Self->_AddDeltaDays( $Y, $M, $D, -$CountPast * 7 + 1 );
+                        ( $Y, $M, $D ) = Add_Delta_Days( $Y, $M, $D, -$CountPast * 7 + 1 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, 0, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Day' ) {
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, 0, $CountUpcoming );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, 0, $CountUpcoming );
                         $Element->{TimeStop} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, 23, 59, 59 );
-                        ( $Y, $M, $D ) = $Self->_AddDeltaYMD( $Y, $M, $D, 0, 0, -$CountPast );
+                        ( $Y, $M, $D ) = Add_Delta_YMD( $Y, $M, $D, 0, 0, -$CountPast );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, 0, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Hour' ) {
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, $CountUpcoming, 0, 0 );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, $CountUpcoming, 0, 0 );
                         $Element->{TimeStop} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, 59, 59 );
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, -$CountPast, 0, 0 );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, -$CountPast, 0, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, 0, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Minute' ) {
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, 0, $CountUpcoming, 0 );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, 0, $CountUpcoming, 0 );
                         $Element->{TimeStop} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, $m, 59 );
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, 0, -$CountPast, 0 );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, 0, -$CountPast, 0 );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, $m, 0 );
                     }
                     elsif ( $Element->{TimeRelativeUnit} eq 'Second' ) {
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, 0, 0, $CountUpcoming );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, 0, 0, $CountUpcoming );
                         $Element->{TimeStop} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, $m, $s );
-                        ( $Y, $M, $D, $h, $m, $s )
-                            = $Self->_AddDeltaDHMS( $Y, $M, $D, $h, $m, $s, 0, 0, 0, -$CountPast );
+                        ( $Y, $M, $D, $h, $m, $s ) = Add_Delta_DHMS( $Y, $M, $D, $h, $m, $s, 0, 0, 0, -$CountPast );
                         $Element->{TimeStart} = sprintf( "%04d-%02d-%02d %02d:%02d:%02d", $Y, $M, $D, $h, $m, $s );
                     }
                     delete $Element->{TimeRelativeUnit};
@@ -2442,15 +2444,16 @@ sub _GenerateDynamicStats {
         }
         elsif ( $RestrictionPart->{Block} eq 'Time' ) {
 
-            # convert start and stop time to OTRS time zone
-            $RestrictionAttribute{ $RestrictionPart->{Values}{TimeStart} } = $Self->_ToOTRSTimeZone(
-                String   => $RestrictionPart->{TimeStart},
-                TimeZone => $Param{TimeZone},
+            # subtract the selected timezone (if the timezone exists) to get the UTC time for the search parameter
+            $RestrictionAttribute{ $RestrictionPart->{Values}{TimeStop} } = $Self->_SubtractTimeZone(
+                TimeStamp => $RestrictionPart->{TimeStop},
+                TimeZone  => $Param{TimeZone},
             );
 
-            $RestrictionAttribute{ $RestrictionPart->{Values}{TimeStop} } = $Self->_ToOTRSTimeZone(
-                String   => $RestrictionPart->{TimeStop},
-                TimeZone => $Param{TimeZone},
+            # subtract the selected timezone (if the timezone exists) to get the UTC time for the search parameter
+            $RestrictionAttribute{ $RestrictionPart->{Values}{TimeStart} } = $Self->_SubtractTimeZone(
+                TimeStamp => $RestrictionPart->{TimeStart},
+                TimeZone  => $Param{TimeZone},
             );
         }
         else {
@@ -2526,7 +2529,7 @@ sub _GenerateDynamicStats {
             $Second = 0;
             $Minute = 0;
             $Hour   = 0;
-            ( $Year, $Month, $Day ) = $Self->_MondayOfWeek( $Year, $Month, $Day )
+            ( $Year, $Month, $Day ) = Monday_of_Week( Week_of_Year( $Year, $Month, $Day ) )
         }
         elsif ( $Element->{SelectedValues}[0] eq 'Month' ) {
             $Second = 0;
@@ -2574,7 +2577,7 @@ sub _GenerateDynamicStats {
                 $Year, $Month, $Day, $Hour, $Minute, $Second
             );
             if ( $Element->{SelectedValues}[0] eq 'Second' ) {
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $Year, $Month, $Day, $Hour, $Minute, $Second, 0, 0, 0,
                     $Count - 1
                 );
@@ -2587,7 +2590,7 @@ sub _GenerateDynamicStats {
                 );
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Minute' ) {
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $Year, $Month, $Day, $Hour, $Minute, $Second, 0, 0, $Count,
                     -1
                 );
@@ -2600,7 +2603,7 @@ sub _GenerateDynamicStats {
                 );
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Hour' ) {
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $Year, $Month, $Day, $Hour, $Minute, $Second, 0, $Count, 0,
                     -1
                 );
@@ -2613,12 +2616,12 @@ sub _GenerateDynamicStats {
                 );
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Day' ) {
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $Year, $Month, $Day, $Hour, $Minute, $Second, $Count, 0, 0,
                     -1
                 );
-                my $Dow = $Self->_DayOfWeek( $Year, $Month, $Day );
-                $Dow = $LanguageObject->Translate( $Self->_DayOfWeekAbbreviation($Dow) );
+                my $Dow = Day_of_Week( $Year, $Month, $Day );
+                $Dow = $LanguageObject->Translate( Day_of_Week_Abbreviation($Dow) );
                 if ( $ToDay eq $Day ) {
                     push @HeaderLine, "$Dow $Day";
                 }
@@ -2633,13 +2636,13 @@ sub _GenerateDynamicStats {
                 }
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Week' ) {
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $Year, $Month, $Day, 0, 0, $Count * 7 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $Year, $Month, $Day, 0, 0, $Count * 7 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $Hour, $Minute, $Second, 0, 0, 0,
                     -1
                 );
                 my %WeekNum;
-                ( $WeekNum{Week}, $WeekNum{Year} ) = $Self->_WeekOfYear( $Year, $Month, $Day );
+                ( $WeekNum{Week}, $WeekNum{Year} ) = Week_of_Year( $Year, $Month, $Day );
                 my $TranslateWeek = $LanguageObject->Translate('week');
                 push(
                     @HeaderLine,
@@ -2651,8 +2654,8 @@ sub _GenerateDynamicStats {
                 );
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Month' ) {
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $Year, $Month, $Day, 0, $Count, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $Year, $Month, $Day, 0, $Count, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $Hour, $Minute, $Second, 0, 0, 0,
                     -1
                 );
@@ -2671,8 +2674,8 @@ sub _GenerateDynamicStats {
                 }
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Quarter' ) {
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $Year, $Month, $Day, 0, $Count * 3, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $Year, $Month, $Day, 0, $Count * 3, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $Hour, $Minute, $Second, 0, 0, 0,
                     -1
                 );
@@ -2696,8 +2699,8 @@ sub _GenerateDynamicStats {
                 }
             }
             elsif ( $Element->{SelectedValues}[0] eq 'HalfYear' ) {
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $Year, $Month, $Day, 0, $Count * 6, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $Year, $Month, $Day, 0, $Count * 6, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $Hour, $Minute, $Second, 0, 0, 0,
                     -1
                 );
@@ -2721,8 +2724,8 @@ sub _GenerateDynamicStats {
                 }
             }
             elsif ( $Element->{SelectedValues}[0] eq 'Year' ) {
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $Year, $Month, $Day, $Count, 0, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $Year, $Month, $Day, $Count, 0, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $Hour, $Minute, $Second, 0, 0, 0,
                     -1
                 );
@@ -2739,7 +2742,7 @@ sub _GenerateDynamicStats {
                     );
                 }
             }
-            ( $Year, $Month, $Day, $Hour, $Minute, $Second ) = $Self->_AddDeltaDHMS(
+            ( $Year, $Month, $Day, $Hour, $Minute, $Second ) = Add_Delta_DHMS(
                 $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0, 0, 0,
                 1
             );
@@ -2750,15 +2753,16 @@ sub _GenerateDynamicStats {
             push(
                 @{ $Xvalue->{SelectedValues} },
                 {
-                    # convert to OTRS time zone for correct database search parameter
-                    TimeStart => $Self->_ToOTRSTimeZone(
-                        String   => $TimeStart,
-                        TimeZone => $Param{TimeZone},
+                  # subtract the selected timezone (if the timezone exists) to get the UTC time for the search parameter
+                    TimeStart => $Self->_SubtractTimeZone(
+                        TimeStamp => $TimeStart,
+                        TimeZone  => $Param{TimeZone},
                     ),
 
-                    TimeStop => $Self->_ToOTRSTimeZone(
-                        String   => $TimeStop,
-                        TimeZone => $Param{TimeZone},
+                  # subtract the selected timezone (if the timezone exists) to get the UTC time for the search parameter
+                    TimeStop => $Self->_SubtractTimeZone(
+                        TimeStamp => $TimeStop,
+                        TimeZone  => $Param{TimeZone},
                     ),
                 }
             );
@@ -2778,11 +2782,6 @@ sub _GenerateDynamicStats {
 
             # Do not translate the values, please see bug#12384 for more information.
             push @HeaderLine, $Xvalue->{Values}{$Valuename};
-        }
-
-        # Prevent randomization of x-axis in preview, sort it alphabetically see bug#12714.
-        if ($Preview) {
-            @HeaderLine = sort { lc($a) cmp lc($b) } @HeaderLine;
         }
     }
 
@@ -2892,7 +2891,7 @@ sub _GenerateDynamicStats {
         elsif ( $Ref1->{SelectedValues}[0] eq 'Week' ) {
 
             for my $Count ( 1 .. 7 ) {
-                push @HeaderLine, $Self->_DayOfWeekToText($Count);
+                push @HeaderLine, Day_of_Week_to_Text($Count);
             }
 
             $VSSecond   = 0;
@@ -2951,8 +2950,8 @@ sub _GenerateDynamicStats {
                 )
             {
                 $TimeStart = sprintf( "%04d-01-01 00:00:00", $VSYear );
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $VSYear, $VSMonth, $VSDay, $Count, 0, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $VSYear, $VSMonth, $VSDay, $Count, 0, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $VSHour, $VSMinute, $VSSecond, 0,
                     0, 0, -1
                 );
@@ -2963,7 +2962,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStart} => $TimeStart
                 };
 
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -2976,8 +2975,8 @@ sub _GenerateDynamicStats {
                 )
             {
                 $TimeStart = sprintf( "%04d-%02d-01 00:00:00", $VSYear, $VSMonth );
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaYMD( $VSYear, $VSMonth, $VSDay, 0, $Count, 0 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_YMD( $VSYear, $VSMonth, $VSDay, 0, $Count, 0 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $VSHour, $VSMinute, $VSSecond, 0,
                     0, 0, -1
                 );
@@ -2994,7 +2993,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStart} => $TimeStart
                     };
 
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -3009,11 +3008,11 @@ sub _GenerateDynamicStats {
                 < $TimeAbsolutStopUnixTime
                 )
             {
-                my @Monday = $Self->_MondayOfWeek( $VSYear, $VSMonth, $VSDay );
+                my @Monday = Monday_of_Week( Week_of_Year( $VSYear, $VSMonth, $VSDay ) );
 
                 $TimeStart = sprintf( "%04d-%02d-%02d 00:00:00", @Monday );
-                ( $ToYear, $ToMonth, $ToDay ) = $Self->_AddDeltaDays( @Monday, $Count * 7 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay ) = Add_Delta_Days( @Monday, $Count * 7 );
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $VSHour, $VSMinute, $VSSecond, 0,
                     0, 0, -1
                 );
@@ -3027,7 +3026,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStart} => $TimeStart
                     };
 
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -3043,7 +3042,7 @@ sub _GenerateDynamicStats {
                 )
             {
                 $TimeStart = sprintf( "%04d-%02d-%02d 00:00:00", $VSYear, $VSMonth, $VSDay );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond,
                     $Count, 0, 0, -1
                 );
@@ -3054,7 +3053,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStart} => $TimeStart
                 };
 
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -3067,7 +3066,7 @@ sub _GenerateDynamicStats {
                 )
             {
                 $TimeStart = sprintf( "%04d-%02d-%02d %02d:00:00", $VSYear, $VSMonth, $VSDay, $VSHour );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond, 0,
                     $Count, 0, -1
                 );
@@ -3081,7 +3080,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStop}  => $TimeStop,
                     $Ref1->{Values}{TimeStart} => $TimeStart
                     };
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -3098,7 +3097,7 @@ sub _GenerateDynamicStats {
                     "%04d-%02d-%02d %02d:%02d:00",
                     $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute
                 );
-                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = $Self->_AddDeltaDHMS(
+                ( $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond ) = Add_Delta_DHMS(
                     $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond, 0,
                     0, $Count, -1
                 );
@@ -3115,7 +3114,7 @@ sub _GenerateDynamicStats {
                     $Ref1->{Values}{TimeStop}  => $TimeStop,
                     $Ref1->{Values}{TimeStart} => $TimeStart
                     };
-                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = $Self->_AddDeltaDHMS(
+                ( $VSYear, $VSMonth, $VSDay, $VSHour, $VSMinute, $VSSecond ) = Add_Delta_DHMS(
                     $ToYear, $ToMonth, $ToDay, $ToHour, $ToMinute, $ToSecond, 0,
                     0, 0, 1
                 );
@@ -3366,10 +3365,10 @@ sub _GenerateDynamicStats {
         return @StatArray;
     }
 
-    # convert to OTRS time zone to get the correct time for the check
-    my $CheckTimeStop = $Self->_ToOTRSTimeZone(
-        String   => $TitleTimeStop,
-        TimeZone => $Param{TimeZone},
+    # subtract the selected timezone (if the timezone exists) to get the UTC time for the check
+    my $CheckTimeStop = $Self->_SubtractTimeZone(
+        TimeStamp => $TitleTimeStop,
+        TimeZone  => $Param{TimeZone},
     );
 
     if ( $TimeObject->TimeStamp2SystemTime( String => $CheckTimeStop ) > $TimeObject->SystemTime() ) {
@@ -3388,7 +3387,7 @@ sub _GenerateDynamicStats {
     return @StatArray;
 }
 
-=head2 _ColumnAndRowTranslation()
+=item _ColumnAndRowTranslation()
 
 Translate the column and row name if needed.
 
@@ -3599,7 +3598,7 @@ sub _WriteResultCache {
     return 1;
 }
 
-=head2 _CreateStaticResultCacheFilename()
+=item _CreateStaticResultCacheFilename()
 
 create a filename out of the GetParam information and the stat id
 
@@ -3661,7 +3660,7 @@ sub _CreateStaticResultCacheFilename {
         . '.cache';
 }
 
-=head2 _SetResultCache()
+=item _SetResultCache()
 
 cache the stats result with a given cache key (Filename).
 
@@ -3699,7 +3698,7 @@ sub _SetResultCache {
     return 1;
 }
 
-=head2 _GetResultCache()
+=item _GetResultCache()
 
 get stats result from cache, if any
 
@@ -3736,7 +3735,7 @@ sub _GetResultCache {
     return;
 }
 
-=head2 _DeleteCache()
+=item _DeleteCache()
 
 clean up stats result cache.
 
@@ -3825,85 +3824,99 @@ sub _AutomaticSampleImport {
     return 1;
 }
 
-=head2 _FromOTRSTimeZone()
+=item _AddTimeZone()
 
-Converts the given date/time string from OTRS time zone to the given time zone.
+Add the given time zone to the given timestamp.
 
-    my $String = $StatsObject->_FromOTRSTimeZone(
-        String   => '2016-02-20 20:00:00',
-        TimeZone => 'Europe/Berlin',
+    my $TimeStamp = $StatsObject->_AddTimeZone(
+        TimeStamp => '2015-06-20 20:00:00',
+        TimeZone  => '+6',
     );
 
-Returns (example for OTRS time zone being set to UTC):
+Returns the calculated timestamp or the given timestamp, if no time zone is given.
 
-    $TimeStamp = '2016-02-20 21:00:00',
+    $TimeStamp = '2015-06-21 02:00:00',
 
 =cut
 
-sub _FromOTRSTimeZone {
+sub _AddTimeZone {
     my ( $Self, %Param ) = @_;
 
     # check needed params
-    if ( !$Param{String} ) {
+    if ( !$Param{TimeStamp} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => 'Need String!',
+            Message  => 'Need TimeStamp!',
         );
         return;
     }
 
-    return $Param{String} if !$Param{TimeZone};
+    return $Param{TimeStamp} if !$Param{TimeZone};
 
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            String => $Param{String},
-        },
+    # get time object
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
+
+    my $SystemTime = $TimeObject->TimeStamp2SystemTime(
+        String => $Param{TimeStamp},
     );
-    $DateTimeObject->ToTimeZone( TimeZone => $Param{TimeZone} );
 
-    return $DateTimeObject->ToString();
+    # add the selected timezone from the general specification to the given timestamp
+    my $SelectedTimeZoneSystemTime = $SystemTime + ( $Param{TimeZone} * 3600 );
+
+    my $SelectedTimeZoneTimeStamp = $TimeObject->SystemTime2TimeStamp(
+        SystemTime => $SelectedTimeZoneSystemTime,
+    );
+
+    return $SelectedTimeZoneTimeStamp;
 }
 
-=head2 _ToOTRSTimeZone()
+=item _SubtractTimeZone()
 
-Converts the given date/time string from the given time zone to OTRS time zone.
+Subtract the given time zone from the given timestamp.
 
-    my $String = $StatsObject->_ToOTRSTimeZone(
-        String    => '2016-02-20 18:00:00',
-        TimeZone  => 'Europe/Berlin',
+    my $TimeStamp = $StatsObject->_SubtractTimeZone(
+        TimeStamp => '2015-06-20 18:00:00',
+        TimeZone  => '+6',
     );
 
-Returns (example for OTRS time zone being set to UTC):
+Returns the calculated timestamp or the given timestamp, if no time zone is given.
 
-    $TimeStamp = '2016-02-20 17:00:00',
+    $TimeStamp = '2015-06-20 12:00:00',
 
 =cut
 
-sub _ToOTRSTimeZone {
+sub _SubtractTimeZone {
     my ( $Self, %Param ) = @_;
 
     # check needed params
-    if ( !$Param{String} ) {
+    if ( !$Param{TimeStamp} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => 'Need String!',
+            Message  => 'Need TimeStamp!',
         );
         return;
     }
 
-    return $Param{String} if !$Param{TimeZone};
+    return $Param{TimeStamp} if !$Param{TimeZone};
 
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => \%Param,
+    # get time object
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
+
+    my $SystemTime = $TimeObject->TimeStamp2SystemTime(
+        String => $Param{TimeStamp},
     );
-    $DateTimeObject->ToOTRSTimeZone();
 
-    return $DateTimeObject->ToString();
+    # subtract the selected timezone from the general specification to the given timestamp
+    my $SelectedTimeZoneSystemTime = $SystemTime - ( $Param{TimeZone} * 3600 );
+
+    my $SelectedTimeZoneTimeStamp = $TimeObject->SystemTime2TimeStamp(
+        SystemTime => $SelectedTimeZoneSystemTime,
+    );
+
+    return $SelectedTimeZoneTimeStamp;
 }
 
-=head2 _GetCacheString()
+=item _GetCacheString()
 
 returns a string that can be used for caching this particular statistic
 with the given parameters.
@@ -3955,384 +3968,11 @@ sub _GetCacheString {
     return $Result;
 }
 
-=head2 _AddDeltaYMD()
-
-Substitute for Date::Pcalc::Add_Delta_YMD() which uses Kernel::System::DateTime.
-
-=cut
-
-sub _AddDeltaYMD {
-    my ( $Self, $Year, $Month, $Day, $YearsToAdd, $MonthsToAdd, $DaysToAdd ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return ( $Year, $Month, $Day, );
-    }
-
-    $DateTimeObject->Add(
-        Years  => $YearsToAdd  || 0,
-        Months => $MonthsToAdd || 0,
-        Days   => $DaysToAdd   || 0,
-    );
-    my $DateTimeValues = $DateTimeObject->Get();
-
-    return (
-        $DateTimeValues->{Year},
-        $DateTimeValues->{Month},
-        $DateTimeValues->{Day},
-    );
-}
-
-=head2 _AddDeltaDHMS()
-
-Substitute for Date::Pcalc::Add_Delta_DHMS() which uses Kernel::System::DateTime.
-
-=cut
-
-sub _AddDeltaDHMS {
-    my ( $Self, $Year, $Month, $Day, $Hour, $Minute, $Second, $DaysToAdd, $HoursToAdd, $MinutesToAdd, $SecondsToAdd )
-        = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            Hour     => $Hour,
-            Minute   => $Minute,
-            Second   => $Second,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return ( $Year, $Month, $Day, $Hour, $Minute, $Second, );
-    }
-
-    $DateTimeObject->Add(
-        Days    => $DaysToAdd    || 0,
-        Hours   => $HoursToAdd   || 0,
-        Minutes => $MinutesToAdd || 0,
-        Seconds => $SecondsToAdd || 0,
-    );
-    my $DateTimeValues = $DateTimeObject->Get();
-
-    return (
-        $DateTimeValues->{Year},
-        $DateTimeValues->{Month},
-        $DateTimeValues->{Day},
-        $DateTimeValues->{Hour},
-        $DateTimeValues->{Minute},
-        $DateTimeValues->{Second},
-    );
-}
-
-=head2 _AddDeltaDays()
-
-Substitute for Date::Pcalc::Add_Delta_Days() which uses Kernel::System::DateTime.
-
-=cut
-
-sub _AddDeltaDays {
-    my ( $Self, $Year, $Month, $Day, $DaysToAdd ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return ( $Year, $Month, $Day, );
-    }
-
-    $DateTimeObject->Add(
-        Days => $DaysToAdd || 0,
-    );
-    my $DateTimeValues = $DateTimeObject->Get();
-
-    return (
-        $DateTimeValues->{Year},
-        $DateTimeValues->{Month},
-        $DateTimeValues->{Day},
-    );
-}
-
-=head2 _DaysInMonth()
-
-Substitute for Date::Pcalc::Days_in_Month() which uses Kernel::System::DateTime.
-
-=cut
-
-sub _DaysInMonth {
-    my ( $Self, $Year, $Month ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => 1,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return;
-    }
-
-    my $LastDayOfMonth = $DateTimeObject->LastDayOfMonthGet();
-
-    return $LastDayOfMonth->{Day};
-}
-
-=head2 _DayOfWeek()
-
-Substitute for Date::Pcalc::Day_of_Week() which uses Kernel::System::DateTime.
-
-=cut
-
-sub _DayOfWeek {
-    my ( $Self, $Year, $Month, $Day ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return;
-    }
-
-    my $DateTimeValues = $DateTimeObject->Get();
-
-    return $DateTimeValues->{DayOfWeek};
-}
-
-=head2 _DayOfWeekAbbreviation()
-
-Substitute for Date::Pcalc::Day_of_Week_Abbreviation()
-
-=cut
-
-sub _DayOfWeekAbbreviation {
-    my ( $Self, $DayOfWeek ) = @_;
-
-    my %DayOfWeekAbbrs = (
-        1 => 'Mon',
-        2 => 'Tue',
-        3 => 'Wed',
-        4 => 'Thu',
-        5 => 'Fri',
-        6 => 'Sat',
-        7 => 'Sun',
-    );
-
-    return if !$DayOfWeekAbbrs{$DayOfWeek};
-
-    return $DayOfWeekAbbrs{$DayOfWeek};
-}
-
-=head2 _DayOfWeekToText()
-
-Substitute for Date::Pcalc::Day_of_Week_to_Text()
-
-=cut
-
-sub _DayOfWeekToText {
-    my ( $Self, $DayOfWeek ) = @_;
-
-    my %DayOfWeekTexts = (
-        1 => 'Monday',
-        2 => 'Tuesday',
-        3 => 'Wednesday',
-        4 => 'Thursday',
-        5 => 'Friday',
-        6 => 'Saturday',
-        7 => 'Sunday',
-    );
-
-    return if !$DayOfWeekTexts{$DayOfWeek};
-
-    return $DayOfWeekTexts{$DayOfWeek};
-}
-
-=head2 _MondayOfWeek()
-
-Substitute for Date::Pcalc::Monday_of_Week(), using Kernel::System::DateTime, note different parameters
-
-=cut
-
-sub _MondayOfWeek {
-    my ( $Self, $Year, $Month, $Day ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return;
-    }
-
-    my $DateTimeValues = $DateTimeObject->Get();
-    my $DaysToSubtract = $DateTimeValues->{DayOfWeek} - 1;
-    return $DateTimeValues->{Day} if !$DaysToSubtract;
-
-    $DateTimeObject->Subtract( Days => $DaysToSubtract );
-    $DateTimeValues = $DateTimeObject->Get();
-    return $DateTimeValues->{Day};
-}
-
-=head2 _WeekOfYear()
-
-Substitute for Date::Pcalc::Week_of_Year(), using Kernel::System::DateTime
-
-=cut
-
-sub _WeekOfYear {
-    my ( $Self, $Year, $Month, $Day ) = @_;
-
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year     => $Year,
-            Month    => $Month,
-            Day      => $Day,
-            TimeZone => 'floating',
-        },
-    );
-
-    if ( !$DateTimeObject ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => "error",
-            Message  => "Error creating DateTime object.",
-        );
-
-        return;
-    }
-
-    return (
-        $DateTimeObject->Format( Format => '%{week_number}' ),
-        $DateTimeObject->Format( Format => '%{week_year}' ),
-    );
-}
-
-=head2 _HumanReadableAgeGet()
-
-Re-implementation of L<CustomerAge()|Kernel::Output::HTML::Layout/CustomerAge()> since this object is inaccessible from
-the backend.
-
-TODO: Currently, there is no support for translation of statistic values, it's planned to be implemented later on. For
-the time being, this method will return a string in English only.
-
-    my $HumanReadableAge = $StatsObject->_HumanReadableAgeGet(
-        Age   => 360,
-    );
-
-Returns (converted seconds in human readable format, i.e. '1 d 2 h'):
-
-    $HumanReadableAge = '6 h',
-
-=cut
-
-sub _HumanReadableAgeGet {
-    my ( $Self, %Param ) = @_;
-
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-
-    my $Age       = defined( $Param{Age} ) ? $Param{Age} : return;
-    my $AgeStrg   = '';
-    my $DayDsc    = 'd';
-    my $HourDsc   = 'h';
-    my $MinuteDsc = 'm';
-    if ( $ConfigObject->Get('TimeShowCompleteDescription') ) {
-        $DayDsc    = 'day(s)';
-        $HourDsc   = 'hour(s)';
-        $MinuteDsc = 'minute(s)';
-    }
-    if ( $Age =~ /^-(.*)/ ) {
-        $Age     = $1;
-        $AgeStrg = '-';
-    }
-
-    # get days
-    if ( $Age >= 86400 ) {
-        $AgeStrg .= int( ( $Age / 3600 ) / 24 ) . ' ';
-        $AgeStrg .= $DayDsc . ' ';
-    }
-
-    # get hours
-    if ( $Age >= 3600 ) {
-        $AgeStrg .= int( ( $Age / 3600 ) % 24 ) . ' ';
-        $AgeStrg .= $HourDsc . ' ';
-    }
-
-    # get minutes (just if age < 1 day)
-    if ( $ConfigObject->Get('TimeShowAlwaysLong') || $Age < 86400 ) {
-        $AgeStrg .= int( ( $Age / 60 ) % 60 ) . ' ';
-        $AgeStrg .= $MinuteDsc;
-    }
-    return $AgeStrg;
-}
-
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

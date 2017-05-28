@@ -121,7 +121,7 @@ sub Run {
                 ROW:
                 while ( my @Row = $DBObject->FetchrowArray( RowNames => 1 ) ) {
 
-                    $MatchesFound++;
+                    $MatchesFound = 1;
 
                     # get csv data
                     if (
@@ -151,18 +151,6 @@ sub Run {
                             },
                         );
                     }
-                }
-
-                # add matches found if min. one result item
-                if ( $MatchesFound >= 1 ) {
-                    $Param{MatchesFound} = $MatchesFound;
-                }
-
-                # add result filter if more than one result item
-                if ( $MatchesFound > 1 ) {
-                    $LayoutObject->Block(
-                        Name => 'ResultFilter',
-                    );
                 }
 
                 # otherwise a no matches found msg is displayed

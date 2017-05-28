@@ -81,9 +81,8 @@ sub Run {
         my $MaxRequest  = 0;
         my $Slot        = 60;
         my $MinuteSlot  = $ParamObject->GetParam( Param => 'Minute' );
-        $Param{Minute} = $MinuteSlot;
-        my $Interface = $ParamObject->GetParam( Param => 'Interface' );
-        my $Module    = $ParamObject->GetParam( Param => 'Module' );
+        my $Interface   = $ParamObject->GetParam( Param => 'Interface' );
+        my $Module      = $ParamObject->GetParam( Param => 'Module' );
         if ( $MinuteSlot < 31 ) {
             $Slot = 1;
         }
@@ -109,14 +108,6 @@ sub Run {
                 Period    => $Slot,
             },
         );
-
-        $Param{Age} = $LayoutObject->CustomerAge(
-            Age   => $MinuteSlot * 60,
-            Space => ' '
-        );
-        $Param{Interface} = $Interface;
-        $Param{Module}    = $Module;
-
         my $Minute = 0;
         my $Count  = 1;
         while ( $Count <= $MinuteSlot ) {
@@ -242,7 +233,7 @@ sub Run {
                 $LayoutObject->Block(
                     Name => 'Reset',
                     Data => {
-                        Size => sprintf "%.1f MB",
+                        Size => sprintf "%.1f MBytes",
                         ( $Self->_DatabaseCheck() / ( 1024 * 1024 ) ),
                     },
                 );

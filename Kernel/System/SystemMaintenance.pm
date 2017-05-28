@@ -27,16 +27,22 @@ our @ObjectDependencies = (
 
 Kernel::System::SystemMaintenance.pm
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 SystemMaintenance backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a SystemMaintenance object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SystemMaintenanceObject = $Kernel::OM->Get('Kernel::System::SystemMaintenance');
 
 =cut
@@ -51,7 +57,7 @@ sub new {
     return $Self;
 }
 
-=head2 SystemMaintenanceAdd()
+=item SystemMaintenanceAdd()
 
 add new SystemMaintenance
 
@@ -128,7 +134,7 @@ sub SystemMaintenanceAdd {
     return $ID;
 }
 
-=head2 SystemMaintenanceDelete()
+=item SystemMaintenanceDelete()
 
 delete a SystemMaintenance
 
@@ -175,7 +181,7 @@ sub SystemMaintenanceDelete {
     return 1;
 }
 
-=head2 SystemMaintenanceGet()
+=item SystemMaintenanceGet()
 
 get SystemMaintenance attributes
 
@@ -256,7 +262,7 @@ sub SystemMaintenanceGet {
     return \%Data;
 }
 
-=head2 SystemMaintenanceUpdate()
+=item SystemMaintenanceUpdate()
 
 update SystemMaintenance attributes
 
@@ -313,7 +319,7 @@ sub SystemMaintenanceUpdate {
     return 1;
 }
 
-=head2 SystemMaintenanceList()
+=item SystemMaintenanceList()
 
 get an SystemMaintenance list
 
@@ -378,7 +384,7 @@ sub SystemMaintenanceList {
     return \%Data;
 }
 
-=head2 SystemMaintenanceListGet()
+=item SystemMaintenanceListGet()
 
 get an SystemMaintenance list with all SystemMaintenance details
 
@@ -452,7 +458,7 @@ sub SystemMaintenanceListGet {
     return \@Data;
 }
 
-=head2 SystemMaintenanceIsActive()
+=item SystemMaintenanceIsActive()
 
 get a SystemMaintenance active flag
 
@@ -501,19 +507,19 @@ sub SystemMaintenanceIsActive {
     return $Result;
 }
 
-=head2 SystemMaintenanceIsComing()
+=item SystemMaintenanceIsComming()
 
 get a SystemMaintenance flag
 
-    my $SystemMaintenanceIsComing = $SystemMaintenanceObject->SystemMaintenanceIsComing();
+    my $SystemMaintenanceIsComming = $SystemMaintenanceObject->SystemMaintenanceIsComming();
 
 Returns:
 
-    $SystemMaintenanceIsComing = 1 # 1 or 0
+    $SystemMaintenanceIsComming = 1 # 1 or 0
 
 =cut
 
-sub SystemMaintenanceIsComing {
+sub SystemMaintenanceIsComming {
     my ( $Self, %Param ) = @_;
 
     my $SystemTime = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
@@ -555,6 +561,8 @@ sub SystemMaintenanceIsComing {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

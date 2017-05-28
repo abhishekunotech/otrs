@@ -22,7 +22,7 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Invoker - GenericInterface Invoker interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Invokers are responsible to prepare for making a remote web service
 request.
@@ -43,7 +43,11 @@ was initiated to allow the Invoker to handle possible errors.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object.
 
@@ -111,7 +115,7 @@ sub new {
     return $Self;
 }
 
-=head2 PrepareRequest()
+=item PrepareRequest()
 
 prepare the invocation of the configured remote web service.
 
@@ -153,7 +157,7 @@ sub PrepareRequest {
 
 }
 
-=head2 HandleResponse()
+=item HandleResponse()
 
 handle response data of the configured remote web service.
 
@@ -192,6 +196,8 @@ sub HandleResponse {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

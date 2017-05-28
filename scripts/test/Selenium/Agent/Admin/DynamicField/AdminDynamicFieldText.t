@@ -21,16 +21,19 @@ $Selenium->RunTest(
         # get helper object
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
-        my %DynamicFieldsOverviewPageShownSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %DynamicFieldsOverviewPageShownSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name => 'PreferencesGroups###DynamicFieldsOverviewPageShown',
         );
+
+        %DynamicFieldsOverviewPageShownSysConfig = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $DynamicFieldsOverviewPageShownSysConfig{Setting}->[1]->{Hash}->[1]->{Item} };
 
         # show more dynamic fields per page as the default value
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'PreferencesGroups###DynamicFieldsOverviewPageShown',
             Value => {
-                %{ $DynamicFieldsOverviewPageShownSysConfig{EffectiveValue} },
+                %DynamicFieldsOverviewPageShownSysConfig,
                 DataSelected => 999,
             },
         );
@@ -93,24 +96,7 @@ $Selenium->RunTest(
             $Selenium->find_element( "#AddRegEx",                    'css' )->VerifiedClick();
             $Selenium->find_element( "#RegEx_1",                     'css' )->send_keys($RegEx);
             $Selenium->find_element( "#CustomerRegExErrorMessage_1", 'css' )->send_keys($RegExErrorTxt);
-
-            # verify JS - add, remove and RegEx block validation
-            $Selenium->find_element( "#AddRegEx", 'css' )->VerifiedClick();
-            $Selenium->find_element( "#Name",     'css' )->VerifiedSubmit();
-
-            $Self->Is(
-                $Selenium->execute_script(
-                    "return \$('#RegEx_2').hasClass('Error')"
-                ),
-                '1',
-                'Client side validation correctly detected missing input value',
-            );
-
-            $Selenium->find_element( "#RegEx_2",       'css' )->send_keys($RegEx);
-            $Selenium->find_element( "#RemoveRegEx_2", 'css' )->VerifiedClick();
-
-            # submit form
-            $Selenium->find_element( "#Name", 'css' )->VerifiedSubmit();
+            $Selenium->find_element( "#Name",                        'css' )->VerifiedSubmit();
 
             # check for test DynamicFieldText on AdminDynamicField screen
             $Self->True(

@@ -35,7 +35,7 @@ Core.Config = (function (TargetNS) {
      * @description
      *      The prefix for all config keys to avoid name conflicts
      */
-        ConfigPrefix = '';
+        ConfigPrefix = 'Config';
 
     if (!Core.Debug.CheckDependency('Core.Config', 'Core.Data', 'Core.Data')) {
         return false;
@@ -135,7 +135,7 @@ Core.Config = (function (TargetNS) {
 
         if (typeof ConfigKey === 'undefined') {
             $.each(Data, function (Key, Value) {
-                TargetNS.Set(Key,Value);
+                ConfigLevel[ConfigPrefix + Key] = Value;
             });
         }
         else {
@@ -183,28 +183,20 @@ Core.Config = (function (TargetNS) {
         'Microsoft Internet Explorer 9': function () {
             return ($.browser.msie && $.browser.version === '9.0');
         },
-        'Microsoft Internet Explorer 10': function () {
-            return ($.browser.msie && $.browser.version === '10.0');
-        },
         'Konqueror (without WebKit engine)': function () {
             return ($.browser.webkit && navigator.vendor === 'KDE');
         },
-        // all Netscape, Mozilla, Firefox before version 31 (Gecko version 31)
+        // all Netscape, Mozilla, Firefox before Gecko Version 1.9 (Firefox 3)
         'Netscape, old Mozilla, old Firefox': function () {
             var BrowserVersion,
                 BrowserDetected = false;
             if ($.browser.mozilla) {
                 BrowserVersion = $.browser.version.split('.');
-                if (parseInt(BrowserVersion[0], 10) < 31) {
+                if (parseInt(BrowserVersion[0], 10) < 10) {
                     BrowserDetected = true;
                 }
             }
             return BrowserDetected;
-        },
-        // Safari version 5 and older on Mac and Windows (webkit version 534.x.x)
-        'Safari Version 5 and older': function () {
-            var BrowserVersion = $.browser.version.split('.');
-            return ($.browser.safari && parseInt(BrowserVersion[0], 10) < 535);
         }
     }, 'BrowserBlackList::Agent');
 
@@ -230,28 +222,20 @@ Core.Config = (function (TargetNS) {
         'Microsoft Internet Explorer 9': function () {
             return ($.browser.msie && $.browser.version === '9.0');
         },
-        'Microsoft Internet Explorer 10': function () {
-            return ($.browser.msie && $.browser.version === '10.0');
-        },
         'Konqueror (without WebKit engine)': function () {
             return ($.browser.webkit && navigator.vendor === 'KDE');
         },
-        // all Netscape, Mozilla, Firefox before version 31 (Gecko version 31)
+        // all Netscape, Mozilla, Firefox before Gecko Version 1.9 (Firefox 3)
         'Netscape, old Mozilla, old Firefox': function () {
             var BrowserVersion,
-                BrowserDetected = false;
+            BrowserDetected = false;
             if ($.browser.mozilla) {
                 BrowserVersion = $.browser.version.split('.');
-                if (parseInt(BrowserVersion[0], 10) < 31) {
+                if (parseInt(BrowserVersion[0], 10) < 10) {
                     BrowserDetected = true;
                 }
             }
             return BrowserDetected;
-        },
-        // Safari version 5 and older on Mac and Windows (webkit version 534.x.x)
-        'Safari Version 5 and older': function () {
-            var BrowserVersion = $.browser.version.split('.');
-            return ($.browser.safari && parseInt(BrowserVersion[0], 10) < 535);
         }
     }, 'BrowserBlackList::Customer');
 

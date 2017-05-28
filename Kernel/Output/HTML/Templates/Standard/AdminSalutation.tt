@@ -6,27 +6,13 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
+[% RenderBlockStart("RichText") %]
+[% InsertTemplate("RichTextEditor.tt") %]
+[% RenderBlockEnd("RichText") %]
+
 [% RenderBlockStart("Overview") %]
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Salutation Management") | html %]</h1>
-
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Salutation Management'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% SWITCH Data.Action %]
-        [% CASE 'Add' %]
-            [% BreadcrumbPath.push({ Name => Translate("Add Salutation"),}) %]
-        [% CASE 'Change' %]
-            [% USE EditTitle = String(Translate("Edit Salutation")) %]
-            [% BreadcrumbPath.push({ Name => EditTitle.append( ': ', Data.Name ) }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
 
     <div class="SidebarColumn">
 [% RenderBlockStart("ActionList") %]
@@ -52,18 +38,6 @@
             </div>
         </div>
 [% RenderBlockEnd("ActionList") %]
-
-[% RenderBlockStart("Filter") %]
-        <div class="WidgetSimple">
-            <div class="Header">
-                <h2><label for="FilterSalutations">[% Translate("Filter for Salutations") | html %]</label></h2>
-            </div>
-            <div class="Content">
-                <input type="text" id="FilterSalutations" class="FilterBox" placeholder="[% Translate("Just start typing to filter...") | html %]" name="FilterSalutations" value="" title="[% Translate("Filter for salutations") | html %]">
-            </div>
-        </div>
-[% RenderBlockEnd("Filter") %]
-
     </div>
     <div class="ContentColumn">
 
@@ -73,7 +47,7 @@
                 <h2>[% Translate("List") | html %]</h2>
             </div>
             <div class="Content">
-                <table class="DataTable" id="Salutations">
+                <table class="DataTable">
                     <thead>
                         <tr>
                             <th>[% Translate("Name") | html %]</th>
@@ -102,9 +76,6 @@
                             <td>[% Data.CreateTime | Localize("TimeShort") %]</td>
                         </tr>
 [% RenderBlockEnd("OverviewResultRow") %]
-                        <tr class="FilterMessage Hidden">
-                            <td colspan="5">[% Translate("No matches found.") | html %]</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -114,13 +85,12 @@
 
         <div class="WidgetSimple">
             <div class="Header">
-
-            [% IF Data.Action == 'Add' %]
+[% RenderBlockStart("HeaderAdd") %]
                 <h2>[% Translate("Add Salutation") | html %]</h2>
-            [% ELSE %]
+[% RenderBlockEnd("HeaderAdd") %]
+[% RenderBlockStart("HeaderEdit") %]
                 <h2>[% Translate("Edit Salutation") | html %]</h2>
-            [% END %]
-
+[% RenderBlockEnd("HeaderEdit") %]
             </div>
             <div class="Content">
 
@@ -128,9 +98,6 @@
                     <input type="hidden" name="Action" value="[% Env("Action") %]"/>
                     <input type="hidden" name="Subaction" value="[% Data.Action | uri %]Action"/>
                     <input type="hidden" name="ID" value="[% Data.ID | html %]"/>
-                    [% IF Data.Action == 'Change' %]
-                        <input type="hidden" name="ContinueAfterSave" id="ContinueAfterSave" value=""/>
-                    [% END %]
                     <fieldset class="TableLike">
                         <label class="Mandatory" for="Name"><span class="Marker">*</span> [% Translate("Name") | html %]:</label>
                         <div class="Field">
@@ -169,13 +136,7 @@
                         <div class="Clear"></div>
 
                         <div class="Field">
-                            [% IF Data.Action == 'Change' %]
-                                <button class="CallForAction Primary" id="SubmitAndContinue" type="button" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                                [% Translate("or") | html %]
-                                <button class="CallForAction Primary" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
-                            [% ELSE %]
-                                <button class="CallForAction Primary" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                            [% END %]
+                            <button class="Primary CallForAction" type="submit" value="[% Translate("Submit") | html %]"><span>[% Translate("Submit") | html %]</span></button>
                             [% Translate("or") | html %]
                             <a href="[% Env("Baselink") %]Action=[% Env("Action") %]">[% Translate("Cancel") | html %]</a>
                         </div>

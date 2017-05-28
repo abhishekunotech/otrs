@@ -22,14 +22,18 @@ our @ObjectDependencies = (
 
 Kernel::System::AsynchronousExecutor - base class to delegate tasks to the OTRS Scheduler Daemon
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 ObjectManager controlled modules can add this base class to execute some time consuming tasks in the
 background using the separate process OTRS Scheduler Daemon.
 
 =head1 PUBLIC INTERFACE
 
-=head2 AsyncCall()
+=over 4
+
+=cut
+
+=item AsyncCall()
 
 creates a scheduler daemon task to execute a function asynchronously.
 
@@ -41,7 +45,7 @@ creates a scheduler daemon task to execute a function asynchronously.
         Attempts                 => 3,                          # optional, default: 1, number of tries to lock the
                                                                 #   task by the scheduler
         MaximumParallelInstances => 1,                          # optional, default: 0 (unlimited), number of same
-                                                                #   function calls from the same object that can be
+                                                                #   function calls form the same object that can be
                                                                 #   executed at the the same time
     );
 
@@ -136,6 +140,8 @@ sub AsyncCall {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

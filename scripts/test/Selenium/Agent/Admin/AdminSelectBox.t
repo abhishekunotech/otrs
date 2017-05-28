@@ -74,10 +74,9 @@ $Selenium->RunTest(
             "Result table header row found",
         );
 
+        @Elements = $Selenium->find_elements( 'table tbody tr', 'css' );
         $Self->Is(
-            $Selenium->execute_script(
-                "return \$('#Results tbody tr:visible').length"
-            ),
+            scalar @Elements,
             3,
             "Result table body rows found",
         );

@@ -11,7 +11,7 @@ package Kernel::System::Console::Command::Maint::Database::MySQL::InnoDBMigratio
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::System::DB',

@@ -22,9 +22,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Mapping - GenericInterface data mapping interface
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object.
 
@@ -125,7 +131,7 @@ sub new {
     return $Self;
 }
 
-=head2 Map()
+=item Map()
 
 perform data mapping in backend
 
@@ -170,6 +176,8 @@ sub Map {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

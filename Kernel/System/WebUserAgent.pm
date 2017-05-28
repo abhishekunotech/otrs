@@ -28,13 +28,17 @@ our @ObjectDependencies = (
 
 Kernel::System::WebUserAgent - a web user agent lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All web user agent functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object
 
@@ -63,7 +67,7 @@ sub new {
     return $Self;
 }
 
-=head2 Request()
+=item Request()
 
 return the content of requested URL.
 
@@ -72,7 +76,6 @@ Simple GET request:
     my %Response = $WebUserAgentObject->Request(
         URL => 'http://example.com/somedata.xml',
         SkipSSLVerification => 1, # (optional)
-        NoLog               => 1, # (optional)
     );
 
 Or a POST request; attributes can be a hashref like this:
@@ -82,7 +85,6 @@ Or a POST request; attributes can be a hashref like this:
         Type => 'POST',
         Data => { Attribute1 => 'Value', Attribute2 => 'Value2' },
         SkipSSLVerification => 1, # (optional)
-        NoLog               => 1, # (optional)
     );
 
 alternatively, you can use an arrayref like this:
@@ -92,7 +94,6 @@ alternatively, you can use an arrayref like this:
         Type => 'POST',
         Data => [ Attribute => 'Value', Attribute => 'OtherValue' ],
         SkipSSLVerification => 1, # (optional)
-        NoLog               => 1, # (optional)
     );
 
 returns
@@ -113,7 +114,6 @@ You can even pass some headers
             Content_Type  => 'text/json',
         },
         SkipSSLVerification => 1, # (optional)
-        NoLog               => 1, # (optional)
     );
 
 If you need to set credentials
@@ -129,7 +129,6 @@ If you need to set credentials
             Location => 'ftp.otrs.org:80',
         },
         SkipSSLVerification => 1, # (optional)
-        NoLog               => 1, # (optional)
     );
 
 =cut
@@ -216,14 +215,10 @@ sub Request {
     }
 
     if ( !$Response->is_success() ) {
-
-        if ( !$Param{NoLog} ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "Can't perform $Param{Type} on $Param{URL}: " . $Response->status_line(),
-            );
-        }
-
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
+            Priority => 'error',
+            Message  => "Can't perform $Param{Type} on $Param{URL}: " . $Response->status_line(),
+        );
         return (
             Status => $Response->status_line(),
         );
@@ -248,6 +243,8 @@ sub Request {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

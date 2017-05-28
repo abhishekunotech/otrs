@@ -36,6 +36,20 @@ my $TicketObject       = $Kernel::OM->Get('Kernel::System::Ticket');
 # define needed variable
 my $RandomID = $Helper->GetRandomID();
 
+# set timezone variables
+$ConfigObject->Set(
+    Key   => 'TimeZone',
+    Value => '+0',
+);
+$ConfigObject->Set(
+    Key   => 'TimeZoneUser',
+    Value => 1,
+);
+$ConfigObject->Set(
+    Key   => 'TimeZoneUserBrowserAutoOffset',
+    Value => 0,
+);
+
 # Ensure that default config values are used
 $ConfigObject->Set(
     Key   => 'TimeInputFormat',
@@ -113,28 +127,36 @@ for my $DynamicField (@DynamicFields) {
     $DynamicFieldConfigsByType{ $DynamicField->{FieldType} } = $DynamicFieldConfig;
 }
 
+# create different layout objects for different time zones
+my $LayoutObjectM6 = Kernel::Output::HTML::Layout->new(
+    Lang         => 'en',
+    UserTimeZone => '-6',
+);
+my $LayoutObject = Kernel::Output::HTML::Layout->new(
+    Lang         => 'en',
+    UserTimeZone => '+0',
+);
+my $LayoutObjectP6 = Kernel::Output::HTML::Layout->new(
+    Lang         => 'en',
+    UserTimeZone => '+6',
+);
+
 my @Tests = (
 
-    #
-    # Tests for field type Date
-    #
+    # date field type
     {
+        Name   => 'Date field -6 hours',
         Config => {
-            Type         => 'Date',
-            OTRSTimeZone => 'UTC',
-            UserTimeZone => 'Europe/Berlin',
-            Common       => {
+            Type   => 'Date',
+            Common => {
                 DynamicFieldConfig => $DynamicFieldConfigsByType{Date},
+                LayoutObject       => $LayoutObjectM6,
             },
             EditFieldRender => {
-
-                # in OTRS time zone
                 Value => {
-                    Value       => '2013-10-01 23:30:00',
+                    Value       => '2013-10-01 00:00:00',
                     ParamObject => $ParamObject,
                 },
-
-                # in OTRS time zone
                 WebRequest => {
                     CGIParam => {
                         'DynamicField_DFDate' . $RandomID . 'Used'  => 1,
@@ -159,8 +181,6 @@ my @Tests = (
             },
         },
         ExpectedResults => {
-
-            # for field type Date, time zones will be ignored, the date is taken as is
             EditFieldRender => {
                 Value => {
                     Day   => '01',
@@ -178,22 +198,18 @@ my @Tests = (
         },
     },
     {
+        Name   => 'Date field +0 hours',
         Config => {
-            Type         => 'Date',
-            OTRSTimeZone => 'Europe/Berlin',
-            UserTimeZone => 'America/New_York',
-            Common       => {
+            Type   => 'Date',
+            Common => {
                 DynamicFieldConfig => $DynamicFieldConfigsByType{Date},
+                LayoutObject       => $LayoutObject,
             },
             EditFieldRender => {
-
-                # in OTRS time zone
                 Value => {
-                    Value       => '2013-10-01 23:30:00',
+                    Value       => '2013-10-01 00:00:00',
                     ParamObject => $ParamObject,
                 },
-
-                # in OTRS time zone
                 WebRequest => {
                     CGIParam => {
                         'DynamicField_DFDate' . $RandomID . 'Used'  => 1,
@@ -218,8 +234,59 @@ my @Tests = (
             },
         },
         ExpectedResults => {
-
-            # for field type Date, time zones will be ignored, the date is taken as is
+            EditFieldRender => {
+                Value => {
+                    Day   => '01',
+                    Month => '10',
+                    Year  => '2013',
+                },
+                WebRequest => {
+                    Day   => '01',
+                    Month => '10',
+                    Year  => '2013',
+                },
+            },
+            EditFieldValueGet => '2013-10-01 00:00:00',
+            ValueSetGet       => '2013-10-01 00:00:00',
+        },
+    },
+    {
+        Name   => 'Date field +6 hours',
+        Config => {
+            Type   => 'Date',
+            Common => {
+                DynamicFieldConfig => $DynamicFieldConfigsByType{Date},
+                LayoutObject       => $LayoutObjectP6,
+            },
+            EditFieldRender => {
+                Value => {
+                    Value       => '2013-10-01 00:00:00',
+                    ParamObject => $ParamObject,
+                },
+                WebRequest => {
+                    CGIParam => {
+                        'DynamicField_DFDate' . $RandomID . 'Used'  => 1,
+                        'DynamicField_DFDate' . $RandomID . 'Day'   => '01',
+                        'DynamicField_DFDate' . $RandomID . 'Month' => '10',
+                        'DynamicField_DFDate' . $RandomID . 'Year'  => '2013',
+                    },
+                },
+            },
+            EditFieldValueGet => {
+                CGIParam => {
+                    'DynamicField_DFDate' . $RandomID . 'Used'  => 1,
+                    'DynamicField_DFDate' . $RandomID . 'Day'   => '01',
+                    'DynamicField_DFDate' . $RandomID . 'Month' => '10',
+                    'DynamicField_DFDate' . $RandomID . 'Year'  => '2013',
+                },
+            },
+            ValueSetGet => {
+                Value    => '2013-10-01 00:00:00',
+                ObjectID => $TicketID,
+                UserID   => 1,
+            },
+        },
+        ExpectedResults => {
             EditFieldRender => {
                 Value => {
                     Day   => '01',
@@ -237,61 +304,110 @@ my @Tests = (
         },
     },
 
-    #
-    # Tests for field type DateTime
-    #
+    # date time field type
     {
+        Name   => 'DateTime field -6 hours',
         Config => {
-            Type         => 'DateTime',
-            OTRSTimeZone => 'UTC',
-            UserTimeZone => 'Europe/Berlin',
-            Common       => {
+            Type   => 'DateTime',
+            Common => {
                 DynamicFieldConfig => $DynamicFieldConfigsByType{DateTime},
+                LayoutObject       => $LayoutObjectM6,
             },
             EditFieldRender => {
-
-                # in OTRS time zone
                 Value => {
-                    Value       => '2013-09-30 23:01:00',
+                    Value       => '2013-10-01 01:01:00',
                     ParamObject => $ParamObject,
                 },
-
-                # in user time zone
                 WebRequest => {
                     CGIParam => {
                         'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
-                        'DynamicField_DFDateTime' . $RandomID . 'Day'    => '30',
-                        'DynamicField_DFDateTime' . $RandomID . 'Month'  => '09',
+                        'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
+                        'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
                         'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '23',
+                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
                         'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
                     },
                 },
             },
             EditFieldValueGet => {
-
-                # in user time zone
                 CGIParam => {
                     'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
-                    'DynamicField_DFDateTime' . $RandomID . 'Day'    => '30',
-                    'DynamicField_DFDateTime' . $RandomID . 'Month'  => '09',
+                    'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
+                    'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
                     'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '23',
+                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
                     'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
                 },
             },
             ValueSetGet => {
-
-                # in OTRS time zone
-                Value    => '2013-09-30 23:01:00',
+                Value    => '2013-10-01 01:01:00',
                 ObjectID => $TicketID,
                 UserID   => 1,
             },
         },
         ExpectedResults => {
             EditFieldRender => {
-
-                # in user time zone
+                Value => {
+                    Day    => '30',
+                    Month  => '09',
+                    Year   => '2013',
+                    Hour   => '19',
+                    Minute => '01',
+                },
+                WebRequest => {
+                    Day    => '01',
+                    Month  => '10',
+                    Year   => '2013',
+                    Hour   => '01',
+                    Minute => '01',
+                },
+            },
+            EditFieldValueGet => '2013-10-01 07:01:00',
+            ValueSetGet       => '2013-10-01 01:01:00',
+        },
+    },
+    {
+        Name   => 'DateTime field +0 hours',
+        Config => {
+            Type   => 'DateTime',
+            Common => {
+                DynamicFieldConfig => $DynamicFieldConfigsByType{DateTime},
+                LayoutObject       => $LayoutObject,
+            },
+            EditFieldRender => {
+                Value => {
+                    Value       => '2013-10-01 01:01:00',
+                    ParamObject => $ParamObject,
+                },
+                WebRequest => {
+                    CGIParam => {
+                        'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
+                        'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
+                        'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
+                        'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
+                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
+                        'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
+                    },
+                },
+            },
+            EditFieldValueGet => {
+                CGIParam => {
+                    'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
+                    'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
+                    'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
+                    'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
+                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
+                    'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
+                },
+            },
+            ValueSetGet => {
+                Value    => '2013-10-01 01:01:00',
+                ObjectID => $TicketID,
+                UserID   => 1,
+            },
+        },
+        ExpectedResults => {
+            EditFieldRender => {
                 Value => {
                     Day    => '01',
                     Month  => '10',
@@ -299,199 +415,83 @@ my @Tests = (
                     Hour   => '01',
                     Minute => '01',
                 },
-
-                # in user time zone
                 WebRequest => {
-                    Day    => '30',
-                    Month  => '09',
+                    Day    => '01',
+                    Month  => '10',
                     Year   => '2013',
-                    Hour   => '23',
+                    Hour   => '01',
                     Minute => '01',
                 },
             },
-
-            # in OTRS time zone
-            EditFieldValueGet => '2013-09-30 21:01:00',
-
-            # in OTRS time zone
-            ValueSetGet => '2013-09-30 23:01:00',
+            EditFieldValueGet => '2013-10-01 01:01:00',
+            ValueSetGet       => '2013-10-01 01:01:00',
         },
     },
     {
+        Name   => 'DateTime field +6 hours',
         Config => {
-            Type         => 'DateTime',
-            OTRSTimeZone => 'Europe/Berlin',
-            UserTimeZone => 'America/New_York',
-            Common       => {
+            Type   => 'DateTime',
+            Common => {
                 DynamicFieldConfig => $DynamicFieldConfigsByType{DateTime},
+                LayoutObject       => $LayoutObjectP6,
             },
             EditFieldRender => {
-
-                # in OTRS time zone
                 Value => {
-                    Value       => '2013-10-01 03:01:00',
+                    Value       => '2013-10-01 01:01:00',
                     ParamObject => $ParamObject,
                 },
-
-                # in user time zone
                 WebRequest => {
                     CGIParam => {
                         'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
                         'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
                         'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
                         'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '03',
+                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
                         'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
                     },
                 },
             },
             EditFieldValueGet => {
-
-                # in user time zone
                 CGIParam => {
                     'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
                     'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
                     'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
                     'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '03',
+                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '01',
                     'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
                 },
             },
             ValueSetGet => {
-
-                # in OTRS time zone
-                Value    => '2013-10-01 03:01:00',
+                Value    => '2013-10-01 01:01:00',
                 ObjectID => $TicketID,
                 UserID   => 1,
             },
         },
         ExpectedResults => {
             EditFieldRender => {
-
-                # in user time zone
-                Value => {
-                    Day    => '30',
-                    Month  => '09',
-                    Year   => '2013',
-                    Hour   => '21',
-                    Minute => '01',
-                },
-
-                # in user time zone
-                WebRequest => {
-                    Day    => '01',
-                    Month  => '10',
-                    Year   => '2013',
-                    Hour   => '03',
-                    Minute => '01',
-                },
-            },
-
-            # in OTRS time zone
-            EditFieldValueGet => '2013-10-01 09:01:00',
-
-            # in OTRS time zone
-            ValueSetGet => '2013-10-01 03:01:00',
-        },
-    },
-    {
-        Config => {
-            Type         => 'DateTime',
-            OTRSTimeZone => 'Europe/Berlin',
-            UserTimeZone => 'Europe/Berlin',
-            Common       => {
-                DynamicFieldConfig => $DynamicFieldConfigsByType{DateTime},
-            },
-            EditFieldRender => {
-
-                # in OTRS time zone
-                Value => {
-                    Value       => '2013-10-01 03:01:00',
-                    ParamObject => $ParamObject,
-                },
-
-                # in user time zone
-                WebRequest => {
-                    CGIParam => {
-                        'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
-                        'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
-                        'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
-                        'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                        'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '03',
-                        'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
-                    },
-                },
-            },
-            EditFieldValueGet => {
-
-                # in user time zone
-                CGIParam => {
-                    'DynamicField_DFDateTime' . $RandomID . 'Used'   => 1,
-                    'DynamicField_DFDateTime' . $RandomID . 'Day'    => '01',
-                    'DynamicField_DFDateTime' . $RandomID . 'Month'  => '10',
-                    'DynamicField_DFDateTime' . $RandomID . 'Year'   => '2013',
-                    'DynamicField_DFDateTime' . $RandomID . 'Hour'   => '03',
-                    'DynamicField_DFDateTime' . $RandomID . 'Minute' => '01',
-                },
-            },
-            ValueSetGet => {
-
-                # in OTRS time zone
-                Value    => '2013-10-01 03:01:00',
-                ObjectID => $TicketID,
-                UserID   => 1,
-            },
-        },
-        ExpectedResults => {
-            EditFieldRender => {
-
-                # in user time zone
                 Value => {
                     Day    => '01',
                     Month  => '10',
                     Year   => '2013',
-                    Hour   => '03',
+                    Hour   => '07',
                     Minute => '01',
                 },
-
-                # in user time zone
                 WebRequest => {
                     Day    => '01',
                     Month  => '10',
                     Year   => '2013',
-                    Hour   => '03',
+                    Hour   => '01',
                     Minute => '01',
                 },
             },
-
-            # in OTRS time zone
-            EditFieldValueGet => '2013-10-01 03:01:00',
-
-            # in OTRS time zone
-            ValueSetGet => '2013-10-01 03:01:00',
+            EditFieldValueGet => '2013-09-30 19:01:00',
+            ValueSetGet       => '2013-10-01 01:01:00',
         },
     },
 );
 
 # execute tests
 for my $Test (@Tests) {
-
-    $ConfigObject->Set(
-        Key   => 'OTRSTimeZone',
-        Value => $Test->{Config}->{OTRSTimeZone},
-    );
-
-    # get Layout object with correct user time zone
-    $Kernel::OM->ObjectsDiscard(
-        Objects => [ 'Kernel::Output::HTML::Layout', 'Kernel::System::Web::Request', ],
-    );
-    $Kernel::OM->ObjectParamAdd(
-        'Kernel::Output::HTML::Layout' => {
-            Lang         => 'en',
-            UserTimeZone => $Test->{Config}->{UserTimeZone},
-        },
-    );
-    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     # for EditFieldRender test both cases, a values passed and value in a web request as they might
     # be different
@@ -502,7 +502,7 @@ for my $Test (@Tests) {
         if ( $Type eq 'Value' ) {
             %Config = (
                 %{ $Test->{Config}->{Common} },
-                %{ $Test->{Config}->{EditFieldRender}->{$Type} },
+                %{ $Test->{Config}->{EditFieldRender}->{$Type} }
             );
         }
         else {
@@ -521,60 +521,56 @@ for my $Test (@Tests) {
             );
         }
 
-        $Config{LayoutObject} = $LayoutObject;
-
         # get EditValueRender HTML
         my $FieldHTML = $BackendObject->EditFieldRender(%Config);
 
         my %HTMLResult;
 
-        # get day from HTML
+        #get day from HTML
         $FieldHTML->{Field} =~ m{title="Day" [^s]+ selected="selected">([^<]+)</option>}msx;
         $HTMLResult{Day} = $1;
 
-        # reset capturing groups
+        #reset capturing groups
         "OTRS" =~ m{OTRS};
 
         # get month from HTML
         $FieldHTML->{Field} =~ m{title="Month" [^s]+ selected="selected">([^<]+)</option>}msx;
         $HTMLResult{Month} = $1;
 
-        # reset capturing groups
+        #reset capturing groups
         "OTRS" =~ m{OTRS};
 
         # get year from HTML
         $FieldHTML->{Field} =~ m{title="Year" [^s]+ selected="selected">([^<]+)</option>}msx;
         $HTMLResult{Year} = $1;
 
-        # reset capturing groups
+        #reset capturing groups
         "OTRS" =~ m{OTRS};
 
         # also get Hour and Minute for DateTime fields
         if ( $Test->{Config}->{Type} eq 'DateTime' ) {
 
-            # get hour from HTML
+            #get hour from HTML
             $FieldHTML->{Field} =~ m{title="Hours" [^s]+ selected="selected">([^<]+)</option>}msx;
             $HTMLResult{Hour} = $1;
 
-            # reset capturing groups
+            #reset capturing groups
             "OTRS" =~ m{OTRS};
 
             # get minute from HTML
             $FieldHTML->{Field} =~ m{title="Minutes" [^s]+ selected="selected">([^<]+)</option>}msx;
             $HTMLResult{Minute} = $1;
 
-            # reset capturing groups
+            #reset capturing groups
             "OTRS" =~ m{OTRS};
         }
 
         $Self->IsDeeply(
             \%HTMLResult,
             $Test->{ExpectedResults}->{EditFieldRender}->{$Type},
-            "EditFieldRender() for type $Type: Field type $Test->{Config}->{Type}, OTRS time zone $Test->{Config}->{OTRSTimeZone}, "
-                . (
-                $Test->{Config}->{UserTimeZone} ? "user time zone $Test->{Config}->{UserTimeZone}" : 'no user time zone'
-                ),
+            "$Test->{Name}: EditFieldRender() $Type Expected results",
         );
+
     }
 
     # create a new CGI object to simulate a web request
@@ -584,21 +580,17 @@ for my $Test (@Tests) {
         WebRequest => $WebRequest,
     );
 
-    # get the value from the web request
+    # get the value form the web request
     my $Value = $BackendObject->EditFieldValueGet(
         %{ $Test->{Config}->{Common} },
         %{ $Test->{Config}->{EditFieldValueGet} },
-        ParamObject  => $LocalParamObject,
-        LayoutObject => $LayoutObject,
+        ParamObject => $LocalParamObject,
     );
 
     $Self->Is(
         $Value,
         $Test->{ExpectedResults}->{EditFieldValueGet},
-        "EditFieldValueGet(): Field type $Test->{Config}->{Type}, OTRS time zone $Test->{Config}->{OTRSTimeZone}, "
-            . (
-            $Test->{Config}->{UserTimeZone} ? "user time zone $Test->{Config}->{UserTimeZone}" : 'no user time zone'
-            ),
+        "$Test->{Name}: EditFieldValueGet() Expected results"
     );
 
     # set a value in the DB and get it
@@ -614,10 +606,7 @@ for my $Test (@Tests) {
     $Self->Is(
         $Value,
         $Test->{ExpectedResults}->{ValueSetGet},
-        "ValueGet(): Field type $Test->{Config}->{Type}, OTRS time zone $Test->{Config}->{OTRSTimeZone}, "
-            . (
-            $Test->{Config}->{UserTimeZone} ? "user time zone $Test->{Config}->{UserTimeZone}" : 'no user time zone'
-            ),
+        "$Test->{Name}: ValueGet() Expected results"
     );
 }
 

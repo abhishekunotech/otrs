@@ -15,7 +15,7 @@ use Kernel::System::VariableCheck qw(:all);
 
 use Kernel::Language qw(Translatable);
 
-use parent qw(Kernel::System::DynamicField::Driver::BaseDateTime);
+use base qw(Kernel::System::DynamicField::Driver::BaseDateTime);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -30,7 +30,7 @@ our @ObjectDependencies = (
 
 Kernel::System::DynamicField::Driver::Date
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 DynamicFields Date Driver delegate
 
@@ -39,7 +39,9 @@ DynamicFields Date Driver delegate
 This module implements the public interface of L<Kernel::System::DynamicField::Backend>.
 Please look there for a detailed reference of the functions.
 
-=head2 new()
+=over 4
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::System::DynamicField::Backend->new();
@@ -219,32 +221,25 @@ sub SearchSQLGet {
         SmallerThanEquals => '<=',
     );
 
-    if ( $Param{Operator} eq 'Empty' ) {
-        if ( $Param{SearchTerm} ) {
-            return " $Param{TableAlias}.value_date IS NULL ";
+    if ( $Operators{ $Param{Operator} } ) {
+        my $SQL = " $Param{TableAlias}.value_date $Operators{$Param{Operator}} '"
+            . $Kernel::OM->Get('Kernel::System::DB')->Quote( $Param{SearchTerm} );
+
+        # Append hh:mm:ss if only the ISO date was supplied to get a full date-time string.
+        if ( $Param{SearchTerm} =~ m{\A \d{4}-\d{2}-\d{2}\z}xms ) {
+            $SQL .= " 00:00:00";
         }
-        else {
-            return " $Param{TableAlias}.value_date IS NOT NULL ";
-        }
-    }
-    elsif ( !$Operators{ $Param{Operator} } ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            'Priority' => 'error',
-            'Message'  => "Unsupported Operator $Param{Operator}",
-        );
-        return;
+
+        $SQL .= "' ";
+        return $SQL;
     }
 
-    my $SQL = " $Param{TableAlias}.value_date $Operators{ $Param{Operator} } '"
-        . $Kernel::OM->Get('Kernel::System::DB')->Quote( $Param{SearchTerm} );
+    $Kernel::OM->Get('Kernel::System::Log')->Log(
+        'Priority' => 'error',
+        'Message'  => "Unsupported Operator $Param{Operator}",
+    );
 
-    # Append hh:mm:ss if only the ISO date was supplied to get a full date-time string.
-    if ( $Param{SearchTerm} =~ m{\A \d{4}-\d{2}-\d{2}\z}xms ) {
-        $SQL .= " 00:00:00";
-    }
-
-    $SQL .= "' ";
-    return $SQL;
+    return;
 }
 
 sub EditFieldRender {
@@ -262,6 +257,7 @@ sub EditFieldRender {
         $Value = $FieldConfig->{DefaultValue} || '';
     }
 
+    my %SplitedFieldValues;
     if ( defined $Param{Value} ) {
         $Value = $Param{Value};
     }
@@ -269,18 +265,21 @@ sub EditFieldRender {
         my ( $Year, $Month, $Day, $Hour, $Minute, $Second ) = $Value =~
             m{ \A ( \d{4} ) - ( \d{2} ) - ( \d{2} ) \s ( \d{2} ) : ( \d{2} ) : ( \d{2} ) \z }xms;
 
-        # If a value is sent this value must be active, then the Used part needs to be set to 1
-        #   otherwise user can easily forget to mark the checkbox and this could lead into data
-        #   lost (Bug#8258).
-        $FieldConfig->{ $FieldName . 'Used' }   = 1;
-        $FieldConfig->{ $FieldName . 'Year' }   = $Year;
-        $FieldConfig->{ $FieldName . 'Month' }  = $Month;
-        $FieldConfig->{ $FieldName . 'Day' }    = $Day;
-        $FieldConfig->{ $FieldName . 'Hour' }   = $Hour;
-        $FieldConfig->{ $FieldName . 'Minute' } = $Minute;
+        %SplitedFieldValues = (
+
+            # if a value is sent this value must be active, then the Used part needs to be set to 1
+            # otherwise user can easily forget to mark the checkbox and this could lead into data
+            # lost Bug#8258
+            $FieldName . 'Used'   => 1,
+            $FieldName . 'Year'   => $Year,
+            $FieldName . 'Month'  => $Month,
+            $FieldName . 'Day'    => $Day,
+            $FieldName . 'Hour'   => $Hour,
+            $FieldName . 'Minute' => $Minute,
+        );
     }
 
-    # extract the dynamic field value from the web request
+    # extract the dynamic field value form the web request
     my $FieldValues = $Self->EditFieldValueGet(
         ReturnValueStructure => 1,
         %Param,
@@ -344,6 +343,7 @@ sub EditFieldRender {
         $FieldName . Optional => 1,
         Validate              => 1,
         %{$FieldConfig},
+        %SplitedFieldValues,
         %YearsPeriodRange,
         OverrideTimeZone => 1,
     );
@@ -1372,6 +1372,8 @@ sub ValueLookup {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

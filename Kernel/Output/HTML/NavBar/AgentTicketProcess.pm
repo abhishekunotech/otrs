@@ -8,8 +8,6 @@
 
 package Kernel::Output::HTML::NavBar::AgentTicketProcess;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 
@@ -22,6 +20,19 @@ our @ObjectDependencies = (
     'Kernel::System::ProcessManagement::Process',
 );
 
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
+
+    return $Self;
+}
+
 sub Run {
     my ( $Self, %Param ) = @_;
 
@@ -29,15 +40,13 @@ sub Run {
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # get process management configuration
-    my $FrontendModuleConfig     = $ConfigObject->Get('Frontend::Module')->{AgentTicketProcess};
-    my $FrontendNavigationConfig = $ConfigObject->Get('Frontend::Navigation')->{AgentTicketProcess};
+    my $FrontendModuleConfig = $ConfigObject->Get('Frontend::Module')->{AgentTicketProcess};
 
     # check if the registration config is valid
     return if !IsHashRefWithData($FrontendModuleConfig);
-    return if !IsHashRefWithData($FrontendNavigationConfig);
-    return if !IsHashRefWithData( $FrontendNavigationConfig->{1} );
+    return if !IsHashRefWithData( $FrontendModuleConfig->{NavBar}->[0] );
 
-    my $NameForID = $FrontendNavigationConfig->{1}->{Name};
+    my $NameForID = $FrontendModuleConfig->{NavBar}->[0]->{Name};
     $NameForID =~ s/[ &;]//ig;
 
     # check if the module name is valid
@@ -126,7 +135,7 @@ sub Run {
 
     # frontend module is enabled but there is no selectable process, then remove the menu entry
     my $NavBarName = $FrontendModuleConfig->{NavBarName};
-    my $Priority = sprintf( "%07d", $FrontendNavigationConfig->{1}->{Prio} );
+    my $Priority = sprintf( "%07d", $FrontendModuleConfig->{NavBar}->[0]->{Prio} );
 
     my %Return = %{ $Param{NavBar}->{Sub} || {} };
 

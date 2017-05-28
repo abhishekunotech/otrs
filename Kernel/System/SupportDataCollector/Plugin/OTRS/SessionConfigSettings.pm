@@ -11,7 +11,7 @@ package Kernel::System::SupportDataCollector::Plugin::OTRS::SessionConfigSetting
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginBase);
+use base qw(Kernel::System::SupportDataCollector::PluginBase);
 
 use Kernel::Language qw(Translatable);
 
@@ -29,6 +29,7 @@ sub Run {
     my @Settings = qw(
         SessionMaxTime
         SessionMaxIdleTime
+        SessionActiveTime
         AgentSessionLimitPriorWarning
         AgentSessionLimit
         AgentSessionPerUserLimit

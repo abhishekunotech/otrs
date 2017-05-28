@@ -20,11 +20,11 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::System::EventHandler - event handler interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Inherit from this class if you want to use events there.
 
-    use parent qw(Kernel::System::EventHandler);
+    use base qw(Kernel::System::EventHandler);
 
 In your class, have to call L</EventHandlerInit()> first.
 
@@ -39,7 +39,11 @@ This is only necessary if you use C<Transaction> events in your class.
 
 =head1 PUBLIC INTERFACE
 
-=head2 EventHandlerInit()
+=over 4
+
+=cut
+
+=item EventHandlerInit()
 
 Call this to initialize the event handling mechanisms to work
 correctly with your object.
@@ -117,7 +121,7 @@ sub EventHandlerInit {
     return 1;
 }
 
-=head2 EventHandler()
+=item EventHandler()
 
 call event handler, returns true if it was executed successfully.
 
@@ -228,7 +232,7 @@ sub EventHandler {
     return 1;
 }
 
-=head2 EventHandlerTransaction()
+=item EventHandlerTransaction()
 
 handle all queued 'Transaction' events which were collected up to this point.
 
@@ -275,7 +279,7 @@ sub EventHandlerTransaction {
     return 1;
 }
 
-=head2 EventHandlerHasQueuedTransactions()
+=item EventHandlerHasQueuedTransactions()
 
 Return a true value if there are queued transactions, which
 C<EventHandlerTransaction> handles, when called.
@@ -289,6 +293,8 @@ sub EventHandlerHasQueuedTransactions {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

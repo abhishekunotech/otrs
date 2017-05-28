@@ -36,7 +36,7 @@
             [% PROCESS ErrorText %]
             [% FOR Error IN Data.StatsConfigurationErrors.GeneralSpecificationFieldErrors.pairs %]
                 <p class="Error">
-                    [% Error.key | html %]: [% Translate(Error.value) | html %]
+                    [% Error.key | html %]: [% Error.value %]
                 </p>
             [% END %]
 
@@ -50,7 +50,7 @@
                 [% PROCESS ErrorText %]
                 [% FOR Error IN Data.StatsConfigurationErrors.XAxisGeneralErrors %]
                     <p class="Error">
-                        [% Translate(Error) | html %]
+                        [% Error | html %]
                     </p>
                 [% END %]
             [% ELSE %]
@@ -69,7 +69,7 @@
             [% FOR Error IN Data.StatsConfigurationErrors.XAxisFieldErrors.pairs %]
                 <p class="Error">
                     <i class="fa fa-times"></i>
-                    [% Error.key | html%]: [% Translate(Error.value) | html %]
+                    [% Error.key | html%]: [% Error.value %]
                 </p>
             [% END %]
 
@@ -81,7 +81,7 @@
             [% PROCESS ErrorText %]
             [% FOR Error IN Data.StatsConfigurationErrors.YAxisGeneralErrors %]
                 <p class="Error">
-                    [% Translate(Error) | html %]
+                    [% Error | html %]
                 </p>
             [% END %]
 
@@ -94,7 +94,7 @@
             [% PROCESS ErrorText %]
             [% FOR Error IN Data.StatsConfigurationErrors.YAxisFieldErrors.pairs %]
                 <p class="Error">
-                    [% Error.key | html%]: [% Translate(Error.value) | html %]
+                    [% Error.key | html%]: [% Error.value %]
                 </p>
             [% END %]
 
@@ -105,7 +105,7 @@
             [% PROCESS ErrorText %]
             [% FOR Error IN Data.StatsConfigurationErrors.RestrictionsFieldErrors.pairs %]
                 <p class="Error">
-                    [% Error.key | html%]: [% Translate(Error.value) | html %]
+                    [% Error.key | html%]: [% Error.value %]
                 </p>
             [% END %]
 
@@ -130,7 +130,7 @@
     [% IF Data.PreviewResult && PreviewFormats.size %]
 
         <div class="PreviewSettings">
-            [% Translate('Preview format') | html %]:
+            [% Translate('Preview format:') | html %]
             [% FOREACH Format IN PreviewFormats.sort %]
             <button class="CallForAction SwitchPreviewFormat" data-format="[% Format %]"><span>[% Translate(FormatConfig.item(Format)) | html %]</span></button>
             [% END %]
@@ -138,6 +138,39 @@
                 [% Translate('Please note that the preview uses random data and does not consider data filters.') | html %]
             </span>
         </div>
+        [% WRAPPER JSOnDocumentComplete %]
+        <script type="text/javascript">
+
+        // Add translations for statistic previews.
+        Core.Config.Set('Grouped', [% Translate("Grouped") | JSON %]);
+        Core.Config.Set('Stacked', [% Translate("Stacked") | JSON %]);
+        Core.Config.Set('Expanded', [% Translate("Expanded") | JSON %]);
+        Core.Config.Set('Stream', [% Translate("Stream") | JSON %]);
+        Core.Config.Set('NoDataAvailable', [% Translate("No Data Available.") | JSON %]);
+
+        $('.SwitchPreviewFormat').on('click', function() {
+            var Format = $(this).data('format'),
+                FormatCleaned = Format.replace('::', '');
+            $('.SwitchPreviewFormat').removeClass('Active');
+            $(this).addClass('Active');
+            $('.PreviewContent:visible').hide();
+            $('svg.PreviewContent').empty();
+            $('#PreviewContent' + FormatCleaned).show();
+            if (Format.match(/D3/)) {
+                Core.UI.AdvancedChart.Init(
+                    Format,
+                    [% JSON(Data.PreviewResult) %],
+                    'svg#PreviewContent' + FormatCleaned,
+                    {
+                        HideLegend: true
+                    }
+                );
+            }
+            return false;
+        });
+        $('.SwitchPreviewFormat').first().trigger('click');
+        </script>
+        [% END %]
     [% END %]
 
     <div class="Preview">

@@ -83,7 +83,7 @@ $Selenium->RunTest(
 
         # check page
         for my $ID (
-            qw(NewStateID Subject RichText FileUpload IsVisibleForCustomer submitRichText)
+            qw(NewStateID Subject RichText FileUpload ArticleTypeID submitRichText)
             )
         {
             my $Element = $Selenium->find_element( "#$ID", 'css' );

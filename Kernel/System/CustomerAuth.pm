@@ -26,16 +26,22 @@ our @ObjectDependencies = (
 
 Kernel::System::CustomerAuth - customer authentication module.
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 The authentication module for the customer interface.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $CustomerAuthObject = $Kernel::OM->Get('Kernel::System::CustomerAuth');
 
 =cut
@@ -81,7 +87,7 @@ sub new {
     return $Self;
 }
 
-=head2 GetOption()
+=item GetOption()
 
 Get module options. Currently there is just one option, "PreAuth".
 
@@ -97,7 +103,7 @@ sub GetOption {
     return $Self->{Backend}->GetOption(%Param);
 }
 
-=head2 Auth()
+=item Auth()
 
 The authentication function.
 
@@ -225,7 +231,7 @@ sub Auth {
     return $User;
 }
 
-=head2 GetLastErrorMessage()
+=item GetLastErrorMessage()
 
 Retrieve $Self->{LastErrorMessage} content.
 
@@ -244,6 +250,8 @@ sub GetLastErrorMessage {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

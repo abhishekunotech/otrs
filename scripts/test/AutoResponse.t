@@ -35,20 +35,15 @@ my $QueueName = 'Some::Queue' . $RandomID;
 
 # create new queue
 my $QueueID = $QueueObject->QueueAdd(
-    Name                => $QueueName,
-    ValidID             => 1,
-    GroupID             => 1,
-    FirstResponseTime   => 0,
-    FirstResponseNotify => 0,
-    UpdateTime          => 0,
-    UpdateNotify        => 0,
-    SolutionTime        => 0,
-    SolutionNotify      => 0,
-    SystemAddressID     => 1,
-    SalutationID        => 1,
-    SignatureID         => 1,
-    Comment             => 'Some Comment',
-    UserID              => 1,
+
+    Name            => $QueueName,
+    ValidID         => 1,
+    GroupID         => 1,
+    SystemAddressID => 1,
+    SalutationID    => 1,
+    SignatureID     => 1,
+    Comment         => 'Some comment',
+    UserID          => 1,
 );
 
 $Self->True(
@@ -97,261 +92,261 @@ $Self->True(
     'SystemAddressAdd()',
 );
 
-my %AutoResponseType = $AutoResponseObject->AutoResponseTypeList(
-    Valid => 1,
+# add auto response
+my $AutoResponseNameRand = 'AutoResponse' . $HelperObject->GetRandomID();
+
+my $AutoResponseID = $AutoResponseObject->AutoResponseAdd(
+    Name        => $AutoResponseNameRand,
+    Subject     => 'Some Subject',
+    Response    => 'Some Response',
+    Comment     => 'Some Comment',
+    AddressID   => $SystemAddressID,
+    TypeID      => 1,
+    ContentType => 'text/plain',
+    ValidID     => 1,
+    UserID      => 1,
 );
 
-for my $TypeID ( sort keys %AutoResponseType ) {
+$Self->True(
+    $AutoResponseID,
+    'AutoResponseAdd()',
+);
 
-    my $AutoResponseNameRand = 'SystemAddress' . $HelperObject->GetRandomID();
+my %AutoResponse = $AutoResponseObject->AutoResponseGet( ID => $AutoResponseID );
 
-    my %Tests = (
-        Created => {
-            Name        => $AutoResponseNameRand,
-            Subject     => 'Some Subject - updated',
-            Response    => 'Some Response - updated',
-            Comment     => 'Some Comment - updated',
-            AddressID   => $SystemAddressID,
-            TypeID      => $TypeID,
-            ContentType => 'text/plain',
-            ValidID     => 1,
-        },
-        Updated => {
-            Name        => $AutoResponseNameRand . ' - updated',
-            Subject     => 'Some Subject - updated',
-            Response    => 'Some Response - updated',
-            Comment     => 'Some Comment - updated',
-            AddressID   => $SystemAddressID,
-            TypeID      => $TypeID,
-            ContentType => 'text/html',
-            ValidID     => 2,
-        },
-        ExpextedData => {
-            AutoResponseID => '',
-            Address        => $SystemAddressNameRand . '@example.com',
-            Realname       => $SystemAddressNameRand,
-            }
-    );
+$Self->Is(
+    $AutoResponse{Name} || '',
+    $AutoResponseNameRand,
+    'AutoResponseGet() - Name',
+);
+$Self->Is(
+    $AutoResponse{Subject} || '',
+    'Some Subject',
+    'AutoResponseGet() - Subject',
+);
+$Self->Is(
+    $AutoResponse{Response} || '',
+    'Some Response',
+    'AutoResponseGet() - Response',
+);
+$Self->Is(
+    $AutoResponse{Comment} || '',
+    'Some Comment',
+    'AutoResponseGet() - Comment',
+);
+$Self->Is(
+    $AutoResponse{ContentType} || '',
+    'text/plain',
+    'AutoResponseGet() - ContentType',
+);
+$Self->Is(
+    $AutoResponse{AddressID} || '',
+    $SystemAddressID,
+    'AutoResponseGet() - AddressID',
+);
+$Self->Is(
+    $AutoResponse{ValidID} || '',
+    1,
+    'AutoResponseGet() - ValidID',
+);
 
-    # add auto response
-    my $AutoResponseID = $AutoResponseObject->AutoResponseAdd(
-        UserID => 1,
-        %{ $Tests{Created} },
-    );
-
-    # this will be used later to test function AutoResponseGetByTypeQueueID()
-    $Tests{ExpextedData}{AutoResponseID} = $AutoResponseID;
-
-    $Self->True(
-        $AutoResponseID,
-        "AutoResponseAdd() - AutoResponseType: $AutoResponseType{$TypeID}",
-    );
-
-    my %AutoResponse = $AutoResponseObject->AutoResponseGet( ID => $AutoResponseID );
-
-    for my $Item ( sort keys %{ $Tests{Created} } ) {
-        $Self->Is(
-            $AutoResponse{$Item} || '',
-            $Tests{Created}{$Item},
-            "AutoResponseGet() - $Item",
-        );
+my %AutoResponseList = $AutoResponseObject->AutoResponseList( Valid => 0 );
+my $Hit = 0;
+for ( sort keys %AutoResponseList ) {
+    if ( $_ eq $AutoResponseID ) {
+        $Hit = 1;
     }
-
-    my %AutoResponseList = $AutoResponseObject->AutoResponseList( Valid => 0 );
-    my $List = grep { $_ eq $AutoResponseID } keys %AutoResponseList;
-    $Self->True(
-        $List,
-        'AutoResponseList() - test Auto Response is in the list.',
-    );
-
-    %AutoResponseList = $AutoResponseObject->AutoResponseList( Valid => 1 );
-    $List = grep { $_ eq $AutoResponseID } keys %AutoResponseList;
-    $Self->True(
-        $List,
-        'AutoResponseList() - test Auto Response is in the list.',
-    );
-
-    # get a list of the queues that do not have auto response
-    my %AutoResponseWithoutQueue = $AutoResponseObject->AutoResponseWithoutQueue();
-
-    $Self->True(
-        exists $AutoResponseWithoutQueue{$QueueID} && $AutoResponseWithoutQueue{$QueueID} eq $QueueName,
-        'AutoResponseWithoutQueue() contains queue ' . $QueueName . ' with ID ' . $QueueID,
-    );
-
-    my %AutoResponseListByType = $AutoResponseObject->AutoResponseList(
-        TypeID => $TypeID,
-        Valid  => 1,
-    );
-    $List = grep { $_ eq $AutoResponseID } keys %AutoResponseList;
-    $Self->True(
-        $List,
-        'AutoResponseList() by AutoResponseTypeID (AutoResponseTypeID) - test Auto Response is in the list.',
-    );
-
-    my $AutoResponseQueue = $AutoResponseObject->AutoResponseQueue(
-        QueueID         => $QueueID,
-        AutoResponseIDs => [$AutoResponseID],
-        UserID          => 1,
-    );
-    $Self->True(
-        $AutoResponseQueue,
-        'AutoResponseQueue()',
-    );
-
-    # check again after assigning auto response to queue
-    %AutoResponseWithoutQueue = $AutoResponseObject->AutoResponseWithoutQueue();
-    $Self->False(
-        exists $AutoResponseWithoutQueue{$QueueID} && $AutoResponseWithoutQueue{$QueueID} eq $QueueName,
-        'AutoResponseWithoutQueue() does not contain queue ' . $QueueName . ' with ID ' . $QueueID,
-    );
-
-    my %AutoResponseData = $AutoResponseObject->AutoResponseGetByTypeQueueID(
-        QueueID => $QueueID,
-        Type    => $AutoResponseType{$TypeID},
-    );
-
-    for my $Item (qw/AutoResponseID Address Realname/) {
-        $Self->Is(
-            $AutoResponseData{$Item} || '',
-            $Tests{ExpextedData}{$Item},
-            "AutoResponseGetByTypeQueueID() - $Item",
-        );
-    }
-
-    if ( $TypeID == 1 ) {
-
-        # auto-reply
-
-        my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-            ChannelName => 'Email',
-        );
-
-        # create a new ticket
-        my $TicketID = $TicketObject->TicketCreate(
-            Title        => 'Some Ticket Title',
-            QueueID      => $QueueID,
-            Lock         => 'unlock',
-            Priority     => '3 normal',
-            State        => 'new',
-            CustomerID   => "Customer#$RandomID",
-            CustomerUser => "CustomerLogin#$RandomID",
-            OwnerID      => 1,
-            UserID       => 1,
-        );
-        $Self->IsNot(
-            $TicketID,
-            undef,
-            'TicketCreate() - TicketID should not be undef',
-        );
-
-        my $ArticleID1 = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 0,
-            SenderType           => 'agent',
-            From                 => 'Some Agent <otrs@example.com>',
-            To                   => 'Suplier<suplier@example.com>',
-            Subject              => 'Email for suplier',
-            Body                 => 'the message text',
-            Charset              => 'utf8',
-            MimeType             => 'text/plain',
-            HistoryType          => 'OwnerUpdate',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
-        );
-        $Self->True(
-            $ArticleID1,
-            "First article created."
-        );
-
-        my $TestEmailObject = $Kernel::OM->Get('Kernel::System::Email::Test');
-        my $CleanUpSuccess  = $TestEmailObject->CleanUp();
-        $Self->True(
-            $CleanUpSuccess,
-            'Cleanup Email backend',
-        );
-
-        my $ArticleID2 = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 0,
-            SenderType           => 'customer',
-            From                 => 'Suplier<suplier@example.com>',
-            To                   => 'Some Agent <otrs@example.com>',
-            Subject              => 'some short description',
-            Body                 => 'the message text',
-            Charset              => 'utf8',
-            MimeType             => 'text/plain',
-            HistoryType          => 'OwnerUpdate',
-            HistoryComment       => 'Some free text!',
-            UserID               => 1,
-            AutoResponseType     => 'auto reply',
-            OrigHeader           => {
-                From    => 'Some Agent <otrs@example.com>',
-                Subject => 'some short description',
-            },
-        );
-
-        $Self->True(
-            $ArticleID2,
-            "Second article created."
-        );
-
-        # check that email was sent
-        my $Emails = $TestEmailObject->EmailsGet();
-
-        # Make sure that auto-response is not sent to the customer (in CC) - See bug#12293
-        $Self->IsDeeply(
-            $Emails->[0]->{ToArray},
-            [
-                'otrs@example.com'
-            ],
-            'Check AutoResponse recipients.'
-        );
-    }
-
-    $AutoResponseQueue = $AutoResponseObject->AutoResponseQueue(
-        QueueID         => $QueueID,
-        AutoResponseIDs => [],
-        UserID          => 1,
-    );
-
-    my $AutoResponseUpdate = $AutoResponseObject->AutoResponseUpdate(
-        ID     => $AutoResponseID,
-        UserID => 1,
-        %{ $Tests{Updated} },
-    );
-
-    $Self->True(
-        $AutoResponseUpdate,
-        'AutoResponseUpdate()',
-    );
-
-    %AutoResponse = $AutoResponseObject->AutoResponseGet( ID => $AutoResponseID );
-
-    for my $Item ( sort keys %{ $Tests{Created} } ) {
-        $Self->Is(
-            $AutoResponse{$Item} || '',
-            $Tests{Updated}{$Item},
-            "AutoResponseGet() - $Item",
-        );
-    }
-
-    %AutoResponseList = $AutoResponseObject->AutoResponseList( Valid => 1 );
-    $List = grep { $_ eq $AutoResponseID } keys %AutoResponseList;
-    $Self->False(
-        $List,
-        'AutoResponseList() - test Auto Response is not in the list of valid Auto Responses.',
-    );
-
-    %AutoResponseList = $AutoResponseObject->AutoResponseList( Valid => 0 );
-
-    $List = grep { $_ eq $AutoResponseID } keys %AutoResponseList;
-    $Self->True(
-        $List,
-        'AutoResponseList() - test Auto Response is in the list of all Auto Responses.',
-    );
 }
+$Self->True(
+    $Hit eq 1,
+    'AutoResponseList()',
+);
+
+# get a list of the queues that do not have auto response
+my %AutoResponseWithoutQueue = $AutoResponseObject->AutoResponseWithoutQueue();
+
+$Self->True(
+    exists $AutoResponseWithoutQueue{$QueueID} && $AutoResponseWithoutQueue{$QueueID} eq $QueueName,
+    'AutoResponseWithoutQueue() contains queue ' . $QueueName . ' with ID ' . $QueueID,
+);
+
+my $AutoResponseQueue = $AutoResponseObject->AutoResponseQueue(
+    QueueID         => $QueueID,
+    AutoResponseIDs => [$AutoResponseID],
+    UserID          => 1,
+);
+$Self->True(
+    $AutoResponseQueue,
+    'AutoResponseQueue()',
+);
+
+# check again after assigning auto response to queue
+%AutoResponseWithoutQueue = $AutoResponseObject->AutoResponseWithoutQueue();
+$Self->False(
+    exists $AutoResponseWithoutQueue{$QueueID} && $AutoResponseWithoutQueue{$QueueID} eq $QueueName,
+    'AutoResponseWithoutQueue() does not contain queue ' . $QueueName . ' with ID ' . $QueueID,
+);
+
+my %Address = $AutoResponseObject->AutoResponseGetByTypeQueueID(
+    QueueID => $QueueID,
+    Type    => 'auto reply',
+);
+$Self->Is(
+    $Address{Address} || '',
+    $SystemAddressNameRand . '@example.com',
+    'AutoResponseGetByTypeQueueID() - Address',
+);
+$Self->Is(
+    $Address{Realname} || '',
+    $SystemAddressNameRand,
+    'AutoResponseGetByTypeQueueID() - Realname',
+);
+
+# get ticket object
+my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
+# create a new ticket
+my $TicketID = $TicketObject->TicketCreate(
+    Title        => 'Some Ticket Title',
+    QueueID      => $QueueID,
+    Lock         => 'unlock',
+    Priority     => '3 normal',
+    State        => 'new',
+    CustomerID   => "Customer#$RandomID",
+    CustomerUser => "CustomerLogin#$RandomID",
+    OwnerID      => 1,
+    UserID       => 1,
+);
+$Self->IsNot(
+    $TicketID,
+    undef,
+    'TicketCreate() - TicketID should not be undef',
+);
+
+my $ArticleID1 = $TicketObject->ArticleCreate(
+    TicketID       => $TicketID,
+    ArticleType    => 'email-internal',
+    SenderType     => 'agent',
+    From           => 'Some Agent <otrs@example.com>',
+    To             => 'Suplier<suplier@example.com>',
+    Subject        => 'Email for suplier',
+    Body           => 'the message text',
+    Charset        => 'utf8',
+    MimeType       => 'text/plain',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'Some free text!',
+    UserID         => 1,
+);
+$Self->True(
+    $ArticleID1,
+    "First article created."
+);
+
+my $TestEmailObject = $Kernel::OM->Get('Kernel::System::Email::Test');
+my $CleanUpSuccess  = $TestEmailObject->CleanUp();
+$Self->True(
+    $CleanUpSuccess,
+    'Cleanup Email backend',
+);
+
+my $ArticleID2 = $TicketObject->ArticleCreate(
+    TicketID         => $TicketID,
+    ArticleType      => 'email-internal',
+    SenderType       => 'customer',
+    From             => 'Suplier<suplier@example.com>',
+    To               => 'Some Agent <otrs@example.com>',
+    Subject          => 'some short description',
+    Body             => 'the message text',
+    Charset          => 'utf8',
+    MimeType         => 'text/plain',
+    HistoryType      => 'OwnerUpdate',
+    HistoryComment   => 'Some free text!',
+    UserID           => 1,
+    AutoResponseType => 'auto reply',
+    OrigHeader       => {
+        From    => 'Some Agent <otrs@example.com>',
+        Subject => 'some short description',
+    },
+);
+
+$Self->True(
+    $ArticleID2,
+    "Second article created."
+);
+
+# check that email was sent
+my $Emails = $TestEmailObject->EmailsGet();
+
+# Make sure that auto-response is not sent to the customer (in CC) - See bug#12293
+$Self->IsDeeply(
+    $Emails->[0]->{ToArray},
+    [
+        'otrs@example.com'
+    ],
+    'Check AutoResponse recipients.'
+);
+
+$AutoResponseQueue = $AutoResponseObject->AutoResponseQueue(
+    QueueID         => $QueueID,
+    AutoResponseIDs => [],
+    UserID          => 1,
+);
+
+my $AutoResponseUpdate = $AutoResponseObject->AutoResponseUpdate(
+    ID          => $AutoResponseID,
+    Name        => $AutoResponseNameRand . '1',
+    Subject     => 'Some Subject1',
+    Response    => 'Some Response1',
+    Comment     => 'Some Comment1',
+    AddressID   => $SystemAddressID,
+    TypeID      => 1,
+    ContentType => 'text/html',
+    ValidID     => 2,
+    UserID      => 1,
+);
+
+$Self->True(
+    $AutoResponseUpdate,
+    'AutoResponseUpdate()',
+);
+
+%AutoResponse = $AutoResponseObject->AutoResponseGet( ID => $AutoResponseID );
+
+$Self->Is(
+    $AutoResponse{Name} || '',
+    $AutoResponseNameRand . '1',
+    'AutoResponseGet() - Name',
+);
+$Self->Is(
+    $AutoResponse{Subject} || '',
+    'Some Subject1',
+    'AutoResponseGet() - Subject',
+);
+$Self->Is(
+    $AutoResponse{Response} || '',
+    'Some Response1',
+    'AutoResponseGet() - Response',
+);
+$Self->Is(
+    $AutoResponse{Comment} || '',
+    'Some Comment1',
+    'AutoResponseGet() - Comment',
+);
+$Self->Is(
+    $AutoResponse{ContentType} || '',
+    'text/html',
+    'AutoResponseGet() - ContentType',
+);
+$Self->Is(
+    $AutoResponse{AddressID} || '',
+    $SystemAddressID,
+    'AutoResponseGet() - AddressID',
+);
+$Self->Is(
+    $AutoResponse{ValidID} || '',
+    2,
+    'AutoResponseGet() - ValidID',
+);
 
 # cleanup is done by RestoreDatabase
 

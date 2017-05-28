@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -68,29 +67,11 @@ $Selenium->RunTest(
         my $ScriptAlias = $ConfigObject->Get('ScriptAlias');
 
         # navigate to AgentPreferences screen
-        $Selenium->VerifiedGet(
-            "${ScriptAlias}index.pl?Action=AgentPreferences;Subaction=Group;Group=NotificationSettings"
-        );
+        $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentPreferences");
 
         # set MyQueue preferences
         $Selenium->execute_script("\$('#QueueID').val('$QueueID').trigger('redraw.InputField').trigger('change');");
-
-        # save the setting, wait for the ajax call to finish and check if success sign is shown
-        $Selenium->execute_script(
-            "\$('#QueueID').closest('.WidgetSimple').find('.SettingUpdateBox').find('button').trigger('click');"
-        );
-        $Selenium->WaitFor(
-            JavaScript =>
-                "return \$('#QueueID').closest('.WidgetSimple').hasClass('HasOverlay')"
-        );
-        $Selenium->WaitFor(
-            JavaScript =>
-                "return \$('#QueueID').closest('.WidgetSimple').find('.fa-check').length"
-        );
-        $Selenium->WaitFor(
-            JavaScript =>
-                "return !\$('#QueueID').closest('.WidgetSimple').hasClass('HasOverlay')"
-        );
+        $Selenium->find_element( "#QueueIDUpdate", 'css' )->VerifiedClick();
 
         # navigate to AgentDashboard screen
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentDashboard");
@@ -353,6 +334,8 @@ $Selenium->RunTest(
 
             # submit
             $Selenium->execute_script( "\$('#Dashboard$DashboardName" . "_submit').trigger('click');" );
+
+            sleep 2;
 
             # wait until block shows
             $Self->True(

@@ -19,16 +19,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Web::UploadCache - an upload file system cache
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All upload cache functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $WebUploadCacheObject = $Kernel::OM->Get('Kernel::System::Web::UploadCache');
 
 =cut
@@ -50,7 +56,7 @@ sub new {
     return;
 }
 
-=head2 FormIDCreate()
+=item FormIDCreate()
 
 create a new Form ID
 
@@ -64,7 +70,7 @@ sub FormIDCreate {
     return $Self->{Backend}->FormIDCreate(@_);
 }
 
-=head2 FormIDRemove()
+=item FormIDRemove()
 
 remove all data for a provided Form ID
 
@@ -78,7 +84,7 @@ sub FormIDRemove {
     return $Self->{Backend}->FormIDRemove(@_);
 }
 
-=head2 FormIDAddFile()
+=item FormIDAddFile()
 
 add a file to a Form ID
 
@@ -109,7 +115,7 @@ sub FormIDAddFile {
     return $Self->{Backend}->FormIDAddFile(@_);
 }
 
-=head2 FormIDRemoveFile()
+=item FormIDRemoveFile()
 
 removes a file from a form id
 
@@ -126,7 +132,7 @@ sub FormIDRemoveFile {
     return $Self->{Backend}->FormIDRemoveFile(@_);
 }
 
-=head2 FormIDGetAllFilesData()
+=item FormIDGetAllFilesData()
 
 returns an array with a hash ref of all files for a Form ID
 
@@ -144,7 +150,7 @@ sub FormIDGetAllFilesData {
     return @{ $Self->{Backend}->FormIDGetAllFilesData(@_) };
 }
 
-=head2 FormIDGetAllFilesMeta()
+=item FormIDGetAllFilesMeta()
 
 returns an array with a hash ref of all files for a Form ID
 
@@ -164,7 +170,7 @@ sub FormIDGetAllFilesMeta {
     return @{ $Self->{Backend}->FormIDGetAllFilesMeta(@_) };
 }
 
-=head2 FormIDCleanUp()
+=item FormIDCleanUp()
 
 Removed no longer needed temporary files.
 
@@ -181,6 +187,8 @@ sub FormIDCleanUp {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

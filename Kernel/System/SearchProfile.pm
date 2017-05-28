@@ -21,16 +21,22 @@ our @ObjectDependencies = (
 
 Kernel::System::SearchProfile - module to manage search profiles
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 module with all functions to manage search profiles
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SearchProfileObject = $Kernel::OM->Get('Kernel::System::SearchProfile');
 
 =cut
@@ -42,19 +48,21 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
+    $Self->{DBObject} = $Kernel::OM->Get('Kernel::System::DB');
+
     $Self->{CacheType} = 'SearchProfile';
     $Self->{CacheTTL}  = 60 * 60 * 24 * 20;
 
     # set lower if database is case sensitive
     $Self->{Lower} = '';
-    if ( $Kernel::OM->Get('Kernel::System::DB')->GetDatabaseFunction('CaseSensitive') ) {
+    if ( $Self->{DBObject}->GetDatabaseFunction('CaseSensitive') ) {
         $Self->{Lower} = 'LOWER';
     }
 
     return $Self;
 }
 
-=head2 SearchProfileAdd()
+=item SearchProfileAdd()
 
 to add a search profile item
 
@@ -76,7 +84,7 @@ sub SearchProfileAdd {
         if ( !defined $Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $_!",
+                Message  => "Need $_!"
             );
             return;
         }
@@ -98,12 +106,9 @@ sub SearchProfileAdd {
         $Param{Type} = 'SCALAR';
     }
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
     for my $Value (@Data) {
 
-        return if !$DBObject->Do(
+        return if !$Self->{DBObject}->Do(
             SQL => "
                 INSERT INTO search_profile
                 (login, profile_name,  profile_type, profile_key, profile_value)
@@ -129,7 +134,7 @@ sub SearchProfileAdd {
     return 1;
 }
 
-=head2 SearchProfileGet()
+=item SearchProfileGet()
 
 returns hash with search profile.
 
@@ -149,7 +154,7 @@ sub SearchProfileGet {
         if ( !defined( $Param{$_} ) ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $_!",
+                Message  => "Need $_!"
             );
             return;
         }
@@ -166,11 +171,8 @@ sub SearchProfileGet {
     );
     return %{$Cache} if $Cache;
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
     # get search profile
-    return if !$DBObject->Prepare(
+    return if !$Self->{DBObject}->Prepare(
         SQL => "
             SELECT profile_type, profile_key, profile_value
             FROM search_profile
@@ -181,7 +183,7 @@ sub SearchProfileGet {
     );
 
     my %Result;
-    while ( my @Data = $DBObject->FetchrowArray() ) {
+    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
         if ( $Data[0] eq 'ARRAY' ) {
             push @{ $Result{ $Data[1] } }, $Data[2];
         }
@@ -199,7 +201,7 @@ sub SearchProfileGet {
     return %Result;
 }
 
-=head2 SearchProfileDelete()
+=item SearchProfileDelete()
 
 deletes a search profile.
 
@@ -219,7 +221,7 @@ sub SearchProfileDelete {
         if ( !$Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $_!",
+                Message  => "Need $_!"
             );
             return;
         }
@@ -228,11 +230,8 @@ sub SearchProfileDelete {
     # create login string
     my $Login = $Param{Base} . '::' . $Param{UserLogin};
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
     # delete search profile
-    return if !$DBObject->Do(
+    return if !$Self->{DBObject}->Do(
         SQL => "
             DELETE
             FROM search_profile
@@ -252,11 +251,10 @@ sub SearchProfileDelete {
         Type => $Self->{CacheType},
         Key  => $CacheKey,
     );
-
     return 1;
 }
 
-=head2 SearchProfileList()
+=item SearchProfileList()
 
 returns a hash of all profiles for the given user.
 
@@ -275,7 +273,7 @@ sub SearchProfileList {
         if ( !defined( $Param{$_} ) ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $_!",
+                Message  => "Need $_!"
             );
             return;
         }
@@ -290,11 +288,8 @@ sub SearchProfileList {
     );
     return %{$Cache} if $Cache;
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
     # get search profile list
-    return if !$DBObject->Prepare(
+    return if !$Self->{DBObject}->Prepare(
         SQL => "
             SELECT profile_name
             FROM search_profile
@@ -305,21 +300,19 @@ sub SearchProfileList {
 
     # fetch the result
     my %Result;
-    while ( my @Data = $DBObject->FetchrowArray() ) {
+    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
         $Result{ $Data[0] } = $Data[0];
     }
-
     $Kernel::OM->Get('Kernel::System::Cache')->Set(
         Type  => $Self->{CacheType},
         TTL   => $Self->{CacheTTL},
         Key   => $Login,
         Value => \%Result,
     );
-
     return %Result;
 }
 
-=head2 SearchProfileUpdateUserLogin()
+=item SearchProfileUpdateUserLogin()
 
 changes the UserLogin of SearchProfiles
 
@@ -339,7 +332,7 @@ sub SearchProfileUpdateUserLogin {
         if ( !defined( $Param{$_} ) ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $_!",
+                Message  => "Need $_!"
             );
             return;
         }
@@ -377,11 +370,11 @@ sub SearchProfileUpdateUserLogin {
             UserLogin => $Param{UserLogin},
         );
     }
-
-    return 1;
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -31,33 +31,23 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
      *      Only select fields with size > 1 are selected (no dropdowns).
      */
     function AddSelectClearButton() {
-        var $SelectFields = $('select'),
-            ModernizeActive = parseInt(Core.Config.Get('InputFieldsActivated'), 10);
+        var $SelectFields = $('select');
 
         // Loop over all select fields available on the page
         $SelectFields.each(function () {
             var Size = parseInt($(this).attr('size'), 10),
-                ModernizeField = $(this).hasClass('Modernize'),
                 $SelectField = $(this),
                 SelectID = this.id,
-                Multiple = $(this).attr('multiple'),
-                ButtonHTML = '<a href="#" title="' + Core.Language.Translate('Remove selection') + '" class="GenericAgentClearSelect" data-select="' + SelectID + '"><span>' + Core.Language.Translate('Remove selection') + '</span><i class="fa fa-undo"></i></a>';
+                ButtonHTML = '<a href="#" title="' + TargetNS.Localization.RemoveSelection + '" class="GenericAgentClearSelect" data-select="' + SelectID + '"><span>' + TargetNS.Localization.RemoveSelection + '</span><i class="fa fa-undo"></i></a>';
 
 
-            // Only handle fields without class Modernize when modernized is disabled
-            if (ModernizeActive && ModernizeField) {
-                return;
-            }
-
-            // Only handle select fields with a size > 1
-            // DynamicFields return a Size of NaN,
-            // they only need a clear button if they have the attribute multiple
-            if ((isNaN(Size) && !Multiple) || Size <= 1) {
-                return;
+            // Only handle select fields with a size > 1, leave all single-dropdown fields untouched
+            if (isNaN(Size) || Size <= 1) {
+                return false;
             }
 
             // If select field has a tree selection icon already,
-            // we want to insert the new code after that element
+            // // we want to insert the new code after that element
             if ($SelectField.next('a.ShowTreeSelection').length) {
                 $SelectField = $SelectField.next('a.ShowTreeSelection');
             }
@@ -77,8 +67,7 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
             }
 
             // Clear field value
-            // setting val('') is not enough since we have selects with an empty value that would be selected
-            $SelectField[0].selectedIndex = -1;
+            $SelectField.val('');
             $(this).blur();
 
             return false;
@@ -86,45 +75,54 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
     }
 
     /**
+     * @name Localization
+     * @memberof Core.Agent.Admin.GenericAgentEvent
+     * @member {Array}
+     * @description
+     *     The localization array for translation strings.
+     */
+    TargetNS.Localization = undefined;
+
+    /**
      * @name Init
      * @memberof Core.Agent.Admin.GenericAgentEvent
      * @function
+     * @param {Object} Params - Initialization and internationalization parameters.
      * @description
      *      This function initialize correctly all other function according to the local language.
      */
-    TargetNS.Init = function () {
+    TargetNS.Init = function (Params) {
 
-        $('.DeleteEvent').on('click', function (Event) {
+        TargetNS.Localization = Params.Localization;
+
+        $('.DeleteEvent').bind('click', function (Event) {
             TargetNS.ShowDeleteEventDialog(Event, $(this));
             return false;
         });
 
-        $('#AddEvent').on('click', function (){
+        $('#AddEvent').bind('click', function (){
             if ($('#EventType').val() !== null) {
                 TargetNS.AddEvent($('#EventType').val());
                 return;
             }
         });
 
-        $('#EventType').on('change', function (){
-            TargetNS.ToggleEventSelect($(this).val());
+        $('#EventType').bind('change', function (){
+            TargetNS.ToogleEventSelect($(this).val());
         });
 
-        Core.UI.Table.InitTableFilter($("#FilterGenericAgentJobs"), $("#GenericAgentJobs"));
-
-        // Add select clear button
         AddSelectClearButton();
     };
 
     /**
-     * @name ToggleEventSelect
+     * @name ToogleEventSelect
      * @memberof Core.Agent.Admin.GenericAgentEvent
      * @function
      * @param {String} SelectedEventType - Event Type.
      * @description
      *      Toggles the event selection.
      */
-    TargetNS.ToggleEventSelect = function (SelectedEventType) {
+    TargetNS.ToogleEventSelect = function (SelectedEventType) {
         $('.EventList').addClass('Hidden');
         $('#' + SelectedEventType + 'Event').removeClass('Hidden');
     };
@@ -165,7 +163,7 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
         $Clone.find('.EventValue').attr('name', 'EventValues').val(EventName);
 
         // bind delete function
-        $Clone.find('#DeleteEvent').on('click', function (Event) {
+        $Clone.find('#DeleteEvent').bind('click', function (Event) {
             // remove row
             TargetNS.ShowDeleteEventDialog(Event, $(this));
             return false;
@@ -191,20 +189,20 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
     TargetNS.ShowDeleteEventDialog = function(Event, Object){
         Core.UI.Dialog.ShowContentDialog(
             $('#DeleteEventDialogContainer'),
-            Core.Language.Translate('Delete this Event Trigger'),
+            TargetNS.Localization.DeleteEventMsg,
             '240px',
             'Center',
             true,
             [
                {
-                   Label: Core.Language.Translate('Cancel'),
+                   Label: TargetNS.Localization.CancelMsg,
                    Class: 'Primary',
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('#DeleteEventDialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Delete'),
+                   Label: TargetNS.Localization.DeleteMsg,
                    Function: function () {
                        Object.parents('tr:first').remove();
                        Core.UI.Dialog.CloseDialog($('#DeleteEventDialog'));
@@ -226,8 +224,8 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
      */
     TargetNS.ShowDuplicatedDialog = function() {
         Core.UI.Dialog.ShowAlert(
-            Core.Language.Translate('Duplicate event.'),
-            Core.Language.Translate('This event is already attached to the job, Please use a different one.'),
+            TargetNS.Localization.DuplicateEventTitle,
+            TargetNS.Localization.DuplicateEventMsg,
             function () {
                 Core.UI.Dialog.CloseDialog($('.Alert'));
                 $('#EventType').focus();
@@ -235,8 +233,6 @@ Core.Agent.Admin.GenericAgent = (function (TargetNS) {
             }
         );
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.GenericAgent || {}));

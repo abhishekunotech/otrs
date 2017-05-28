@@ -81,7 +81,7 @@ Core.Agent.Admin.DynamicFieldText = (function (TargetNS) {
             if($(this).hasClass('RemoveRegEx')) {
 
                 // bind click function to remove button
-                $(this).on('click', function () {
+                $(this).bind('click', function () {
                     TargetNS.RemoveRegEx($(this).attr('id'));
                     return false;
                 });
@@ -101,32 +101,6 @@ Core.Agent.Admin.DynamicFieldText = (function (TargetNS) {
 
         return false;
     };
-
-    /**
-    * @name Init
-    * @memberof Core.Agent.Admin.DynamicFieldText
-    * @function
-    * @description
-    *       Initialize module functionality
-    */
-    TargetNS.Init = function () {
-
-        $('.ShowWarning').on('change keyup', function () {
-            $('p.Warning').removeClass('Hidden');
-        });
-
-        // click handler to add regex
-        $('#AddRegEx').on('click', function () {
-            TargetNS.AddRegEx(
-                $(this).closest('fieldset').find('.RegExInsert')
-            );
-            return false;
-        });
-
-        Core.Agent.Admin.DynamicField.ValidationInit();
-    };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.DynamicFieldText || {}));

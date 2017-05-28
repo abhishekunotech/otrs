@@ -53,51 +53,52 @@ $Selenium->RunTest(
         # get test params
         my @Tests = (
             {
-                ToolBarModule => '110-Ticket::AgentTicketQueue',
+                ToolBarModule => '1-Ticket::AgentTicketQueue',
                 CssClassCheck => 'QueueView',
             },
             {
-                ToolBarModule => '120-Ticket::AgentTicketStatus',
+                ToolBarModule => '2-Ticket::AgentTicketStatus',
                 CssClassCheck => 'StatusView',
             },
             {
-                ToolBarModule => '130-Ticket::AgentTicketEscalation',
+                ToolBarModule => '3-Ticket::AgentTicketEscalation',
                 CssClassCheck => 'EscalationView',
             },
             {
-                ToolBarModule => '140-Ticket::AgentTicketPhone',
+                ToolBarModule => '4-Ticket::AgentTicketPhone',
                 CssClassCheck => 'PhoneTicket',
             },
             {
-                ToolBarModule => '150-Ticket::AgentTicketEmail',
+                ToolBarModule => '5-Ticket::AgentTicketEmail',
                 CssClassCheck => 'EmailTicket',
             },
             {
-                ToolBarModule => '160-Ticket::AgentTicketProcess',
+                ToolBarModule => '6-Ticket::AgentTicketProcess',
                 CssClassCheck => 'ProcessTicket',
             },
             {
-                ToolBarModule => '170-Ticket::TicketResponsible',
+                ToolBarModule => '7-Ticket::TicketResponsible',
                 CssClassCheck => 'Responsible',
             },
             {
-                ToolBarModule => '180-Ticket::TicketWatcher',
+                ToolBarModule => '8-Ticket::TicketWatcher',
                 CssClassCheck => 'Watcher',
             },
             {
-                ToolBarModule => '190-Ticket::TicketLocked',
+                ToolBarModule => '9-Ticket::TicketLocked',
                 CssClassCheck => 'Locked',
             },
         );
 
         # set group restriction for each toolbar module
         for my $ConfigUpdate (@Tests) {
-            my %ToolBarConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+            my %ToolBarConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
                 Name    => 'Frontend::ToolBarModule###' . $ConfigUpdate->{ToolBarModule},
                 Default => 1,
             );
 
-            %ToolBarConfig = %{ $ToolBarConfig{EffectiveValue} };
+            %ToolBarConfig = map { $_->{Key} => $_->{Content} }
+                grep { defined $_->{Key} } @{ $ToolBarConfig{Setting}->[1]->{Hash}->[1]->{Item} };
 
             $ToolBarConfig{Group} = "ro:$TestGroup";
 

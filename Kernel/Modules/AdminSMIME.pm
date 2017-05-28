@@ -104,8 +104,6 @@ sub Run {
         Value     => $Param{Search},
     );
 
-    $Param{Action} = $Self->{Subaction};
-
     # ------------------------------------------------------------ #
     # delete cert
     # ------------------------------------------------------------ #
@@ -583,12 +581,7 @@ sub _MaskAdd {
     # get layout object
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
-    $LayoutObject->Block(
-        Name => 'Overview',
-        Data => {
-            Action => $Param{Action}
-        },
-    );
+    $LayoutObject->Block( Name => 'Overview' );
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionOverview' );
 

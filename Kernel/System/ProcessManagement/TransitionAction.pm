@@ -23,16 +23,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::TransitionAction - action lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All Process Management Transition Action functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TransitionActionObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::TransitionAction');
 
 =cut
@@ -47,7 +53,7 @@ sub new {
     return $Self;
 }
 
-=head2 TransitionActionGet()
+=item TransitionActionGet()
 
     Get transition action info
 
@@ -104,9 +110,9 @@ sub TransitionActionGet {
     }
 
     if (
-        !$TransitionAction->{ $Param{TransitionActionEntityID} }->{Module}
+        !$TransitionAction->{ $Param{TransitionActionEntityID} }{Module}
         || !$Kernel::OM->Get('Kernel::System::Main')->Require(
-            $TransitionAction->{ $Param{TransitionActionEntityID} }->{Module}
+            $TransitionAction->{ $Param{TransitionActionEntityID} }{Module}
         )
         )
     {
@@ -121,7 +127,7 @@ sub TransitionActionGet {
     return $TransitionAction->{ $Param{TransitionActionEntityID} };
 }
 
-=head2 TransitionActionList()
+=item TransitionActionList()
 
     Get action config for dedicated TransitionActionEntityIDs
 
@@ -210,9 +216,9 @@ sub TransitionActionList {
         }
 
         if (
-            !$TransitionAction->{$TransitionActionEntityID}->{Module}
+            !$TransitionAction->{$TransitionActionEntityID}{Module}
             || !$Kernel::OM->Get('Kernel::System::Main')->Require(
-                $TransitionAction->{$TransitionActionEntityID}->{Module}
+                $TransitionAction->{$TransitionActionEntityID}{Module}
             )
             )
         {
@@ -234,6 +240,8 @@ sub TransitionActionList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

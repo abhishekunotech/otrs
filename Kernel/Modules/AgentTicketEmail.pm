@@ -80,7 +80,7 @@ sub Run {
     for my $Key (
         qw(Year Month Day Hour Minute To Cc Bcc TimeUnits PriorityID Subject Body
         TypeID ServiceID SLAID OwnerAll ResponsibleAll NewResponsibleID NewUserID
-        NextStateID StandardTemplateID Dest
+        NextStateID StandardTemplateID
         )
         )
     {
@@ -303,7 +303,7 @@ sub Run {
     for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-        # extract the dynamic field value from the web request
+        # extract the dynamic field value form the web request
         $DynamicFieldValues{ $DynamicFieldConfig->{Name} } = $DynamicFieldBackendObject->EditFieldValueGet(
             DynamicFieldConfig => $DynamicFieldConfig,
             ParamObject        => $ParamObject,
@@ -485,13 +485,7 @@ sub Run {
 
                     # get params
                     my %GetParam;
-                    PARAMETER:
                     for my $Parameter ( $Object->Option( %GetParam, Config => $Jobs{$Job} ) ) {
-                        if ( $Jobs{$Job}->{ParamType} && $Jobs{$Job}->{ParamType} ne 'Single' ) {
-                            @{ $GetParam{$Parameter} } = $ParamObject->GetArray( Param => $Parameter );
-                            next PARAMETER;
-                        }
-
                         $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter );
                     }
 
@@ -514,14 +508,6 @@ sub Run {
                 $Body = $LayoutObject->Ascii2RichText(
                     String => $Body,
                 );
-            }
-
-            my $Dest = '';
-            if ( !$Self->{QueueID} && $GetParam{Dest} ) {
-
-                my @QueueParts = split( /\|\|/, $GetParam{Dest} );
-                $Self->{QueueID} = $QueueParts[0];
-                $Dest = $GetParam{Dest};
             }
 
             # html output
@@ -573,7 +559,6 @@ sub Run {
                     %ACLCompatGetParam,
                     QueueID => $Self->{QueueID}
                 ),
-                FromSelected      => $Dest,
                 To                => '',
                 Subject           => $Subject,
                 Body              => $Body,
@@ -598,7 +583,6 @@ sub Run {
 
     # deliver signature
     elsif ( $Self->{Subaction} eq 'Signature' ) {
-        my $CustomerUser = $ParamObject->GetParam( Param => 'SelectedCustomerUser' ) || '';
         my $QueueID = $ParamObject->GetParam( Param => 'QueueID' );
         if ( !$QueueID ) {
             my $Dest = $ParamObject->GetParam( Param => 'Dest' ) || '';
@@ -608,10 +592,7 @@ sub Run {
         # start with empty signature (no queue selected) - if we have a queue, get the sig.
         my $Signature = '';
         if ($QueueID) {
-            $Signature = $Self->_GetSignature(
-                QueueID        => $QueueID,
-                CustomerUserID => $CustomerUser,
-            );
+            $Signature = $Self->_GetSignature( QueueID => $QueueID );
         }
         my $MimeType = 'text/plain';
         if ( $LayoutObject->{BrowserRichText} ) {
@@ -670,6 +651,11 @@ sub Run {
             $GetParam{From} = $Queue{Email};
         }
 
+        # get sender queue from
+        my $Signature = '';
+        if ($NewQueueID) {
+            $Signature = $Self->_GetSignature( QueueID => $NewQueueID );
+        }
         my $CustomerUser = $ParamObject->GetParam( Param => 'CustomerUser' )
             || $ParamObject->GetParam( Param => 'PreSelectedCustomerUser' )
             || $ParamObject->GetParam( Param => 'SelectedCustomerUser' )
@@ -685,15 +671,6 @@ sub Run {
             || '';
         $GetParam{QueueID}            = $NewQueueID;
         $GetParam{ExpandCustomerName} = $ExpandCustomerName;
-
-        # get sender queue from
-        my $Signature = '';
-        if ($NewQueueID) {
-            $Signature = $Self->_GetSignature(
-                QueueID        => $NewQueueID,
-                CustomerUserID => $CustomerUser
-            );
-        }
 
         if ( $ParamObject->GetParam( Param => 'OwnerAllRefresh' ) ) {
             $GetParam{OwnerAll} = 1;
@@ -1066,49 +1043,17 @@ sub Run {
                 );
 
                 # get params
-                my $Multiple;
-                PARAMETER:
                 for my $Parameter ( $Object->Option( %GetParam, Config => $Jobs{$Job} ) ) {
-
-                    if ( $Jobs{$Job}->{ParamType} && $Jobs{$Job}->{ParamType} ne 'Single' ) {
-                        @{ $GetParam{$Parameter} } = $ParamObject->GetArray( Param => $Parameter );
-                        $Multiple = 1;
-                        next PARAMETER;
-                    }
-
                     $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter );
                 }
 
                 # run module
-                $Object->Run(
-                    %GetParam,
-                    StoreNew => 1,
-                    Config   => $Jobs{$Job}
-                );
-
-                # get options that have been removed from the selection
-                # and add them back to the selection so that the submit
-                # will contain options that were hidden from the agent
-                my $Key = $Object->Option( %GetParam, Config => $Jobs{$Job} );
-
-                if ( $Object->can('GetOptionsToRemoveAJAX') ) {
-                    my @RemovedOptions = $Object->GetOptionsToRemoveAJAX(%GetParam);
-                    if (@RemovedOptions) {
-                        if ($Multiple) {
-                            for my $RemovedOption (@RemovedOptions) {
-                                push @{ $GetParam{$Key} }, $RemovedOption;
-                            }
-                        }
-                        else {
-                            $GetParam{$Key} = shift @RemovedOptions;
-                        }
-                    }
-                }
+                $Object->Run( %GetParam, Config => $Jobs{$Job} );
 
                 # ticket params
                 %ArticleParam = (
                     %ArticleParam,
-                    $Object->ArticleOption( %GetParam, %ArticleParam, Config => $Jobs{$Job} ),
+                    $Object->ArticleOption( %GetParam, Config => $Jobs{$Job} ),
                 );
 
                 # get errors
@@ -1374,27 +1319,24 @@ sub Run {
             UserID  => $Self->{UserID},
         );
 
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-        my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
-
         # send email
-        my $ArticleID = $ArticleBackendObject->ArticleSend(
-            NoAgentNotify        => $NoAgentNotify,
-            Attachment           => \@Attachments,
-            TicketID             => $TicketID,
-            SenderType           => $Config->{SenderType},
-            IsVisibleForCustomer => $Config->{IsVisibleForCustomer},
-            From                 => $Sender,
-            To                   => $GetParam{To},
-            Cc                   => $GetParam{Cc},
-            Bcc                  => $GetParam{Bcc},
-            Subject              => $GetParam{Subject},
-            Body                 => $GetParam{Body},
-            Charset              => $LayoutObject->{UserCharset},
-            MimeType             => $MimeType,
-            UserID               => $Self->{UserID},
-            HistoryType          => $Config->{HistoryType},
-            HistoryComment       => $Config->{HistoryComment}
+        my $ArticleID = $TicketObject->ArticleSend(
+            NoAgentNotify  => $NoAgentNotify,
+            Attachment     => \@Attachments,
+            TicketID       => $TicketID,
+            ArticleType    => $Config->{ArticleType},
+            SenderType     => $Config->{SenderType},
+            From           => $Sender,
+            To             => $GetParam{To},
+            Cc             => $GetParam{Cc},
+            Bcc            => $GetParam{Bcc},
+            Subject        => $GetParam{Subject},
+            Body           => $GetParam{Body},
+            Charset        => $LayoutObject->{UserCharset},
+            MimeType       => $MimeType,
+            UserID         => $Self->{UserID},
+            HistoryType    => $Config->{HistoryType},
+            HistoryComment => $Config->{HistoryComment}
                 || "\%\%$GetParam{To}, $GetParam{Cc}, $GetParam{Bcc}",
             %ArticleParam,
         );
@@ -1533,10 +1475,7 @@ sub Run {
         }
         my $Signature = '';
         if ($QueueID) {
-            $Signature = $Self->_GetSignature(
-                QueueID        => $QueueID,
-                CustomerUserID => $CustomerUser,
-            );
+            $Signature = $Self->_GetSignature( QueueID => $QueueID );
         }
         my $Users = $Self->_GetUsers(
             %GetParam,
@@ -1736,18 +1675,8 @@ sub Run {
                     Debug => $Debug,
                 );
 
-                my $Multiple;
-
                 # get params
-                PARAMETER:
                 for my $Parameter ( $Object->Option( %GetParam, Config => $Jobs{$Job} ) ) {
-
-                    if ( $Jobs{$Job}->{ParamType} && $Jobs{$Job}->{ParamType} ne 'Single' ) {
-                        @{ $GetParam{$Parameter} } = $ParamObject->GetArray( Param => $Parameter );
-                        $Multiple = 1;
-                        next PARAMETER;
-                    }
-
                     $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter );
                 }
 
@@ -1759,29 +1688,16 @@ sub Run {
                     %GetParam = ( %GetParam, $Object->GetParamAJAX(%GetParam) )
                 }
 
-                # get options that have to be removed from the selection visible
-                # to the agent. These options will be added again on submit.
-                if ( $Object->can('GetOptionsToRemoveAJAX') ) {
-                    my @OptionsToRemove = $Object->GetOptionsToRemoveAJAX(%GetParam);
-
-                    for my $OptionToRemove (@OptionsToRemove) {
-                        delete $Data{$OptionToRemove};
-                    }
-                }
-
                 my $Key = $Object->Option( %GetParam, Config => $Jobs{$Job} );
-
                 if ($Key) {
                     push(
                         @ExtendedData,
                         {
-                            Name         => $Key,
-                            Data         => \%Data,
-                            SelectedID   => $GetParam{$Key},
-                            Translation  => 1,
-                            PossibleNone => 1,
-                            Multiple     => $Multiple,
-                            Max          => 100,
+                            Name        => $Key,
+                            Data        => \%Data,
+                            SelectedID  => $GetParam{$Key},
+                            Translation => 1,
+                            Max         => 100,
                         }
                     );
                 }
@@ -2137,7 +2053,12 @@ sub _GetTos {
             );
         }
         else {
-            %Tos = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressQueueList();
+            %Tos = $Kernel::OM->Get('Kernel::System::DB')->GetTableData(
+                Table => 'system_address',
+                What  => 'queue_id, id',
+                Valid => 1,
+                Clamp => 1,
+            );
         }
 
         # get create permission queues
@@ -2158,10 +2079,6 @@ sub _GetTos {
                 || '<Realname> <<Email>> - Queue: <Queue>';
             $String =~ s/<Queue>/$QueueData{Name}/g;
             $String =~ s/<QueueComment>/$QueueData{Comment}/g;
-
-            # remove trailing spaces
-            $String =~ s{\s+\z}{} if !$QueueData{Comment};
-
             if ( $ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') ne 'Queue' )
             {
                 my %SystemAddressData = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressGet(
@@ -2244,12 +2161,9 @@ sub _MaskEmailNew {
     # get layout object
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
-    # set JS data
-    $LayoutObject->AddJSData(
-        Key   => 'CustomerSearch',
-        Value => {
-            ShowCustomerTickets => $ConfigObject->Get('Ticket::Frontend::ShowCustomerTickets'),
-        },
+    # build customer search autocomplete field
+    $LayoutObject->Block(
+        Name => 'CustomerSearchAutoComplete',
     );
 
     # build string
@@ -2334,15 +2248,6 @@ sub _MaskEmailNew {
         $LayoutObject->Block(
             Name => 'FromExternalCustomer',
             Data => $Param{FromExternalCustomer},
-        );
-
-        $LayoutObject->AddJSData(
-            Key   => 'DataEmail',
-            Value => $Param{FromExternalCustomer}->{Email},
-        );
-        $LayoutObject->AddJSData(
-            Key   => 'DataCustomer',
-            Value => $Param{FromExternalCustomer}->{Customer},
         );
     }
 
@@ -2497,10 +2402,12 @@ sub _MaskEmailNew {
         OnlyDynamicFields => 1
     );
 
-    $LayoutObject->AddJSData(
-        Key   => 'DynamicFieldNames',
-        Value => $DynamicFieldNames,
-    );
+    # create a string with the quoted dynamic field names separated by commas
+    if ( IsArrayRefWithData($DynamicFieldNames) ) {
+        for my $Field ( @{$DynamicFieldNames} ) {
+            $Param{DynamicFieldNamesStrg} .= ", '" . $Field . "'";
+        }
+    }
 
     # build type string
     if ( $ConfigObject->Get('Ticket::Type') ) {
@@ -2522,46 +2429,73 @@ sub _MaskEmailNew {
     # build service string
     if ( $ConfigObject->Get('Ticket::Service') ) {
 
-        $Param{ServiceStrg} = $LayoutObject->BuildSelection(
-            Data  => $Param{Services},
-            Name  => 'ServiceID',
-            Class => 'Modernize '
-                . ( $Config->{ServiceMandatory} ? 'Validate_Required ' : '' )
-                . ( $Param{Errors}->{ServiceInvalid} || '' ),
-            SelectedID   => $Param{ServiceID},
-            PossibleNone => 1,
-            TreeView     => $TreeView,
-            Sort         => 'TreeView',
-            Translation  => 0,
-            Max          => 200,
-        );
-        $LayoutObject->Block(
-            Name => 'TicketService',
-            Data => {
-                ServiceMandatory => $Config->{ServiceMandatory} || 0,
-                %Param,
-            },
-        );
+        if ( $Config->{ServiceMandatory} ) {
+            $Param{ServiceStrg} = $LayoutObject->BuildSelection(
+                Data         => $Param{Services},
+                Name         => 'ServiceID',
+                Class        => 'Validate_Required Modernize ' . ( $Param{Errors}->{ServiceInvalid} || ' ' ),
+                SelectedID   => $Param{ServiceID},
+                PossibleNone => 1,
+                TreeView     => $TreeView,
+                Sort         => 'TreeView',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketServiceMandatory',
+                Data => {%Param},
+            );
+        }
+        else {
+            $Param{ServiceStrg} = $LayoutObject->BuildSelection(
+                Data         => $Param{Services},
+                Name         => 'ServiceID',
+                Class        => 'Modernize ' . ( $Param{Errors}->{ServiceInvalid} || ' ' ),
+                SelectedID   => $Param{ServiceID},
+                PossibleNone => 1,
+                TreeView     => $TreeView,
+                Sort         => 'TreeView',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketService',
+                Data => {%Param},
+            );
+        }
 
-        $Param{SLAStrg} = $LayoutObject->BuildSelection(
-            Data       => $Param{SLAs},
-            Name       => 'SLAID',
-            SelectedID => $Param{SLAID},
-            Class      => 'Modernize '
-                . ( $Config->{SLAMandatory} ? 'Validate_Required ' : '' )
-                . ( $Param{Errors}->{SLAInvalid} || '' ),
-            PossibleNone => 1,
-            Sort         => 'AlphanumericValue',
-            Translation  => 0,
-            Max          => 200,
-        );
-        $LayoutObject->Block(
-            Name => 'TicketSLA',
-            Data => {
-                SLAMandatory => $Config->{SLAMandatory} || 0,
-                %Param,
-            },
-        );
+        if ( $Config->{SLAMandatory} ) {
+            $Param{SLAStrg} = $LayoutObject->BuildSelection(
+                Data         => $Param{SLAs},
+                Name         => 'SLAID',
+                SelectedID   => $Param{SLAID},
+                Class        => 'Validate_Required Modernize ' . ( $Param{Errors}->{SLAInvalid} || ' ' ),
+                PossibleNone => 1,
+                Sort         => 'AlphanumericValue',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketSLAMandatory',
+                Data => {%Param},
+            );
+        }
+        else {
+            $Param{SLAStrg} = $LayoutObject->BuildSelection(
+                Data         => $Param{SLAs},
+                Name         => 'SLAID',
+                SelectedID   => $Param{SLAID},
+                Class        => 'Modernize',
+                PossibleNone => 1,
+                Sort         => 'AlphanumericValue',
+                Translation  => 0,
+                Max          => 200,
+            );
+            $LayoutObject->Block(
+                Name => 'TicketSLA',
+                Data => {%Param},
+            );
+        }
     }
 
     # check if exists create templates regardless the queue
@@ -2694,13 +2628,58 @@ sub _MaskEmailNew {
         );
     }
 
-    # Show the customer user address book if the module is registered and java script support is available.
+    my $ShownOptionsBlock;
+
+    # show spell check
+    if ( $LayoutObject->{BrowserSpellChecker} ) {
+
+        # check if need to call Options block
+        if ( !$ShownOptionsBlock ) {
+            $LayoutObject->Block(
+                Name => 'TicketOptions',
+                Data => {
+                    %Param,
+                },
+            );
+
+            # set flag to "true" in order to prevent calling the Options block again
+            $ShownOptionsBlock = 1;
+        }
+
+        $LayoutObject->Block(
+            Name => 'SpellCheck',
+            Data => {
+                %Param,
+            },
+        );
+    }
+
+    # show address book if the module is registered and java script support is available
     if (
-        $ConfigObject->Get('Frontend::Module')->{AgentCustomerUserAddressBook}
+        $ConfigObject->Get('Frontend::Module')->{AgentBook}
         && $LayoutObject->{BrowserJavaScriptSupport}
         )
     {
-        $Param{OptionCustomerUserAddressBook} = 1;
+
+        # check if need to call Options block
+        if ( !$ShownOptionsBlock ) {
+            $LayoutObject->Block(
+                Name => 'TicketOptions',
+                Data => {
+                    %Param,
+                },
+            );
+
+            # set flag to "true" in order to prevent calling the Options block again
+            $ShownOptionsBlock = 1;
+        }
+
+        $LayoutObject->Block(
+            Name => 'AddressBook',
+            Data => {
+                %Param,
+            },
+        );
     }
 
     # show customer edit link
@@ -2708,9 +2687,6 @@ sub _MaskEmailNew {
         Action => 'AdminCustomerUser',
         Type   => 'rw',
     );
-
-    my $ShownOptionsBlock;
-
     if ($OptionCustomer) {
 
         # check if need to call Options block
@@ -2759,8 +2735,8 @@ sub _MaskEmailNew {
         $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-        # set up rich text editor
-        $LayoutObject->SetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }

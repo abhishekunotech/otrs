@@ -13,29 +13,29 @@ Core.Config = Core.Config || {};
 
 Core.Config = (function (Namespace) {
     Namespace.RunUnitTests = function(){
-        QUnit.module('Core.Config');
-        QUnit.test('Core.Config.Get()', function(Assert){
+        module('Core.Config');
+        test('Core.Config.Get()', function(){
             var ConfigTest = 'Test value';
 
-            Assert.expect(6);
+            expect(6);
 
             Core.Config.Set('Test', ConfigTest);
-            Assert.deepEqual(Core.Config.Get('Test'), ConfigTest);
+            deepEqual(Core.Config.Get('Test'), ConfigTest);
 
             Core.Config.Set('RichText.Test', ConfigTest);
-            Assert.deepEqual(Core.Config.Get('RichText.Test'), ConfigTest);
+            deepEqual(Core.Config.Get('RichText.Test'), ConfigTest);
 
             Core.Config.Set('RichText.Test2', ConfigTest);
-            Assert.deepEqual(Core.Config.Get('RichText.Test2'), ConfigTest);
+            deepEqual(Core.Config.Get('RichText.Test2'), ConfigTest);
 
-            Assert.deepEqual(Core.Config.Get('non.existing.dummy.ns'), undefined);
+            deepEqual(Core.Config.Get('non.existing.dummy.ns'), undefined);
 
-            Assert.deepEqual(Core.Config.Get('EasyName', 42), 42, "Test for default value");
+            deepEqual(Core.Config.Get('EasyName', 42), 42, "Test for default value");
 
-            Assert.deepEqual(Core.Config.Get('non.existing.dummy.ns', 'DefaultValueTest'), 'DefaultValueTest', "Test for default value 2");
+            deepEqual(Core.Config.Get('non.existing.dummy.ns', 'DefaultValueTest'), 'DefaultValueTest', "Test for default value 2");
         });
 
-        QUnit.test('Core.Config.AddConfig()', function(Assert){
+        test('Core.Config.AddConfig()', function(){
 
             var ConfigTest = {
                 Width: 600,
@@ -43,18 +43,18 @@ Core.Config = (function (Namespace) {
                 Name: 'Test'
             };
 
-            Assert.expect(3);
+            expect(3);
 
             Core.Config.AddConfig(ConfigTest, 'RichText');
-            Assert.deepEqual(Core.Config.Get('RichText'), ConfigTest);
+            deepEqual(Core.Config.Get('RichText'), ConfigTest);
 
             Core.Config.AddConfig(ConfigTest, 'RichText.Details');
-            Assert.deepEqual(Core.Config.Get('RichText.Details'), ConfigTest);
+            deepEqual(Core.Config.Get('RichText.Details'), ConfigTest);
 
             ConfigTest = '{"Width":"600","Height":"400","Name":"Test"}';
 
             Core.Config.AddConfig(ConfigTest, 'RichText.JSONStuff');
-            Assert.deepEqual(Core.Config.Get('RichText.JSONStuff'), ConfigTest);
+            deepEqual(Core.Config.Get('RichText.JSONStuff'), ConfigTest);
         });
     };
 

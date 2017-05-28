@@ -87,26 +87,23 @@ sub Run {
         # if no errors occurred
         if ( !%Errors ) {
 
-            # update auto response
-            my $Update = $AutoResponseObject->AutoResponseUpdate( %GetParam, UserID => $Self->{UserID} );
-
-            if ($Update)
+            # update group
+            if (
+                $AutoResponseObject->AutoResponseUpdate(
+                    %GetParam, UserID => $Self->{UserID}
+                )
+                )
             {
-
-                # if the user would like to continue editing the auto response, just redirect to the edit screen
-                if (
-                    defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-                    && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-                    )
-                {
-                    my $ID = $ParamObject->GetParam( Param => 'ID' ) || '';
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Subaction=Change;ID=$ID" );
-                }
-                else {
-
-                    # otherwise return to overview
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-                }
+                $Self->_Overview();
+                my $Output = $LayoutObject->Header();
+                $Output .= $LayoutObject->NavigationBar();
+                $Output .= $LayoutObject->Notify( Info => Translatable('Response updated!') );
+                $Output .= $LayoutObject->Output(
+                    TemplateFile => 'AdminAutoResponse',
+                    Data         => \%Param,
+                );
+                $Output .= $LayoutObject->Footer();
+                return $Output;
             }
         }
 
@@ -188,7 +185,7 @@ sub Run {
                 $Self->_Overview();
                 my $Output = $LayoutObject->Header();
                 $Output .= $LayoutObject->NavigationBar();
-                $Output .= $LayoutObject->Notify( Info => Translatable('Auto Response added!') );
+                $Output .= $LayoutObject->Notify( Info => Translatable('Response added!') );
                 $Output .= $LayoutObject->Output(
                     TemplateFile => 'AdminAutoResponse',
                     Data         => \%Param,
@@ -257,6 +254,15 @@ sub _Edit {
         Class      => 'Modernize Validate_Required ' . ( $Param{Errors}->{'ValidIDInvalid'} || '' ),
     );
 
+    $Param{AutoResponseOption} = $LayoutObject->BuildSelection(
+        Data       => { $AutoResponseObject->AutoResponseList(), },
+        Name       => 'ID',
+        Max        => 75,
+        Multiple   => 1,
+        SelectedID => $Param{ID},
+        Class      => 'Modernize',
+    );
+
     $Param{TypeOption} = $LayoutObject->BuildSelection(
         Data       => { $AutoResponseObject->AutoResponseTypeList(), },
         Name       => 'TypeID',
@@ -271,6 +277,14 @@ sub _Edit {
         Translation => 0,
         Class => 'Modernize Validate_Required ' . ( $Param{Errors}->{'AddressIDInvalid'} || '' ),
     );
+
+    # shows header
+    if ( $Param{Action} eq 'Change' ) {
+        $LayoutObject->Block( Name => 'HeaderEdit' );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
 
     my $HTMLUtilsObject = $Kernel::OM->Get('Kernel::System::HTMLUtils');
 
@@ -303,9 +317,8 @@ sub _Edit {
     );
 
     if ( $LayoutObject->{BrowserRichText} ) {
-
-        # set up rich text editor
-        $LayoutObject->SetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }
@@ -326,14 +339,14 @@ sub _Overview {
 
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionAdd' );
-    $LayoutObject->Block( Name => 'Filter' );
 
     $LayoutObject->Block(
         Name => 'OverviewResult',
         Data => \%Param,
     );
     my %List = $AutoResponseObject->AutoResponseList(
-        Valid => 0,
+        UserID => 1,
+        Valid  => 0,
     );
 
     # if there are any results, they are shown

@@ -11,9 +11,9 @@ package Kernel::Modules::AdminSystemAddress;
 use strict;
 use warnings;
 
-use Kernel::Language qw(Translatable);
-
 our $ObjectManagerDisabled = 1;
+
+use Kernel::Language qw(Translatable);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -88,16 +88,6 @@ sub Run {
             $Errors{ErrorType}   = $CheckItemObject->CheckErrorType();
         }
 
-        # check if a system address exist with this name
-        my $NameExists = $SystemAddressObject->NameExistsCheck(
-            Name => $GetParam{Name},
-            ID   => $GetParam{ID}
-        );
-        if ($NameExists) {
-            $Errors{NameInvalid} = 'ServerError';
-            $Errors{ErrorType}   = 'AlreadyUsed';
-        }
-
         # if no errors occurred
         if ( !%Errors ) {
 
@@ -109,20 +99,18 @@ sub Run {
                 )
                 )
             {
-                # if the user would like to continue editing system e-mail address, just redirect to the edit screen
-                # otherwise return to overview
-                if (
-                    defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-                    && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-                    )
-                {
-                    return $LayoutObject->Redirect(
-                        OP => "Action=$Self->{Action};Subaction=Change;ID=$GetParam{ID}"
-                    );
-                }
-                else {
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-                }
+                $Self->_Overview();
+                my $Output = $LayoutObject->Header();
+                $Output .= $LayoutObject->NavigationBar();
+                $Output .= $LayoutObject->Notify(
+                    Info => Translatable('System e-mail address updated!'),
+                );
+                $Output .= $LayoutObject->Output(
+                    TemplateFile => 'AdminSystemAddress',
+                    Data         => \%Param,
+                );
+                $Output .= $LayoutObject->Footer();
+                return $Output;
             }
         }
 
@@ -194,15 +182,6 @@ sub Run {
             $Errors{ErrorType}   = $CheckItemObject->CheckErrorType();
         }
 
-        # check if a system address exist with this name
-        my $NameExists = $SystemAddressObject->NameExistsCheck(
-            Name => $GetParam{Name},
-        );
-        if ($NameExists) {
-            $Errors{NameInvalid} = 'ServerError';
-            $Errors{ErrorType}   = 'AlreadyUsed';
-        }
-
         # if no errors occurred
         if ( !%Errors ) {
 
@@ -250,7 +229,6 @@ sub Run {
     # ------------------------------------------------------------
     else {
         $Self->_Overview();
-
         my $Output = $LayoutObject->Header();
         $Output .= $LayoutObject->NavigationBar();
         $Output .= $LayoutObject->Output(
@@ -276,21 +254,8 @@ sub _Edit {
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionOverview' );
 
-    # Get valid list.
-    my $ValidObject = $Kernel::OM->Get('Kernel::System::Valid');
-    my %ValidList   = $ValidObject->ValidList();
-
-    # If there is queue using this system address, disable invalid selection on edit screen.
-    if ( $Param{Action} eq 'Change' ) {
-        $Param{SystemAddressIsUsed} = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressIsUsed(
-            SystemAddressID => $Param{ID},
-        );
-        if ( $Param{SystemAddressIsUsed} ) {
-            my @ValidIDsList = $ValidObject->ValidIDsGet();
-            %ValidList = map { $_ => $ValidList{$_} } @ValidIDsList;
-        }
-    }
-
+    # get valid list
+    my %ValidList        = $Kernel::OM->Get('Kernel::System::Valid')->ValidList();
     my %ValidListReverse = reverse %ValidList;
 
     $Param{ValidOption} = $LayoutObject->BuildSelection(
@@ -315,7 +280,15 @@ sub _Edit {
         },
     );
 
-    # Add the correct server error msg for the system email address.
+    # shows header
+    if ( $Param{Action} eq 'Change' ) {
+        $LayoutObject->Block( Name => 'HeaderEdit' );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
+
+    # add the correct server error msg for the system email address
     if ( $Param{Name} && $Param{Errors}->{ErrorType} ) {
         $LayoutObject->Block(
             Name => 'Email' . $Param{Errors}->{ErrorType} . 'ServerErrorMsg',
@@ -345,7 +318,6 @@ sub _Overview {
 
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionAdd' );
-    $LayoutObject->Block( Name => 'Filter' );
 
     $LayoutObject->Block(
         Name => 'OverviewResult',

@@ -775,25 +775,21 @@ my $UserIDNoOutOfOffice = $UserObject->UserLookup(
 );
 
 # set a user out of office
-my $StartDateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
-
-$StartDateTimeObject->Subtract(
-    Days => 1,
+my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
+my ( $SSec, $SMin, $SHour, $SDay, $SMonth, $SYear, $SWeekDay ) = $TimeObject->SystemTime2Date(
+    SystemTime => $TimeObject->SystemTime() - ( 24 * 60 * 60 ),
 );
-my $StartDateTimeSettings = $StartDateTimeObject->Get();
-my $EndDateTimeObject     = $Kernel::OM->Create('Kernel::System::DateTime');
-$EndDateTimeObject->Add(
-    Days => 1,
+my ( $ESec, $EMin, $EHour, $EDay, $EMonth, $EYear, $EWeekDay ) = $TimeObject->SystemTime2Date(
+    SystemTime => $TimeObject->SystemTime() + ( 24 * 60 * 60 ),
 );
-my $EndDateTimeSettings = $EndDateTimeObject->Get();
-my %OutOfOfficeParams   = (
+my %OutOfOfficeParams = (
     OutOfOffice           => 1,
-    OutOfOfficeStartYear  => $StartDateTimeSettings->{Year},
-    OutOfOfficeStartMonth => $StartDateTimeSettings->{Month},
-    OutOfOfficeStartDay   => $StartDateTimeSettings->{Day},
-    OutOfOfficeEndYear    => $EndDateTimeSettings->{Year},
-    OutOfOfficeEndMonth   => $EndDateTimeSettings->{Month},
-    OutOfOfficeEndDay     => $EndDateTimeSettings->{Day},
+    OutOfOfficeStartYear  => $SYear,
+    OutOfOfficeStartMonth => $SMonth,
+    OutOfOfficeStartDay   => $SDay,
+    OutOfOfficeEndYear    => $EYear,
+    OutOfOfficeEndMonth   => $EMonth,
+    OutOfOfficeEndDay     => $EDay,
 );
 for my $Key ( sort keys %OutOfOfficeParams ) {
     $UserObject->SetPreferences(
@@ -970,14 +966,6 @@ for my $DynamicFieldID ( sort keys %{$DeleteFieldList} ) {
     next DYNAMICFIELD if !$DeleteFieldList->{$DynamicFieldID};
 
     next DYNAMICFIELD if $DeleteFieldList->{$DynamicFieldID} !~ m{ ^Unittest }xms;
-
-    my $DynamicFieldConfig = $DynamicFieldObject->DynamicFieldGet(
-        ID => $DynamicFieldID,
-    );
-    my $ValuesDeleteSuccess = $BackendObject->AllValuesDelete(
-        DynamicFieldConfig => $DynamicFieldConfig,
-        UserID             => $Self->{UserID},
-    );
 
     $DynamicFieldObject->DynamicFieldDelete(
         ID     => $DynamicFieldID,

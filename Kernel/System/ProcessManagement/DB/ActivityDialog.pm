@@ -25,16 +25,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::ActivityDialog
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB ActivityDialog backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ActivityDialogObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::ActivityDialog');
 
 =cut
@@ -58,7 +64,7 @@ sub new {
     return $Self;
 }
 
-=head2 ActivityDialogAdd()
+=item ActivityDialogAdd()
 
 add new ActivityDialog
 
@@ -191,7 +197,7 @@ sub ActivityDialogAdd {
     return $ID;
 }
 
-=head2 ActivityDialogDelete()
+=item ActivityDialogDelete()
 
 delete an ActivityDialog
 
@@ -239,7 +245,7 @@ sub ActivityDialogDelete {
     return 1;
 }
 
-=head2 ActivityDialogGet()
+=item ActivityDialogGet()
 
 get Activity Dialog attributes
 
@@ -357,7 +363,7 @@ sub ActivityDialogGet {
     return \%Data;
 }
 
-=head2 ActivityDialogUpdate()
+=item ActivityDialogUpdate()
 
 update ActivityDialog attributes
 
@@ -501,7 +507,7 @@ sub ActivityDialogUpdate {
     return 1;
 }
 
-=head2 ActivityDialogList()
+=item ActivityDialogList()
 
 get an ActivityDialog list
 
@@ -584,7 +590,7 @@ sub ActivityDialogList {
     return \%Data;
 }
 
-=head2 ActivityDialogListGet()
+=item ActivityDialogListGet()
 
 get an Activity Dialog list with all activity dialog details
 
@@ -677,6 +683,8 @@ sub ActivityDialogListGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

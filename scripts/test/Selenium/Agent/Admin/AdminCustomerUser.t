@@ -28,13 +28,6 @@ $Selenium->RunTest(
             Value => 0
         );
 
-        # set enable auto complete
-        $Helper->ConfigSettingChange(
-            Valid => 1,
-            Key   => 'AdminCustomerUser::UseAutoComplete',
-            Value => 1
-        );
-
         # create test user and login
         my $TestUserLogin = $Helper->TestUserCreate(
             Groups => ['admin'],
@@ -100,12 +93,6 @@ $Selenium->RunTest(
         $Selenium->find_element( "#Source",           'css' );
         $Selenium->find_element( "#Search",           'css' );
 
-        # check breadcrumb on Overview screen
-        $Self->True(
-            $Selenium->find_element( '.BreadCrumb', 'css' ),
-            "Breadcrumb is found on Overview screen.",
-        );
-
         # click 'Add customer'
         $Selenium->find_element( "button.CallForAction", 'css' )->VerifiedClick();
 
@@ -117,24 +104,6 @@ $Selenium->RunTest(
             my $Element = $Selenium->find_element( "#$ID", 'css' );
             $Element->is_enabled();
             $Element->is_displayed();
-        }
-
-        # check add customer screen if auto complete is activated
-        my $AutoCompleteElement = $Selenium->find_element( '.CustomerAutoCompleteSimple', 'css' );
-        $AutoCompleteElement->is_enabled();
-        $AutoCompleteElement->is_displayed();
-
-        # check breadcrumb on Add screen
-        my $Count = 1;
-        my $IsLinkedBreadcrumbText;
-        for my $BreadcrumbText ( 'Customer User Management', 'Add Customer User' ) {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
         }
 
         # check client side validation
@@ -168,13 +137,6 @@ $Selenium->RunTest(
         $Self->True(
             index( $Selenium->get_page_source(), $RandomID ) > -1,
             "$RandomID found on page",
-        );
-
-        #check is there notification after customer user is added
-        my $Notification = "Customer $RandomID added ( New phone ticket - New email ticket )!";
-        $Self->True(
-            $Selenium->execute_script("return \$('.MessageBox.Notice p:contains($Notification)').length"),
-            "$Notification - notification is found."
         );
 
         # create another test customer user for filter search test
@@ -244,28 +206,9 @@ $Selenium->RunTest(
             "#UserCustomerID updated value",
         );
 
-        # check breadcrumb on Edit screen
-        $Count = 1;
-        for my $BreadcrumbText ( 'Customer User Management', 'Edit Customer User: ' . $RandomID ) {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
-        }
-
         # set test customer user to invalid
         $Selenium->execute_script("\$('#ValidID').val('2').trigger('redraw.InputField').trigger('change');");
         $Selenium->find_element( "#UserFirstname", 'css' )->VerifiedSubmit();
-
-        #check is there notification after customer user is updated
-        $Notification = "Customer user updated!";
-        $Self->True(
-            $Selenium->execute_script("return \$('.MessageBox.Notice p:contains($Notification)').length"),
-            "$Notification - notification is found."
-        );
 
         # test search filter
         $Selenium->find_element( "#Search", 'css' )->clear();
@@ -278,50 +221,11 @@ $Selenium->RunTest(
             "There is a class 'Invalid' for test Customer User",
         );
 
-        # navigate to AgentTicketPhone
-        $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentTicketPhone");
-
-        # click on '[ Customer User ]' to test customer user creation from iframe
-        $Selenium->find_element( "#OptionCustomer", 'css' )->click();
-
-        sleep 1;
-
-        $Selenium->switch_to_frame( $Selenium->find_element( '.TextOption', 'css' ) );
-
-        # click to 'Add customer user'
-        $Selenium->find_element("//button[\@class='CallForAction Fullsize Center']")->VerifiedClick();
-
-        sleep 1;
-
-        # create new test customer user
-        my $RandomID3 = 'TestCustomer' . $Helper->GetRandomID();
-        my $UserEmail = $RandomID3 . "\@localhost.com";
-        $Selenium->find_element( "#UserFirstname", 'css' )->send_keys($RandomID3);
-        $Selenium->find_element( "#UserLastname",  'css' )->send_keys($RandomID3);
-        $Selenium->find_element( "#UserLogin",     'css' )->send_keys($RandomID3);
-        $Selenium->find_element( "#UserEmail",     'css' )->send_keys( $RandomID3 . "\@localhost.com" );
-        $Selenium->execute_script(
-            "\$('#UserCustomerID').val('$RandomID').trigger('redraw.InputField').trigger('change');"
-        );
-        $Selenium->find_element( "#UserFirstname", 'css' )->submit();
-
-        # return focus back on AgentTicketPhone window
-        my $Handles = $Selenium->get_window_handles();
-        $Selenium->switch_to_window( $Handles->[0] );
-
-        # verify created customer user is added directly in AgentTicketPhone form
-        $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("#CustomerID").val().length' );
-        $Self->Is(
-            $Selenium->find_element( "#CustomerID", 'css' )->get_value(),
-            $RandomID,
-            "Test customer user $RandomID3 is successfully created from AgentTicketPhone screen"
-        );
-
         # get DB object
         my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
         # delete created test customer user and customer company
-        for my $CustomerID ( $RandomID, $RandomID2, $RandomID3 ) {
+        for my $CustomerID ( $RandomID, $RandomID2 ) {
             my $Success = $DBObject->Do(
                 SQL  => "DELETE FROM customer_user WHERE customer_id = ?",
                 Bind => [ \$CustomerID ],

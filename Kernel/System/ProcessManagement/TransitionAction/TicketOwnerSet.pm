@@ -14,7 +14,7 @@ use utf8;
 
 use Kernel::System::VariableCheck qw(:all);
 
-use parent qw(Kernel::System::ProcessManagement::TransitionAction::Base);
+use base qw(Kernel::System::ProcessManagement::TransitionAction::Base);
 
 our @ObjectDependencies = (
     'Kernel::System::Log',
@@ -25,16 +25,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::TransitionAction::TicketOwnerSet - A module to set a new ticket owner
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All TicketOwnerSet functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TicketOwnerSetObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::TransitionAction::TicketOwnerSet');
 
 =cut
@@ -49,7 +55,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
     Run Data
 
@@ -158,6 +164,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

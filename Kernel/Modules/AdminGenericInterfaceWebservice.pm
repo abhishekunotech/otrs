@@ -755,7 +755,14 @@ sub _ShowOverview {
         Name => 'Main',
         Data => \%Param,
     );
-
+    $LayoutObject->Block(
+        Name => 'WebservicePathElement',
+        Data => {
+            Name => Translatable('Web Services'),
+            Link => 'Action=AdminGenericInterfaceWebservice',
+            Nav  => '',
+        },
+    );
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionAdd' );
     $LayoutObject->Block( Name => 'OverviewHeader' );
@@ -877,7 +884,26 @@ sub _ShowEdit {
         Data => \%Param,
     );
 
-    if ( $Param{Action} eq 'Add' ) {
+    $LayoutObject->Block(
+        Name => 'WebservicePathElement',
+        Data => {
+            Name => Translatable('Web Services'),
+            Link => 'Action=AdminGenericInterfaceWebservice',
+            Nav  => '',
+        },
+    );
+    if ( $Param{Action} eq 'Change' && $WebserviceData->{Name} ) {
+        $LayoutObject->Block(
+            Name => 'WebservicePathElementNoLink',
+            Data => {
+                Name => $WebserviceData->{Name},
+                Link => 'Action=AdminGenericInterfaceWebservice;Subaction=' . $Param{Action}
+                    . ';WebserviceID=' . $Param{WebserviceID},
+                Nav => '',
+            },
+        );
+    }
+    elsif ( $Param{Action} eq 'Add' ) {
 
         my @ExampleWebServices = $Kernel::OM->Get('Kernel::System::Main')->DirectoryRead(
             Directory => $Kernel::OM->Get('Kernel::Config')->Get('Home') . '/var/webservices/examples',
@@ -913,6 +939,15 @@ sub _ShowEdit {
             Name => 'ExampleWebServices',
             Data => {
                 %Frontend,
+            },
+        );
+
+        $LayoutObject->Block(
+            Name => 'WebservicePathElementNoLink',
+            Data => {
+                Name => Translatable('New Web service'),
+                Link => 'Action=AdminGenericInterfaceWebservice;Subaction=' . $Param{Action},
+                Nav  => '',
             },
         );
     }
@@ -1155,7 +1190,6 @@ sub _ShowEdit {
         else {
 
             # output operation and invoker tables
-            my %JSData;
             for my $ActionName (
                 sort keys %{ $CommTypeConfig{$CommunicationType}->{ActionsConfig} }
                 )
@@ -1180,8 +1214,6 @@ sub _ShowEdit {
                     $NoControllerFound = 1;
                     $ControllerClass   = 'Error';
                 }
-
-                $JSData{ $ActionData{Name} } = $ActionData{ActionType};
 
                 $LayoutObject->Block(
                     Name => 'DetailsActionsRow',
@@ -1211,12 +1243,6 @@ sub _ShowEdit {
                     );
                 }
             }
-
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'JSData',
-                Value => \%JSData
-            );
         }
 
         if ($NoControllerFound) {
@@ -1247,14 +1273,27 @@ sub _OutputGIConfig {
 
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'Webservice',
-        Value => {
-            Transport => $Param{GITransports},
-            Operation => $Param{GIOperations},
-            Invoker   => $Param{GIInvokers},
+    # parse the transport config as JSON structure
+    my $TransportConfig = $LayoutObject->JSONEncode(
+        Data => $Param{GITransports},
+    );
 
+    # parse the operation config as JSON structure
+    my $OpertaionConfig = $LayoutObject->JSONEncode(
+        Data => $Param{GIOperations},
+    );
+
+    # parse the operation config as JSON structure
+    my $InvokerConfig = $LayoutObject->JSONEncode(
+        Data => $Param{GIInvokers},
+    );
+
+    $LayoutObject->Block(
+        Name => 'ConfigSet',
+        Data => {
+            TransportConfig => $TransportConfig,
+            OperationConfig => $OpertaionConfig,
+            InvokerConfig   => $InvokerConfig,
         },
     );
 

@@ -11,7 +11,7 @@ package Kernel::System::Console::Command::Dev::Tools::Migrate::DTL2TT;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::System::Main',

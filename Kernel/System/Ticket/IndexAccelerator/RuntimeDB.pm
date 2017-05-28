@@ -21,13 +21,6 @@ our @ObjectDependencies = (
     'Kernel::System::Time',
 );
 
-sub new {
-    my ($Type) = @_;
-
-    my $Self = {};
-    return bless( $Self, $Type );
-}
-
 sub TicketAcceleratorUpdate {
     my ( $Self, %Param ) = @_;
 

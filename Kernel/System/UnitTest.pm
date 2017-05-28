@@ -20,8 +20,6 @@ use Kernel::System::ObjectManager;
 # UnitTest helper must be loaded to override the builtin time functions!
 use Kernel::System::UnitTest::Helper;
 
-use Kernel::System::VariableCheck qw(DataIsDifferent);
-
 our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::DB',
@@ -38,16 +36,22 @@ our @ObjectDependencies = (
 
 Kernel::System::UnitTest - global unit test interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions to run existing unit tests, as well as functions to define test cases.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create unit test object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $UnitTestObject = $Kernel::OM->Get('Kernel::System::UnitTest');
 
 =cut
@@ -74,7 +78,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 Run all tests located in scripts/test/*.t and print result to stdout.
 
@@ -339,7 +343,7 @@ sub Run {
     return $Self->{TestCountNotOk} ? 0 : 1;
 }
 
-=head2 True()
+=item True()
 
 test for a scalar value that evaluates to true.
 
@@ -381,7 +385,7 @@ sub True {
     }
 }
 
-=head2 False()
+=item False()
 
 test for a scalar value that evaluates to false.
 
@@ -412,7 +416,7 @@ sub False {
     }
 }
 
-=head2 Is()
+=item Is()
 
 compares two scalar values for equality.
 
@@ -466,7 +470,7 @@ sub Is {
     }
 }
 
-=head2 IsNot()
+=item IsNot()
 
 compares two scalar values for inequality.
 
@@ -509,7 +513,7 @@ sub IsNot {
     }
 }
 
-=head2 IsDeeply()
+=item IsDeeply()
 
 compares complex data structures for equality.
 
@@ -543,7 +547,7 @@ sub IsDeeply {
         return;
     }
 
-    my $Diff = DataIsDifferent(
+    my $Diff = $Self->_DataDiff(
         Data1 => $Test,
         Data2 => $ShouldBe,
     );
@@ -572,7 +576,7 @@ sub IsDeeply {
     }
 }
 
-=head2 IsNotDeeply()
+=item IsNotDeeply()
 
 compares two data structures for inequality.
 
@@ -593,7 +597,7 @@ sub IsNotDeeply {
         return;
     }
 
-    my $Diff = DataIsDifferent(
+    my $Diff = $Self->_DataDiff(
         Data1 => $Test,
         Data2 => $ShouldBe,
     );
@@ -628,6 +632,153 @@ sub IsNotDeeply {
 =begin Internal:
 
 =cut
+
+=item _DataDiff()
+
+compares two data structures with each other. Returns 1 if
+they are different, undef otherwise.
+
+Data parameters need to be passed by reference and can be SCALAR,
+ARRAY or HASH.
+
+    my $DataIsDifferent = $UnitTestObject->_DataDiff(
+        Data1 => \$Data1,
+        Data2 => \$Data2,
+    );
+
+=cut
+
+sub _DataDiff {
+    my ( $Self, %Param ) = @_;
+
+    # check needed stuff
+    for (qw(Data1 Data2)) {
+        if ( !defined $Param{$_} ) {
+            $Kernel::OM->Get('Kernel::System::Log')->Log(
+                Priority => 'error',
+                Message  => "Need $_!"
+            );
+            return;
+        }
+    }
+
+    # ''
+    if ( ref $Param{Data1} eq '' && ref $Param{Data2} eq '' ) {
+
+        # do nothing, it's ok
+        return if !defined $Param{Data1} && !defined $Param{Data2};
+
+        # return diff, because its different
+        return 1 if !defined $Param{Data1} || !defined $Param{Data2};
+
+        # return diff, because its different
+        return 1 if $Param{Data1} ne $Param{Data2};
+
+        # return, because its not different
+        return;
+    }
+
+    # SCALAR
+    if ( ref $Param{Data1} eq 'SCALAR' && ref $Param{Data2} eq 'SCALAR' ) {
+
+        # do nothing, it's ok
+        return if !defined ${ $Param{Data1} } && !defined ${ $Param{Data2} };
+
+        # return diff, because its different
+        return 1 if !defined ${ $Param{Data1} } || !defined ${ $Param{Data2} };
+
+        # return diff, because its different
+        return 1 if ${ $Param{Data1} } ne ${ $Param{Data2} };
+
+        # return, because its not different
+        return;
+    }
+
+    # ARRAY
+    if ( ref $Param{Data1} eq 'ARRAY' && ref $Param{Data2} eq 'ARRAY' ) {
+        my @A = @{ $Param{Data1} };
+        my @B = @{ $Param{Data2} };
+
+        # check if the count is different
+        return 1 if $#A ne $#B;
+
+        # compare array
+        COUNT:
+        for my $Count ( 0 .. $#A ) {
+
+            # do nothing, it's ok
+            next COUNT if !defined $A[$Count] && !defined $B[$Count];
+
+            # return diff, because its different
+            return 1 if !defined $A[$Count] || !defined $B[$Count];
+
+            if ( $A[$Count] ne $B[$Count] ) {
+                if ( ref $A[$Count] eq 'ARRAY' || ref $A[$Count] eq 'HASH' ) {
+                    return 1 if $Self->_DataDiff(
+                        Data1 => $A[$Count],
+                        Data2 => $B[$Count]
+                    );
+                    next COUNT;
+                }
+                return 1;
+            }
+        }
+        return;
+    }
+
+    # HASH
+    if ( ref $Param{Data1} eq 'HASH' && ref $Param{Data2} eq 'HASH' ) {
+        my %A = %{ $Param{Data1} };
+        my %B = %{ $Param{Data2} };
+
+        # compare %A with %B and remove it if checked
+        KEY:
+        for my $Key ( sort keys %A ) {
+
+            # Check if both are undefined
+            if ( !defined $A{$Key} && !defined $B{$Key} ) {
+                delete $A{$Key};
+                delete $B{$Key};
+                next KEY;
+            }
+
+            # return diff, because its different
+            return 1 if !defined $A{$Key} || !defined $B{$Key};
+
+            if ( $A{$Key} eq $B{$Key} ) {
+                delete $A{$Key};
+                delete $B{$Key};
+                next KEY;
+            }
+
+            # return if values are different
+            if ( ref $A{$Key} eq 'ARRAY' || ref $A{$Key} eq 'HASH' ) {
+                return 1 if $Self->_DataDiff(
+                    Data1 => $A{$Key},
+                    Data2 => $B{$Key}
+                );
+                delete $A{$Key};
+                delete $B{$Key};
+                next KEY;
+            }
+            return 1;
+        }
+
+        # check rest
+        return 1 if %B;
+        return;
+    }
+
+    if ( ref $Param{Data1} eq 'REF' && ref $Param{Data2} eq 'REF' ) {
+        return 1 if $Self->_DataDiff(
+            Data1 => ${ $Param{Data1} },
+            Data2 => ${ $Param{Data2} }
+        );
+        return;
+    }
+
+    return 1;
+}
 
 sub _Print {
     my ( $Self, $ResultOk, $Message ) = @_;
@@ -699,7 +850,7 @@ sub AttachSeleniumScreenshot {
     return;
 }
 
-=head2 _Color()
+=item _Color()
 
 this will color the given text (see Term::ANSIColor::color()) if
 ANSI output is available and active, otherwise the text stays unchanged.
@@ -718,6 +869,8 @@ sub _Color {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

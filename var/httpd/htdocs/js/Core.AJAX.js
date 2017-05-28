@@ -57,7 +57,7 @@ Core.AJAX = (function (TargetNS) {
      *      Handles failing ajax request (only used as error callback in $.ajax calls)
      */
     function HandleAJAXError(XHRObject, Status, Error) {
-        var ErrorMessage = Core.Language.Translate('Error during AJAX communication. Status: %s, Error: %s', Status, Error);
+        var ErrorMessage = 'Error during AJAX communication. Status: ' + Status + ', Error: ' + Error;
 
         // Check for expired sessions.
         if (RedirectAfterSessionTimeOut(XHRObject)) {
@@ -208,7 +208,8 @@ Core.AJAX = (function (TargetNS) {
      *      the Value parmeter.
      */
     function UpdateTicketAttachments(Value) {
-        var FileID,
+        var DeleteText = Core.Config.Get('Localization.Delete'),
+            FileID,
             ButtonStrg,
             InputStrg;
 
@@ -219,14 +220,14 @@ Core.AJAX = (function (TargetNS) {
         // 2nd: add all files based on the metadata from Value
         $(Value).each(function() {
             FileID = this.FileID;
-            ButtonStrg = '<button type="button" id="AttachmentDeleteButton' + FileID + '" name="AttachmentDeleteButton' + FileID + '" value="Delete" class="CallForAction Inline Small SpacingRight"><span>' + Core.Language.Translate('Delete') + '</span></button>';
+            ButtonStrg = '<button type="button" id="AttachmentDeleteButton' + FileID + '" name="AttachmentDeleteButton' + FileID + '" value="Delete" class="SpacingLeft">' + DeleteText + '</button>';
             InputStrg = '<input type="hidden" id="AttachmentDelete' + this.FileID + '" name="AttachmentDelete' + this.FileID + '" />';
             $('#FileUpload').parent().before(
-                '<li>' + ButtonStrg + InputStrg + this.Filename + ' (' + this.Filesize + ')' + '</li>'
+                '<li>' + this.Filename + ' (' + this.Filesize + ')' + ButtonStrg + InputStrg + '</li>'
             );
 
             //3rd: set form submit and disable validation on attachment delete
-            $('#AttachmentDeleteButton' + FileID).on('click', function () {
+            $('#AttachmentDeleteButton' + FileID).bind('click', function () {
                 var $Form = $(this).closest('form');
                 $(this).next('input[type=hidden]').val(1);
                 Core.Form.Validate.DisableValidation($Form);
@@ -250,24 +251,15 @@ Core.AJAX = (function (TargetNS) {
             ParentBody,
             Range,
             StartRange = 0,
-            NewPosition = 0,
-            CKEditorObj = parent.CKEDITOR;
+            NewPosition = 0;
 
         if ($Element.length) {
             $ParentBody = $Element;
             ParentBody = $ParentBody[0];
 
-            // for regular popups, parent is a reference to the popup itself, which is why parent.CKEDITOR is a reference to the CKEDITOR
-            // object of the popup window. But if we're on a mobile environment, the popup would instead open as an iframe, which would cause
-            // parent.CKEDITOR to be the CKEDITOR object of the parent window which contains the iframe. This is why we want to use only
-            // CKEDITOR in this case (see bug#12680).
-            if (Core.App.Responsive.IsSmallerOrEqual(Core.App.Responsive.GetScreenSize(), 'ScreenL') && (!localStorage.getItem("DesktopMode") || parseInt(localStorage.getItem("DesktopMode"), 10) <= 0)) {
-                CKEditorObj = CKEDITOR;
-            }
-
             // add the text to the RichText editor
-            if (CKEditorObj && CKEditorObj.instances.RichText) {
-                CKEditorObj.instances.RichText.focus();
+            if (parent.CKEDITOR && parent.CKEDITOR.instances.RichText) {
+                parent.CKEDITOR.instances.RichText.focus();
                 window.setTimeout(function () {
 
                     // In some circumstances, this command throws an error (although inserting the HTML works)
@@ -275,7 +267,7 @@ Core.AJAX = (function (TargetNS) {
                     try {
 
                         // set new text
-                        CKEditorObj.instances.RichText.setData(Value);
+                        parent.CKEDITOR.instances.RichText.setData(Value);
                     }
                     catch (Error) {
                         $.noop();
@@ -311,7 +303,7 @@ Core.AJAX = (function (TargetNS) {
             }
         }
         else {
-            alert(Core.Language.Translate('This window must be called from compose window.'));
+            alert('$JSText{"This window must be called from compose window"}');
             return;
         }
     }

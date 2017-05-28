@@ -42,9 +42,15 @@ my $ContractExpiryWarningPeriod = 60 * 60 * 24 * 28;    # 28 days
 
 Kernel::System::OTRSBusiness - OTRSBusiness deployment backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object. Do not use it directly, instead use:
 
@@ -80,7 +86,7 @@ sub new {
     return $Self;
 }
 
-=head2 OTRSBusinessIsInstalled()
+=item OTRSBusinessIsInstalled()
 
 checks if OTRSBusiness is installed in the current system.
 That does not necessarily mean that it is also active, for
@@ -117,7 +123,7 @@ sub OTRSBusinessIsInstalled {
     return $IsInstalled;
 }
 
-=head2 OTRSBusinessIsAvailable()
+=item OTRSBusinessIsAvailable()
 
 checks with C<cloud.otrs.com> if OTRSBusiness is available for the current framework.
 
@@ -163,7 +169,7 @@ sub OTRSBusinessIsAvailable {
     return;
 }
 
-=head2 OTRSBusinessIsAvailableOffline()
+=item OTRSBusinessIsAvailableOffline()
 
 retrieves the latest result of the BusinessVersionCheck cloud service
 that was stored in the system_data table.
@@ -182,7 +188,7 @@ sub OTRSBusinessIsAvailableOffline {
     return $BusinessVersionCheck{LatestVersionForCurrentFramework} ? 1 : 0;
 }
 
-=head2 OTRSBusinessIsCorrectlyDeployed()
+=item OTRSBusinessIsCorrectlyDeployed()
 
 checks if the OTRSBusiness package is correctly
 deployed or if it needs to be reinstalled.
@@ -224,7 +230,7 @@ sub OTRSBusinessIsCorrectlyDeployed {
     return 1;
 }
 
-=head2 OTRSBusinessIsReinstallable()
+=item OTRSBusinessIsReinstallable()
 
 checks if the OTRSBusiness package can be reinstalled
 (if it supports the current framework version). If not,
@@ -245,7 +251,7 @@ sub OTRSBusinessIsReinstallable {
     );
 }
 
-=head2 OTRSBusinessIsUpdateable()
+=item OTRSBusinessIsUpdateable()
 
 checks with C<cloud.otrs.com> if the OTRSBusiness package is available in a newer version
 than the one currently installed. The result of this check will be stored in the
@@ -300,7 +306,7 @@ sub OTRSBusinessIsUpdateable {
     return 0;
 }
 
-=head2 OTRSBusinessVersionCheckOffline()
+=item OTRSBusinessVersionCheckOffline()
 
 retrieves the latest result of the BusinessVersionCheck cloud service
 that was stored in the system_data table.
@@ -341,7 +347,7 @@ sub OTRSBusinessVersionCheckOffline {
     return %Result;
 }
 
-=head2 OTRSBusinessGetDependencies()
+=item OTRSBusinessGetDependencies()
 
 checks if there are any active dependencies on OTRSBusiness.
 
@@ -380,7 +386,7 @@ sub OTRSBusinessGetDependencies {
     return \@DependentPackages;
 }
 
-=head2 OTRSBusinessEntitlementCheck()
+=item OTRSBusinessEntitlementCheck()
 
 determines the OTRSBusiness entitlement status of this system as reported by C<cloud.otrs.com>
 and stores it in the system_data cache.
@@ -448,7 +454,7 @@ sub OTRSBusinessEntitlementCheck {
     return 0;
 }
 
-=head2 OTRSBusinessEntitlementStatus()
+=item OTRSBusinessEntitlementStatus()
 
 Returns the current entitlement status.
 
@@ -510,7 +516,7 @@ sub OTRSBusinessEntitlementStatus {
     return 'entitled';
 }
 
-=head2 OTRSBusinessContractExpiryDateCheck()
+=item OTRSBusinessContractExpiryDateCheck()
 
 checks for the warning period before the contract expires
 
@@ -671,7 +677,7 @@ sub _OTRSBusinessFileGet {
     return;
 }
 
-=head2 OTRSBusinessInstall()
+=item OTRSBusinessInstall()
 
 downloads and installs OTRSBusiness.
 
@@ -702,7 +708,7 @@ sub OTRSBusinessInstall {
     return $Install;
 }
 
-=head2 OTRSBusinessReinstall()
+=item OTRSBusinessReinstall()
 
 re-installs OTRSBusiness from local repository.
 
@@ -726,7 +732,7 @@ sub OTRSBusinessReinstall {
     );
 }
 
-=head2 OTRSBusinessUpdate()
+=item OTRSBusinessUpdate()
 
 downloads and updates OTRSBusiness.
 
@@ -744,7 +750,7 @@ sub OTRSBusinessUpdate {
     );
 }
 
-=head2 OTRSBusinessUninstall()
+=item OTRSBusinessUninstall()
 
 removes OTRSBusiness from the system.
 
@@ -831,7 +837,7 @@ sub OTRSBusinessUninstall {
     return $Uninstall;
 }
 
-=head2 OTRSBusinessCommandNextUpdateTimeSet()
+=item OTRSBusinessCommandNextUpdateTimeSet()
 
 Set the next update time for the given command in the system data table storage.
 
@@ -910,6 +916,8 @@ sub _GetOTRSBusinessPackageFromRepository {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

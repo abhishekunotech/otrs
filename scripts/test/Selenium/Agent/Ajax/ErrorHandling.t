@@ -54,6 +54,15 @@ $Selenium->RunTest(
         # Accept main alert.
         $Selenium->accept_alert();
 
+        # Another alert dialog opens with the detail message.
+        $Self->Is(
+            substr( $Selenium->get_alert_text(), 0, 64 ),
+            'Error during AJAX communication. Status: error, Error: Not Found',
+            'Check for opened alert text',
+        );
+
+        $Selenium->accept_alert();
+
         # Wait until all AJAX calls finished.
         $Selenium->WaitFor( JavaScript => "return \$.active == 0" );
 

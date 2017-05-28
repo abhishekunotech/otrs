@@ -29,16 +29,22 @@ our @ObjectDependencies = (
 
 Kernel::System::JSON - the JSON wrapper lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions for encoding perl data structures to JSON.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a JSON object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $JSONObject = $Kernel::OM->Get('Kernel::System::JSON');
 
 =cut
@@ -53,14 +59,13 @@ sub new {
     return $Self;
 }
 
-=head2 Encode()
+=item Encode()
 
 Encode a perl data structure to a JSON string.
 
     my $JSONString = $JSONObject->Encode(
         Data     => $Data,
         SortKeys => 1,          # (optional) (0|1) default 0, to sort the keys of the json data
-        Pretty => 1,            # (optional) (0|1) default 0, to pretty print
     );
 
 =cut
@@ -84,12 +89,7 @@ sub Encode {
 
     # sort the keys of the JSON data
     if ( $Param{SortKeys} ) {
-        $JSONObject->canonical(1);
-    }
-
-    # pretty print - can be useful for debugging purposes
-    if ( $Param{Pretty} ) {
-        $JSONObject->pretty(1);
+        $JSONObject->canonical( [1] );
     }
 
     # get JSON-encoded presentation of perl structure
@@ -109,7 +109,7 @@ sub Encode {
     return $JSONEncoded;
 }
 
-=head2 Decode()
+=item Decode()
 
 Decode a JSON string to a perl data structure.
 
@@ -152,7 +152,7 @@ sub Decode {
     return $Scalar;
 }
 
-=head2 True()
+=item True()
 
 returns a constant that can be mapped to a boolean true value
 in JSON rather than a string with "true".
@@ -176,7 +176,7 @@ sub True {
     return \1;
 }
 
-=head2 False()
+=item False()
 
 like C<True()>, but for a false boolean value.
 
@@ -193,7 +193,7 @@ sub False {
 
 =cut
 
-=head2 _BooleansProcess()
+=item _BooleansProcess()
 
 decode boolean values leftover from JSON decoder to simple scalar values
 
@@ -237,6 +237,8 @@ sub _BooleansProcess {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

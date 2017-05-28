@@ -33,9 +33,6 @@ sub Run {
     # check if cloud services are disabled
     my $CloudServicesDisabled = $ConfigObject->Get('CloudServices::Disabled') || 0;
 
-    # define parameter for breadcrumb during system registration
-    my $WithoutBreadcrumb;
-
     if ($CloudServicesDisabled) {
 
         my $Output = $LayoutObject->Header( Title => 'Error' );
@@ -60,9 +57,6 @@ sub Run {
         if ( $Self->{Subaction} eq 'Deregister' || $Self->{Subaction} eq 'UpdateNow' ) {
             $Self->{Subaction} = 'OTRSIDValidate';
         }
-
-        # during system registration, don't create breadcrumb item 'Validate OTRS-ID'
-        $WithoutBreadcrumb = 1 if $Self->{Subaction} eq 'OTRSIDValidate';
     }
 
     # get needed objects
@@ -181,10 +175,7 @@ sub Run {
         $Output .= $LayoutObject->NavigationBar();
         $LayoutObject->Block(
             Name => 'Overview',
-            Data => {
-                %Param,
-                Subaction => $WithoutBreadcrumb ? '' : $Self->{Subaction},
-            },
+            Data => \%Param,
         );
 
         my $EntitlementStatus  = 'forbidden';
@@ -263,10 +254,7 @@ sub Run {
         $Output .= $LayoutObject->NavigationBar();
         $LayoutObject->Block(
             Name => 'Overview',
-            Data => {
-                %Param,
-                Subaction => $Self->{Subaction},
-            },
+            Data => \%Param,
         );
 
         $Param{SystemTypeOption} = $LayoutObject->BuildSelection(
@@ -316,10 +304,7 @@ sub Run {
         $Output .= $LayoutObject->NavigationBar();
         $LayoutObject->Block(
             Name => 'Overview',
-            Data => {
-                %Param,
-                Subaction => $Self->{Subaction},
-                }
+            Data => \%Param,
         );
 
         $LayoutObject->Block(
@@ -400,10 +385,7 @@ sub Run {
         $Output .= $LayoutObject->NavigationBar();
         $LayoutObject->Block(
             Name => 'Overview',
-            Data => {
-                %Param,
-                Subaction => $Self->{Subaction},
-                }
+            Data => \%Param,
         );
 
         my %RegistrationData = $RegistrationObject->RegistrationDataGet();
@@ -585,10 +567,7 @@ sub _SentDataOverview {
 
     $LayoutObject->Block(
         Name => 'Overview',
-        Data => {
-            %Param,
-            Subaction => 'SentDataOverview',
-            }
+        Data => \%Param,
     );
 
     $LayoutObject->Block( Name => 'ActionList' );

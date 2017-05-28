@@ -11,10 +11,9 @@ package Kernel::Modules::AgentTicketCustomer;
 use strict;
 use warnings;
 
-use Kernel::Language qw(Translatable);
-
 our $ObjectManagerDisabled = 1;
 
+use Kernel::Language qw(Translatable);
 use Kernel::System::VariableCheck qw(:all);
 
 sub new {
@@ -66,6 +65,22 @@ sub Run {
             Message => $LayoutObject->{LanguageObject}->Translate( 'You need %s permissions!', $Config->{Permission} ),
             WithHeader => 'yes',
         );
+    }
+
+    # check permissions
+    if ( $Self->{TicketID} ) {
+        if (
+            !$TicketObject->TicketPermission(
+                Type     => 'customer',
+                TicketID => $Self->{TicketID},
+                UserID   => $Self->{UserID}
+            )
+            )
+        {
+
+            # no permission screen, don't show ticket
+            return $LayoutObject->NoPermission( WithHeader => 'yes' );
+        }
     }
 
     # get ACL restrictions
@@ -234,15 +249,9 @@ sub Form {
     my %CustomerUserData = ();
     if ( $Self->{TicketID} ) {
 
-        # get config object
-        my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-
-        # set JS data
-        $LayoutObject->AddJSData(
-            Key   => 'CustomerSearch',
-            Value => {
-                ShowCustomerTickets => $ConfigObject->Get('Ticket::Frontend::ShowCustomerTickets'),
-            },
+        # set some customer search autocomplete properties
+        $LayoutObject->Block(
+            Name => 'CustomerSearchAutoComplete',
         );
 
         # get ticket data
@@ -256,11 +265,8 @@ sub Form {
         $Param{SelectedCustomerUser} = $TicketData{CustomerUserID};
 
         $Param{Table} = $LayoutObject->AgentCustomerViewTable(
-            Data => {
-                %CustomerUserData,
-                TicketID => $Self->{TicketID},
-            },
-            Max => $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Frontend::CustomerInfoComposeMaxSize'),
+            Data => \%CustomerUserData,
+            Max  => $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Frontend::CustomerInfoComposeMaxSize'),
         );
 
         # show customer field as "FirstName Lastname" <MailAddress>

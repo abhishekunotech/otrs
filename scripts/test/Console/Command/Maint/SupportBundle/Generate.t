@@ -12,6 +12,7 @@ use utf8;
 
 use vars (qw($Self));
 
+# get helper object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase => 1,
@@ -19,9 +20,7 @@ $Kernel::OM->ObjectParamAdd(
 );
 my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
-my $TargetDirectory = $Kernel::OM->Get('Kernel::Config')->Get('Home') . '/var/tmp';
-
-# Cleanup from previous tests.
+# cleanup from previous tests
 my @SupportFiles = $Kernel::OM->Get('Kernel::System::Main')->DirectoryRead(
     Directory => '/var/tmp',
     Filter    => 'SupportBundle_*.tar.gz',
@@ -30,15 +29,17 @@ foreach my $File (@SupportFiles) {
     unlink $File;
 }
 
+# get command object
 my $CommandObject = $Kernel::OM->Get('Kernel::System::Console::Command::Maint::SupportBundle::Generate');
 
-# Run the console command and get its exit code as a result.
+my $TargetDirectory = $Kernel::OM->Get('Kernel::Config')->Get('Home') . "/var/tmp";
+
 my $ExitCode = $CommandObject->Execute( '--target-directory', $TargetDirectory );
 
 $Self->Is(
     $ExitCode,
     0,
-    'Maint::SupportBundle::Generate exit code'
+    "Maint::SupportBundle::Generate exit code",
 );
 
 @SupportFiles = $Kernel::OM->Get('Kernel::System::Main')->DirectoryRead(
@@ -49,14 +50,14 @@ $Self->Is(
 $Self->Is(
     scalar @SupportFiles,
     1,
-    'Support bundle generated'
+    "Support bundle generated",
 );
 
-# Remove generated support files.
+# cleanup
 foreach my $File (@SupportFiles) {
     unlink $File;
 }
 
-# Cleanup cache is done by RestoreDatabase.
+# cleanup cache is done by RestoreDatabase
 
 1;

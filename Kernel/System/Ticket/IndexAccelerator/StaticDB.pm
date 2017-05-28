@@ -18,16 +18,8 @@ our @ObjectDependencies = (
     'Kernel::System::Lock',
     'Kernel::System::Log',
     'Kernel::System::State',
-    'Kernel::System::Ticket',
     'Kernel::System::Time',
 );
-
-sub new {
-    my ($Type) = @_;
-
-    my $Self = {};
-    return bless( $Self, $Type );
-}
 
 sub TicketAcceleratorUpdate {
     my ( $Self, %Param ) = @_;
@@ -46,7 +38,7 @@ sub TicketAcceleratorUpdate {
     # check if ticket is shown or not
     my $IndexUpdateNeeded = 0;
     my $IndexSelected     = 0;
-    my %TicketData        = $Kernel::OM->Get('Kernel::System::Ticket')->TicketGet(
+    my %TicketData        = $Self->TicketGet(
         %Param,
         DynamicFields => 0,
     );
@@ -219,7 +211,7 @@ sub TicketAcceleratorAdd {
     }
 
     # get ticket data
-    my %TicketData = $Kernel::OM->Get('Kernel::System::Ticket')->TicketGet(
+    my %TicketData = $Self->TicketGet(
         %Param,
         DynamicFields => 0,
     );
@@ -301,7 +293,7 @@ sub TicketLockAcceleratorAdd {
     }
 
     # get ticket data
-    my %TicketData = $Kernel::OM->Get('Kernel::System::Ticket')->TicketGet(
+    my %TicketData = $Self->TicketGet(
         %Param,
         DynamicFields => 0,
     );

@@ -9,28 +9,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Performance Log") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate("Performance Log"),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% IF Data.Minute %]
-        [% BreadcrumbPath.push({ Name => Translate("Range") _ ' (' _ Translate("last") _ ' ' _ Data.Age _ ')' }) %]
-    [% END %]
-
-    [% IF Data.Interface %]
-        [% BreadcrumbPath.push({ Name => Data.Interface, Link => Env("Action") _ ';Subaction=View;Interface=Agent;Minute=' _ Data.Minute, }) %]
-    [% END %]
-
-    [% IF Data.Module %]
-        [% BreadcrumbPath.push({ Name => Data.Module }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="SidebarColumn">
 [% RenderBlockStart("ActionList") %]
         <div class="WidgetSimple">
@@ -55,7 +33,7 @@
             <div class="Content">
 [% RenderBlockStart("Enabled") %]
                 <form action="[% Env("CGIHandle") %]" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="Action" value="AdminSystemConfiguration"/>
+                    <input type="hidden" name="Action" value="AdminSysConfig"/>
                     <input type="hidden" name="Subaction" value="Edit"/>
                     <input type="hidden" name="SysConfigGroup" value="Framework"/>
                     <input type="hidden" name="SysConfigSubGroup" value="Core::PerformanceLog"/>
@@ -64,7 +42,7 @@
                         <p class="FieldExplanation">
                             [% Translate("Just use this feature if you want to log each request.") | html %]
                         </p>
-                        <p class="FieldExplanation">
+                        <p class="Error">
                             [% Translate("Activating this feature might affect your system performance!") | html %]
                         </p>
                         <div class="Field SpacingTop">
@@ -79,7 +57,7 @@
 [% RenderBlockEnd("Enabled") %]
 [% RenderBlockStart("Disabled") %]
                 <form action="[% Env("CGIHandle") %]" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="Action" value="AdminSystemConfiguration"/>
+                    <input type="hidden" name="Action" value="AdminSysConfig"/>
                     <input type="hidden" name="Subaction" value="Edit"/>
                     <input type="hidden" name="SysConfigGroup" value="Framework"/>
                     <input type="hidden" name="SysConfigSubGroup" value="Core::PerformanceLog"/>
@@ -88,7 +66,7 @@
                         <p class="FieldExplanation">
                             [% Translate("Just use this feature if you want to log each request.") | html %]
                         </p>
-                        <p class="FieldExplanation">
+                        <p class="Error">
                             [% Translate("Activating this feature might affect your system performance!") | html %]
                         </p>
                         <div class="Field SpacingTop">

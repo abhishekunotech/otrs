@@ -12,19 +12,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Package Manager") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% USE UninstallBreadcrumb = String(Translate("Uninstall Package")) %]
-    [% BreadcrumbPath.push({ Name => UninstallBreadcrumb.append( ': ', Data.Name ) }) %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="SidebarColumn">
 
         <div class="WidgetSimple">
@@ -44,7 +31,7 @@
         <div class="WidgetSimple">
             <div class="Header">
                 <h2>
-                    [% Translate("Uninstall Package") | html %]
+                    [% Translate("Uninstall package") | html %]
                 </h2>
             </div>
             <div class="Content">
@@ -86,19 +73,6 @@
 [% RenderBlockStart("Reinstall") %]
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Package Manager") | html %]</h1>
-
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% USE ReinstallBreadcrumb = String(Translate("Reinstall package")) %]
-    [% BreadcrumbPath.push({ Name => ReinstallBreadcrumb.append( ': ', Data.Name ) }) %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
 
     <div class="SidebarColumn">
 
@@ -162,31 +136,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Package Manager") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% SWITCH Env("Subaction") %]
-        [% CASE 'InstallRemote' %]
-            [% USE InstallRemoteTitle = String(Translate("Install Package")) %]
-            [% BreadcrumbPath.push({ Name => InstallRemoteTitle.append( ': ', Data.Name ) }) %]
-        [% CASE 'Uninstall' %]
-            [% USE UninstallTitle = String(Translate("Uninstall Package")) %]
-            [% BreadcrumbPath.push({ Name => UninstallTitle.append( ': ', Data.Name ) }) %]
-        [% CASE 'UpgradeRemote' %]
-            [% USE UpgradeRemoteTitle = String(Translate("Upgrade Package")) %]
-            [% BreadcrumbPath.push({ Name => UpgradeRemoteTitle.append( ': ', Data.Name ) }) %]
-        [% CASE 'InstallUpload' %]
-            [% USE InstallUploadTitle = String(Translate("Install Package")) %]
-            [% BreadcrumbPath.push({ Name => InstallUploadTitle.append( ': ', Data.Name ) }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="SidebarColumn">
         <div class="WidgetSimple">
             <div class="Header">
@@ -242,16 +191,6 @@
     <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
         <h1>[% Translate("Package Manager") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
         <div class="SidebarColumn">
             <div class="WidgetSimple">
                 <div class="Header">
@@ -297,7 +236,7 @@
                                 [% Translate("OTRS Verify™ can not continue!") | html %]
                             </p>
                             <form action="[% Env("CGIHandle") %]" method="post">
-                                <input type="hidden" name="Action" value="AdminSystemConfiguration"/>
+                                <input type="hidden" name="Action" value="AdminSysConfig"/>
                                 <input type="hidden" name="Subaction" value="Edit"/>
                                 <input type="hidden" name="SysConfigGroup" value="CloudService"/>
                                 <input type="hidden" name="SysConfigSubGroup" value="Core"/>
@@ -440,7 +379,7 @@
 
                 <div class="Header">
                     <h2>
-                        [% Translate("Features for %s Customers Only", OTRSBusinessLabel) %]
+                        [% Translate("Features for %s customers only", OTRSBusinessLabel) %]
                         → <a href="mailto:sales@otrs.com">sales@otrs.com</a>
                     </h2>
                 </div>
@@ -478,19 +417,6 @@
 [% RenderBlockStart("Package") %]
     <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
         <h1>[% Translate("Package Manager") | html %]</h1>
-
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% USE PackageBreadcrumb = String(Translate("Package Information")) %]
-    [% BreadcrumbPath.push({ Name => PackageBreadcrumb.append( ': ', Data.Name ) }) %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
 
         <div class="SidebarColumn">
             <div class="WidgetSimple">
@@ -697,19 +623,6 @@
     <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
         <h1>[% Translate("Package Manager") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Package Manager'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% USE FileDiffBreadcrumb = String(Translate("File Differences for File %s", Data.Location)) %]
-    [% BreadcrumbPath.push({ Name => FileDiffBreadcrumb.append( ': ', Data.Name ) }) %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
         <div class="SidebarColumn">
 
             <div class="WidgetSimple">
@@ -731,7 +644,7 @@
             <div class="WidgetSimple">
                 <div class="Header">
                     <h2>
-                        [% Data.Name | html %]: [% Translate("File Differences for File %s", Data.Location) | html %]
+                        [% Data.Name | html %]: [% Translate("File differences for file %s", Data.Location) | html %]
                     </h2>
                 </div>
                 <div class="Content">

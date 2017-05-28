@@ -14,7 +14,7 @@ use warnings;
 use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
 
-use parent qw(Kernel::System::DynamicField::Driver::Base);
+use base qw(Kernel::System::DynamicField::Driver::Base);
 
 our @ObjectDependencies = (
     'Kernel::System::DB',
@@ -29,11 +29,13 @@ Kernel::System::DynamicField::Driver::BaseDateTime - sub module of
 Kernel::System::DynamicField::Driver::Date and
 Kernel::System::DynamicField::Driver::DateTime
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Date common functions.
 
 =head1 PUBLIC INTERFACE
+
+=over 4
 
 =cut
 
@@ -124,25 +126,18 @@ sub SearchSQLGet {
         SmallerThanEquals => '<=',
     );
 
-    if ( $Param{Operator} eq 'Empty' ) {
-        if ( $Param{SearchTerm} ) {
-            return " $Param{TableAlias}.value_date IS NULL ";
-        }
-        else {
-            return " $Param{TableAlias}.value_date IS NOT NULL ";
-        }
-    }
-    elsif ( !$Operators{ $Param{Operator} } ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            'Priority' => 'error',
-            'Message'  => "Unsupported Operator $Param{Operator}",
-        );
-        return;
+    if ( $Operators{ $Param{Operator} } ) {
+        my $SQL = " $Param{TableAlias}.value_date $Operators{$Param{Operator}} '";
+        $SQL .= $Kernel::OM->Get('Kernel::System::DB')->Quote( $Param{SearchTerm} ) . "' ";
+        return $SQL;
     }
 
-    my $SQL = " $Param{TableAlias}.value_date $Operators{ $Param{Operator} } '";
-    $SQL .= $Kernel::OM->Get('Kernel::System::DB')->Quote( $Param{SearchTerm} ) . "' ";
-    return $SQL;
+    $Kernel::OM->Get('Kernel::System::Log')->Log(
+        'Priority' => 'error',
+        'Message'  => "Unsupported Operator $Param{Operator}",
+    );
+
+    return;
 }
 
 sub SearchSQLOrderFieldGet {
@@ -166,26 +161,29 @@ sub EditFieldRender {
         $Value = $FieldConfig->{DefaultValue} || '';
     }
 
+    my %SplitedFieldValues;
     if ( defined $Param{Value} ) {
         $Value = $Param{Value};
     }
-
     if ($Value) {
         my ( $Year, $Month, $Day, $Hour, $Minute, $Second ) = $Value =~
             m{ \A ( \d{4} ) - ( \d{2} ) - ( \d{2} ) \s ( \d{2} ) : ( \d{2} ) : ( \d{2} ) \z }xms;
 
-        # If a value is sent this value must be active, then the Used part needs to be set to 1
-        #   otherwise user can easily forget to mark the checkbox and this could lead into data
-        #   lost (Bug#8258).
-        $FieldConfig->{ $FieldName . 'Used' }   = 1;
-        $FieldConfig->{ $FieldName . 'Year' }   = $Year;
-        $FieldConfig->{ $FieldName . 'Month' }  = $Month;
-        $FieldConfig->{ $FieldName . 'Day' }    = $Day;
-        $FieldConfig->{ $FieldName . 'Hour' }   = $Hour;
-        $FieldConfig->{ $FieldName . 'Minute' } = $Minute;
+        %SplitedFieldValues = (
+
+            # if a value is sent this value must be active, then the Used part needs to be set to 1
+            # otherwise user can easily forget to mark the checkbox and this could lead into data
+            # lost Bug#8258
+            $FieldName . 'Used'   => 1,
+            $FieldName . 'Year'   => $Year,
+            $FieldName . 'Month'  => $Month,
+            $FieldName . 'Day'    => $Day,
+            $FieldName . 'Hour'   => $Hour,
+            $FieldName . 'Minute' => $Minute,
+        );
     }
 
-    # extract the dynamic field value from the web request
+    # extract the dynamic field value form the web request
     # TransformDates is always needed from EditFieldRender Bug#8452
     my $FieldValues = $Self->EditFieldValueGet(
         TransformDates       => 1,
@@ -252,6 +250,7 @@ sub EditFieldRender {
         $FieldName . Optional => 1,
         Validate              => 1,
         %{$FieldConfig},
+        %SplitedFieldValues,
         %YearsPeriodRange,
     );
 
@@ -1209,6 +1208,8 @@ sub ValueLookup {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

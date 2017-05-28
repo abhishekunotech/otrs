@@ -11,8 +11,8 @@ package Kernel::Modules::AdminProcessManagementActivityDialog;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -276,6 +276,8 @@ sub Run {
             EntityID => $EntityID,
         );
 
+        my $ConfigJSON = $LayoutObject->JSONEncode( Data => $ActivityDialogConfig );
+
         # check if needed to open another window or if popup should go back
         if ( $Redirect && $Redirect eq '1' ) {
 
@@ -295,7 +297,7 @@ sub Run {
                     Subaction => 'FieldEdit',
                     Field     => $RedirectField,
                 },
-                ConfigJSON => $ActivityDialogConfig,
+                ConfigJSON => $ConfigJSON,
             );
         }
         else {
@@ -309,7 +311,7 @@ sub Run {
                 # close the popup
                 return $Self->_PopupResponse(
                     ClosePopup => 1,
-                    ConfigJSON => $ActivityDialogConfig,
+                    ConfigJSON => $ConfigJSON,
                 );
             }
             else {
@@ -318,7 +320,7 @@ sub Run {
                 return $Self->_PopupResponse(
                     Redirect   => 1,
                     Screen     => $LastScreen,
-                    ConfigJSON => $ActivityDialogConfig,
+                    ConfigJSON => $ConfigJSON,
                 );
             }
         }
@@ -528,6 +530,8 @@ sub Run {
             EntityID => $ActivityDialogData->{EntityID},
         );
 
+        my $ConfigJSON = $LayoutObject->JSONEncode( Data => $ActivityDialogConfig );
+
         # check if needed to open another window or if popup should go back
         if ( $Redirect && $Redirect eq '1' ) {
 
@@ -547,7 +551,7 @@ sub Run {
                     Subaction => 'FieldEdit',
                     Field     => $RedirectField,
                 },
-                ConfigJSON => $ActivityDialogConfig,
+                ConfigJSON => $ConfigJSON,
             );
         }
         else {
@@ -561,7 +565,7 @@ sub Run {
                 # close the popup
                 return $Self->_PopupResponse(
                     ClosePopup => 1,
-                    ConfigJSON => $ActivityDialogConfig,
+                    ConfigJSON => $ConfigJSON,
                 );
             }
             else {
@@ -570,7 +574,7 @@ sub Run {
                 return $Self->_PopupResponse(
                     Redirect   => 1,
                     Screen     => $LastScreen,
-                    ConfigJSON => $ActivityDialogConfig,
+                    ConfigJSON => $ConfigJSON,
                 );
             }
         }
@@ -584,7 +588,6 @@ sub Run {
         # close the popup
         return $Self->_PopupResponse(
             ClosePopup => 1,
-            ConfigJSON => '',
         );
     }
 
@@ -1055,24 +1058,20 @@ sub _PopupResponse {
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     if ( $Param{Redirect} && $Param{Redirect} eq 1 ) {
-
-        # send data to JS
-        $LayoutObject->AddJSData(
-            Key   => 'Redirect',
-            Value => {
+        $LayoutObject->Block(
+            Name => 'Redirect',
+            Data => {
                 ConfigJSON => $Param{ConfigJSON},
                 %{ $Param{Screen} },
-                }
+            },
         );
     }
     elsif ( $Param{ClosePopup} && $Param{ClosePopup} eq 1 ) {
-
-        # send data to JS
-        $LayoutObject->AddJSData(
-            Key   => 'ClosePopup',
-            Value => {
+        $LayoutObject->Block(
+            Name => 'ClosePopup',
+            Data => {
                 ConfigJSON => $Param{ConfigJSON},
-                }
+            },
         );
     }
 

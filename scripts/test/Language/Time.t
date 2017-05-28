@@ -12,14 +12,16 @@ use utf8;
 
 use vars (qw($Self %Param));
 
-my $HelperObject = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
+# get needed objects
+my $Helper     = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
+my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
+# get language object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::Language' => {
         UserLanguage => 'de',
     },
 );
-
 my $LanguageObject = $Kernel::OM->Get('Kernel::Language');
 
 my @Tests = (
@@ -79,14 +81,9 @@ for my $Test (@Tests) {
 
     $LanguageObject->{DateFormatLong} = $Test->{DateFormatLong};
 
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            String => $Test->{FixedTimeSet},
-        },
+    $Helper->FixedTimeSet(
+        $TimeObject->TimeStamp2SystemTime( String => $Test->{FixedTimeSet} ),
     );
-
-    $HelperObject->FixedTimeSet($DateTimeObject);
 
     my $Result = $LanguageObject->Time(
         %{ $Test->{Data} },
@@ -110,8 +107,6 @@ for my $Test (@Tests) {
         $Test->{ResultGet},
         "$Test->{Name} - get",
     );
-
-    $HelperObject->FixedTimeUnset();
 }
 
 1;

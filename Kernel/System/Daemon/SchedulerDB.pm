@@ -31,16 +31,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Daemon::SchedulerDB - Scheduler database lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Includes all scheduler related database functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a scheduler database object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SchedulerDBObject = $Kernel::OM->Get('Kernel::System::Daemon::SchedulerDB');
 
 =cut
@@ -55,7 +61,7 @@ sub new {
     return $Self;
 }
 
-=head2 TaskAdd()
+=item TaskAdd()
 
 add a new task to scheduler task list
 
@@ -185,7 +191,7 @@ sub TaskAdd {
     return $TaskID;
 }
 
-=head2 TaskGet()
+=item TaskGet()
 
 get scheduler task
 
@@ -278,7 +284,7 @@ sub TaskGet {
     return %Task;
 }
 
-=head2 TaskDelete()
+=item TaskDelete()
 
 delete a task from scheduler task list
 
@@ -315,7 +321,7 @@ sub TaskDelete {
     return 1;
 }
 
-=head2 TaskList()
+=item TaskList()
 
 get the list of scheduler tasks
 
@@ -378,7 +384,7 @@ sub TaskList {
     return @List;
 }
 
-=head2 TaskListUnlocked()
+=item TaskListUnlocked()
 
 get a list of unlocked tasks
 
@@ -432,7 +438,7 @@ sub TaskListUnlocked {
     return @List;
 }
 
-=head2 TaskLock()
+=item TaskLock()
 
 locks task to a specific PID
 
@@ -544,7 +550,7 @@ sub TaskLock {
     return 1;
 }
 
-=head2 TaskCleanup()
+=item TaskCleanup()
 
 deletes obsolete worker tasks
 
@@ -601,7 +607,7 @@ sub TaskCleanup {
     return 1;
 }
 
-=head2 TaskSummary()
+=item TaskSummary()
 
 get a summary of the tasks from the worker task table divided into handled and unhandled
 
@@ -738,7 +744,7 @@ sub TaskSummary {
     );
 }
 
-=head2 TaskLockUpdate()
+=item TaskLockUpdate()
 
 sets the task lock update time as current time for the specified tasks
 
@@ -779,7 +785,7 @@ sub TaskLockUpdate {
     return 1;
 }
 
-=head2 TaskUnlockExpired()
+=item TaskUnlockExpired()
 
 remove lock status for working tasks that has not been updated its lock update time for more than 5 minutes
 
@@ -855,7 +861,7 @@ sub TaskUnlockExpired {
     return 1;
 }
 
-=head2 FutureTaskAdd()
+=item FutureTaskAdd()
 
 add a new task to scheduler future task list
 
@@ -1000,7 +1006,7 @@ sub FutureTaskAdd {
     return $TaskID;
 }
 
-=head2 FutureTaskGet()
+=item FutureTaskGet()
 
 get scheduler future task
 
@@ -1092,7 +1098,7 @@ sub FutureTaskGet {
     return %Task;
 }
 
-=head2 FutureTaskDelete()
+=item FutureTaskDelete()
 
 delete a task from scheduler future task list
 
@@ -1129,7 +1135,7 @@ sub FutureTaskDelete {
     return 1;
 }
 
-=head2 FutureTaskList()
+=item FutureTaskList()
 
 get the list of scheduler future tasks
 
@@ -1195,7 +1201,7 @@ sub FutureTaskList {
     return @List;
 }
 
-=head2 FutureTaskToExecute()
+=item FutureTaskToExecute()
 
 moves all future tasks with reached execution time to the task table to execute
 
@@ -1314,7 +1320,7 @@ sub FutureTaskToExecute {
     return 1;
 }
 
-=head2 FutureTaskSummary()
+=item FutureTaskSummary()
 
 get a summary of the tasks from the future task table
 
@@ -1353,7 +1359,7 @@ sub FutureTaskSummary {
     );
 }
 
-=head2 CronTaskToExecute()
+=item CronTaskToExecute()
 
 creates cron tasks that needs to be run in the current time into the task table to execute
 
@@ -1446,7 +1452,7 @@ sub CronTaskToExecute {
     return 1;
 }
 
-=head2 CronTaskCleanup()
+=item CronTaskCleanup()
 
 removes recurrent tasks that does not have a matching a cron tasks definition in SysConfig
 
@@ -1519,7 +1525,7 @@ sub CronTaskCleanup {
     return 1;
 }
 
-=head2 CronTaskSummary()
+=item CronTaskSummary()
 
 get a summary of the cron tasks from the recurrent task table
 
@@ -1553,7 +1559,7 @@ sub CronTaskSummary {
     );
 }
 
-=head2 GenericAgentTaskToExecute()
+=item GenericAgentTaskToExecute()
 
 creates generic agent tasks that needs to be run in the current time into the task table to execute
 
@@ -1619,11 +1625,11 @@ sub GenericAgentTaskToExecute {
         next JOBNAME if !$Schedule;
 
         # get the last time the GenericAgent job should be executed, this returns even THIS minute
-        my $PreviousEventTimestamp = $CronEventObject->PreviousEventGet(
+        my $EventSystemTime = $CronEventObject->PreviousEventGet(
             Schedule => $Schedule,
         );
 
-        next JOBNAME if !$PreviousEventTimestamp;
+        next JOBNAME if !$EventSystemTime;
 
         # execute recurrent tasks
         $Self->RecurrentTaskExecute(
@@ -1631,7 +1637,7 @@ sub GenericAgentTaskToExecute {
             PID                      => $Param{PID},
             TaskName                 => $JobName,
             TaskType                 => 'GenericAgent',
-            PreviousEventTimestamp   => $PreviousEventTimestamp,
+            PreviousEventTimestamp   => $EventSystemTime,
             MaximumParallelInstances => 1,
             Data                     => \%Job,
         );
@@ -1640,7 +1646,7 @@ sub GenericAgentTaskToExecute {
     return 1;
 }
 
-=head2 GenericAgentTaskCleanup()
+=item GenericAgentTaskCleanup()
 
 removes recurrent tasks that does not have a matching generic agent job
 
@@ -1721,7 +1727,7 @@ sub GenericAgentTaskCleanup {
     return 1;
 }
 
-=head2 GenericAgentTaskSummary()
+=item GenericAgentTaskSummary()
 
 get a summary of the generic agent tasks from the recurrent task table
 
@@ -1780,7 +1786,7 @@ sub GenericAgentTaskSummary {
     );
 }
 
-=head2 RecurrentTaskGet()
+=item RecurrentTaskGet()
 
 get scheduler recurrent task
 
@@ -1844,7 +1850,7 @@ sub RecurrentTaskGet {
     return %Task;
 }
 
-=head2 RecurrentTaskList()
+=item RecurrentTaskList()
 
 get the list of scheduler recurrent tasks
 
@@ -1925,7 +1931,7 @@ sub RecurrentTaskList {
     return @List;
 }
 
-=head2 RecurrentTaskDelete()
+=item RecurrentTaskDelete()
 
 delete a task from scheduler recurrent task list
 
@@ -1972,7 +1978,7 @@ sub RecurrentTaskDelete {
     return 1;
 }
 
-=head2 RecurrentTaskExecute()
+=item RecurrentTaskExecute()
 
 executes recurrent tasks like cron or generic agent tasks
 
@@ -2028,10 +2034,14 @@ sub RecurrentTaskExecute {
     my $DBObject   = $Kernel::OM->Get('Kernel::System::DB');
     my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
-    my $LastExecutionTimeStamp;
+    # convert last previous event time-stamp
+    my $PreviousEventTime = $TimeObject->SystemTime2TimeStamp(
+        SystemTime => $Param{PreviousEventTimestamp},
+    );
 
     # get entry id and last execution time from database
     my $EntryID;
+    my $LastExecutionTimeStamp = '';
     TRY:
     for my $Try ( 1 .. 10 ) {
 
@@ -2047,7 +2057,7 @@ sub RecurrentTaskExecute {
                 Bind => [
                     \$Param{TaskName},
                     \$Param{TaskType},
-                    \$Param{PreviousEventTimestamp},
+                    \$PreviousEventTime,
                 ],
             );
         }
@@ -2065,9 +2075,19 @@ sub RecurrentTaskExecute {
         );
 
         # fetch the entry id
+        my $LastExecutionTime;
         while ( my @Row = $DBObject->FetchrowArray() ) {
-            $EntryID                = $Row[0];
-            $LastExecutionTimeStamp = $Row[1];
+            $EntryID           = $Row[0];
+            $LastExecutionTime = $Row[1];
+        }
+
+        next TRY if !$EntryID;
+
+        # convert last execution time to a time-stamp
+        if ($LastExecutionTime) {
+            $LastExecutionTimeStamp = $TimeObject->TimeStamp2SystemTime(
+                String => $LastExecutionTime,
+            ) || '';
         }
 
         last TRY if $EntryID;
@@ -2149,7 +2169,7 @@ sub RecurrentTaskExecute {
                     change_time = current_timestamp
                 WHERE lock_key = ? AND id = ?',
             Bind => [
-                \$Param{PreviousEventTimestamp},
+                \$PreviousEventTime,
                 \$TaskID,
                 \$LockKey,
                 \$EntryID,
@@ -2180,7 +2200,7 @@ sub RecurrentTaskExecute {
     return;
 }
 
-=head2 RecurrentTaskSummary()
+=item RecurrentTaskSummary()
 
 get a summary of the recurring tasks for the specified task type
 
@@ -2247,8 +2267,12 @@ sub RecurrentTaskSummary {
         next ROW if !$Schedule;
 
         # calculate next cron event time
-        my $NextExecutionTime = $CronEventObject->NextEventGet(
+        my $NextEvent = $CronEventObject->NextEventGet(
             Schedule => $Schedule,
+        );
+
+        my $NextExecutionTime = $TimeObject->SystemTime2TimeStamp(
+            SystemTime => $NextEvent,
         );
 
         my $LastWorkerStatus;
@@ -2307,7 +2331,7 @@ sub RecurrentTaskSummary {
     );
 }
 
-=head2 RecurrentTaskWorkerInfoSet()
+=item RecurrentTaskWorkerInfoSet()
 
 sets last worker information (success status and running time) to a recurrent task
 
@@ -2352,7 +2376,7 @@ sub RecurrentTaskWorkerInfoSet {
     return 1;
 }
 
-=head2 RecurrentTaskUnlockExpired()
+=item RecurrentTaskUnlockExpired()
 
 remove lock status for recurring tasks that has been locked for more than 1 minutes
 
@@ -2449,6 +2473,8 @@ sub _Seconds2String {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

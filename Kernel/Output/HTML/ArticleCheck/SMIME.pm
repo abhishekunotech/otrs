@@ -18,15 +18,17 @@ our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Crypt::SMIME',
     'Kernel::System::Log',
-    'Kernel::System::Ticket::Article',
+    'Kernel::System::Ticket',
 );
 
 sub new {
     my ( $Type, %Param ) = @_;
 
+    # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
 
+    # get needed params
     for my $Needed (qw(UserID ArticleID)) {
         if ( $Param{$Needed} ) {
             $Self->{$Needed} = $Param{$Needed};
@@ -55,11 +57,13 @@ sub Check {
     return if !$ConfigObject->Get('SMIME');
 
     # check if article is an email
-    my $ArticleBackendObject
-        = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForArticle( %{ $Param{Article} // {} } );
-    return if $ArticleBackendObject->ChannelNameGet() ne 'Email';
+    return if $Param{Article}->{ArticleType} !~ /email/i;
 
+    my $StoreDecryptedData = $ConfigObject->Get('SMIME::StoreDecryptedData');
+
+    # get needed objects
     my $SMIMEObject = $Kernel::OM->Get('Kernel::System::Crypt::SMIME');
+    my $TicketObject = $Param{TicketObject} || $Kernel::OM->Get('Kernel::System::Ticket');
 
     # check inline smime
     if ( $Param{Article}->{Body} =~ /^-----BEGIN PKCS7-----/ ) {
@@ -86,8 +90,7 @@ sub Check {
     else {
 
         # get email from fs
-        my $Message = $ArticleBackendObject->ArticlePlain(
-            TicketID  => $Param{Article}->{TicketID},
+        my $Message = $TicketObject->ArticlePlain(
             ArticleID => $Self->{ArticleID},
             UserID    => $Self->{UserID},
         );
@@ -140,7 +143,7 @@ sub Check {
                 return (
                     {
                         Key        => Translatable('Crypted'),
-                        Value      => Translatable('Sent message encrypted to recipient!'),
+                        Value      => Translatable('Sent message crypted to recipient!'),
                         Successful => 1,
                     }
                 );
@@ -291,28 +294,31 @@ sub Check {
                         . ", but sender address $OrigSender: does not match certificate address!";
                 }
 
-                # updated article body
-                $ArticleBackendObject->ArticleUpdate(
-                    TicketID  => $Param{Article}->{TicketID},
-                    ArticleID => $Self->{ArticleID},
-                    Key       => 'Body',
-                    Value     => $Body,
-                    UserID    => $Self->{UserID},
-                );
+                if ($StoreDecryptedData) {
 
-                # delete crypted attachments
-                $ArticleBackendObject->ArticleDeleteAttachment(
-                    ArticleID => $Self->{ArticleID},
-                    UserID    => $Self->{UserID},
-                );
+                    # updated article body
+                    $TicketObject->ArticleUpdate(
+                        TicketID  => $Param{Article}->{TicketID},
+                        ArticleID => $Self->{ArticleID},
+                        Key       => 'Body',
+                        Value     => $Body,
+                        UserID    => $Self->{UserID},
+                    );
 
-                # write attachments to the storage
-                for my $Attachment ( $ParserObject->GetAttachments() ) {
-                    $ArticleBackendObject->ArticleWriteAttachment(
-                        %{$Attachment},
+                    # delete crypted attachments
+                    $TicketObject->ArticleDeleteAttachment(
                         ArticleID => $Self->{ArticleID},
                         UserID    => $Self->{UserID},
                     );
+
+                    # write attachments to the storage
+                    for my $Attachment ( $ParserObject->GetAttachments() ) {
+                        $TicketObject->ArticleWriteAttachment(
+                            %{$Attachment},
+                            ArticleID => $Self->{ArticleID},
+                            UserID    => $Self->{UserID},
+                        );
+                    }
                 }
 
                 return @Return;
@@ -403,28 +409,31 @@ sub Check {
                         . ", but sender address $OrigSender: does not match certificate address!";
                 }
 
-                # updated article body
-                $ArticleBackendObject->ArticleUpdate(
-                    TicketID  => $Param{Article}->{TicketID},
-                    ArticleID => $Self->{ArticleID},
-                    Key       => 'Body',
-                    Value     => $Body,
-                    UserID    => $Self->{UserID},
-                );
+                if ($StoreDecryptedData) {
 
-                # delete crypted attachments
-                $ArticleBackendObject->ArticleDeleteAttachment(
-                    ArticleID => $Self->{ArticleID},
-                    UserID    => $Self->{UserID},
-                );
+                    # updated article body
+                    $TicketObject->ArticleUpdate(
+                        TicketID  => $Param{Article}->{TicketID},
+                        ArticleID => $Self->{ArticleID},
+                        Key       => 'Body',
+                        Value     => $Body,
+                        UserID    => $Self->{UserID},
+                    );
 
-                # write attachments to the storage
-                for my $Attachment ( $ParserObject->GetAttachments() ) {
-                    $ArticleBackendObject->ArticleWriteAttachment(
-                        %{$Attachment},
+                    # delete crypted attachments
+                    $TicketObject->ArticleDeleteAttachment(
                         ArticleID => $Self->{ArticleID},
                         UserID    => $Self->{UserID},
                     );
+
+                    # write attachments to the storage
+                    for my $Attachment ( $ParserObject->GetAttachments() ) {
+                        $TicketObject->ArticleWriteAttachment(
+                            %{$Attachment},
+                            ArticleID => $Self->{ArticleID},
+                            UserID    => $Self->{UserID},
+                        );
+                    }
                 }
             }
 

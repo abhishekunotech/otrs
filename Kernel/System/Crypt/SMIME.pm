@@ -11,7 +11,7 @@ package Kernel::System::Crypt::SMIME;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
+use MIME::Decoder;
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -28,11 +28,13 @@ our @ObjectDependencies = (
 
 Kernel::System::Crypt::SMIME - smime crypt backend lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This is a sub module of Kernel::System::Crypt and contains all smime functions.
 
 =head1 PUBLIC INTERFACE
+
+=over 4
 
 =cut
 
@@ -57,7 +59,7 @@ sub new {
     return $Self;
 }
 
-=head2 Check()
+=item Check()
 
 check if environment is working
 
@@ -128,23 +130,9 @@ sub Check {
     return;
 }
 
-=head2 Crypt()
+=item Crypt()
 
 crypt a message
-
-    my $Message = $CryptObject->Crypt(
-        Message      => $Message,
-        Certificates => [
-            {
-                Filename => $CertificateFilename,
-            },
-            {
-                Hash        => $CertificateHash,
-                Fingerprint => $CertificateFingerprint,
-            },
-            # ...
-        ]
-    );
 
     my $Message = $CryptObject->Crypt(
         Message  => $Message,
@@ -163,24 +151,17 @@ sub Crypt {
     my ( $Self, %Param ) = @_;
 
     # check needed stuff
-    for my $Needed (qw(Message)) {
-        if ( !$Param{$Needed} ) {
+    for (qw(Message)) {
+        if ( !$Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $Needed!"
+                Message  => "Need $_!"
             );
             return;
         }
     }
 
-    if ( $Param{Certificates} && ref $Param{Certificates} ne 'ARRAY' ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => "Certificates Param: Must be an array reference!",
-        );
-    }
-
-    if ( !$Param{Certificates} && !$Param{Filename} && !( $Param{Hash} || $Param{Fingerprint} ) ) {
+    if ( !$Param{Filename} && !( $Param{Hash} || $Param{Fingerprint} ) ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Message  => "Need Param: Filename or Hash and Fingerprint!",
             Priority => 'error',
@@ -188,58 +169,25 @@ sub Crypt {
         return;
     }
 
-    # backwards compatibility
-    my @CertificateSearchParams;
-    if ( $Param{Certificates} ) {
-        @CertificateSearchParams = @{ $Param{Certificates} };
-    }
-    else {
-        my %SearchParam = %Param;
-        delete $SearchParam{Message};
-        push @CertificateSearchParams, \%SearchParam;
-    }
-
     # get temp file object
     my $FileTempObject = $Kernel::OM->Get('Kernel::System::FileTemp');
 
-    my @CertFiles;
-
-    SEARCHPARAM:
-    for my $SearchParam (@CertificateSearchParams) {
-
-        next SEARCHPARAM if !IsHashRefWithData($SearchParam);
-
-        my $Certificate = $Self->CertificateGet( %{$SearchParam} );
-        my ( $FHCertificate, $CertFile ) = $FileTempObject->TempFile();
-        print $FHCertificate $Certificate;
-        close $FHCertificate;
-
-        push @CertFiles, $CertFile;
-    }
-
-    if ( !@CertFiles ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => "No certificates found!",
-        );
-        return;
-    }
-
-    my $CertFileStrg = join ' ', @CertFiles;
-
+    my $Certificate = $Self->CertificateGet(%Param);
+    my ( $FHCertificate, $CertFile ) = $FileTempObject->TempFile();
+    print $FHCertificate $Certificate;
+    close $FHCertificate;
     my ( $FH, $PlainFile ) = $FileTempObject->TempFile();
     print $FH $Param{Message};
     close $FH;
-
     my ( $FHCrypted, $CryptedFile ) = $FileTempObject->TempFile();
     close $FHCrypted;
 
-    my $Options    = "smime -encrypt -binary -des3 -in $PlainFile -out $CryptedFile $CertFileStrg";
+    my $Options    = "smime -encrypt -binary -des3 -in $PlainFile -out $CryptedFile $CertFile";
     my $LogMessage = $Self->_CleanOutput(qx{$Self->{Cmd} $Options 2>&1});
     if ($LogMessage) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Can't encrypt: $LogMessage!"
+            Message  => "Can't crypt: $LogMessage!"
         );
         return;
     }
@@ -250,7 +198,7 @@ sub Crypt {
     return $$CryptedRef;
 }
 
-=head2 Decrypt()
+=item Decrypt()
 
 decrypt a message and returns a hash (Successful, Message, Data)
 
@@ -359,7 +307,7 @@ sub Decrypt {
     );
 }
 
-=head2 Sign()
+=item Sign()
 
 sign a message
 
@@ -468,7 +416,7 @@ sub Sign {
 
 }
 
-=head2 Verify()
+=item Verify()
 
 verify a message with signature and returns a hash (Successful, Message, Signers, SignerCertificate)
 
@@ -616,7 +564,7 @@ sub Verify {
     return %Return;
 }
 
-=head2 Search()
+=item Search()
 
 search a certificate or an private key
 
@@ -634,7 +582,7 @@ sub Search {
     return @Result;
 }
 
-=head2 CertificateSearch()
+=item CertificateSearch()
 
 search a local certificate
 
@@ -725,7 +673,7 @@ sub _CheckCertificateList {
     return @Result;
 }
 
-=head2 FetchFromCustomer()
+=item FetchFromCustomer()
 
 add certificates from CustomerUserAttributes to local certificates
 returns an array of filenames of added certificates
@@ -799,7 +747,7 @@ sub FetchFromCustomer {
     return @CertFileList;
 }
 
-=head2 ConvertCertFormat()
+=item ConvertCertFormat()
 
 Convert certificate strings into importable C<PEM> format.
 
@@ -908,7 +856,7 @@ sub ConvertCertFormat {
     return ${$CertFileRefPEM};
 }
 
-=head2 CertificateAdd()
+=item CertificateAdd()
 
 add a certificate to local certificates
 returns result message and new certificate filename
@@ -1014,7 +962,7 @@ sub CertificateAdd {
     return %Result;
 }
 
-=head2 CertificateGet()
+=item CertificateGet()
 
 get a local certificate
 
@@ -1053,7 +1001,7 @@ sub CertificateGet {
     return $$CertificateRef;
 }
 
-=head2 CertificateRemove()
+=item CertificateRemove()
 
 remove a local certificate
 
@@ -1144,7 +1092,7 @@ sub CertificateRemove {
     return %Result;
 }
 
-=head2 CertificateList()
+=item CertificateList()
 
 get list of local certificates filenames
 
@@ -1174,7 +1122,7 @@ sub CertificateList {
     return @CertList;
 }
 
-=head2 CertificateAttributes()
+=item CertificateAttributes()
 
 get certificate attributes
 
@@ -1247,7 +1195,7 @@ sub CertificateAttributes {
     return %Attributes;
 }
 
-=head2 CertificateRead()
+=item CertificateRead()
 
 show a local certificate in plain text
 
@@ -1306,7 +1254,7 @@ sub CertificateRead {
     return $Output;
 }
 
-=head2 PrivateSearch()
+=item PrivateSearch()
 
 returns private keys
 
@@ -1352,7 +1300,7 @@ sub PrivateSearch {
     return @Result;
 }
 
-=head2 PrivateAdd()
+=item PrivateAdd()
 
 add private key
 
@@ -1475,7 +1423,7 @@ sub PrivateAdd {
     return %Result;
 }
 
-=head2 PrivateGet()
+=item PrivateGet()
 
 get private key
 
@@ -1531,7 +1479,7 @@ sub PrivateGet {
     return;
 }
 
-=head2 PrivateRemove()
+=item PrivateRemove()
 
 remove private key
 
@@ -1627,7 +1575,7 @@ sub PrivateRemove {
     return %Return;
 }
 
-=head2 PrivateList()
+=item PrivateList()
 
 returns a list of private key hashes
 
@@ -1658,7 +1606,7 @@ sub PrivateList {
 
 }
 
-=head2 PrivateAttributes()
+=item PrivateAttributes()
 
 returns attributes of private key
 
@@ -1736,7 +1684,7 @@ sub PrivateAttributes {
     return %Attributes;
 }
 
-=head2 SignerCertRelationAdd ()
+=item SignerCertRelationAdd ()
 
 add a relation between signer certificate and CA certificate to attach to the signature
 
@@ -1812,7 +1760,7 @@ sub SignerCertRelationAdd {
     return $Success;
 }
 
-=head2 SignerCertRelationGet ()
+=item SignerCertRelationGet ()
 
 get relation data by ID or by Certificate finger print
 returns data Hash if ID given or Array of all relations if CertFingerprint given
@@ -1918,7 +1866,7 @@ sub SignerCertRelationGet {
     return;
 }
 
-=head2 SignerCertRelationExists ()
+=item SignerCertRelationExists ()
 
 returns the ID if the relation exists
 
@@ -1998,7 +1946,7 @@ sub SignerCertRelationExists {
     return;
 }
 
-=head2 SignerCertRelationDelete ()
+=item SignerCertRelationDelete ()
 
 returns 1 if success
 
@@ -2093,7 +2041,7 @@ sub SignerCertRelationDelete {
     return;
 }
 
-=head2 CheckCertPath()
+=item CheckCertPath()
 
 Checks and fixes the private secret files that do not have an index. (Needed because this
 changed during the migration from OTRS 3.0 to 3.1.)
@@ -2983,6 +2931,8 @@ sub _ReHashCertificates {
 =end Internal:
 
 =cut
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -11,7 +11,7 @@ package Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker::Asynchronous
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Daemon::DaemonModules::BaseTaskWorker);
+use base qw(Kernel::System::Daemon::DaemonModules::BaseTaskWorker);
 
 our @ObjectDependencies = (
     'Kernel::System::Log',
@@ -21,14 +21,20 @@ our @ObjectDependencies = (
 
 Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker::AsynchronousExecutor - Scheduler daemon task handler module for generic asynchronous tasks
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This task handler executes scheduler generic asynchronous tasks.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
+=cut
+
+=item new()
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TaskHandlerObject = $Kernel::OM->Get('Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker::AsynchronousExecutor');
 
 =cut
@@ -45,7 +51,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 Performs the selected asynchronous task.
 
@@ -157,6 +163,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

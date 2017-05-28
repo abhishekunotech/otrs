@@ -7,6 +7,7 @@
 # --
 
 package Kernel::Modules::AdminQueueAutoResponse;
+## nofilter(TidyAll::Plugin::OTRS::Perl::DBObject)
 
 use strict;
 use warnings;
@@ -29,8 +30,10 @@ sub Run {
     my ( $Self, %Param ) = @_;
 
     my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $DBObject    = $Kernel::OM->Get('Kernel::System::DB');
     my $Output      = '';
     $Param{ID} = $ParamObject->GetParam( Param => 'ID' ) || '';
+    $Param{ID} = $DBObject->Quote( $Param{ID}, 'Integer' ) if ( $Param{ID} );
     $Param{Action} = $ParamObject->GetParam( Param => 'Action' )
         || 'AdminQueueAutoResponse';
     $Param{Filter} = $ParamObject->GetParam( Param => 'Filter' ) || '';
@@ -51,13 +54,7 @@ sub Run {
             ID => $Param{ID},
         );
 
-        $LayoutObject->Block(
-            Name => 'Overview',
-            Data => {
-                Subaction => $Self->{Subaction},
-                QueueName => $QueueData{Name},
-            },
-        );
+        $LayoutObject->Block( Name => 'Overview' );
         $LayoutObject->Block( Name => 'ActionList' );
         $LayoutObject->Block( Name => 'ActionOverview' );
 
@@ -71,22 +68,22 @@ sub Run {
             },
         );
         for my $TypeID ( sort keys %TypeResponsesData ) {
-
-            # get all valid Auto Responses data for appropriate Auto Responses type
-            my %AutoResponseListByType = $AutoResponseObject->AutoResponseList(
-                TypeID => $TypeID,
+            my %Data = $DBObject->GetTableData(
+                Table => 'auto_response ar, auto_response_type art',
+                What  => 'ar.id, ar.name',
+                Where => " art.id = $TypeID AND ar.type_id = art.id "
+                    . "AND ar.valid_id IN ( ${\(join ', ', $Kernel::OM->Get('Kernel::System::Valid')->ValidIDsGet())} )",
             );
-
-            # get selected Auto Responses for appropriate Auto Responses type and Queue
-            my %AutoResponseData = $AutoResponseObject->AutoResponseGetByTypeQueueID(
-                QueueID => $Param{ID},
-                Type    => $TypeResponsesData{$TypeID},
+            my ( $SelectedID, $Name ) = $DBObject->GetTableData(
+                Table => 'auto_response ar, auto_response_type art, queue_auto_response qar',
+                What  => 'ar.id, ar.name',
+                Where => " art.id = $TypeID AND ar.type_id = art.id AND qar.queue_id = $Param{ID} "
+                    . "AND qar.auto_response_id = ar.id",
             );
-
             $Param{DataStrg} = $LayoutObject->BuildSelection(
                 Name         => "IDs_$TypeID",
-                SelectedID   => $AutoResponseData{AutoResponseID} || '',
-                Data         => \%AutoResponseListByType,
+                SelectedID   => $SelectedID || '',
+                Data         => \%Data,
                 Size         => 1,
                 PossibleNone => 1,
                 Class        => 'Modernize W50pc',
@@ -118,7 +115,7 @@ sub Run {
         # get Type Auto Responses data
         my %TypeResponsesData = $AutoResponseObject->AutoResponseTypeList();
 
-        # set Auto Responses IDs for this queue.
+        # Set Autoresponses IDs for this queue.
         for my $TypeID ( sort keys %TypeResponsesData ) {
             push( @NewIDs, $ParamObject->GetParam( Param => "IDs_$TypeID" ) );
         }
@@ -128,19 +125,7 @@ sub Run {
             AutoResponseIDs => \@NewIDs,
             UserID          => $Self->{UserID},
         );
-
-       # if the user would like to continue editing the queue - auto response relation, just redirect to the edit screen
-       # otherwise return to overview
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Subaction=Change;ID=$Param{ID}" );
-        }
-        else {
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-        }
+        return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
     }
 
     # else ! print form
@@ -192,6 +177,7 @@ sub Run {
         # if there are any queues, they are shown
         if (%QueueData) {
             for ( sort { $QueueData{$a} cmp $QueueData{$b} } keys %QueueData ) {
+
                 $LayoutObject->Block(
                     Name => 'Item',
                     Data => {
@@ -212,31 +198,35 @@ sub Run {
             );
         }
 
-        # get valid Auto Response IDs
-        my %AutoResponseList = $AutoResponseObject->AutoResponseList();
+        # Get Auto Response data.
+        my @ResponseData;
+        my $SQL = "SELECT ar.name, art.name, ar.id FROM "
+            . " auto_response ar, auto_response_type art, valid "
+            . " WHERE ar.type_id = art.id "
+            . " AND ar.valid_id = valid.id AND valid.name = 'valid'"
+            . " ORDER BY ar.name ASC"
+            ;
+        $DBObject->Prepare( SQL => $SQL );
+
+        while ( my @Row = $DBObject->FetchrowArray() ) {
+            my %AutoResponseData;
+            $AutoResponseData{Name} = $Row[0];
+            $AutoResponseData{Type} = $Row[1];
+            $AutoResponseData{ID}   = $Row[2];
+            push( @ResponseData, \%AutoResponseData );
+        }
 
         # if there are any auto responses, they are shown
-        if ( keys %AutoResponseList ) {
-            for my $AutoResponseID ( sort keys %AutoResponseList ) {
-
-                my %Data = $AutoResponseObject->AutoResponseGet(
-                    ID => $AutoResponseID,
-                );
-
-                my %ResponseDataItem = (
-                    ID   => $Data{ID},
-                    Type => $Data{Type},
-                    Name => $Data{Name},
-                );
-
+        if (@ResponseData) {
+            for my $ResponseDataItem (@ResponseData) {
                 $LayoutObject->Block(
                     Name => 'ItemList',
-                    Data => \%ResponseDataItem,
+                    Data => $ResponseDataItem,
                 );
             }
         }
 
-        # otherwise a no data found message is displayed
+        # otherwise a no data found msg is displayed
         else {
             $LayoutObject->Block(
                 Name => 'NoAutoResponsesFoundMsg',

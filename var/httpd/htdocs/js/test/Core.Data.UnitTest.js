@@ -12,15 +12,14 @@ var Core = Core || {};
 
 Core.Data = (function (Namespace) {
     Namespace.RunUnitTests = function(){
-        QUnit.module('Core.Data');
-        QUnit.test('Core.Data.Set()', function(Assert){
+        module('Core.Data');
+        test('Core.Data.Set()', function(){
 
             /*
              * Create a div containter for the tests
              */
             var Sign, ObjectOne, ObjectTwo, ResultOneEmpty, NonexistingResult,
                 ResultOne, ResultTwo,
-                ObjectThree, ObjectFour, ResultCompare,
                 $TestDiv = $('<div id="Container"></div>');
             $TestDiv.append('<span id="ElementOne"></span>');
             $TestDiv.append('<span id="ElementTwo"></span>');
@@ -30,17 +29,17 @@ Core.Data = (function (Namespace) {
              * Run the tests
              */
 
-            Assert.expect(9);
+            expect(5);
 
             Sign = 'Save This Information';
             ObjectOne = $('#ElementOne');
             ObjectTwo = $('#ElementTwo');
 
             ResultOneEmpty = Core.Data.Get(ObjectOne, 'One');
-            Assert.deepEqual(ResultOneEmpty, {}, 'information not yet stored');
+            deepEqual(ResultOneEmpty, {}, 'information not yet stored');
 
             NonexistingResult = Core.Data.Get($('#nonexisting_selector'), 'One');
-            Assert.deepEqual(NonexistingResult, {}, 'nonexisting element');
+            deepEqual(NonexistingResult, {}, 'nonexisting element');
 
             Core.Data.Set(ObjectOne, 'One', Sign);
             Core.Data.Set(ObjectTwo, 'Two', Sign);
@@ -48,26 +47,9 @@ Core.Data = (function (Namespace) {
             ResultOne = Core.Data.Get(ObjectOne, 'One');
             ResultTwo = Core.Data.Get(ObjectTwo, 'Two');
 
-            Assert.equal(ResultOne, Sign, 'okay');
-            Assert.equal(ResultTwo, Sign, 'okay');
-            Assert.equal(ResultOne, ResultTwo, 'okay');
-
-            /* test CopyObject and CompareObject functions */
-            ObjectThree = {
-                "ItemOne": "abcd"
-            };
-
-            ObjectFour = Core.Data.CopyObject(ObjectThree);
-            Assert.deepEqual(ObjectThree, ObjectFour, 'okay');
-
-            ResultCompare = Core.Data.CompareObject(ObjectThree, ObjectFour);
-            Assert.equal(ResultCompare, true, 'okay');
-
-            ObjectThree.ItemTwo = "1234";
-            Assert.notDeepEqual(ObjectThree, ObjectFour, 'okay');
-
-            ResultCompare = Core.Data.CompareObject(ObjectThree, ObjectFour);
-            Assert.equal(ResultCompare, false, 'okay');
+            equal(ResultOne, Sign, 'okay');
+            equal(ResultTwo, Sign, 'okay');
+            equal(ResultOne, ResultTwo, 'okay');
 
              /*
              * Cleanup div container and contents

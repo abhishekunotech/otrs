@@ -14,15 +14,15 @@ Core.App = Core.App || {};
 Core.App.Responsive = (function (Namespace) {
     Namespace.RunUnitTests = function(){
 
-        QUnit.module('Core.App.Responsive');
+        module('Core.App.Responsive');
 
-        QUnit.test('IsSmallerOrEqual', function(Assert){
-            Assert.expect(4);
+        test('IsSmallerOrEqual', function(){
+            expect(4);
 
-            Assert.ok(Core.App.Responsive.IsSmallerOrEqual('ScreenL', 'ScreenXL'));
-            Assert.ok(Core.App.Responsive.IsSmallerOrEqual('ScreenXS', 'ScreenL'));
-            Assert.ok(Core.App.Responsive.IsSmallerOrEqual('ScreenM', 'ScreenM'));
-            Assert.ok(!Core.App.Responsive.IsSmallerOrEqual('ScreenL', 'ScreenM'));
+            ok(Core.App.Responsive.IsSmallerOrEqual('ScreenL', 'ScreenXL'));
+            ok(Core.App.Responsive.IsSmallerOrEqual('ScreenXS', 'ScreenL'));
+            ok(Core.App.Responsive.IsSmallerOrEqual('ScreenM', 'ScreenM'));
+            ok(!Core.App.Responsive.IsSmallerOrEqual('ScreenL', 'ScreenM'));
         });
     };
 

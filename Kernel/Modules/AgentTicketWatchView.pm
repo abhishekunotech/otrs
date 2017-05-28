@@ -13,8 +13,8 @@ use warnings;
 
 our $ObjectManagerDisabled = 1;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -186,15 +186,10 @@ sub Run {
             $Access = 1;
         }
         else {
-            my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
             GROUP:
             for my $Group (@Groups) {
-                my $HasPermission = $GroupObject->PermissionCheck(
-                    UserID    => $Self->{UserID},
-                    GroupName => $Group,
-                    Type      => 'rw',
-                );
-                if ($HasPermission) {
+                next GROUP if !$LayoutObject->{"UserIsGroup[$Group]"};
+                if ( $LayoutObject->{"UserIsGroup[$Group]"} eq 'Yes' ) {
                     $Access = 1;
                     last GROUP;
                 }
@@ -401,7 +396,7 @@ sub Run {
             %{ $Filters{$FilterColumn}->{Search} },
             %ColumnFilter,
             Result => 'COUNT',
-        ) || 0;
+        );
 
         # prepare count for new article tickets
         if ( $FilterColumn eq 'New' ) {
@@ -409,7 +404,7 @@ sub Run {
                 %{ $Filters{All}->{Search} },
                 %ColumnFilter,
                 Result => 'COUNT',
-            ) || 0;
+            );
             $Count = $CountAll - $Count;
         }
 

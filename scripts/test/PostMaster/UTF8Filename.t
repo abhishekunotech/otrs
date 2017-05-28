@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -16,10 +15,9 @@ use vars (qw($Self));
 use Kernel::System::PostMaster;
 
 # get needed objects
-my $ConfigObject         = $Kernel::OM->Get('Kernel::Config');
-my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
-my $MainObject           = $Kernel::OM->Get('Kernel::System::Main');
+my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+my $MainObject   = $Kernel::OM->Get('Kernel::System::Main');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
@@ -33,7 +31,7 @@ my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 for my $Backend (qw(DB FS)) {
 
     $ConfigObject->Set(
-        Key   => 'Ticket::Article::Backend::MIMEBase###ArticleStorage',
+        Key   => 'Ticket::StorageModule',
         Value => 'Kernel::System::Ticket::ArticleStorage' . $Backend,
     );
 
@@ -62,13 +60,13 @@ for my $Backend (qw(DB FS)) {
         "$Backend - Ticket created",
     );
 
-    my @ArticleIDs = map { $_->{ArticleID} } $ArticleObject->ArticleList( TicketID => $TicketID );
+    my @ArticleIDs = $TicketObject->ArticleIndex( TicketID => $TicketID );
     $Self->True(
         $ArticleIDs[0],
         "$Backend - Article created",
     );
 
-    my %Attachments = $ArticleBackendObject->ArticleAttachmentIndex(
+    my %Attachments = $TicketObject->ArticleAttachmentIndex(
         ArticleID => $ArticleIDs[0],
         UserID    => 1,
     );
@@ -78,6 +76,7 @@ for my $Backend (qw(DB FS)) {
         {
             ContentAlternative => '',
             ContentID          => '',
+            Filesize           => '132 Bytes',
             ContentType        => 'application/pdf; name="=?UTF-8?Q?Documentacio=CC=81n=2Epdf?="',
             Filename           => 'Documentación.pdf',
             FilesizeRaw        => '132',

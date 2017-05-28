@@ -21,16 +21,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::Process::State.pm
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB State backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ProcessStateObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::Process::State');
 
 =cut
@@ -52,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 StateList()
+=item StateList()
 
 get a State list
 
@@ -85,7 +91,7 @@ sub StateList {
     return $Self->{StateList};
 }
 
-=head2 StateLookup()
+=item StateLookup()
 
 get State name or State EntityID
 
@@ -143,6 +149,8 @@ sub StateLookup {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

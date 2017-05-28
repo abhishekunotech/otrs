@@ -13,8 +13,8 @@ Core.UI = Core.UI || {};
 
 Core.UI.Accessibility = (function (Namespace) {
     Namespace.RunUnitTests = function(){
-        QUnit.module('Core.UI.Accessibility');
-        QUnit.test('Core.UI.Accessibility.Init()', function(Assert){
+        module('Core.UI.Accessibility');
+        test('Core.UI.Accessibility.Init()', function(){
 
             /*
              * Create a div containter for the tests
@@ -35,23 +35,23 @@ Core.UI.Accessibility = (function (Namespace) {
              */
             Core.UI.Accessibility.Init();
 
-            Assert.expect(8);
+            expect(8);
 
-            Assert.equal($('.ARIARoleBanner')
+            equal($('.ARIARoleBanner')
                 .attr('role'), 'banner', 'Role banner');
-            Assert.equal($('.ARIARoleNavigation')
+            equal($('.ARIARoleNavigation')
                 .attr('role'), 'navigation', 'Role navigation');
-            Assert.equal($('.ARIARoleSearch')
+            equal($('.ARIARoleSearch')
                 .attr('role'), 'search', 'Role search');
-            Assert.equal($('.ARIARoleMain')
+            equal($('.ARIARoleMain')
                 .attr('role'), 'main', 'Role main');
-            Assert.equal($('.ARIARoleContentinfo')
+            equal($('.ARIARoleContentinfo')
                 .attr('role'), 'contentinfo', 'Role contentinfo');
-            Assert.equal($('.ARIAHasPopup')
+            equal($('.ARIAHasPopup')
                 .attr('aria-haspopup'), 'true', 'HasPopup attribute');
-            Assert.equal($('.Validate_Required')
+            equal($('.Validate_Required')
                 .attr('aria-required'), 'true', 'ARIA required attribute');
-            Assert.equal($('.Validate_DependingRequiredAND')
+            equal($('.Validate_DependingRequiredAND')
                 .attr('aria-required'), 'true', 'ARIA required attribute');
 
 

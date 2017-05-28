@@ -527,15 +527,6 @@ sub _ShowEdit {
 
     }
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'MappingSimple',
-        Value => {
-            WebServiceID  => $Param{WebserviceID},
-            DeletedString => $Param{DeletedString},
-        },
-    );
-
     # set key index
     $LayoutObject->Block(
         Name => 'KeyCounter',

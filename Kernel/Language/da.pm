@@ -25,29 +25,775 @@ sub Data {
     $Self->{DateFormatShort}     = '%D.%M.%Y';
     $Self->{DateInputFormat}     = '%D.%M.%Y';
     $Self->{DateInputFormatLong} = '%D.%M.%Y - %T';
-    $Self->{Completeness}        = 0.503108252947481;
+    $Self->{Completeness}        = 0.546045944297621;
 
     # csv separator
     $Self->{Separator} = '';
 
     $Self->{Translation} = {
 
+        # Template: AAABase
+        'Yes' => 'Ja',
+        'No' => 'Nej',
+        'yes' => 'ja',
+        'no' => 'nej',
+        'Off' => 'Fra',
+        'off' => 'fra',
+        'On' => 'Til',
+        'on' => 'til',
+        'top' => 'start',
+        'end' => 'slut',
+        'Done' => 'Færdig',
+        'Cancel' => 'Annuller',
+        'Reset' => 'Nulstil',
+        'more than ... ago' => 'mere end ... siden',
+        'in more than ...' => 'mere end ...',
+        'within the last ...' => 'indenfor de sidste ...',
+        'within the next ...' => 'indenfor den næste ...',
+        'Created within the last' => 'Oprettet indenfor de sidste',
+        'Created more than ... ago' => 'Oprettet mere end ... siden',
+        'Today' => 'I dag',
+        'Tomorrow' => 'I morgen',
+        'Next week' => 'Næste uge',
+        'day' => 'dag',
+        'days' => 'dage',
+        'day(s)' => 'dag(e)',
+        'd' => 'd',
+        'hour' => 'time',
+        'hours' => 'timer',
+        'hour(s)' => 'time(r)',
+        'Hours' => 'Timer',
+        'h' => 't',
+        'minute' => 'minut',
+        'minutes' => 'minutter',
+        'minute(s)' => 'minut(ter)',
+        'Minutes' => 'Minutter',
+        'm' => 'm',
+        'month' => 'måned',
+        'months' => 'måneder',
+        'month(s)' => 'måned(er)',
+        'week' => 'uge',
+        'week(s)' => 'uge(r)',
+        'quarter' => 'kvartal',
+        'quarter(s)' => 'kvartal(er)',
+        'half-year' => 'halvår',
+        'half-year(s)' => 'halvår',
+        'year' => 'år',
+        'years' => 'år',
+        'year(s)' => 'år',
+        'second(s)' => 'sekund(er)',
+        'seconds' => 'sekunder',
+        'second' => 'sekund',
+        's' => 's',
+        'Time unit' => 'Tidsenhed',
+        'wrote' => 'skrev',
+        'Message' => 'Meddelelse',
+        'Error' => 'Fejl',
+        'Bug Report' => 'Fejlrapport',
+        'Attention' => 'Bemærk',
+        'Warning' => 'Advarsel',
+        'Module' => 'Modul',
+        'Modulefile' => 'Modulfil',
+        'Subfunction' => 'Underfunktion',
+        'Line' => 'Linje',
+        'Setting' => 'Indstilling',
+        'Settings' => 'Indstillinger',
+        'Example' => 'Eksempel',
+        'Examples' => 'Eksempler',
+        'valid' => 'gyldig',
+        'Valid' => 'Gyldig',
+        'invalid' => 'ugyldig',
+        'Invalid' => 'Ugyldig',
+        '* invalid' => '* ugyldig',
+        'invalid-temporarily' => 'ugyldig-midlertidigt',
+        ' 2 minutes' => ' 2 minutter',
+        ' 5 minutes' => ' 5 minutter',
+        ' 7 minutes' => ' 7 minutter',
+        '10 minutes' => '10 minutter',
+        '15 minutes' => '15 minutter',
+        'Mr.' => 'Hr.',
+        'Mrs.' => 'Fru',
+        'Next' => 'Næste',
+        'Back' => 'Tilbage',
+        'Next...' => 'Næste...',
+        '...Back' => '...Tilbage',
+        '-none-' => '-ingen-',
+        'none' => 'ingen',
+        'none!' => 'ingen!',
+        'none - answered' => 'ingen - besvarede',
+        'please do not edit!' => 'vær venlig ikke at redigere!',
+        'Need Action' => 'Behøver handling',
+        'AddLink' => 'TilføjLink',
+        'Link' => 'Link',
+        'Unlink' => 'Fjern link',
+        'Linked' => 'Linket',
+        'Link (Normal)' => 'Link (normal)',
+        'Link (Parent)' => 'Link (forælder)',
+        'Link (Child)' => 'Link (barn)',
+        'Normal' => 'Normal',
+        'Parent' => 'Forælder',
+        'Child' => 'Barn',
+        'Hit' => 'Resultat',
+        'Hits' => 'Antal resultater',
+        'Text' => 'Tekst',
+        'Standard' => 'Standard',
+        'Lite' => 'Let',
+        'User' => 'Bruger',
+        'Username' => 'Brugernavn',
+        'Language' => 'Sprog',
+        'Languages' => 'Sprog',
+        'Password' => 'Adgangskode',
+        'Preferences' => 'Indstillinger',
+        'Salutation' => 'Indledning',
+        'Salutations' => 'Indledninger',
+        'Signature' => 'Signatur',
+        'Signatures' => 'Signaturer',
+        'Customer' => 'Kunde',
+        'CustomerID' => 'Kunde-ID',
+        'CustomerIDs' => 'Kunde-ID\'er',
+        'customer' => 'kunde',
+        'agent' => 'agent',
+        'system' => 'system',
+        'Customer Info' => 'Kundeinfo',
+        'Customer Information' => 'Kundeoplysninger',
+        'Customer Companies' => 'Kunde/Firmaer',
+        'Company' => 'Firma',
+        'go!' => 'kør',
+        'go' => 'kør',
+        'All' => 'Alle',
+        'all' => 'alle',
+        'Sorry' => 'Beklager',
+        'update!' => 'opdater',
+        'update' => 'opdater',
+        'Update' => 'Opdater',
+        'Updated!' => 'Opdateret',
+        'submit!' => 'send',
+        'submit' => 'send',
+        'Submit' => 'Send',
+        'change!' => 'skift',
+        'Change' => 'Skift',
+        'change' => 'skift',
+        'click here' => 'klik her',
+        'Comment' => 'Kommentar',
+        'Invalid Option!' => 'Ugyldig valgmulighed!',
+        'Invalid time!' => 'Ugyldigt tidsrum!',
+        'Invalid date!' => 'Ugyldig dato!',
+        'Name' => 'Navn',
+        'Group' => 'Gruppe',
+        'Description' => 'Beskrivelse',
+        'description' => 'beskrivelse',
+        'Theme' => 'Tema',
+        'Created' => 'Oprettet',
+        'Created by' => 'Oprettet af',
+        'Changed' => 'ændret',
+        'Changed by' => 'ændret af',
+        'Search' => 'Søg',
+        'and' => 'og',
+        'between' => 'mellem',
+        'before/after' => 'før/efter',
+        'Fulltext Search' => 'Fritekstsøgning',
+        'Data' => 'Data',
+        'Options' => 'Valgmuligheder',
+        'Title' => 'Titel',
+        'Item' => 'Punkt',
+        'Delete' => 'Slet',
+        'Edit' => 'Rediger',
+        'View' => 'Vis',
+        'Number' => 'Nummer',
+        'System' => 'System',
+        'Contact' => 'Kontaktperson',
+        'Contacts' => 'Kontaktpersoner',
+        'Export' => 'Eksporter',
+        'Up' => 'Op',
+        'Down' => 'Ned',
+        'Add' => 'Tilføj',
+        'Added!' => 'Tilføjet',
+        'Category' => 'Kategori',
+        'Viewer' => 'Fremviser',
+        'Expand' => 'Udvid',
+        'Small' => 'Lille',
+        'Medium' => 'Medium',
+        'Large' => 'Stor',
+        'Date picker' => 'Datovælger',
+        'Show Tree Selection' => 'Vis træ',
+        'The field content is too long!' => 'Indholdet af feltet er for langt.',
+        'Maximum size is %s characters.' => 'Maksimal længde er %s tegn.',
+        'This field is required or' => 'Dette felt er påkrævet eller',
+        'New message' => 'Ny meddelelse',
+        'New message!' => 'Ny meddelelse!',
+        'Please answer this ticket(s) to get back to the normal queue view!' =>
+            'Vær venlig at besvare én eller flere sager for at komme tilbage til køens normale visning',
+        'You have %s new message(s)!' => 'Du har %s ny(e) meddelelser.',
+        'You have %s reminder ticket(s)!' => 'Du har %s sag(er) med påmindelser.',
+        'The recommended charset for your language is %s!' => 'Det anbefalede tegnsæt til dit sprog er %s.',
+        'Change your password.' => 'Ændr dit password',
+        'Please activate %s first!' => 'Aktiver venligst %s først',
+        'No suggestions' => 'Ingen forslag',
+        'Word' => 'Ord',
+        'Ignore' => 'Ignorer',
+        'replace with' => 'udskift med',
+        'There is no account with that login name.' => 'Der er ingen konto med det login-navn.',
+        'Login failed! Your user name or password was entered incorrectly.' =>
+            'Login fejlede. Dit brugernavn eller password blev indtastet forkert.',
+        'There is no acount with that user name.' => 'Der er ingen konto med det brugernavn.',
+        'Please contact your administrator' => 'Kontakt venligst din administrator',
+        'Authentication succeeded, but no customer record is found in the customer backend. Please contact your administrator.' =>
+            'Login lykkedes, men ingen kundeoplysninger er fundet i systemet. Kontakt venligst din administrator.',
+        'This e-mail address already exists. Please log in or reset your password.' =>
+            'Denne mail-adresse eksisterer allerede. Log ind eller nulstil dit password.',
+        'Logout' => 'Log ud',
+        'Logout successful. Thank you for using %s!' => 'Du er nu logget ud. Tak fordi du bruger %s.',
+        'Feature not active!' => 'Funktionen er ikke aktiv',
+        'Agent updated!' => 'Agent opdateret',
+        'Database Selection' => 'Databasevalg',
+        'Create Database' => 'Opret database',
+        'System Settings' => 'Systemindstillinger',
+        'Mail Configuration' => 'Mail-konfiguration',
+        'Finished' => 'Færdig',
+        'Install OTRS' => 'Installer OTRS',
+        'Intro' => 'Indledning',
+        'License' => 'Licens',
+        'Database' => 'Database',
+        'Configure Mail' => 'Konfigurer Mail',
+        'Database deleted.' => 'Database slettet.',
+        'Enter the password for the administrative database user.' => 'Indtast passwordet for den administrative bruger i databasen.',
+        'Enter the password for the database user.' => 'Indtast oasswirdet for databasens bruger.',
+        'If you have set a root password for your database, it must be entered here. If not, leave this field empty.' =>
+            'Hvis du har sat et root-password på din database, skal det indtastes her. Ellers lad feltet være tomt.',
+        'Database already contains data - it should be empty!' => 'Databasen indeholder allerede data - den burde være tom!',
+        'Login is needed!' => 'Login er påkrævet',
+        'It is currently not possible to login due to a scheduled system maintenance.' =>
+            'Det er i øjeblikket ikke muligt at logge ind grundet planlagt system-vedligeholdelde.',
+        'Password is needed!' => 'Adgangskode er påkrævet',
+        'Take this Customer' => 'Tag denne kunde',
+        'Take this User' => 'Tag denne bruger',
+        'possible' => 'mulig',
+        'reject' => 'afvis',
+        'reverse' => 'omvendt',
+        'Facility' => 'Facilitet',
+        'Time Zone' => 'Tidszone',
+        'Pending till' => 'Afventer til',
+        'Don\'t use the Superuser account to work with OTRS! Create new Agents and work with these accounts instead.' =>
+            'Brug ikke Superuser-kontoen til at arbejde med OTRS! Opret nye agenter og arbejd med disse konti i stedet.',
+        'Dispatching by email To: field.' => 'Sendes via mail til: felt.',
+        'Dispatching by selected Queue.' => 'Sendes via den valgte kø.',
+        'No entry found!' => 'Ingen post fundet',
+        'Session invalid. Please log in again.' => 'Ugyldig session. Log venligst ind igen.',
+        'Session has timed out. Please log in again.' => 'Sessionens tidsfrist er udløbet. Vær venlig at logge ind igen.',
+        'Session limit reached! Please try again later.' => 'Systemet kan ikke håndtere flere brugere nu. Prøv venligst igen senere.',
+        'No Permission!' => 'Ingen tilladelse.',
+        '(Click here to add)' => '(Klik her for at tilføje)',
+        'Preview' => 'Forhåndsvisning',
+        'Package not correctly deployed! Please reinstall the package.' =>
+            'Pakken er ikke installeret korrekt! Installer den igen.',
+        '%s is not writable!' => 'Der kan ikke skrives til %s!',
+        'Cannot create %s!' => 'Kan ikke oprette %s!',
+        'Check to activate this date' => 'Marker for at aktivere denne dato',
+        'You have Out of Office enabled, would you like to disable it?' =>
+            'Du har Out of Office aktiveret. Vil du deaktivere det?',
+        'News about OTRS releases!' => 'Nyheder om OTRS-udgivelser.',
+        'Go to dashboard!' => 'Gå til dashboard!',
+        'Customer %s added' => 'Kunde %s er tilføjet',
+        'Role added!' => 'Rolle tilføjet.',
+        'Role updated!' => 'Rolle opdateret.',
+        'Attachment added!' => 'Vedhæftet fil tilføjet.',
+        'Attachment updated!' => 'Vedhæftet fil opdateret.',
+        'Response added!' => 'Svar tilføjet.',
+        'Response updated!' => 'Svar opdateret.',
+        'Group updated!' => 'Gruppe opdateret.',
+        'Queue added!' => 'Kø tilføjet.',
+        'Queue updated!' => 'Kø opdateret.',
+        'State added!' => 'Tilstand tilføjet.',
+        'State updated!' => 'Tilstand opdateret.',
+        'Type added!' => 'Type tilføjet.',
+        'Type updated!' => 'Type opdateret.',
+        'Customer updated!' => 'Kunde opdateret.',
+        'Customer company added!' => 'Kunde-firma tilføjet.',
+        'Customer company updated!' => 'Kunde-firma opdateret.',
+        'Note: Company is invalid!' => 'Note: Firma er ugyldigt',
+        'Mail account added!' => 'Mail-konto tilføjet.',
+        'Mail account updated!' => 'Mail-konto opdateret.',
+        'System e-mail address added!' => 'System-mail-adresse tilføjet.',
+        'System e-mail address updated!' => 'System-mail-adresse opdateret.',
+        'Contract' => 'Kontrakt',
+        'Online Customer: %s' => 'Online kunde: %s ',
+        'Online Agent: %s' => 'Online Agent: %s ',
+        'Calendar' => 'Kalender',
+        'File' => 'Fil',
+        'Filename' => 'Filnavn',
+        'Type' => 'Type',
+        'Size' => 'Størrelse',
+        'Upload' => 'Upload',
+        'Directory' => 'Katalog',
+        'Signed' => 'Underskrevet',
+        'Sign' => 'Underskriv',
+        'Crypted' => 'Krypteret',
+        'Crypt' => 'Krypter',
+        'PGP' => 'PGP',
+        'PGP Key' => 'PGP-nøgle',
+        'PGP Keys' => 'PGP-nøgler',
+        'S/MIME' => 'S/MIME',
+        'S/MIME Certificate' => 'S/MIME-certifikat',
+        'S/MIME Certificates' => 'S/MIME-certifikater',
+        'Office' => 'Kontor',
+        'Phone' => 'Telefon',
+        'Fax' => 'Fax',
+        'Mobile' => 'Mobil',
+        'Zip' => 'Post Nr.',
+        'City' => 'By',
+        'Street' => 'Gade',
+        'Country' => 'Land',
+        'Location' => 'Lokation',
+        'installed' => 'installeret',
+        'uninstalled' => 'afinstalleret',
+        'Security Note: You should activate %s because application is already running!' =>
+            'Sikkerhedsadvarsel: Du burde aktivere %s, da applikationen allerede kører.',
+        'Unable to parse repository index document.' => 'Ikke i stand til at fortolke repositoriets index-dokument.',
+        'No packages for your framework version found in this repository, it only contains packages for other framework versions.' =>
+            'Ingen pakker for din version af frameworket fundet i dette repositorie, det indeholder kun pakker for andre versioner af frameworket.',
+        'No packages, or no new packages, found in selected repository.' =>
+            'Ingen pakker, eller ingen nye pakker, fundet i det valgte repositorie.',
+        'Edit the system configuration settings.' => 'Rediger systemets konfiguration',
+        'ACL information from database is not in sync with the system configuration, please deploy all ACLs.' =>
+            'ACL-oplysningerne i databasen stemmer ikke med systemets konfiguration. Iværksæt alle ACL\'er.',
+        'printed at' => 'udskrevet den',
+        'Loading...' => 'Indlæser...',
+        'Dear Mr. %s,' => 'Kære Hr. %s',
+        'Dear Mrs. %s,' => 'Kære Fru. %s',
+        'Dear %s,' => 'Kære %s',
+        'Hello %s,' => 'Hej %s',
+        'This email address is not allowed to register. Please contact support staff.' =>
+            'Denne mail-adresse har ikke tilladelse til at registrere. Kontakt venligst supporten.',
+        'New account created. Sent login information to %s. Please check your email.' =>
+            'Ny konto oprettet. Login-information sendt til %s. Tjek venligst din mail.',
+        'Please press Back and try again.' => 'Tryk venligst tilbage og prøv igen.',
+        'Sent password reset instructions. Please check your email.' => 'Instruktioner til nulstilling af password sendt. Tjek venligst din mail.',
+        'Sent new password to %s. Please check your email.' => 'Nyt password sendt til %s. Tjek venligst din mail.',
+        'Upcoming Events' => 'Forestående Hændelser',
+        'Event' => 'Hændelse',
+        'Events' => 'Hændelser',
+        'Invalid Token!' => 'Ugyldigt Token!',
+        'more' => 'mere',
+        'Collapse' => 'Sammenfold',
+        'Shown' => 'Viste',
+        'Shown customer users' => 'Viste kundebrugere',
+        'News' => 'Nyheder',
+        'Product News' => 'Produktnyheder',
+        'OTRS News' => 'OTRS-nyheder',
+        '7 Day Stats' => 'Sidste 7 dage',
+        'Process Management information from database is not in sync with the system configuration, please synchronize all processes.' =>
+            'Process Management-informationen i databasen stemmer ikke overens med systemkonfigurationen. Synkroniser alle processer.',
+        'Package not verified by the OTRS Group! It is recommended not to use this package.' =>
+            'Pakken er ikke godtkendt af OTRS-gruppen! Det anbefales ikke af bruge denne pakke.',
+        '<br>If you continue to install this package, the following issues may occur!<br><br>&nbsp;-Security problems<br>&nbsp;-Stability problems<br>&nbsp;-Performance problems<br><br>Please note that issues that are caused by working with this package are not covered by OTRS service contracts!<br><br>' =>
+            'Hvis du fortsætter installationen af denne pakke, kan følgende opstå:<br><br>&nbsp;-Sikkerhedsproblemer<br>&nbsp;-Stabilitetsproblemer<br>&nbsp;-Performance-problemer<br><br>Vær opmærksom på at problemer opstået ved brug af denne pakke ikke af dækket af OTRS-servicekontrakter!<br>br>',
+        'Mark' => 'Marker',
+        'Unmark' => 'Fjern markering',
+        'Bold' => 'Fed',
+        'Italic' => 'Kursiv',
+        'Underline' => 'Understreget',
+        'Font Color' => 'Skriftfarve',
+        'Background Color' => 'Baggrundsfarve',
+        'Remove Formatting' => 'Fjern formattering',
+        'Show/Hide Hidden Elements' => 'Vis/Skjul Skjulte Elementer',
+        'Align Left' => 'Venstrestil',
+        'Align Center' => 'Centrer',
+        'Align Right' => 'Højrestil',
+        'Justify' => 'Lige margener',
+        'Header' => 'Overskrift',
+        'Indent' => 'Ryk ind',
+        'Outdent' => 'Ryk ud',
+        'Create an Unordered List' => 'Lav punktliste',
+        'Create an Ordered List' => 'Lav talliste',
+        'HTML Link' => 'HTML-link',
+        'Insert Image' => 'Indsæt billede',
+        'CTRL' => 'Ctrl',
+        'SHIFT' => 'Shift',
+        'Undo' => 'Fortryd',
+        'Redo' => 'Gendan',
+        'OTRS Daemon is not running.' => 'OTRS-dæmonen kører ikke.',
+        'Can\'t contact registration server. Please try again later.' => 'Kan ikke kontakte registrations-serveren. Prøv venligst igen senere.',
+        'No content received from registration server. Please try again later.' =>
+            'Modtog ikke noget fra registrations-serveren. Prøv venligst igen senere.',
+        'Problems processing server result. Please try again later.' => 'Problemer med at behandle svaret fra serveren. Prøv venligst igen senere.',
+        'Username and password do not match. Please try again.' => 'Brugernavn og password passer ikke. Prøv venligst igen.',
+        'The selected process is invalid!' => 'Den valgte proces er ugyldig.',
+        'Upgrade to %s now!' => 'Opgrader til %s nu!',
+        '%s Go to the upgrade center %s' => '%s Gå til opgraderings center %s',
+        'The license for your %s is about to expire. Please make contact with %s to renew your contract!' =>
+            'Licensen for %s er ved at udløbe. Kontakt venligst %s for at forny din kontrakt.',
+        'An update for your %s is available, but there is a conflict with your framework version! Please update your framework first!' =>
+            'En opdatering til %s er tilgængelig, men der er en konflikt med din framework version!
+Opdater venligst dit framework først!',
+        'Your system was successfully upgraded to %s.' => 'Dit system blev opgraderet til %s.',
+        'There was a problem during the upgrade to %s.' => 'Der var et problem under opgraderingen til %s.',
+        '%s was correctly reinstalled.' => '%s blev geninstalleret korrekt.',
+        'There was a problem reinstalling %s.' => 'Der var et problem med at geninstallere %s.',
+        'Your %s was successfully updated.' => '%s blev opdateret.',
+        'There was a problem during the upgrade of %s.' => 'Der var et problem under opgraderingen af %s.',
+        '%s was correctly uninstalled.' => '%s blev afinstalleret.',
+        'There was a problem uninstalling %s.' => 'Der var et problem med at afinstallere %s.',
+        'Enable cloud services to unleash all OTRS features!' => 'Aktiver cloud service for at få adgang til alle OTRS muligheder!',
+
+        # Template: AAACalendar
+        'New Year\'s Day' => 'Nytårsdag',
+        'International Workers\' Day' => 'Arbejdernes internationale kampdag',
+        'Christmas Eve' => 'Juleaften',
+        'First Christmas Day' => 'Første juledag',
+        'Second Christmas Day' => 'Anden juledag',
+        'New Year\'s Eve' => 'Nytårs aften',
+
+        # Template: AAAGenericInterface
+        'OTRS as requester' => 'OTRS som requester',
+        'OTRS as provider' => 'OTRS som provider',
+        'Webservice "%s" created!' => 'Webservice "%s" oprettet.',
+        'Webservice "%s" updated!' => 'Webservice "%s" opdateret.',
+
+        # Template: AAAMonth
+        'Jan' => 'Jan',
+        'Feb' => 'Feb',
+        'Mar' => 'Mar',
+        'Apr' => 'Apr',
+        'May' => 'Maj',
+        'Jun' => 'Jun',
+        'Jul' => 'Jul',
+        'Aug' => 'Aug',
+        'Sep' => 'Sep',
+        'Oct' => 'Okt',
+        'Nov' => 'Nov',
+        'Dec' => 'Dec',
+        'January' => 'Januar',
+        'February' => 'Februar',
+        'March' => 'Marts',
+        'April' => 'April',
+        'May_long' => 'Maj',
+        'June' => 'Juni',
+        'July' => 'Juli',
+        'August' => 'August',
+        'September' => 'September',
+        'October' => 'Oktober',
+        'November' => 'November',
+        'December' => 'December',
+
+        # Template: AAAPreferences
+        'Preferences updated successfully!' => 'Indstillingerne er opdateret',
+        'User Profile' => 'Brugerprofil',
+        'Email Settings' => 'Email-indstillinger',
+        'Other Settings' => 'Andre Indstillinger',
+        'Notification Settings' => 'Besked-indstillinger',
+        'Change Password' => 'Skift adgangskode',
+        'Current password' => 'Nuværende adgangskode',
+        'New password' => 'Ny adgangskode',
+        'Verify password' => 'Gentag adgangskode',
+        'Spelling Dictionary' => 'Ordbog til stavekontrol',
+        'Default spelling dictionary' => 'Standard-stavekontrol',
+        'Max. shown Tickets a page in Overview.' => 'Max. viste sager pr. side i oversigten.',
+        'The current password is not correct. Please try again!' => 'Det nuværende password er ikke korrekt. Prøv venligst igen.',
+        'Can\'t update password, your new passwords do not match. Please try again!' =>
+            'Kan ikke opdatere password, dine nye passwords er ikke ens. Prøv venligst igen.',
+        'Can\'t update password, it contains invalid characters!' => 'Kan ikke opdatere password, det indeholde ugyldige tegn.',
+        'Can\'t update password, it must be at least %s characters long!' =>
+            'Kan ikke opdatere password, det skal være mindst %s tegn langt.',
+        'Can\'t update password, it must contain at least 2 lowercase and 2 uppercase characters!' =>
+            'Kan ikke opdatere password, det skal indeholde mindst 2 små og 2 store bogstaver.',
+        'Can\'t update password, it must contain at least 1 digit!' => 'Kan ikke opdatere password, det skal indeholde mindst 1 tal.',
+        'Can\'t update password, it must contain at least 2 characters!' =>
+            'Kan ikke opdatere password, det skal indeholde mindst 2 tegn.',
+        'Can\'t update password, this password has already been used. Please choose a new one!' =>
+            'Kan ikke opdatere password, da dette password allerede har været brugt. Vælg venligst et nyt.',
+        'Select the separator character used in CSV files (stats and searches). If you don\'t select a separator here, the default separator for your language will be used.' =>
+            'Vælg det tegn, der skal bruges som separator i CSV-filer (rapporter og søgninger). Hvis du ikke vælger en separator her, vil standard-separatoren for dit sprog blive brugt.',
+        'CSV Separator' => 'CSV-skilletegn',
+
+        # Template: AAATicket
+        'Status View' => 'Statusoversigt',
+        'Service View' => 'Serviceoversigt',
+        'Bulk' => 'Massehandling',
+        'Lock' => 'Træk',
+        'Unlock' => 'Frigiv',
+        'History' => 'Historik',
+        'Zoom' => 'Vis',
+        'Age' => 'Alder',
+        'Bounce' => 'Overgiv',
+        'Forward' => 'Videresend',
+        'From' => 'Fra',
+        'To' => 'Til',
+        'Cc' => 'Cc',
+        'Bcc' => 'Bcc',
+        'Subject' => 'Emne',
+        'Move' => 'Flyt',
+        'Queue' => 'Kø',
+        'Queues' => 'Køer',
+        'Priority' => 'Prioritet',
+        'Priorities' => 'Prioriteter',
+        'Priority Update' => 'Opdatering af Prioritet',
+        'Priority added!' => 'Prioritet tilføjet.',
+        'Priority updated!' => 'Prioritet opdateret.',
+        'Signature added!' => 'Signatur tilføjet.',
+        'Signature updated!' => 'Signatur opdateret.',
+        'SLA' => 'SLA',
+        'Service Level Agreement' => 'Service Level Agreement',
+        'Service Level Agreements' => 'Service Level Agreements',
+        'Service' => 'Service',
+        'Services' => 'Services',
+        'State' => 'Tilstand',
+        'States' => 'Tilstande',
+        'Status' => 'Status',
+        'Statuses' => 'Status',
+        'Ticket Type' => 'Sagstype',
+        'Ticket Types' => 'Sagstyper',
+        'Compose' => 'Skrive',
+        'Pending' => 'Afventer',
+        'Owner' => 'Ejer',
+        'Owner Update' => 'Ændring af ejer',
+        'Responsible' => 'Ansvarlig',
+        'Responsible Update' => 'Opdatering af Ansvarlig',
+        'Sender' => 'Afsender',
+        'Article' => 'Indlæg',
+        'Ticket' => 'Sager',
+        'Createtime' => 'Oprettelsestid',
+        'plain' => 'almindelig',
+        'Email' => 'Mail',
+        'email' => 'mail',
+        'Close' => 'Luk',
+        'Action' => 'Handling',
+        'Attachment' => 'Vedhæftet fil',
+        'Attachments' => 'Vedhæftede filer',
+        'This message was written in a character set other than your own.' =>
+            'Denne meddelelse blev skrevet i et andet tegnsæt end dit eget.',
+        'If it is not displayed correctly,' => 'Vises den ikke korrekt,',
+        'This is a' => 'Dette er en',
+        'to open it in a new window.' => 'for at åbne i et nyt vindue.',
+        'This is a HTML email. Click here to show it.' => 'Dette er en mail i HTML. Klik her for at vise den.',
+        'Free Fields' => 'Frie felter',
+        'Merge' => 'Saml',
+        'merged' => 'samlet',
+        'closed successful' => 'Afsluttet',
+        'closed unsuccessful' => 'Afsluttet uden løsning',
+        'Locked Tickets Total' => 'Mine sager i alt',
+        'Locked Tickets Reminder Reached' => 'Mine sager, hvor påmindelsesfristen er nået',
+        'Locked Tickets New' => 'Mine nye sager',
+        'Responsible Tickets Total' => 'Sager, jeg er ansvarlig for i alt',
+        'Responsible Tickets New' => 'Nye sager, jeg er ansvarlig for',
+        'Responsible Tickets Reminder Reached' => 'Sager, jeg er ansvarlig for, hvor påmindelsesfristen er nået',
+        'Watched Tickets Total' => 'Fulgte sager i alt',
+        'Watched Tickets New' => 'Nye fulgte sager',
+        'Watched Tickets Reminder Reached' => 'Fulgte sager, hvor påmindelsesfristen er nået',
+        'All tickets' => 'Alle sager',
+        'Available tickets' => 'Frie sager',
+        'Escalation' => 'Eskalation',
+        'last-search' => 'sidste søgning',
+        'QueueView' => 'Køer',
+        'Ticket Escalation View' => 'Oversigt over eskalerede sager',
+        'Message from' => 'Besked fra',
+        'End message' => 'Slut på besked',
+        'Forwarded message from' => 'Videresendt besked fra',
+        'End forwarded message' => 'Slut på videresendt besked',
+        'Bounce Article to a different mail address' => 'Bounce Indlæg til en anden mail-adresse',
+        'Reply to note' => 'Svar på note',
+        'new' => 'ny',
+        'open' => 'åben',
+        'Open' => 'Åben',
+        'Open tickets' => 'Åbne sager',
+        'closed' => 'lukket',
+        'Closed' => 'Lukket',
+        'Closed tickets' => 'Lukkede sager',
+        'removed' => 'fjernet',
+        'pending reminder' => 'afventer påmindelse',
+        'pending auto' => 'afventer auto',
+        'pending auto close+' => 'afventer autolukning+',
+        'pending auto close-' => 'afventer autolukning-',
+        'email-external' => 'mail-ekstern',
+        'email-internal' => 'mail-intern',
+        'note-external' => 'bemærkning-ekstern',
+        'note-internal' => 'bemærkning-intern',
+        'note-report' => 'bemærkning-rapport',
+        'phone' => 'telefon',
+        'sms' => 'sms',
+        'webrequest' => 'webanmodning',
+        'lock' => 'tildelt',
+        'unlock' => 'fri',
+        'very low' => 'meget lav',
+        'low' => 'lav',
+        'normal' => 'normal',
+        'high' => 'høj',
+        'very high' => 'meget høj',
+        '1 very low' => '1 meget lav',
+        '2 low' => '2 lav',
+        '3 normal' => '3 normal',
+        '4 high' => '4 høj',
+        '5 very high' => '5 meget høj',
+        'auto follow up' => 'automatisk opfølgning',
+        'auto reject' => 'automatisk afvisning',
+        'auto remove' => 'Auto fjern',
+        'auto reply' => 'autosvar',
+        'auto reply/new ticket' => 'autosvar/ny sag',
+        'Create' => 'Opret',
+        'Answer' => 'Svar',
+        'Phone call' => 'Telefonopkald',
+        'Ticket "%s" created!' => 'Sag "%s" oprettet.',
+        'Ticket Number' => 'Sagsnummer',
+        'Ticket Object' => 'Sagsobjekt',
+        'No such Ticket Number "%s"! Can\'t link it!' => 'Sag nummer "%s" eksisterer ikke! Kan ikke sammenkæde den.',
+        'You don\'t have write access to this ticket.' => 'Du har ikke rettigheder til at ændre denne sag.',
+        'Sorry, you need to be the ticket owner to perform this action.' =>
+            'Du skal eje denne sag for at udføre handlingen.',
+        'Please change the owner first.' => 'Skift venligst ejeren først.',
+        'Ticket selected.' => 'Sag valgt.',
+        'Ticket is locked by another agent.' => 'Sagen ejes af en anden agent.',
+        'Ticket locked.' => 'Sag trukker.',
+        'Don\'t show closed Tickets' => 'Vis åbne sager',
+        'Show closed Tickets' => 'Vis lukkede sager',
+        'New Article' => 'Nyt indlæg',
+        'Unread article(s) available' => 'Der er ulæste indlæg',
+        'Remove from list of watched tickets' => 'Fjern fra listen over fulgte sager',
+        'Add to list of watched tickets' => 'Føj til listen over fulgte sager',
+        'Email-Ticket' => 'Email-sag',
+        'Create new Email Ticket' => 'Opret ny mail-sag',
+        'Phone-Ticket' => 'Ny Sag',
+        'Search Tickets' => 'Søg sager',
+        'Customer Realname' => 'Kundens rigtige navn',
+        'Customer History' => 'Kunde-historik',
+        'Edit Customer Users' => 'Rediger kundebrugere',
+        'Edit Customer' => 'Rediger kunde',
+        'Bulk Action' => 'Massehandling',
+        'Bulk Actions on Tickets' => 'Massehandlinger på sager',
+        'Send Email and create a new Ticket' => 'Send mail og opret en ny sag',
+        'Create new Email Ticket and send this out (Outbound)' => 'Opret ny mail-sag, og send den (Outbound)',
+        'Create new Phone Ticket (Inbound)' => 'Opret ny telefon-sag (Inbound)',
+        'Address %s replaced with registered customer address.' => 'Adresse %s erstattet med kundens registrerede adresse.',
+        'Customer user automatically added in Cc.' => 'Kundebruger automatisk tilføjet til Cc.',
+        'Overview of all open Tickets' => 'Oversigt over alle frie sager',
+        'Locked Tickets' => 'Mine sager',
+        'My Locked Tickets' => 'Mine sager',
+        'My Watched Tickets' => 'Fulgte sager',
+        'My Responsible Tickets' => 'Sager, jeg er ansvarlig for',
+        'Watched Tickets' => 'Fulgte sager',
+        'Watched' => 'Fulgte',
+        'Watch' => 'Følg',
+        'Unwatch' => 'Følg ikke',
+        'Lock it to work on it' => 'Træk sagen for at arbejde på den',
+        'Unlock to give it back to the queue' => 'Frigiv sagen og gør den ledig i køen',
+        'Show the ticket history' => 'Vis sagens historik',
+        'Print this ticket' => 'Udskriv denne sag',
+        'Print this article' => 'Udskriv dette indlæg',
+        'Split' => 'Opdel',
+        'Split this article' => 'Opdel dette indlæg',
+        'Forward article via mail' => 'Videresend indlæg via mail',
+        'Change the ticket priority' => 'Ændr sagens prioritet',
+        'Change the ticket free fields!' => 'Skift sagens frie felter.',
+        'Link this ticket to other objects' => 'Kæd denne sag til andre objekter',
+        'Change the owner for this ticket' => 'Ændr denne sags ejer',
+        'Change the  customer for this ticket' => 'Ændr denne sags kunde',
+        'Add a note to this ticket' => 'Tilføj en note til denne sag',
+        'Merge into a different ticket' => 'Saml til en anden sag',
+        'Set this ticket to pending' => 'Sæt denne sag til at afvente',
+        'Close this ticket' => 'Luk denne sag',
+        'Look into a ticket!' => 'Se nærmere på en sag.',
+        'Delete this ticket' => 'Slet denne sag',
+        'Mark as Spam!' => 'Marker som spam.',
+        'My Queues' => 'Mine køer',
+        'Shown Tickets' => 'Viste Sager',
+        'Shown Columns' => 'Viste Kolonner',
+        'Your email with ticket number "<OTRS_TICKET>" is merged to "<OTRS_MERGE_TO_TICKET>".' =>
+            'Din sag nummer "<OTRS_TICKET>" er blevet samlet med sag nummer "<OTRS_MERGE_TO_TICKET>".',
+        'Ticket %s: first response time is over (%s)!' => 'Sag %s: Tidsgrænsen for første svar er overskredet (%s)!',
+        'Ticket %s: first response time will be over in %s!' => 'Sag %s: Tidsgrænsen for første svar overskrides om %s!',
+        'Ticket %s: update time is over (%s)!' => 'Sag %s: Opdateringstid er overskredet (%s)!',
+        'Ticket %s: update time will be over in %s!' => 'Sag %s: Opdateringstid overskrides om %s!',
+        'Ticket %s: solution time is over (%s)!' => 'Sag %s: Løsningstid er overskredet (%s)!',
+        'Ticket %s: solution time will be over in %s!' => 'Sag %s: løsningstid overskrides om %s!',
+        'There are more escalated tickets!' => 'Der er ikke flere eskalerede sager.',
+        'Plain Format' => 'Kildetekst',
+        'Reply All' => 'Svar alle',
+        'Direction' => 'Retning',
+        'New ticket notification' => 'Besked om ny sag',
+        'Send me a notification if there is a new ticket in "My Queues".' =>
+            'Send mig en besked, hvis der er en ny sag i "Mine køer".',
+        'Send new ticket notifications' => 'Send besked om nye sager',
+        'Ticket follow up notification' => 'Besked om opfølgning på sager',
+        'Send me a notification if a customer sends a follow up and I\'m the owner of the ticket or the ticket is unlocked and is in one of my subscribed queues.' =>
+            'Send mig en besked, hvis en kunde sender en opfølgning, og jeg er denne sags indehaver.',
+        'Send ticket follow up notifications' => 'Send besked om opfølgning til brugere',
+        'Ticket lock timeout notification' => 'Besked om sagsfrigivelse efter tidsfristens udløb',
+        'Send me a notification if a ticket is unlocked by the system.' =>
+            'Send mig en besked, hvis systemet frigiver en sag.',
+        'Send ticket lock timeout notifications' => 'Send besked om udløb af tidsfrister',
+        'Ticket move notification' => 'Besked om flyttet sag',
+        'Send me a notification if a ticket is moved into one of "My Queues".' =>
+            'Send mig en besked, hvis en sag flyttes ind i en af "Mine køer".',
+        'Send ticket move notifications' => 'Send besked om flyttede sager',
+        'Your queue selection of your favourite queues. You also get notified about those queues via email if enabled.' =>
+            'Dit valg af favirot-køer. Du får også beskeder om hændelser i de køer, hvis det er aktiveret.',
+        'Custom Queue' => 'Tilpasset kø',
+        'QueueView refresh time' => 'Genindlæsningstid af kø-visningen',
+        'If enabled, the QueueView will automatically refresh after the specified time.' =>
+            'Hvis aktiveret vil Kø-visningen automatisk genindlæses efter den specificerede tid.',
+        'Refresh QueueView after' => 'Opdater kø-billedet efter',
+        'Screen after new ticket' => 'Skærm efter oprettelse af ny sag',
+        'Show this screen after I created a new ticket' => 'Vis dette billede efter jeg har oprettet en ny sag',
+        'Closed Tickets' => 'Lukkede sager',
+        'Show closed tickets.' => 'Vis lukkede sager.',
+        'Max. shown Tickets a page in QueueView.' => 'Max. viste sager pr. side i kø-visning.',
+        'Ticket Overview "Small" Limit' => 'Sagsoversigt "Lille" grænse',
+        'Ticket limit per page for Ticket Overview "Small"' => 'Antal sager pr side for Sagsoversigt "Lille"',
+        'Ticket Overview "Medium" Limit' => 'Sagsoversigt "Mellem" grænse',
+        'Ticket limit per page for Ticket Overview "Medium"' => 'Antal sager pr side for Sagsoversigt "Mellem"',
+        'Ticket Overview "Preview" Limit' => 'Sagsoversigt "Forhåndsvisnings" grænse',
+        'Ticket limit per page for Ticket Overview "Preview"' => 'Antal sager pr side for Sagsoversigt "Forhåndsvisning"',
+        'Ticket watch notification' => 'Besked om fulgte sager',
+        'Send me the same notifications for my watched tickets that the ticket owners will get.' =>
+            'For mine fulgte sager, send mig samme beskeder som sagernes ejere får.',
+        'Send ticket watch notifications' => 'Send besked om fulgte sager',
+        'Out Of Office Time' => 'Ude af Kontoret',
+        'New Ticket' => 'Ny sag',
+        'Create new Ticket' => 'Opret ny sag',
+        'Customer called' => 'Opkald fra Kunde',
+        'phone call' => 'opringning',
+        'Phone Call Outbound' => 'Ring til kunden',
+        'Phone Call Inbound' => 'Kunden ringer',
+        'Reminder Reached' => 'Påmindelsesdato nået',
+        'Reminder Tickets' => 'Sager med påmindelser',
+        'Escalated Tickets' => 'Eskalerede Sager',
+        'New Tickets' => 'Nye Sager',
+        'Open Tickets / Need to be answered' => 'Åbne Sager',
+        'All open tickets, these tickets have already been worked on, but need a response' =>
+            'Alle åbne sager, der er i gang med at blive arbejdet på',
+        'All new tickets, these tickets have not been worked on yet' => 'Alle nye sager, der ikke er blevet arbejdet på endnu',
+        'All escalated tickets' => 'Alle eskalerede sager',
+        'All tickets with a reminder set where the reminder date has been reached' =>
+            'Alle sager med påmindelser, hvor påmindelsesfristen er nået',
+        'Archived tickets' => 'Arkiverede sager',
+        'Unarchived tickets' => 'Uarkiverede sager',
+        'Ticket Information' => 'Sagsinformation',
+        'including subqueues' => 'Inkluder underkøer',
+        'excluding subqueues' => 'Ekskluder underkøer',
+
+        # Template: AAAWeekDay
+        'Sun' => 'Søn',
+        'Mon' => 'Man',
+        'Tue' => 'Tir',
+        'Wed' => 'Ons',
+        'Thu' => 'Tor',
+        'Fri' => 'Fre',
+        'Sat' => 'Lør',
+
         # Template: AdminACL
         'ACL Management' => 'ACL-administration',
+        'Filter for ACLs' => 'Filtrer ACLs',
+        'Filter' => 'Filter',
+        'ACL Name' => 'ACL-navn',
         'Actions' => 'Handlinger',
         'Create New ACL' => 'Opret ny ACL',
         'Deploy ACLs' => 'Aktiver ACL\'er',
         'Export ACLs' => 'Eksporter ACL\'er',
-        'Filter for ACLs' => 'Filtrer ACLs',
-        'Just start typing to filter...' => 'Begynd at skrive for at filtrere...',
-        'Configuration Import' => 'Importer konfiguration',
+        'Configuration import' => 'Konfigurations-import',
         'Here you can upload a configuration file to import ACLs to your system. The file needs to be in .yml format as exported by the ACL editor module.' =>
             'Her kan du indlæse en konfigurationsfil for at importere ACLs til dit system. Filen skal være eksporteret i .yml format af ACL redigerings modulet.',
         'This field is required.' => 'Dette felt skal udfyldes',
         'Overwrite existing ACLs?' => 'Overskriv eksisterende ACL\'er?',
         'Upload ACL configuration' => 'Upload ACL-konfiguration',
         'Import ACL configuration(s)' => 'Importer ACL-konfiguration(er)',
-        'Description' => 'Beskrivelse',
         'To create a new ACL you can either import ACLs which were exported from another system or create a complete new one.' =>
             'For at oprette en ACL kan du enten importere ACLs der er eksporteret fra et andet system eller kreere en helt ny.',
         'Changes to the ACLs here only affect the behavior of the system, if you deploy the ACL data afterwards. By deploying the ACL data, the newly made changes will be written to the configuration.' =>
@@ -56,12 +802,9 @@ sub Data {
         'Please note: This table represents the execution order of the ACLs. If you need to change the order in which ACLs are executed, please change the names of the affected ACLs.' =>
             'Bemærk: Denne tabel repræsenterer i hvilken rækkefølge ACL\'er udføres. Hvis du har brug for at ændre rækkefølgen skal du omdøbe dem.',
         'ACL name' => 'ACL-navn',
-        'Comment' => 'Kommentar',
         'Validity' => 'Gyldighed',
-        'Export' => 'Eksporter',
         'Copy' => 'Kopier',
         'No data found.' => 'Ingen data fundet.',
-        'No matches found.' => 'Intet fundet',
 
         # Template: AdminACLEdit
         'Edit ACL %s' => 'Rediger ACL %s',
@@ -77,15 +820,20 @@ sub Data {
         'Check the official' => 'Tjek den officielle',
         'documentation' => 'dokumentation',
         'Show or hide the content' => 'Vis eller skjul indhold',
-        'Edit ACL Information' => '',
-        'Name' => 'Navn',
+        'Edit ACL information' => 'Rediger ACL-information',
         'Stop after match' => 'Stop, hvis matcher',
-        'Edit ACL Structure' => '',
+        'Edit ACL structure' => 'Rediger ACL-struktur',
+        'Save settings' => 'Gem ændringer',
+        'Save ACL' => '',
         'Save' => 'Gem',
         'or' => 'eller',
         'Save and finish' => 'Gem og afslut',
-        'Cancel' => 'Annuller',
         'Do you really want to delete this ACL?' => 'Vil du virkelig slette denne ACL?',
+        'This item still contains sub items. Are you sure you want to remove this item including its sub items?' =>
+            'Denne enhed indeholder under-enheder. Er du sikker på, at du vil fjerne denne enhed, inklusive dens underenheder?',
+        'An item with this name is already present.' => 'En enhed med dette navn eksisterer allerede.',
+        'Add all' => 'Tilføj alle',
+        'There was an error reading the ACL data.' => 'Fejl under læsning af ACL data.',
 
         # Template: AdminACLNew
         'Create a new ACL by submitting the form data. After creating the ACL, you will be able to add configuration items in edit mode.' =>
@@ -94,36 +842,25 @@ sub Data {
         # Template: AdminAttachment
         'Attachment Management' => 'Styring af vedhæftede filer',
         'Add attachment' => 'Vedhæft fil',
-        'Filter for Attachments' => 'Filter for vedhæftede filer',
-        'Filter for attachments' => '',
         'List' => 'Liste',
-        'Filename' => 'Filnavn',
-        'Changed' => 'ændret',
-        'Created' => 'Oprettet',
-        'Delete' => 'Slet',
         'Download file' => 'Download fil',
         'Delete this attachment' => 'Slet denne vedhæftede fil',
+        'Do you really want to delete this attachment?' => 'Er du sikker på at du vil slette denne vedhæftning?',
         'Add Attachment' => 'Tilføj vedhæftet fil',
         'Edit Attachment' => 'Rediger vedhæftet fil',
-        'Attachment' => 'Vedhæftet fil',
 
         # Template: AdminAutoResponse
         'Auto Response Management' => 'Styring af autosvar',
         'Add auto response' => 'Tilføj autosvar',
-        'Filter for Auto Responses' => 'Filtrer autosvar',
-        'Filter for auto responses' => '',
-        'Type' => 'Type',
         'Add Auto Response' => 'Tilføj autosvar',
         'Edit Auto Response' => 'Rediger autosvar',
-        'Subject' => 'Emne',
         'Response' => 'Svar',
         'Auto response from' => 'Autosvar fra',
         'Reference' => 'Reference',
         'You can use the following tags' => 'Du kan bruge følgende tags',
         'To get the first 20 character of the subject.' => 'For at få de første 20 tegn af emnet.',
         'To get the first 5 lines of the email.' => 'For at få de første 5 linjer af mailen.',
-        'To get the realname of the ticket\'s customer user (if given).' =>
-            '',
+        'To get the name of the ticket\'s customer user (if given).' => '',
         'To get the article attribute' => 'For at få indlægges attributter',
         ' e. g.' => 'f.eks.',
         'Options of the current customer user data' => 'Valgmuligheder for den nuværende kundebruger',
@@ -149,7 +886,6 @@ sub Data {
         'Send support data' => 'Send support-data',
         'This will allow the system to send additional support data information to OTRS Group.' =>
             'Dette tillader systemet at sende udvidet support-data information til OTRS koncernen.',
-        'Update' => 'Opdater',
         'System Registration' => 'System-registrering',
         'To enable data sending, please register your system with OTRS Group or update your system registration information (make sure to activate the \'send support data\' option.)' =>
             'For at aktivere data afsendelse, bedes du registrere dit system hos OTRS koncernen eller opdatere dit systems registreringsoplysninger (sørg for at aktivere "send support data".)',
@@ -170,35 +906,25 @@ sub Data {
 
         # Template: AdminCustomerCompany
         'Customer Management' => 'Administrer Kunder',
-        'Search' => 'Søg',
         'Wildcards like \'*\' are allowed.' => 'Jokertegn som \'*\' er tilladt.',
         'Add customer' => 'Tilføj kunde',
         'Select' => 'Vælg',
         'List (only %s shown - more available)' => '',
-        'total' => 'total',
+        'List (%s total)' => '',
         'Please enter a search term to look for customers.' => 'Angiv søgeord for at lede efter kunder',
-        'CustomerID' => 'Kunde-ID',
         'Add Customer' => 'Tilføj kunde',
-        'Edit Customer' => 'Rediger kunde',
-        'Please note' => '',
-        'This customer backend is read only!' => '',
 
         # Template: AdminCustomerUser
         'Customer User Management' => 'Kunde-bruger-administration',
         'Back to search results' => 'Tilbage til søgeresultater',
         'Add customer user' => 'Tilføj kundebruger',
         'Customer user are needed to have a customer history and to login via customer panel.' =>
-            'Kundebruger behøves for at få vist kundehistorik og til at logge på i kundepanelet.',
-        'List (%s total)' => '',
-        'Username' => 'Brugernavn',
-        'Email' => 'Mail',
-        'Last Login' => 'Sidste login',
+            'Kundebrugere skal oprettes for at få vist kundehistorik og for at kunne logge på i kundepanelet.',
+        'Last Login' => 'Seneste login',
         'Login as' => 'Login som',
         'Switch to customer' => 'Skift til kunde',
         'Add Customer User' => 'Tilføj Kundebruger',
         'Edit Customer User' => 'Rediger Kundebruger',
-        'This customer backend is read only, but the customer user preferences can be changed!' =>
-            '',
         'This field is required and needs to be a valid email address.' =>
             'Dette felt er kævet og skal være en gyldig mail-adresse.',
         'This email address is not allowed due to the system configuration.' =>
@@ -220,11 +946,13 @@ sub Data {
         'You can manage these groups via the configuration setting "CustomerGroupAlwaysGroups".' =>
             'Du kan administrere disse grupper via konfigurationsindstillingen "CustomerGroupAlwaysGroups".',
         'Filter for Groups' => 'Filtrer grupper',
+        'Just start typing to filter...' => 'Begynd at skrive for at filtrere...',
         'Select the customer:group permissions.' => 'Vælg kunde:gruppe-tilladelser.',
         'If nothing is selected, then there are no permissions in this group (tickets will not be available for the customer).' =>
             'Hvis intet er velgt, er der ingen tilladelser i denne gruppe (sager vil ikke være tilgængelige for kunden).',
         'Search Results' => 'Søgeresultat',
         'Customers' => 'Kunder',
+        'No matches found.' => 'Intet fundet',
         'Groups' => 'Grupper',
         'Change Group Relations for Customer' => 'Administrer Gruppe-relationer for Kunde',
         'Change Customer Relations for Group' => 'Administrer Kunde-relationer for Gruppe',
@@ -242,7 +970,6 @@ sub Data {
         'Manage Customer-Services Relations' => 'Administrer Kunde/Service-relationer',
         'Edit default services' => 'Rediger standardservices',
         'Filter for Services' => 'Filter for services',
-        'Services' => 'Services',
         'Allocate Services to Customer' => 'Tildel Services til Kunde',
         'Allocate Customers to Service' => 'Tildel Kunder til Service',
         'Toggle active state for all' => 'Skift aktiv tilstand for alle',
@@ -252,17 +979,18 @@ sub Data {
         # Template: AdminDynamicField
         'Dynamic Fields Management' => 'Administrer Dynamiske Felter',
         'Add new field for object' => 'Tilføj nyt felt for objekt',
-        'Filter for Dynamic Fields' => '',
-        'Filter for dynamic fields' => '',
         'To add a new field, select the field type from one of the object\'s list, the object defines the boundary of the field and it can\'t be changed after the field creation.' =>
             '',
         'Dynamic Fields List' => 'Liste over Dynamiske Felter',
-        'Settings' => 'Indstillinger',
         'Dynamic fields per page' => 'Dynamiske felter pr. side',
         'Label' => 'Label',
         'Order' => 'Rækkefølge',
         'Object' => 'Objekt',
         'Delete this field' => 'Slet dette felt',
+        'Do you really want to delete this dynamic field? ALL associated data will be LOST!' =>
+            'Vil du virkelig slette dette dynamiske felt? ALT tilhørende data vil GÅ TABT!',
+        'Delete field' => 'Slet felt',
+        'Deleting the field and its data. This may take a while...' => '',
 
         # Template: AdminDynamicFieldCheckbox
         'Dynamic Fields' => 'Dynamiske Felter',
@@ -304,7 +1032,6 @@ sub Data {
         'Show link' => 'Vis link',
         'Here you can specify an optional HTTP link for the field value in Overviews and Zoom screens.' =>
             'Her kan du angive et valgfrit HTTP-link for felt-værdien i oversigter og Zoom-skærmbilleder.',
-        'Example' => 'Eksempel',
         'Link for preview' => '',
         'If filled in, this URL will be used for a preview which is shown when this link is hovered in ticket zoom. Please note that for this to work, the regular URL field above needs to be filled in, too.' =>
             '',
@@ -345,12 +1072,11 @@ sub Data {
         'Add RegEx' => 'Tilføj RegEx',
 
         # Template: AdminEmail
-        'Admin Notification' => 'Besked til admin',
+        'Admin Notification' => 'Besked til Admin',
         'With this module, administrators can send messages to agents, group or role members.' =>
             'Med dette modul kan administratorer sende beskeder til agenter, grupper eller rollemedlemmer.',
         'Create Administrative Message' => 'Opret administrativ besked',
         'Your message was sent to' => 'Din besked blev sendt til',
-        'From' => 'Fra',
         'Send message to users' => 'Send besked til brugere',
         'Send message to group members' => 'Send besked til gruppemedlemmer',
         'Group members need to have permission' => 'Gruppemedlemmer skal have tilladelse',
@@ -362,17 +1088,16 @@ sub Data {
         # Template: AdminGenericAgent
         'Generic Agent' => 'Automatisk Agent',
         'Add job' => 'Tilføj job',
-        'Filter for Generic Agent Jobs' => '',
-        'Filter for generic agent jobs' => '',
         'Last run' => 'Sidste kørsel',
         'Run Now!' => 'Kør nu',
         'Delete this task' => 'Slet dette job',
         'Run this task' => 'Kør job',
+        'Do you really want to delete this task?' => 'Vil du virkelig slette denne opgave?',
         'Job Settings' => 'Job-indstillinger',
         'Job name' => 'Job-navn',
         'The name you entered already exists.' => 'Det indtastede navn eksisterer allerede.',
         'Toggle this widget' => 'Slå denne widget til eller fra',
-        'Automatic Execution (Multiple Tickets)' => '',
+        'Automatic execution (multiple tickets)' => 'Automatisk udførelse (flere sager)',
         'Execution Schedule' => 'Udførelses tidsplan',
         'Schedule minutes' => 'Planlæg minutter',
         'Schedule hours' => 'Planlæg timer',
@@ -381,44 +1106,36 @@ sub Data {
             'Denne automatisk agent vil i øjeblikket ikke køre.',
         'To enable automatic execution select at least one value from minutes, hours and days!' =>
             'For at aktivere automatisk kørsel, vælg mindst en værdi fra minutter, timer og dage.',
-        'Event Based Execution (Single Ticket)' => '',
-        'Event Triggers' => 'Hændelses udløsere',
+        'Event based execution (single ticket)' => 'Hændelsesbaseret tidsplan (enkelt sag)',
+        'Event Triggers' => 'Hændelsens udløsere',
         'List of all configured events' => 'Liste med alle konfigurerede hændelser',
-        'Event' => 'Hændelse',
         'Delete this event' => 'Slet denne hændelse',
         'Additionally or alternatively to a periodic execution, you can define ticket events that will trigger this job.' =>
             '',
         'If a ticket event is fired, the ticket filter will be applied to check if the ticket matches. Only then the job is run on that ticket.' =>
             '',
-        'Do you really want to delete this event trigger?' => 'Ønsker du at slette denne hændelses-udløser',
+        'Do you really want to delete this event trigger?' => 'Ønsker du at slette denne hændelses udløser',
         'Add Event Trigger' => 'Tilføj hændelses-udløser',
         'Add Event' => 'Tilføj hændelse',
         'To add a new event select the event object and event name and click on the "+" button' =>
             'For at tilføje en ny hændelse skal du vælge hændelses-objekt og navn og klikke på "+" knappen',
+        'Duplicate event.' => 'Dubliker hændelse',
+        'This event is already attached to the job, Please use a different one.' =>
+            'Denne hændelse er allerede tilknyttet jobbet, brug venligst en anden.',
+        'Delete this Event Trigger' => 'Slet denne hændelses udløser',
+        'Remove selection' => 'Fjern markering',
         'Select Tickets' => 'Vælg sager',
         '(e. g. 10*5155 or 105658*)' => '(f.eks. 10*5155 eller 105658*)',
-        'Title' => 'Titel',
         '(e. g. 234321)' => '(f.eks. 234321)',
         'Customer user' => 'Kundebruger',
         '(e. g. U5150)' => '(f.eks. U5150)',
         'Fulltext-search in article (e. g. "Mar*in" or "Baue*").' => 'Fuldtekst-søgning i indlæg (f.eks. "Mar*in" eller "Niels*").',
-        'To' => 'Til',
-        'Cc' => 'Cc',
-        'Text' => 'Tekst',
-        'Service' => 'Service',
-        'Service Level Agreement' => 'Service Level Agreement',
-        'Priority' => 'Prioritet',
-        'Queue' => 'Kø',
-        'State' => 'Tilstand',
         'Agent' => 'Agent',
-        'Owner' => 'Ejer',
-        'Responsible' => 'Ansvarlig',
         'Ticket lock' => 'Tildelt',
         'Create times' => 'Oprettelsestider',
         'No create time settings.' => 'Angiv ikke oprettelsestid.',
         'Ticket created' => 'Sag oprettet',
         'Ticket created between' => 'Sag oprettet mellem',
-        'and' => 'og',
         'Last changed times' => 'Sidst ændret tidspunkt',
         'No last changed time settings.' => 'Ingen sidst ændret tids indstilling',
         'Ticket last changed' => 'Sag sidst ændret',
@@ -477,16 +1194,9 @@ sub Data {
         'Warning: All affected tickets will be removed from the database and cannot be restored!' =>
             'Advarsel: Alle berørte sager vil blive fjernet fra databasen og kan ikke gendannes!',
         'Execute Custom Module' => 'Udfør speciel-modul',
-        'Module' => 'Modul',
         'Param %s key' => 'Param %s nøgle',
         'Param %s value' => 'Param %s værdi',
         'Save Changes' => 'Gem ændringer',
-        'Tag Reference' => '',
-        'In the note section, you can use the following tags' => '',
-        'Attributes of the current customer user data' => '',
-        'Attributes of the ticket data' => '',
-        'Ticket dynamic fields internal key values' => '',
-        'Example note' => '',
         'Results' => 'Resultater',
         '%s Tickets affected! What do you want to do?' => '%s sager vil blive berørt. Hvad vil du gøre?',
         'Warning: You used the DELETE option. All deleted tickets will be lost!' =>
@@ -496,7 +1206,6 @@ sub Data {
         'Edit job' => 'Rediger job',
         'Run job' => 'Kør job',
         'Affected Tickets' => 'Berørte sager',
-        'Age' => 'Alder',
 
         # Template: AdminGenericInterfaceDebugger
         'GenericInterface Debugger for Web Service %s' => '',
@@ -519,6 +1228,9 @@ sub Data {
         'Limit' => 'Grænse',
         'Refresh' => 'Opfrisk',
         'Request Details' => '',
+        'An error occurred during communication.' => 'En fejl skete under kommunikation.',
+        'Show or hide the content.' => 'Vis eller skjul indholdet.',
+        'Clear debug log' => 'Tøm debug-log',
 
         # Template: AdminGenericInterfaceInvokerDefault
         'Add new Invoker to Web Service %s' => '',
@@ -548,6 +1260,7 @@ sub Data {
         'Synchronous event triggers would be processed directly during the web request.' =>
             '',
         'Save and continue' => 'Gem og fortsæt',
+        'Delete this Invoker' => '',
 
         # Template: AdminGenericInterfaceMappingSimple
         'GenericInterface Mapping Simple for Web Service %s' => '',
@@ -572,6 +1285,7 @@ sub Data {
         'New value map' => '',
         'Add value mapping' => '',
         'Do you really want to delete this key mapping?' => 'Vil du virkelig fjerne denne taste-binding?',
+        'Delete this Key Mapping' => 'Fjern denne taste-binding',
 
         # Template: AdminGenericInterfaceMappingXSLT
         'GenericInterface Mapping XSLT for Web Service %s' => '',
@@ -599,10 +1313,11 @@ sub Data {
         'Mapping for outgoing response data' => '',
         'The response data will be processed by this mapping, to transform it to the kind of data the remote system expects.' =>
             '',
+        'Delete this Operation' => 'Slet denne operation',
 
         # Template: AdminGenericInterfaceTransportHTTPREST
         'GenericInterface Transport HTTP::REST for Web Service %s' => '',
-        'Network Transport' => '',
+        'Network transport' => '',
         'Properties' => 'Egenskaber',
         'Route mapping for Operation' => '',
         'Define the route that should get mapped to this operation. Variables marked by a \':\' will get mapped to the entered name and passed along with the others to the mapping. (e.g. /Ticket/:TicketID).' =>
@@ -629,12 +1344,10 @@ sub Data {
             '',
         'Default command' => 'Standard kommando',
         'The default HTTP command to use for the requests.' => '',
-        'Authentication' => 'Authentikation',
-        'The authentication mechanism to access the remote system.' => 'Authentikations-mekanisme for at tilgå fjernsystemet.',
-        'A "-" value means no authentication.' => 'Et "-" betyder ingen authentikation.',
-        'User' => 'Bruger',
+        'Authentication' => 'Godkendelse',
+        'The authentication mechanism to access the remote system.' => 'Godkendelses-mekanisme for at tilgå fjernsystemet.',
+        'A "-" value means no authentication.' => 'Et "-" betyder ingen godkendelse.',
         'The user name to be used to access the remote system.' => 'Brugernavnet, der skal anvendes for at tilgå fjernsystemet.',
-        'Password' => 'Adgangskode',
         'The password for the privileged user.' => 'Passwordet for den priviligerede bruger.',
         'Use SSL Options' => 'Brug SSL',
         'Show or hide SSL options to connect to the remote system.' => 'Vis eller skjul SSL-muligheder for at forbinde til fjernsystemet.',
@@ -708,7 +1421,6 @@ sub Data {
         'Sort options' => 'Sorterings indstillinger',
         'Add new first level element' => '',
         'Element' => '',
-        'Add' => 'Tilføj',
         'Outbound sort order for xml fields (structure starting below function name wrapper) - see documentation for SOAP transport.' =>
             '',
 
@@ -727,11 +1439,13 @@ sub Data {
         'Configuration history' => 'Konfigurationshistorie',
         'Delete web service' => 'Slet web-service',
         'Do you really want to delete this web service?' => 'Vil du virkelig slette denne web-service?',
-        'Example Web Services' => '',
-        'Here you can activate best practice example web service that are part of %s. Please note that some additional configuration may be required.' =>
+        'Ready-to-run Web Services' => '',
+        'Here you can activate ready-to-run web services showcasing our best practices that are a part of %s.' =>
             '',
-        'Import example web service' => '',
-        'Do you want to benefit from web services created by experts? Upgrade to %s to be able to import some sophisticated example web services.' =>
+        'Please note that these web services may depend on other modules only available with certain %s contract levels (there will be a notification with further details when importing).' =>
+            '',
+        'Import ready-to-run web service' => '',
+        'Would you like to benefit from web services created by experts? Upgrade to %s to import some sophisticated ready-to-run web services.' =>
             '',
         'After you save the configuration you will be redirected again to the edit screen.' =>
             '',
@@ -746,7 +1460,6 @@ sub Data {
             '',
         'In requester mode, OTRS uses web services of remote systems.' =>
             '',
-        'Network transport' => '',
         'Operations are individual system functions which remote systems can request.' =>
             '',
         'Invokers prepare data for a request to a remote web service, and process its response data.' =>
@@ -757,14 +1470,18 @@ sub Data {
         'Delete this action' => '',
         'At least one %s has a controller that is either not active or not present, please check the controller registration or delete the %s' =>
             '',
+        'Delete webservice' => 'Slet webtjeneste',
+        'Delete operation' => '',
+        'Delete invoker' => '',
+        'Clone webservice' => 'kopier webtjeneste',
+        'Import webservice' => 'Importer webtjeneste',
 
         # Template: AdminGenericInterfaceWebserviceHistory
         'GenericInterface Configuration History for Web Service %s' => '',
-        'History' => 'Historik',
         'Go back to Web Service' => 'Gå tilbage til web-service',
         'Here you can view older versions of the current web service\'s configuration, export or even restore them.' =>
             'Her kan du se, eksportere eller gendanne ældre versioner af den aktive webtjenestes konfiguration.',
-        'Configuration History List' => 'Konfigurations historik',
+        'Configuration History List' => 'Historik over Konfigurationen',
         'Version' => 'Version',
         'Create time' => 'Oprettelsestidspunkt',
         'Select a single configuration version to see its details.' => 'Vælg en konfigurations version for at se detaljer.',
@@ -773,33 +1490,31 @@ sub Data {
         'Do you really want to restore this version of the web service configuration?' =>
             'Ønsker du at gendanne denne version af webtjenestens konfiguration?',
         'Your current web service configuration will be overwritten.' => 'Din nuværende webtjeneste konfiguration bliver overskrevet.',
+        'Restore' => 'Gendan',
 
         # Template: AdminGroup
+        'WARNING: When you change the name of the group \'admin\', before making the appropriate changes in the SysConfig, you will be locked out of the administrations panel! If this happens, please rename the group back to admin per SQL statement.' =>
+            'ADVARSEL: Når du skifter navnet på gruppen \'admin\', før du laver de passende ændringer i SysConfig, vil du blive låst ude af administrationspanelet! Hvis det sker, skal du omdøbe gruppen tilbage til admin via SQL-statements.',
         'Group Management' => 'Gruppestyring',
         'Add group' => 'Tilføj gruppe',
-        'Filter for log entries' => '',
         'The admin group is to get in the admin area and the stats group to get stats area.' =>
             'Admin-gruppen giver adgang til administratorområdet og statgruppen giver adgang til rapportområdet.',
         'Create new groups to handle access permissions for different groups of agent (e. g. purchasing department, support department, sales department, ...). ' =>
             'Opret grupper for at give adgang til forskellige grupper af agenter (f.eks. indkøb, support, salg).',
         'It\'s useful for ASP solutions. ' => 'Det er nyttigt for ASP-løsninger.',
+        'total' => 'i alt',
         'Add Group' => 'Tilføj Gruppe',
         'Edit Group' => 'Rediger Gruppe',
 
         # Template: AdminLog
         'System Log' => 'Systemlog',
-        'Filter for Log Entries' => '',
         'Here you will find log information about your system.' => 'Her finder du log-information om dit system',
         'Hide this message' => 'Skjul denne besked',
         'Recent Log Entries' => 'Nylige log-føringer',
-        'Facility' => 'Facilitet',
-        'Message' => 'Meddelelse',
 
         # Template: AdminMailAccount
         'Mail Account Management' => 'Administrer mail-konti',
         'Add mail account' => 'Tilføj mailkonto',
-        'Filter for Mail Accounts' => '',
-        'Filter for mail accounts' => '',
         'All incoming emails with one account will be dispatched in the selected queue!' =>
             'Alle indkommende mails med denne konto tildeles til den valgte kø.',
         'If your account is trusted, the already existing X-OTRS header at arrival time (for priority, ...) will be used! PostMaster filter will be used anyway.' =>
@@ -818,37 +1533,32 @@ sub Data {
         # Template: AdminNavigationBar
         'Admin' => 'Admin',
         'Agent Management' => 'Administrer Agenter',
-        'Email Settings' => 'Email-indstillinger',
         'Queue Settings' => 'Administrer Køer',
         'Ticket Settings' => 'Administrer Sager',
         'System Administration' => 'Administrer System',
         'Online Admin Manual' => 'Online Admin Manual',
 
         # Template: AdminNotificationEvent
-        'Ticket Notification Management' => 'Håndter sags notifikationer',
+        'Ticket Notification Management' => 'Håndter sagsbeskeder',
         'Add notification' => 'Tilføj besked',
-        'Export Notifications' => 'Eksporter notifikationer',
-        'Filter for Notifications' => '',
-        'Filter for notifications' => '',
+        'Export Notifications' => 'Eksporter beskeder',
+        'Configuration Import' => 'Importer konfiguration',
         'Here you can upload a configuration file to import Ticket Notifications to your system. The file needs to be in .yml format as exported by the Ticket Notification module.' =>
-            'Her kan du indlæse en konfigurationsfil for at importere sags-notifikationer til dit system. Filen skal være eksporteret i .yml format af sags-notifikations modulet.',
-        'Overwrite existing notifications?' => 'Overskriv eksisterende notifikationer?',
-        'Upload Notification configuration' => 'Upload notifikations konfiguration',
-        'Import Notification configuration' => 'Importer notifikations konfiguration',
+            'Her kan du indlæse en konfigurationsfil for at importere sagsbeskeder til dit system. Filen skal være eksporteret i .yml format af sagsbesked-modulet.',
+        'Overwrite existing notifications?' => 'Overskriv eksisterende beskeder?',
+        'Upload Notification configuration' => 'Upload besked-konfiguration',
+        'Import Notification configuration' => 'Importer besked-konfiguration',
         'Delete this notification' => 'Slet denne besked',
+        'Do you really want to delete this notification?' => 'Ønsker du at slette denne besked?',
         'Add Notification' => 'Tilføj besked',
         'Edit Notification' => 'Rediger besked',
         'Show in agent preferences' => 'Vis i agent præferencer',
         'Agent preferences tooltip' => 'Agent præference værktøjstip',
         'This message will be shown on the agent preferences screen as a tooltip for this notification.' =>
             '',
-        'Events' => 'Hændelser',
         'Here you can choose which events will trigger this notification. An additional ticket filter can be applied below to only send for ticket with certain criteria.' =>
             '',
         'Ticket Filter' => 'Sagsfilter',
-        'Lock' => 'Træk',
-        'SLA' => 'SLA',
-        'Customer' => 'Kunde',
         'Article Filter' => 'Filtrer indlæg',
         'Only for ArticleCreate and ArticleSend event' => '',
         'Article type' => 'Indlægstype',
@@ -868,44 +1578,51 @@ sub Data {
         'Once per day' => 'Dagligt',
         'Notify user just once per day about a single ticket using a selected transport.' =>
             '',
-        'Notification Methods' => 'Notifikations metoder',
+        'Notification Methods' => 'Beskedafgivelsesmetoder',
         'These are the possible methods that can be used to send this notification to each of the recipients. Please select at least one method below.' =>
             '',
-        'Enable this notification method' => 'Aktiver denne notifikations metode',
+        'Enable this notification method' => 'Aktiver denne beskedafgivelsesmetode',
         'Transport' => '',
-        'At least one method is needed per notification.' => 'Mindst en metode er krævet pr. notifikation',
+        'At least one method is needed per notification.' => 'Mindst en metode er krævet pr. besked',
         'Active by default in agent preferences' => '',
         'This is the default value for assigned recipient agents who didn\'t make a choice for this notification in their preferences yet. If the box is enabled, the notification will be sent to such agents.' =>
             '',
         'This feature is currently not available.' => '',
         'No data found' => 'Ingen data fundet',
-        'No notification method found.' => 'Ingen notifikations metode fundet.',
-        'Notification Text' => 'Notifikations tekst',
+        'No notification method found.' => 'Ingen beskedafgivelsesmetode fundet.',
+        'Notification Text' => 'Beskedtekst',
         'This language is not present or enabled on the system. This notification text could be deleted if it is not needed anymore.' =>
-            'Dette sprog er deaktiveret eller ikke tilstede på dette system.  Denne notifikations-tekst  kan slettes hvis den ikke skal bruges mere.',
-        'Remove Notification Language' => 'Fjern notifikationssprog',
+            'Dette sprog er deaktiveret eller ikke tilstede på dette system.  Denne besked-tekst  kan slettes hvis den ikke skal bruges mere.',
+        'Remove Notification Language' => 'Fjern beskedsprog',
         'Message body' => '',
-        'Add new notification language' => 'Tilføj notifikationssprog',
+        'Add new notification language' => 'Tilføj beskedsprog',
+        'Do you really want to delete this notification language?' => 'Er du sikker på at du vil slette dette beskedsprog',
+        'Tag Reference' => '',
         'Notifications are sent to an agent or a customer.' => 'Beskeder sendes til en agent eller kunde.',
         'To get the first 20 character of the subject (of the latest agent article).' =>
             'For at få de første 20 tegn af emnet (af den seneste agent-indlæg).',
         'To get the first 5 lines of the body (of the latest agent article).' =>
-            'For at få de første 5 linier af beskeden (af den seneste agent-indlæg).',
+            'For at få de første 5 linier af indholdet (af den seneste agent-indlæg).',
         'To get the first 20 character of the subject (of the latest customer article).' =>
             'For at få de første 20 tegn af emnet (af det seneste kunde-indlæg).',
         'To get the first 5 lines of the body (of the latest customer article).' =>
-            'For at få de første 5 linier af beskeden (af den seneste agent-indlæg).',
+            'For at få de første 5 linier af indholdet (af det seneste agent-indlæg).',
+        'Attributes of the current customer user data' => '',
         'Attributes of the current ticket owner user data' => '',
         'Attributes of the current ticket responsible user data' => '',
         'Attributes of the current agent user who requested this action' =>
             '',
         'Attributes of the recipient user for the notification' => '',
+        'Attributes of the ticket data' => '',
+        'Ticket dynamic fields internal key values' => '',
         'Ticket dynamic fields display values, useful for Dropdown and Multiselect fields' =>
             '',
-        'Example notification' => 'Eksempel notifikation',
+        'Example notification' => 'Eksempel på besked',
 
         # Template: AdminNotificationEventTransportEmailSettings
         'Additional recipient email addresses' => 'Yderligere modtageres email adresser',
+        'You can use OTRS-tags like <OTRS_TICKET_DynamicField_...> to insert values from the current ticket.' =>
+            '',
         'Notification article type' => 'Beskedens indlægstype',
         'An article will be created if the notification is sent to the customer or an additional email address.' =>
             '',
@@ -993,7 +1710,6 @@ sub Data {
             'Du kan på denne måde direkte redigere den nøglering, der er konfigureret i SysConfig.',
         'Introduction to PGP' => 'Introduktion til PGP',
         'Result' => 'Resultat',
-        'Status' => 'Status',
         'Identifier' => 'Identifikator',
         'Bit' => 'Bit',
         'Fingerprint' => 'Fingeraftryk',
@@ -1004,9 +1720,8 @@ sub Data {
 
         # Template: AdminPackageManager
         'Package Manager' => 'Pakkestyring',
-        'Uninstall Package' => '',
-        'Do you really want to uninstall this package?' => 'Er du sikker på, du ønsker at afinstallere denne pakke?',
         'Uninstall package' => 'Afinstaller pakke',
+        'Do you really want to uninstall this package?' => 'Er du sikker på, du ønsker at afinstallere denne pakke?',
         'Reinstall package' => 'Geninstaller pakke',
         'Do you really want to reinstall this package? Any manual changes will be lost.' =>
             'Vil du virkelig geninstallere denne pakke? Alle manuelle ændringer vil gå tabt.',
@@ -1020,16 +1735,13 @@ sub Data {
         'OTRS Verify™ can not continue!' => '',
         'Enable cloud services' => '',
         'Online Repository' => 'Online lagerdepot',
-        'Action' => 'Handling',
         'Module documentation' => 'Modul-dokumentation',
         'Upgrade' => 'Opgrader',
         'Local Repository' => 'Lokalt lagerdepot',
         'This package is verified by OTRSverify (tm)' => 'Denne pakke er verificeret af OTRSverify (tm)',
         'Uninstall' => 'Afinstaller',
-        'Package not correctly deployed! Please reinstall the package.' =>
-            'Pakken er ikke installeret korrekt! Installer den igen.',
         'Reinstall' => 'Geninstaller',
-        'Features for %s Customers Only' => '',
+        'Features for %s customers only' => '',
         'With %s, you can benefit from the following optional features. Please make contact with %s if you need more information.' =>
             '',
         'Download package' => 'Download pakke',
@@ -1042,11 +1754,10 @@ sub Data {
         'Download' => 'Download',
         'Download file from package!' => 'Download fil fra pakke!',
         'Required' => 'Påkrævet',
-        'Size' => 'Størrelse',
-        'PrimaryKey' => 'PrimærNøgle',
-        'AutoIncrement' => 'AutoForhøjelse',
+        'Primary Key' => '',
+        'Auto Increment' => '',
         'SQL' => 'SQL',
-        'File Differences for File %s' => '',
+        'File differences for file %s' => 'Fil-difference for fil %s',
 
         # Template: AdminPerformanceLog
         'Performance Log' => 'Ydelseslog',
@@ -1057,7 +1768,6 @@ sub Data {
         'Disable it here!' => 'Deaktiver det her!',
         'Logfile too large!' => 'Logfil er for stor',
         'The logfile is too large, you need to reset it' => 'Logfilen er for stor, du bør nulstille den',
-        'Reset' => 'Nulstil',
         'Overview' => 'Oversigt',
         'Range' => 'Område',
         'last' => 'sidste',
@@ -1067,7 +1777,6 @@ sub Data {
         'Max Response' => 'Max Svar',
         'Average Response' => 'Gennemsnitligt Svar',
         'Period' => 'Periode',
-        'minutes' => 'minutter',
         'Min' => 'Min',
         'Max' => 'Max',
         'Average' => 'Gennemsnitlig',
@@ -1075,17 +1784,14 @@ sub Data {
         # Template: AdminPostMasterFilter
         'PostMaster Filter Management' => 'PostMasters filterstyring',
         'Add filter' => 'Tilføj filter',
-        'Filter for Postmaster Filters' => '',
-        'Filter for postmaster filters' => '',
         'To dispatch or filter incoming emails based on email headers. Matching using Regular Expressions is also possible.' =>
             'For at fordele eller filtrere indgående mail baseret på mail-headere. Det er også muligt at macthe på regulære udtryk.',
         'If you want to match only the email address, use EMAILADDRESS:info@example.com in From, To or Cc.' =>
             'Hvis du kun ønsker at matche mail adressen, så brug EMAILADDRESS:info@example.com i Fra, Til eller Cc.',
         'If you use Regular Expressions, you also can use the matched value in () as [***] in the \'Set\' action.' =>
             'Hvis du bruger regulære udtryk, kan du også bruge den matchede værdi i (), som [***] i \'Set\'-handlingen.',
-        'You can also use \'named captures\' ((?<name>)) and use the names in the \'Set\' action ([**\name**]). (e.g. Regexp: Server: (?<server>\w+), Set action [**\server**]). A matched EMAILADDRESS has the name \'email\'.' =>
-            '',
         'Delete this filter' => 'Slet dette filter',
+        'Do you really want to delete this filter?' => '',
         'Add PostMaster Filter' => 'Tilføj Postmaster-filter',
         'Edit PostMaster Filter' => 'Rediger Postmaster-filter',
         'The name is required.' => 'Navnet er påkrævet.',
@@ -1100,21 +1806,16 @@ sub Data {
         'Set email header' => 'Sæt mail-header',
         'Set value' => 'Sæt værdi',
         'The field needs to be a literal word.' => 'Feltet skal være et ord.',
-        'Save changes' => '',
-        'Header' => 'Overskrift',
 
         # Template: AdminPriority
         'Priority Management' => 'Administrer Prioriteter',
         'Add priority' => 'Tilføj prioritet',
-        'Filter for Priorities' => '',
-        'Filter for priorities' => '',
         'Add Priority' => 'Tilføj prioritet',
         'Edit Priority' => 'Rediger prioritet',
 
         # Template: AdminProcessManagement
         'Process Management' => 'Proces styring',
         'Filter for Processes' => 'Filter for processer',
-        'Filter' => 'Filter',
         'Create New Process' => 'Opret ny proces',
         'Deploy All Processes' => 'Aktiver alle processer',
         'Here you can upload a configuration file to import a process to your system. The file needs to be in .yml format as exported by process management module.' =>
@@ -1122,12 +1823,12 @@ sub Data {
         'Overwrite existing entities' => 'Overskriv eksisterende enheder',
         'Upload process configuration' => 'Upload proces-konfiguration',
         'Import process configuration' => 'Importer proces-konfiguration',
-        'Example Processes' => '',
-        'Here you can activate best practice example processes that are part of %s. Please note that some additional configuration may be required.' =>
-            'Her kan du aktivere "Best Practice" processer der er en del af %s. Bemærk at yderligere konfiguration kan være nødvendig.',
-        'Import example process' => 'Importer eksempel processer',
-        'Do you want to benefit from processes created by experts? Upgrade to %s to be able to import some sophisticated example processes.' =>
-            'Vil du have udbytte af processer lavet af experter? Opgrader til %s for at importere nogle sofistikerede eksempel processer.',
+        'Ready-to-run Processes' => '',
+        'Here you can activate ready-to-run processes showcasing our best practices. Please note that some additional configuration may be required.' =>
+            '',
+        'Would you like to benefit from processes created by experts? Upgrade to %s to import some sophisticated ready-to-run processes.' =>
+            '',
+        'Import ready-to-run process' => '',
         'To create a new Process you can either import a Process that was exported from another system or create a complete new one.' =>
             'For at lave en ny proces kan du enten importere en proces fra et andet system eller kreere en helt ny.',
         'Changes to the Processes here only affect the behavior of the system, if you synchronize the Process data. By synchronizing the Processes, the newly made changes will be written to the Configuration.' =>
@@ -1153,9 +1854,10 @@ sub Data {
         'Filter available Activity Dialogs' => 'Filtrer tilgængelige aktivitets dialoger',
         'Available Activity Dialogs' => 'Tilgængelige aktivitets dialoger',
         'Name: %s, EntityID: %s' => '',
-        'Edit' => 'Rediger',
         'Create New Activity Dialog' => 'Opret ny aktivitets dialog',
         'Assigned Activity Dialogs' => 'Tildelte aktivitets dialoger',
+        'As soon as you use this button or link, you will leave this screen and its current state will be saved automatically. Do you want to continue?' =>
+            '',
 
         # Template: AdminProcessManagementActivityDialog
         'Please note that changing this activity dialog will affect the following activities' =>
@@ -1183,6 +1885,8 @@ sub Data {
         'Assigned Fields' => 'Tildelte felter',
         'ArticleType' => 'IndlægsType',
         'Display' => 'Vis',
+        'Edit Field Details' => '',
+        'Customer interface does not support internal article types.' => 'Kundeinterfacet understøtter ikke interne indlægs-typer.',
 
         # Template: AdminProcessManagementPath
         'Path' => 'Sti',
@@ -1217,7 +1921,7 @@ sub Data {
             '',
         'To assign an Activity Dialog to an Activity drop the Activity Dialog element from this sidebar over the Activity placed in the canvas area.' =>
             '',
-        'You can start a connection between to Activities by dropping the Transition element over the Start Activity of the connection. After that you can move the loose end of the arrow to the End Activity.' =>
+        'You can start a connection between two Activities by dropping the Transition element over the Start Activity of the connection. After that you can move the loose end of the arrow to the End Activity.' =>
             '',
         'Actions can be assigned to a Transition by dropping the Action Element onto the label of a Transition.' =>
             '',
@@ -1230,7 +1934,6 @@ sub Data {
         'Extend the height of the Canvas' => '',
         'Remove the Activity from this Process' => '',
         'Edit this Activity' => 'Rediger denne aktivitet',
-        'Save settings' => 'Gem ændringer',
         'Save Activities, Activity Dialogs and Transitions' => '',
         'Do you really want to delete this Process?' => 'Vil du virkelig slette denne proces?',
         'Do you really want to delete this Activity?' => 'Vil du virkelig slette denne aktivitet?',
@@ -1241,12 +1944,31 @@ sub Data {
             '',
         'Do you really want to remove this transition from the canvas? This can only be undone by leaving this screen without saving.' =>
             '',
+        'Hide EntityIDs' => '',
+        'Delete Entity' => '',
+        'Remove Entity from canvas' => '',
+        'This Activity is already used in the Process. You cannot add it twice!' =>
+            '',
+        'This Activity cannot be deleted because it is the Start Activity.' =>
+            '',
+        'This Transition is already used for this Activity. You cannot use it twice!' =>
+            '',
+        'This TransitionAction is already used in this Path. You cannot use it twice!' =>
+            '',
+        'Remove the Transition from this Process' => '',
+        'No TransitionActions assigned.' => '',
+        'The Start Event cannot loose the Start Transition!' => '',
+        'No dialogs assigned yet. Just pick an activity dialog from the list on the left and drag it here.' =>
+            '',
+        'An unconnected transition is already placed on the canvas. Please connect this transition first before placing another transition.' =>
+            '',
 
         # Template: AdminProcessManagementProcessNew
         'In this screen, you can create a new process. In order to make the new process available to users, please make sure to set its state to \'Active\' and synchronize after completing your work.' =>
             '',
 
         # Template: AdminProcessManagementProcessPrint
+        'cancel & close' => '',
         'Start Activity' => 'Start aktivitet',
         'Contains %s dialog(s)' => 'Indeholder %s dialoger',
         'Assigned dialogs' => 'Tildelte dialoger',
@@ -1265,6 +1987,7 @@ sub Data {
             '',
         'Transition' => 'Overgang',
         'Transition Name' => '',
+        'Conditions can only operate on non-empty fields.' => '',
         'Type of Linking between Conditions' => 'Linktype mellem betingelser',
         'Remove this Condition' => 'Fjern denne betingelse',
         'Type of Linking' => '',
@@ -1286,16 +2009,12 @@ sub Data {
         # Template: AdminQueue
         'Manage Queues' => 'Administrer Køer',
         'Add queue' => 'Tilføj kø',
-        'Filter for Queues' => 'Filtrer køer',
-        'Filter for queues' => '',
-        'Group' => 'Gruppe',
         'Add Queue' => 'Tilføj kø',
         'Edit Queue' => 'Rediger kø',
         'A queue with this name already exists!' => 'En kø med dette navn findes allerede.',
         'Sub-queue of' => 'Underkø af',
         'Unlock timeout' => 'Tidsfrist for frigivelse',
         '0 = no unlock' => '0 = ingen frigivelse',
-        'hours' => 'timer',
         'Only business hours are counted.' => 'Kun normal kontor tid er beregnet.',
         'If an agent locks a ticket and does not close it before the unlock timeout has passed, the ticket will unlock and will become available for other agents.' =>
             'Hvis en agent trækker sagen og ikke lukker den før frigivelses-timeout, vil sagen blive frigivet og gjort tilgængelig for andre agenter.',
@@ -1316,11 +2035,8 @@ sub Data {
         'System address' => 'Systemadresse',
         'Will be the sender address of this queue for email answers.' => 'Bliver til denne køs afsenderadresse for mail-svar.',
         'Default sign key' => 'Standard signeringsnøgle',
-        'Salutation' => 'Indledning',
         'The salutation for email answers.' => 'Den hilsen, der bruges til mail-svar.',
-        'Signature' => 'Signatur',
         'The signature for email answers.' => 'Den signatur, der bruges til mail-svar.',
-        'Calendar' => 'Kalender',
 
         # Template: AdminQueueAutoResponse
         'Manage Queue-Auto Response Relations' => 'Administrer Kø/Autosvar-relationer',
@@ -1328,6 +2044,8 @@ sub Data {
         'Queues without auto responses' => '',
         'This filter allow you to show all queues' => 'Dette filter tillader dig at vise alle køer',
         'Show all queues' => 'Vis alle køer',
+        'Filter for Queues' => 'Filtrer køer',
+        'Filter for Auto Responses' => 'Filtrer autosvar',
         'Auto Responses' => 'Autosvar',
         'Change Auto Response Relations for Queue' => 'Administrer autosvar-relationer for kø',
 
@@ -1335,7 +2053,6 @@ sub Data {
         'Manage Template-Queue Relations' => 'Administrer Skabelon/Kø-relationer',
         'Filter for Templates' => 'Filter for skabeloner',
         'Templates' => 'Skabeloner',
-        'Queues' => 'Køer',
         'Change Queue Relations for Template' => 'Ændr Kø-relationer for Skabelon',
         'Change Template Relations for Queue' => 'Ændr Skabelon-relationer for Kø',
 
@@ -1349,11 +2066,11 @@ sub Data {
         'System type' => 'System-type',
         'Unique ID' => 'Unikt ID',
         'Last communication with registration server' => 'Seneste kommunikation med registrerings-server',
-        'System Registration not Possible' => '',
+        'System registration not possible' => 'Det er ikke muligt at registrere systemet.',
         'Please note that you can\'t register your system if OTRS Daemon is not running correctly!' =>
             'Bemærk at du ikke kan registrere dit system hvis ikke OTRS tjenesten fungerer korrekt!',
         'Instructions' => 'Instruktioner',
-        'System Deregistration not Possible' => '',
+        'System deregistration not possible' => 'Det er ikke muligt at afregistrere systemet.',
         'Please note that you can\'t deregister your system if you\'re using the %s or having a valid service contract.' =>
             'Bemærk at du ikke kan afregistrere systemet hvis du benytter %s eller hvis du har en gyldig service kontrakt.',
         'OTRS-ID Login' => 'OTRS-ID Login',
@@ -1401,13 +2118,11 @@ sub Data {
         'Sign up now' => 'Registrer dig nu',
         'Forgot your password?' => 'Glemt dit password?',
         'Retrieve a new one' => 'Få et nyt',
-        'Next' => 'Næste',
         'This data will be frequently transferred to OTRS Group when you register this system.' =>
             'Disse data bliver jævnligt overført til OTRS koncernen når du registrerer dit system',
         'Attribute' => 'Attribut',
         'FQDN' => 'FQDN',
         'OTRS Version' => 'OTRS-version',
-        'Database' => 'Database',
         'Operating System' => 'Operativ-system',
         'Perl Version' => 'Perl-version',
         'Optional description of this system.' => 'Valgfri beskrivelse af dette system.',
@@ -1417,7 +2132,7 @@ sub Data {
             'Hvis du fortsætter afregistreres dit system hos OTRS koncernen.',
         'Deregister' => 'Afregistrer',
         'You can modify registration settings here.' => 'Du kan ændre registrerings indstillingerne her.',
-        'Overview of Transmitted Data' => '',
+        'Overview of transmitted data' => 'Oversigt over sendte data',
         'There is no data regularly sent from your system to %s.' => '',
         'The following data is sent at minimum every 3 days from your system to %s.' =>
             '',
@@ -1429,8 +2144,6 @@ sub Data {
         # Template: AdminRole
         'Role Management' => 'Rollestyring',
         'Add role' => 'Tilføj rolle',
-        'Filter for Roles' => 'Filtrer roller',
-        'Filter for roles' => '',
         'Create a role and put groups in it. Then add the role to the users.' =>
             'Opret en rolle og indsæt grupper i den. Tilføj dernæst brugernes rolle.',
         'There are no roles defined. Please use the \'Add\' button to create a new role.' =>
@@ -1440,6 +2153,7 @@ sub Data {
 
         # Template: AdminRoleGroup
         'Manage Role-Group Relations' => 'Administrer Rolle/Gruppe-relationer',
+        'Filter for Roles' => 'Filtrer roller',
         'Roles' => 'Roller',
         'Select the role:group permissions.' => 'Vælg rolle:gruppe-rettigheder',
         'If nothing is selected, then there are no permissions in this group (tickets will not be available for the role).' =>
@@ -1472,7 +2186,6 @@ sub Data {
         # Template: AdminSLA
         'SLA Management' => 'SLA Administration',
         'Add SLA' => 'Tilføj SLA',
-        'Filter for SLAs' => '',
         'Edit SLA' => 'Rediger SLA',
         'Please write only numbers!' => 'Angiv venligst kun tal!',
 
@@ -1488,7 +2201,7 @@ sub Data {
         'Check SMIME configuration' => '',
         'Add certificate' => 'Tilføj certifikat',
         'Add private key' => 'Tilføj private nøgle',
-        'Filter for Certificates' => '',
+        'Filter for certificates' => 'Filter for certifikater',
         'Filter for S/MIME certs' => 'Filter for S/MIME-certifikater',
         'To show certificate details click on a certificate icon.' => 'Klik på et certifikat-ikon for at se certifikatets detaljer',
         'To manage private certificate relations click on a private key icon.' =>
@@ -1499,37 +2212,31 @@ sub Data {
         'In this way you can directly edit the certification and private keys in file system.' =>
             'Du kan på denne måde direkte redigere certificeringsnøgler og private nøgler i filsystemet.',
         'Hash' => 'Hash',
-        'Create' => 'Opret',
         'Handle related certificates' => 'Håndter relaterede certifikater',
         'Read certificate' => 'Læs certifikat',
         'Delete this certificate' => 'Slet dette certifikat',
         'Add Certificate' => 'Tilføj certifikat',
-        'File' => 'Fil',
         'Add Private Key' => 'Tilføj privat nøgle',
         'Secret' => 'Hemmelig',
-        'Submit' => 'Send',
         'Related Certificates for' => 'Relaterede certifikater for',
         'Delete this relation' => 'Slet denne relation',
         'Available Certificates' => 'Tilgængelige Certifikater',
         'Relate this certificate' => 'Relater dette certifikat',
 
         # Template: AdminSMIMECertRead
-        'S/MIME Certificate' => 'S/MIME-certifikat',
         'Close dialog' => '',
-        'Certificate Details' => '',
+        'Certificate details' => 'Certifikat-detaljer',
 
         # Template: AdminSalutation
         'Salutation Management' => 'Administrer Indledninger',
         'Add salutation' => 'Tilføj indledning',
-        'Filter for Salutations' => '',
-        'Filter for salutations' => '',
         'Add Salutation' => 'Tilføj Indledning',
         'Edit Salutation' => 'Rediger Indledning',
         'e. g.' => 'f.eks.',
         'Example salutation' => 'Eksempel på indledning',
 
         # Template: AdminSecureMode
-        'Secure Mode Needs to be Enabled!' => '',
+        'Secure mode needs to be enabled!' => 'Secure mode skal aktiveres!',
         'Secure mode will (normally) be set after the initial installation is completed.' =>
             'Secure Mode vil (normalt) blive aktiveret efter den indledende installation er fuldført.',
         'If secure mode is not activated, activate it via SysConfig because your application is already running.' =>
@@ -1537,13 +2244,10 @@ sub Data {
 
         # Template: AdminSelectBox
         'SQL Box' => 'SQL Box',
-        'Filter for Results' => '',
-        'Filter for results' => '',
         'Here you can enter SQL to send it directly to the application database. It is not possible to change the content of the tables, only select queries are allowed.' =>
             '',
         'Here you can enter SQL to send it directly to the application database.' =>
             'Her kan du indtaste SQL og sende de direkte til applikations-databasen.',
-        'Options' => 'Valgmuligheder',
         'Only select queries are allowed.' => '',
         'The syntax of your SQL query has a mistake. Please check it.' =>
             'Din SQL-syntax indeholder fejl. Tjek den venligst.',
@@ -1551,12 +2255,11 @@ sub Data {
             'Der mangler mindst et parameter for bindingen. Tjek det venligst.',
         'Result format' => 'Resultatformat',
         'Run Query' => 'Kør forespørgsel',
-        'Query is executed.' => '',
+        'Query is executed.' => 'Forespørgslen er udført',
 
         # Template: AdminService
         'Service Management' => 'Administrer Services',
         'Add service' => 'Tilføj service',
-        'Filter for services' => '',
         'Add Service' => 'Tilføj service',
         'Edit Service' => 'Rediger service',
         'Sub-service of' => 'Under-service af',
@@ -1570,8 +2273,6 @@ sub Data {
         'Unique customers' => 'Unikke kunder',
         'Kill all sessions' => 'Dræb alle sessioner',
         'Kill this session' => 'Dræb denne session',
-        'Filter for Sessions' => '',
-        'Filter for sessions' => '',
         'Session' => 'Session',
         'Kill' => 'Dræb',
         'Detail View for SessionID' => 'Detaljer for SessionID',
@@ -1579,8 +2280,6 @@ sub Data {
         # Template: AdminSignature
         'Signature Management' => 'Administrer signaturer',
         'Add signature' => 'Tilføj signatur',
-        'Filter for Signatures' => '',
-        'Filter for signatures' => '',
         'Add Signature' => 'Tilføj Signatur',
         'Edit Signature' => 'Rediger signatur',
         'Example signature' => 'Eksempel på signatur',
@@ -1588,9 +2287,6 @@ sub Data {
         # Template: AdminState
         'State Management' => 'Administrer Tilstande',
         'Add state' => 'Tilføj tilstand',
-        'Filter for States' => '',
-        'Filter for states' => '',
-        'Attention' => 'Bemærk',
         'Please also update the states in SysConfig where needed.' => 'Husk også at opdatere tilstandene i SysConfig, hvor der er behov for det.',
         'Add State' => 'Tilføj tilstand',
         'Edit State' => 'Rediger tilstand',
@@ -1607,17 +2303,17 @@ sub Data {
         'Sending Update...' => 'Sender Opdatering...',
         'Support Data information was successfully sent.' => 'Support Data afsendt med succes.',
         'Was not possible to send Support Data information.' => 'Det var ikke muligt at sende Support Data.',
-        'Update Result' => '',
+        'Update Result' => 'Opdater resultat',
         'Currently this data is only shown in this system.' => '',
         'A support bundle (including: system registration information, support data, a list of installed packages and all locally modified source code files) can be generated by pressing this button:' =>
             '',
         'Generate Support Bundle' => 'Generer Support Pakke',
         'Generating...' => 'Genererer...',
         'It was not possible to generate the Support Bundle.' => 'Det var ikke muligt at generere Support Pakken.',
-        'Generate Result' => '',
+        'Generate Result' => 'Generer resultat',
         'Support Bundle' => 'Support Pakke',
         'The mail could not be sent' => 'Mailen kunne ikke sendes',
-        'The Support Bundle has been Generated' => '',
+        'The support bundle has been generated.' => 'Support Pakken er genereret.',
         'Please choose one of the following options.' => 'Vælg venligst en af følgende muligheder.',
         'Send by Email' => 'Send via mail',
         'The support bundle is too large to send it by email, this option has been disabled.' =>
@@ -1647,7 +2343,7 @@ sub Data {
         'Elements' => 'Elementer',
 
         # Template: AdminSysConfigEdit
-        'Edit Config Settings in %s → %s' => '',
+        'Edit Config Settings in %s → %s' => 'Rediger indstillinger for %s → %s',
         'This setting is read only.' => 'Denne indstilling kan ikke ændres.',
         'This config item is only available in a higher config level!' =>
             'Dette konfigurationsparameter er kun tilgængeligt på et højere konfigurationsniveau!',
@@ -1671,7 +2367,6 @@ sub Data {
         'New Loader File' => 'Ny indlæsningsfil',
         'NavBarName' => 'NavBarNavn',
         'NavBar' => 'NavBar',
-        'Link' => 'Link',
         'LinkOption' => 'LinkMulighed',
         'Block' => 'Blok',
         'AccessKey' => 'AdgangsNøgle',
@@ -1680,16 +2375,14 @@ sub Data {
         'Year' => 'År',
         'Month' => 'Måned',
         'Day' => 'Dag',
-        'Error' => 'Fejl',
         'Invalid year' => 'Ugyldigt år',
         'Invalid month' => 'Ugyldig måned',
         'Invalid day' => 'Ugyldig dag',
+        'Show more' => 'Vis mere',
 
         # Template: AdminSystemAddress
         'System Email Addresses Management' => 'Administrer systemets mail-adresser',
         'Add system address' => 'Tilføj systemadresse',
-        'Filter for System Addresses' => '',
-        'Filter for system addresses' => '',
         'All incoming email with this address in To or Cc will be dispatched to the selected queue.' =>
             'Alt indgående mail med denne adresse i Til eller Cc, vil blive sendt til den valgte kø.',
         'Email address' => 'Mail-adresse',
@@ -1702,8 +2395,6 @@ sub Data {
         # Template: AdminSystemMaintenance
         'System Maintenance Management' => 'System vedligeholdelse',
         'Schedule New System Maintenance' => 'Planlæg ny system vedligeholdelse',
-        'Filter for System Maintenances' => '',
-        'Filter for system maintenances' => '',
         'Schedule a system maintenance period for announcing the Agents and Customers the system is down for a time period.' =>
             '',
         'Some time before this system maintenance starts the users will receive a notification on each screen announcing about this fact.' =>
@@ -1711,10 +2402,12 @@ sub Data {
         'Start date' => 'Start dato',
         'Stop date' => 'Slut dato',
         'Delete System Maintenance' => 'Slet Systemvedligehold',
+        'Do you really want to delete this scheduled system maintenance?' =>
+            'Vil du virkelig fjerne denne planlagte systemvedligeholdelse?',
 
         # Template: AdminSystemMaintenanceEdit
         'Edit System Maintenance %s' => 'Rediger systemvedligeholdelse %s',
-        'Edit System Maintenance information' => 'Rediger system vedligeholdelses information',
+        'Edit System Maintenance Information' => '',
         'Date invalid!' => 'Ugyldig dato',
         'Login message' => 'Login besked',
         'Show login message' => 'Vis login besked',
@@ -1731,7 +2424,7 @@ sub Data {
         'A template is a default text which helps your agents to write faster tickets, answers or forwards.' =>
             'En skabelon er en standard-tekst, der hjælper dine agenter til at skrive hurtigere sager, svar og videresendelser.',
         'Don\'t forget to add new templates to queues.' => 'Husk at tilføje nye skabeloner til køer.',
-        'Attachments' => 'Vedhæftede filer',
+        'Do you really want to delete this template?' => '',
         'Add Template' => 'Tilføj skabelon',
         'Edit Template' => 'Rediger skabelon',
         'A standard template with this name already exists!' => 'En standard-skabelon med dette navn eksisterer allerede!',
@@ -1741,7 +2434,8 @@ sub Data {
         'Your email address is' => 'Din mail-adresse er',
 
         # Template: AdminTemplateAttachment
-        'Manage Templates-Attachments Relations' => '',
+        'Manage Templates <-> Attachments Relations' => 'Administrer relationer mellem skabeloner og vedhæftede filer',
+        'Filter for Attachments' => 'Filter for vedhæftede filer',
         'Change Template Relations for Attachment' => 'Ændr Skabelonens relation til vedhæftede filer',
         'Change Attachment Relations for Template' => 'Ændr den vedhæftede fils relation til skabeloner',
         'Toggle active for all' => 'Skift aktiv for alle',
@@ -1750,8 +2444,6 @@ sub Data {
         # Template: AdminType
         'Type Management' => 'Administrer Typer',
         'Add ticket type' => 'Tilføj sagstype',
-        'Filter for Types' => '',
-        'Filter for types' => '',
         'Add Type' => 'Tilføj type',
         'Edit Type' => 'Rediger type',
         'A type with this name already exists!' => 'En type med dette navn eksisterer allerede!',
@@ -1760,18 +2452,15 @@ sub Data {
         'Agents will be needed to handle tickets.' => 'Agenter skal oprettes for at kunne håndtere sager.',
         'Don\'t forget to add a new agent to groups and/or roles!' => 'Glem ikke at tilføje nye agenter til grupper og/eller roller!',
         'Please enter a search term to look for agents.' => 'Angiv en søgestreng for at lede efter agenter.',
-        'Last login' => 'Sidste Login',
+        'Last login' => 'Seneste Login',
         'Switch to agent' => 'Skift til agent',
         'Add Agent' => 'Tilføj agent',
         'Edit Agent' => 'Rediger agent',
-        'Title or salutation' => '',
+        'Title or salutation' => 'Titel eller titulering',
         'Firstname' => 'Fornavn',
         'Lastname' => 'Efternavn',
         'A user with this username already exists!' => 'En bruger med dette brugernavn eksisterer allerede!',
         'Will be auto-generated if left empty.' => 'Bliver autogenereret, hvis ikke udfyldt.',
-        'Mobile' => 'Mobil',
-        'On' => 'Til',
-        'Off' => 'Fra',
         'Start' => 'Start',
         'End' => 'Slut',
 
@@ -1783,7 +2472,6 @@ sub Data {
         # Template: AgentBook
         'Address Book' => 'Adressebog',
         'Search for a customer' => 'Søg efter en kunde',
-        'Bcc' => 'Bcc',
         'Add email address %s to the To field' => 'Tilføj mail-adresse %s til Til-feltet',
         'Add email address %s to the Cc field' => 'Tilføj mail-adresse %s til Cc-feltet',
         'Add email address %s to the Bcc field' => 'Tilføj mail-adresse %s til Bcc-feltet',
@@ -1795,8 +2483,16 @@ sub Data {
         # Template: AgentCustomerInformationCenterSearch
         'Customer User' => 'Kundebruger',
 
+        # Template: AgentCustomerSearch
+        'Duplicated entry' => 'Dublet',
+        'This address already exists on the address list.' => 'Denne adresse eksisterer allerede i adresselisten.',
+        'It is going to be deleted from the field, please try again.' => 'Det vil blive slettet fra feltet. Prøv venligst igen.',
+
         # Template: AgentCustomerTableView
         'Note: Customer is invalid!' => 'Bemærk: Kunden er ugyldig',
+        'Start chat' => 'Start chat',
+        'Video call' => '',
+        'Audio call' => '',
 
         # Template: AgentDaemonInfo
         'The OTRS Daemon is a daemon process that performs asynchronous tasks, e.g. ticket escalation triggering, email sending, etc.' =>
@@ -1816,34 +2512,24 @@ sub Data {
 
         # Template: AgentDashboardCalendarOverview
         'in' => 'om',
-        'none' => 'ingen',
 
         # Template: AgentDashboardCommon
-        'Close this widget' => '',
-        'more' => 'mere',
+        'Close this widget' => 'Luk widget',
         'Available Columns' => 'Tilgængelige kolonner',
         'Visible Columns (order by drag & drop)' => 'Synlige kolonner (flyt dem med musen)',
 
         # Template: AgentDashboardCustomerIDStatus
         'Escalated tickets' => 'Eskalerede sager',
-        'Open tickets' => 'Åbne sager',
-        'Closed tickets' => 'Lukkede sager',
-        'All tickets' => 'Alle sager',
-        'Archived tickets' => 'Arkiverede sager',
 
         # Template: AgentDashboardCustomerUserList
         'Customer login' => 'Kunde-login',
         'Customer information' => 'Kundeinformation',
-        'Open' => 'Åben',
-        'Closed' => 'Lukket',
         'Phone ticket' => 'Sager',
         'Email ticket' => 'Mail-sager',
-        'Start Chat' => 'Start Chat',
         '%s open ticket(s) of %s' => '%s åbne sager af %s',
         '%s closed ticket(s) of %s' => '%s lukkede sager af %s',
         'New phone ticket from %s' => 'Nye sager fra %s',
         'New email ticket to %s' => 'Nye mail-sager til %s',
-        'Start chat' => 'Start chat',
 
         # Template: AgentDashboardProductNotify
         '%s %s is available!' => '%s %s er tilgængelig',
@@ -1856,18 +2542,23 @@ sub Data {
 
         # Template: AgentDashboardStats
         'The configuration for this statistic widget contains errors, please review your settings.' =>
-            '',
+            'Konfigurationen for denne rapport-widget har fejl. Tjek venligst dine indstillinger.',
         'Download as SVG file' => 'Hent som SVG fil',
         'Download as PNG file' => 'Hent som PNG fil',
         'Download as CSV file' => 'Hent som CSV fil',
         'Download as Excel file' => 'Hent som Excel fil',
         'Download as PDF file' => 'Hent som PDF fil',
+        'Grouped' => 'Grupperet',
+        'Stacked' => 'Stakket',
+        'Expanded' => 'Udvidet',
+        'Stream' => 'Strøm',
+        'No Data Available.' => '',
         'Please select a valid graph output format in the configuration of this widget.' =>
             '',
         'The content of this statistic is being prepared for you, please be patient.' =>
             'Indholdet af rapporten forberedes, vær tålmodig.',
         'This statistic can currently not be used because its configuration needs to be corrected by the statistics administrator.' =>
-            '',
+            'Rapporten kan ikke bruges i øjeblikket, da den afventer at konfigurationen bliver korrigeret af rapport-administratoren.',
 
         # Template: AgentDashboardTicketGeneric
         'My locked tickets' => 'Mine sager',
@@ -1883,7 +2574,6 @@ sub Data {
 
         # Template: AgentDashboardUserOnline
         'out of office' => 'ude af kontoret',
-        'Selected agent is not available for chat' => 'Den valgte agent er ikke tilgængelig i chat',
 
         # Template: AgentDashboardUserOutOfOffice
         'until' => 'til',
@@ -1904,25 +2594,23 @@ sub Data {
         'Unlink Object: %s' => 'Fjern k?dning af objekt: %s',
         'go to link add screen' => 'gå til skærmen, hvor links kan tilføjes',
 
+        # Template: AgentOTRSBusinessBlockScreen
+        'Unauthorized usage of %s detected' => '',
+        'If you decide to downgrade to OTRS Free, you will lose all database tables and data related to %s.' =>
+            '',
+
         # Template: AgentPreferences
         'Edit your preferences' => 'Opdater dine indstillinger',
         'Did you know? You can help translating OTRS at %s.' => 'Vidste du det? Du kan hjælpe med at oversætte OTRS på %s.',
 
         # Template: AgentSpelling
         'Spell Checker' => 'Stavekontrol',
-        'Spelling Error(s)' => '',
-        'Language' => 'Sprog',
-        'Line' => 'Linje',
-        'Word' => 'Ord',
-        'replace with' => 'udskift med',
-        'Change' => 'Skift',
-        'Ignore' => 'Ignorer',
+        'spelling error(s)' => 'stavefejl',
         'Apply these changes' => 'Anvend disse ændringer',
-        'Done' => 'Færdig',
 
         # Template: AgentStatisticsAdd
-        'Statistics » Add' => 'Statistikker » Tilføj',
-        'Add New Statistic' => 'Tilføj ny statistik',
+        'Statistics » Add' => 'Rapporter » Tilføj',
+        'Add New Statistic' => 'Tilføj ny rapport',
         'Dynamic Matrix' => 'Dynamisk matrix',
         'Tabular reporting data where each cell contains a singular data point (e. g. the number of tickets).' =>
             '',
@@ -1931,41 +2619,40 @@ sub Data {
             '',
         'Static' => 'Statisk',
         'Complex statistics that cannot be configured and may return non-tabular data.' =>
-            '',
-        'General Specification' => '',
-        'Create Statistic' => 'Opret Statistik',
+            'Komplekse rapporter, der ikke kan konfigureres i web-interfacet.',
+        'General Specification' => 'Generel Specifikation',
+        'Create Statistic' => 'Opret Rapport',
 
         # Template: AgentStatisticsEdit
-        'Statistics » Edit %s%s — %s' => 'Statistikker » Rediger %s%s — %s',
+        'Statistics » Edit %s%s — %s' => 'Rapporter » Rediger %s%s — %s',
         'Run now' => 'Kør nu',
-        'Statistics Preview' => 'Statistik forhåndsvisning',
-        'Save Statistic' => '',
+        'Statistics Preview' => 'Forhåndsvisning af Rapport',
+        'Save statistic' => 'Gem rapport',
 
         # Template: AgentStatisticsImport
-        'Statistics » Import' => 'Statistik » Import',
-        'Import Statistic Configuration' => 'Importer statistik konfiguration',
+        'Statistics » Import' => 'Rapport » Import',
+        'Import Statistic Configuration' => 'Importer Rapport-konfiguration',
 
         # Template: AgentStatisticsOverview
-        'Statistics » Overview' => 'Statistikker » Oversigt',
+        'Statistics » Overview' => 'Rapporter » Oversigt',
         'Statistics' => 'Rapporter',
         'Run' => 'Kør',
-        'Edit statistic "%s".' => 'Rediger statistik "%s".',
-        'Export statistic "%s"' => 'Eksporter statistik "%s"',
-        'Export statistic %s' => 'Eksporter statistik %s',
-        'Delete statistic "%s"' => 'Slet statistik "%s"',
-        'Delete statistic %s' => 'Slet statistik %s',
+        'Edit statistic "%s".' => 'Rediger rapport "%s".',
+        'Export statistic "%s"' => 'Eksporter rapport "%s"',
+        'Export statistic %s' => 'Eksporter rapport %s',
+        'Delete statistic "%s"' => 'Slet rapport "%s"',
+        'Delete statistic %s' => 'Slet rapport %s',
+        'Do you really want to delete this statistic?' => 'Vil du virkelig slette denne rapport?',
 
         # Template: AgentStatisticsView
-        'Statistics » View %s%s — %s' => 'Statistikker » Vis %s%s — %s',
-        'Statistic Information' => 'Statistik Information',
-        'Created by' => 'Oprettet af',
-        'Changed by' => 'ændret af',
+        'Statistics » View %s%s — %s' => 'Rapporter » Vis %s%s — %s',
+        'Statistic Information' => 'Rapport-information',
         'Sum rows' => 'Summer rækker',
         'Sum columns' => 'Summer Kolonner',
         'Show as dashboard widget' => 'Vis på dashboardet som widget',
         'Cache' => 'Cache',
         'This statistic contains configuration errors and can currently not be used.' =>
-            'Denne statistik er fejl konfigureret og kan ikke benyttes i øjeblikket.',
+            'Denne rapport er fejlkonfigureret og kan ikke benyttes i øjeblikket.',
 
         # Template: AgentTicketActionCommon
         'Change Free Text of %s%s%s' => '',
@@ -1980,7 +2667,6 @@ sub Data {
         'New Owner' => 'Ny Ejer',
         'Please set a new owner!' => 'Vælg venligst en ny ejer!',
         'New Responsible' => 'Ny Ansvarlig',
-        'Please set a new responsible!' => '',
         'Next state' => 'Næste status',
         'For all pending* states.' => 'For alle afventende* tilstande.',
         'Add Article' => 'Tilføj Indlæg',
@@ -1994,7 +2680,6 @@ sub Data {
         'Text Template' => 'Tekst-skabelon',
         'Setting a template will overwrite any text or attachment.' => 'Angivelse af skabelon vil overskrive enhver tekst eller vedhæftning.',
         'Note type' => 'Bemærkningstype',
-        'Invalid time!' => 'Ugyldigt tidsrum!',
 
         # Template: AgentTicketBounce
         'Bounce %s%s%s' => '',
@@ -2009,14 +2694,13 @@ sub Data {
         # Template: AgentTicketBulk
         'Ticket Bulk Action' => 'Massehandling',
         'Send Email' => 'Send mail',
-        'Merge' => 'Saml',
         'Merge to' => 'Saml til',
         'Invalid ticket identifier!' => 'Ugyldig sagsidentifikation!',
         'Merge to oldest' => 'Saml til ældste',
         'Link together' => 'Kæd sammen',
         'Link to parent' => 'Kæd til forælder',
         'Unlock tickets' => 'Frigiv sager',
-        'Execute Bulk Action' => '',
+        'Execute Bulk Action' => 'Udfør massehandling',
 
         # Template: AgentTicketCompose
         'Compose Answer for %s%s%s' => '',
@@ -2026,7 +2710,6 @@ sub Data {
         'Remove Ticket Customer' => 'Fjern Sagens Kunde',
         'Please remove this entry and enter a new one with the correct value.' =>
             'Fjern venligst denne indtastning og skriv en ny med den korrekte værdi.',
-        'This address already exists on the address list.' => 'Denne adresse eksisterer allerede i adresselisten.',
         'Remove Cc' => 'Fjern Cc',
         'Remove Bcc' => 'Fjern Bcc',
         'Address book' => 'Adressebog',
@@ -2034,7 +2717,6 @@ sub Data {
 
         # Template: AgentTicketCustomer
         'Change Customer of %s%s%s' => '',
-        'Customer Information' => 'Kundeoplysninger',
 
         # Template: AgentTicketEmail
         'Create New Email Ticket' => 'Opret ny mail-sag',
@@ -2050,21 +2732,19 @@ sub Data {
         'Outbound Email for %s%s%s' => '',
 
         # Template: AgentTicketEscalation
-        'Ticket %s: first response time is over (%s/%s)!' => '',
-        'Ticket %s: first response time will be over in %s/%s!' => '',
+        'Ticket %s: first response time is over (%s/%s)!' => 'Sag %s: Tid til første svar er overskredet (%s/%s)!',
+        'Ticket %s: first response time will be over in %s/%s!' => 'Sag %s: Tid til første svar overskrides om %s/%s!',
         'Ticket %s: update time is over (%s/%s)!' => '',
         'Ticket %s: update time will be over in %s/%s!' => '',
-        'Ticket %s: solution time is over (%s/%s)!' => '',
-        'Ticket %s: solution time will be over in %s/%s!' => '',
+        'Ticket %s: solution time is over (%s/%s)!' => 'Sag %s: Tid til løsning er overskredet (%s/%s)!',
+        'Ticket %s: solution time will be over in %s/%s!' => 'Sag %s: Tid til løsning overskrides om %s/%s!',
 
         # Template: AgentTicketForward
         'Forward %s%s%s' => '',
 
         # Template: AgentTicketHistory
         'History of %s%s%s' => '',
-        'History Content' => 'Historikindhold',
-        'Zoom' => 'Vis',
-        'Createtime' => 'Oprettelsestid',
+        'History Content' => 'Historik',
         'Zoom view' => 'Zoom-visning',
 
         # Template: AgentTicketMerge
@@ -2072,13 +2752,11 @@ sub Data {
         'Merge Settings' => 'Saml indstillinger',
         'You need to use a ticket number!' => 'Du skal bruge et sagsnummer.',
         'A valid ticket number is required.' => 'Angiv et gyldigt sagsnummer',
-        'Inform Sender' => '',
         'Need a valid email address.' => 'Angiv en gyldig mail-adresse',
 
         # Template: AgentTicketMove
         'Move %s%s%s' => '',
         'New Queue' => 'Ny Kø',
-        'Move' => 'Flyt',
 
         # Template: AgentTicketOverviewMedium
         'Select all' => 'Vælg alle',
@@ -2138,8 +2816,13 @@ sub Data {
         'Remove' => 'Fjern',
         'Searches in the attributes From, To, Cc, Subject and the article body, overriding other attributes with the same name.' =>
             '',
-        'Customer User Login' => 'Kundebrugers login',
-        'Attachment Name' => '',
+        'CustomerID (complex search)' => '',
+        '(e. g. 234*)' => '',
+        'CustomerID (exact match)' => '',
+        'Customer User Login (complex search)' => '',
+        '(e. g. U51*)' => '',
+        'Customer User Login (exact match)' => '',
+        'Attachment Name' => 'Vedhæftningsnavn',
         '(e. g. m*file or myfi*)' => '(f.eks. m*fil eller minfi*)',
         'Created in Queue' => 'Oprettet i kø',
         'Lock state' => 'Tildelt/fri',
@@ -2164,9 +2847,15 @@ sub Data {
         'Article Type' => 'Indlægstype',
         'Sender Type' => 'Afsendertype',
         'Save filter settings as default' => 'Gem disse filterinstillinger som standard',
-        'Event Type Filter' => 'Hændelsestype filter',
+        'Event Type Filter' => 'Hændelsestype-filter',
         'Event Type' => 'Hændelsestype',
         'Save as default' => 'Gem som standard',
+        'Archive' => 'Arkiver',
+        'This ticket is archived.' => 'Denne sag er arkiveret',
+        'Note: Type is invalid!' => 'Obs: Ugyldig type!',
+        'Locked' => 'Tildelt',
+        'Accounted time' => 'Benyttet tid',
+        'Linked Objects' => 'Sammenkædede objekter',
         'Change Queue' => 'Skift kø',
         'There are no dialogs available at this point in the process.' =>
             'Der er ingen dialoger tilgængelige på dette sted i processen.',
@@ -2178,14 +2867,11 @@ sub Data {
         'Add Filter' => 'Tilføj filter',
         'Set' => 'Indstil',
         'Reset Filter' => 'Nulstil filter',
-        'Article' => 'Indlæg',
-        'View' => 'Vis',
         'Show one article' => 'Vis indlæg enkeltvis',
         'Show all articles' => 'Vis alle indlæg',
         'Show Ticket Timeline View' => '',
         'Unread articles' => 'Ulæste indlæg',
         'No.' => 'Nr.',
-        'Direction' => 'Retning',
         'Important' => 'Vigtigt',
         'Unread Article!' => 'Ulæst indlæg',
         'Incoming message' => 'Indgående besked',
@@ -2203,17 +2889,11 @@ sub Data {
         'Close this message' => 'Luk denne besked',
         'Article could not be opened! Perhaps it is on another article page?' =>
             'Et indlæg kunne ikke åbnes! Måske er det på en anden indlægs side?',
-
-        # Template: LinkTable
-        'Linked Objects' => 'Sammenkædede objekter',
-
-        # Template: TicketInformation
-        'Archive' => 'Arkiver',
-        'This ticket is archived.' => 'Denne sag er arkiveret',
-        'Note: Type is invalid!' => 'Obs: Ugyldig type!',
-        'Locked' => 'Tildelt',
-        'Accounted time' => 'Benyttet tid',
-        'Pending till' => 'Afventer til',
+        'Scale preview content' => '',
+        'Open URL in new tab' => '',
+        'Close preview' => 'Luk forhåndsvisning',
+        'A preview of this website can\'t be provided because it didn\'t allow to be embedded.' =>
+            '',
 
         # Template: AttachmentBlocker
         'To protect your privacy, remote content was blocked.' => 'For at beskytte dit privatliv blev fjernindhold blokeret.',
@@ -2223,7 +2903,7 @@ sub Data {
         'First message' => '',
 
         # Template: CloudServicesDisabled
-        'This Feature Requires Cloud Services' => '',
+        'This feature requires cloud services.' => '',
         'You can' => 'Du kan',
         'go back to the previous page' => 'gå tilbage til den forrige side',
 
@@ -2235,16 +2915,47 @@ sub Data {
         # Template: CustomerFooter
         'Powered by' => ' ',
 
-        # Template: CustomerLogin
-        'JavaScript Not Available' => 'JavaScript ikke tilgængeligt',
-        'In order to experience OTRS, you\'ll need to enable JavaScript in your browser.' =>
-            'For at opleve OTRS, skal du aktivere JavaScript i din browser.',
-        'Browser Warning' => 'Browser-advarsel',
+        # Template: CustomerFooterJS
+        'One or more errors occurred!' => 'En eller flere fejl opstod!',
+        'Close this dialog' => 'Luk dette vindue',
+        'Could not open popup window. Please disable any popup blockers for this application.' =>
+            'Kan ikke åbne nyt vindue. Deaktiver din browsers popup-blokering for denne applikation.',
+        'If you now leave this page, all open popup windows will be closed, too!' =>
+            'Hvis du forlader denne side, vil alle pop-up vinduer også blive lukket!',
+        'A popup of this screen is already open. Do you want to close it and load this one instead?' =>
+            'Et pop-up vindue med dette billede er allerede åbent. Vil du lukke det og åbne denne i stedet?',
+        'There are currently no elements available to select from.' => 'Der er i øjeblikket ingen elementer at vælge fra.',
+        'Please turn off Compatibility Mode in Internet Explorer!' => 'Slå venligst kompatibilitet fra i Internet Explorer!',
         'The browser you are using is too old.' => 'Din browser er for gammel.',
         'OTRS runs with a huge lists of browsers, please upgrade to one of these.' =>
             'OTRS virker med en masse browsere, opgrader venligst til en af disse.',
         'Please see the documentation or ask your admin for further information.' =>
             'Se venligst dokumentationen eller kontakt din administrator for yderligere information.',
+        'Switch to mobile mode' => 'Skift til mobil-tilstand',
+        'Switch to desktop mode' => 'Skift til desktop-tilstand',
+        'Not available' => 'Ikke tilgængelig',
+        'Clear all' => 'Slet alt',
+        'Clear search' => 'Slet søgning',
+        '%s selection(s)...' => '%s udvalgt(e)...',
+        'and %s more...' => 'og %s flere...',
+        'Filters' => 'Filtre',
+        'Confirm' => 'Bekræft',
+        'You have unanswered chat requests' => '',
+        'Accept' => '',
+        'Decline' => '',
+        'An internal error occurred.' => '',
+        'Connection error' => '',
+        'Reload page' => '',
+        'Your browser was not able to communicate with OTRS properly, there seems to be something wrong with your network connection. You could either try reloading this page manually or wait until your browser has re-established the connection on its own.' =>
+            '',
+        'The connection has been re-established after a temporary connection loss. Due to this, elements on this page could have stopped to work correctly. In order to be able to use all elements correctly again, it is strongly recommended to reload this page.' =>
+            '',
+
+        # Template: CustomerLogin
+        'JavaScript Not Available' => 'JavaScript ikke tilgængeligt',
+        'In order to experience OTRS, you\'ll need to enable JavaScript in your browser.' =>
+            'For at opleve OTRS, skal du aktivere JavaScript i din browser.',
+        'Browser Warning' => 'Browser-advarsel',
         'One moment please, you are being redirected...' => 'Et øjeblik, du stilles videre...',
         'Login' => 'Login',
         'User name' => 'Brugernavn',
@@ -2255,8 +2966,7 @@ sub Data {
         'Your 2 Factor Token' => 'Dit 2 Faktor Token',
         'Log In' => 'Login',
         'Not yet registered?' => 'Endnu ikke registreret?',
-        'Back' => 'Tilbage',
-        'Request New Password' => 'Bed om nyt password',
+        'Request new password' => 'Anmod om ny adgangskode',
         'Your User Name' => 'Dit brugernavn',
         'A new password will be sent to your email address.' => 'Et nyt password bliver sendt til din mail-adresse.',
         'Create Account' => 'Opret konto',
@@ -2269,11 +2979,11 @@ sub Data {
         # Template: CustomerNavigationBar
         'Incoming Chat Requests' => '',
         'Edit personal preferences' => 'Rediger dine personlige indstillinger',
-        'Preferences' => 'Indstillinger',
         'Logout %s %s' => 'Logaf %s %s',
 
         # Template: CustomerRichTextEditor
         'Split Quote' => '',
+        'Open link' => 'Åbn link',
 
         # Template: CustomerTicketMessage
         'Service level agreement' => 'Service level agreement',
@@ -2287,21 +2997,19 @@ sub Data {
         'Profile' => 'Profil',
         'e. g. 10*5155 or 105658*' => 'f.eks. 10*55 eller 105658*',
         'Customer ID' => 'Kunde-ID',
-        'Fulltext Search in Tickets (e. g. "John*n" or "Will*")' => '',
-        'Sender' => 'Afsender',
+        'Fulltext search in tickets (e. g. "John*n" or "Will*")' => 'Fritekstsøgning i sager (f.eks. "Ni*olai eller Hans*")',
         'Recipient' => 'Modtager',
         'Carbon Copy' => 'Cc',
         'e. g. m*file or myfi*' => 'f.eks. m*fil eller minfi*',
         'Types' => 'Typer',
-        'Time Restrictions' => '',
+        'Time restrictions' => 'Tidsbegrænsninger',
         'No time settings' => 'Ingen tidsindstillinger',
-        'All' => 'Alle',
-        'Specific date' => '',
-        'Only tickets created' => 'Kun sager oprettet',
-        'Date range' => '',
+        'Specific date' => 'Specifik dato',
+        'Only tickets created' => 'Kun oprettede sager',
+        'Date range' => 'Datointerval',
         'Only tickets created between' => 'Kun sager oprettet mellem',
-        'Ticket Archive System' => '',
-        'Save Search as Template?' => '',
+        'Ticket archive system' => 'Sagsarkivet',
+        'Save search as template?' => 'Gem søgning som skabelon?',
         'Save as Template?' => 'Gem som skabelon?',
         'Save as Template' => 'Gem som skabelon',
         'Template Name' => 'Navn på skabelon',
@@ -2321,42 +3029,82 @@ sub Data {
         'Reply' => 'Svar',
         'Chat Protocol' => '',
 
-        # Template: CustomerWarning
-        'Warning' => 'Advarsel',
-
         # Template: DashboardEventsTicketCalendar
+        'All-day' => 'Alle dage',
+        'Sunday' => 'Søndag',
+        'Monday' => 'Mandag',
+        'Tuesday' => 'Tirsdag',
+        'Wednesday' => 'Onsdag',
+        'Thursday' => 'Torsdag',
+        'Friday' => 'Fredag',
+        'Saturday' => 'Lørdag',
+        'Su' => 'Sø',
+        'Mo' => 'Ma',
+        'Tu' => 'Ti',
+        'We' => 'On',
+        'Th' => 'To',
+        'Fr' => 'Fr',
+        'Sa' => 'Lø',
         'Event Information' => 'Begivenheds oplysninger',
         'Ticket fields' => 'Sagsfelter',
         'Dynamic fields' => 'Dynamiske felter',
 
+        # Template: Datepicker
+        'Invalid date (need a future date)!' => 'Ugyldig dato (angiv dato i fremtiden)',
+        'Invalid date (need a past date)!' => 'Ugyldig dato (angiv en dato i fortiden)',
+        'Previous' => 'Forrige',
+        'Open date selection' => 'Åbn datovælger',
+
         # Template: Error
+        'An error occurred.' => 'Der er sket en fejl.',
         'Really a bug? 5 out of 10 bug reports result from a wrong or incomplete installation of OTRS.' =>
             '',
         'With %s, our experts take care of correct installation and cover your back with support and periodic security updates.' =>
             '',
-        'Contact our service team now.' => '',
+        'Contact our service team now.' => 'Kontakt vores service-team nu.',
         'Send a bugreport' => 'Sende en fejlrapport',
-        'Expand' => 'Udvid',
 
         # Template: FooterJS
+        'Please enter at least one search value or * to find anything.' =>
+            'Angiv venligst mindst ét søgeord eller * for at finde alt.',
+        'Please remove the following words from your search as they cannot be searched for:' =>
+            'Fjern venligst følgende ord fra søgningen da der ikke kan søges efter dem:',
+        'Please check the fields marked as red for valid inputs.' => 'Tjek de røde felter og udfyld dem med gyldigt indhold.',
+        'Please perform a spell check on the the text first.' => 'Kontroller venligst stavningen i teksten først.',
+        'Slide the navigation bar' => '',
+        'Unavailable for chat' => '',
+        'Available for internal chats only' => '',
+        'Available for chats' => '',
+        'Please visit the chat manager' => '',
+        'New personal chat request' => '',
+        'New customer chat request' => '',
+        'New public chat request' => '',
+        'Selected user is not available for chat.' => '',
+        'New activity' => 'Ny aktivitet',
+        'New activity on one of your monitored chats.' => 'Ny aktivitet i en af dine monitorerede chats.',
+        'Your browser does not support video and audio calling.' => '',
+        'Selected user is not available for video and audio call.' => '',
+        'Target user\'s browser does not support video and audio calling.' =>
+            '',
+        'Do you really want to continue?' => 'Ønsker du at fortsætte?',
+        'Information about the OTRS Daemon' => 'Information om OTRS tjenesten',
         'This feature is part of the %s.  Please contact us at %s for an upgrade.' =>
             '',
         'Find out more about the %s' => '',
 
         # Template: Header
-        'Logout' => 'Log ud',
         'You are logged in as' => 'Du er logget ind som',
 
         # Template: Installer
         'JavaScript not available' => 'JavaScript ikke tilgængeligt',
         'Step %s' => 'Skridt %s',
-        'License' => 'Licens',
         'Database Settings' => 'Database-indstillinger',
         'General Specifications and Mail Settings' => 'Generelle specifikationer og mail-indstillinger',
         'Finish' => 'Færdig',
-        'Welcome to %s' => '',
-        'Phone' => 'Telefon',
+        'Welcome to %s' => 'Velkommen til %s',
         'Web site' => 'Webside',
+        'Mail check successful.' => 'Mail er tjekket ok.',
+        'Error in the mail settings. Please correct and try again.' => 'Fejl i mail-indstillingerne. Ret dem venligst og prøv igen.',
 
         # Template: InstallerConfigureMail
         'Configure Outbound Mail' => 'Konfigurer udgående mail',
@@ -2366,8 +3114,8 @@ sub Data {
         'Select outbound mail port.' => 'Vælg udgående mail-port.',
         'SMTP host' => 'SMTP-server',
         'SMTP host.' => 'SMTP-server.',
-        'SMTP authentication' => 'SMTP-autentifikation',
-        'Does your SMTP host need authentication?' => 'Har din SMTP-server brug for autentifikation?',
+        'SMTP authentication' => 'SMTP-godkendelse',
+        'Does your SMTP host need authentication?' => 'Har din SMTP-server brug for godkendelse?',
         'SMTP auth user' => 'SMTP autentifikations-bruger',
         'Username for SMTP auth.' => 'Brugernavn for SMTP-autentifikation',
         'SMTP auth password' => 'SMTP autentifikations-password',
@@ -2394,8 +3142,6 @@ sub Data {
         'Use an existing database for OTRS' => 'Brug en eksisterende database til OTRS',
 
         # Template: InstallerDBmssql
-        'If you have set a root password for your database, it must be entered here. If not, leave this field empty.' =>
-            'Hvis du har sat et root-password på din database, skal det indtastes her. Ellers lad feltet være tomt.',
         'Database name' => 'Database-navn',
         'Check database settings' => 'Tjek database-konfiguration',
         'Result of database check' => 'Resultat af database-konfigurationstjek',
@@ -2453,12 +3199,13 @@ sub Data {
 
         # Template: Login
         'Lost your password?' => 'Mistet din adgangskode?',
+        'Request New Password' => 'Bed om nyt password',
         'Back to login' => 'Tilbage til login',
 
         # Template: MobileNotAvailableWidget
-        'Feature not Available' => '',
+        'Feature not available' => 'Denne funktion er ikke tilgængelig',
         'Sorry, but this feature of OTRS is currently not available for mobile devices. If you\'d like to use it, you can either switch to desktop mode or use your regular desktop device.' =>
-            '',
+            'Beklager, men denne funktion i OTRS er ikke tilgængelig for mobile enheder. Hvis du gerne vil bruge den, kan du enten skifte til desktop-visning eller bruge din almindelige desktop-pc.',
 
         # Template: Motd
         'Message of the Day' => 'Dagens Besked',
@@ -2487,6 +3234,10 @@ sub Data {
             '',
         'Please note that you can\'t completely disable notifications marked as mandatory.' =>
             '',
+        'Sorry, but you can\'t disable all methods for notifications marked as mandatory.' =>
+            '',
+        'Sorry, but you can\'t disable all methods for this notification.' =>
+            '',
 
         # Template: ActivityDialogHeader
         'Process Information' => '',
@@ -2509,32 +3260,31 @@ sub Data {
         'Permissions' => 'Rettigheder',
         'You can select one or more groups to define access for different agents.' =>
             'Du kan vælge en eller flere grupper for at give adgang for forskellige agenter.',
-        'Result formats' => '',
-        'Time Zone' => 'Tidszone',
+        'Result formats' => 'Formater resultat som',
         'The selected time periods in the statistic are time zone neutral.' =>
-            '',
-        'Create summation row' => '',
+            'De valgte tidsperioder i rapportern tager ikke højde for tidszoner.',
+        'Create summation row' => 'Summer rækker',
         'Generate an additional row containing sums for all data rows.' =>
             '',
-        'Create summation column' => '',
+        'Create summation column' => 'Summer kolonner',
         'Generate an additional column containing sums for all data columns.' =>
             '',
-        'Cache results' => '',
-        'Stores statistics result data in a cache to be used in subsequent views with the same configuration.' =>
+        'Cache results' => 'Gem resultater i cache',
+        'Stores statistics result data in a cache to be used in subsequent views with the same configuration (requires at least one selected time field).' =>
             '',
         'Provide the statistic as a widget that agents can activate in their dashboard.' =>
             'Tilbyd rapporten som en widget, agenter kan aktivere på deres dashboard.',
         'Please note that enabling the dashboard widget will activate caching for this statistic in the dashboard.' =>
-            '',
+            'Bemærk, at ved at aktivere dashboard-widget, vil caching også blive aktiveret.',
         'If set to invalid end users can not generate the stat.' => 'Hvis sat til ugyldig, kan brugere ikke køre rapporten.',
 
         # Template: PreviewWidget
-        'There are problems in the configuration of this statistic:' => '',
-        'You may now configure the X-axis of your statistic.' => '',
-        'This statistic does not provide preview data.' => '',
-        'Preview format:' => '',
+        'There are problems in the configuration of this statistic:' => 'Der er problemer i konfigurationen af denne rapport:',
+        'You may now configure the X-axis of your statistic.' => 'Du kan nu konfigurere X-aksen i din rapport.',
+        'This statistic does not provide preview data.' => 'Denne rapport har ikke mulighed for forhåndsvisning.',
+        'Preview format:' => 'Format for forhåndsvisning:',
         'Please note that the preview uses random data and does not consider data filters.' =>
-            '',
+            'Bemærk at forhåndsvisningen bruger tilfældigt data og ikke tager filtre i betragtning.',
         'Configure X-Axis' => 'Konfigurer X-aksen',
         'X-axis' => 'X-akse',
         'Configure Y-Axis' => 'Konfigirer Y-aksen',
@@ -2550,12 +3300,12 @@ sub Data {
         'The past complete %s and the current+upcoming complete %s %s' =>
             '',
         'Do not allow changes to this element when the statistic is generated.' =>
-            '',
+            'Tillad ikke ændringer i dette element, når rapporten genereres.',
 
         # Template: StatsParamsWidget
         'Format' => 'Format',
         'Exchange Axis' => 'Ombyt akser',
-        'Configurable Params of Static Stat' => '',
+        'Configurable params of static stat' => 'Konfigurerbare parametre af en statisk rapport',
         'No element selected.' => 'Intet element er valgt',
         'Scale' => 'Skala',
         'show more' => '',
@@ -2567,7 +3317,7 @@ sub Data {
 
         # Template: XAxisWidget
         'The selected time period defines the default time frame for this statistic to collect data from.' =>
-            '',
+            'Den valgte tidsperiode definerer tidsrammen, som denne rapport samler data i.',
         'Defines the time unit that will be used to split the selected time period into reporting data points.' =>
             '',
 
@@ -2577,7 +3327,6 @@ sub Data {
 
         # Template: Test
         'OTRS Test Page' => 'OTRS prøveside',
-        'Unlock' => 'Frigiv',
         'Welcome %s %s' => 'Velkommen %s %s',
         'Counter' => 'Tæller',
 
@@ -2585,22 +3334,10 @@ sub Data {
         'Go back to the previous page' => 'Gå tilbage til forrige side',
 
         # Perl Module: Kernel/Config/Defaults.pm
-        'CustomerIDs' => 'Kunde-ID\'er',
-        'Fax' => 'Fax',
-        'Street' => 'Gade',
-        'Zip' => 'Post Nr.',
-        'City' => 'By',
-        'Country' => 'Land',
-        'Valid' => 'Gyldig',
-        'Mr.' => 'Hr.',
-        'Mrs.' => 'Fru',
         'View system log messages.' => 'Se systemets log',
-        'Edit the system configuration settings.' => 'Rediger systemets konfiguration',
         'Update and extend your system with software packages.' => 'Opdater ',
 
         # Perl Module: Kernel/Modules/AdminACL.pm
-        'ACL information from database is not in sync with the system configuration, please deploy all ACLs.' =>
-            'ACL-oplysningerne i databasen stemmer ikke med systemets konfiguration. Iværksæt alle ACL\'er.',
         'ACLs could not be Imported due to a unknown error, please check OTRS logs for more information' =>
             '',
         'The following ACLs have been added successfully: %s' => '',
@@ -2616,8 +3353,6 @@ sub Data {
         'There was an error synchronizing the ACLs.' => '',
         'ACL %s could not be deleted' => '',
         'There was an error getting data for ACL with ID %s' => '',
-        'Please note that ACL restrictions will be ignored for the Superuser account (UserID 1).' =>
-            '',
         'Exact match' => '',
         'Negated exact match' => '',
         'Regular expression' => '',
@@ -2625,24 +3360,12 @@ sub Data {
         'Negated regular expression' => '',
         'Negated regular expression (ignore case)' => '',
 
-        # Perl Module: Kernel/Modules/AdminAttachment.pm
-        'Attachment updated!' => 'Vedhæftet fil opdateret.',
-        'Attachment added!' => 'Vedhæftet fil tilføjet.',
-
-        # Perl Module: Kernel/Modules/AdminAutoResponse.pm
-        'Response updated!' => 'Svar opdateret.',
-        'Response added!' => 'Svar tilføjet.',
-
         # Perl Module: Kernel/Modules/AdminCustomerCompany.pm
-        'Customer company updated!' => 'Kunde-firma opdateret.',
         'Customer Company %s already exists!' => '',
-        'Customer company added!' => 'Kunde-firma tilføjet.',
 
         # Perl Module: Kernel/Modules/AdminCustomerUser.pm
-        'Customer updated!' => 'Kunde opdateret.',
         'New phone ticket' => 'Opret ny sag',
         'New email ticket' => 'Opret ny sag ved at sende mail',
-        'Customer %s added' => 'Kunde %s er tilføjet',
 
         # Perl Module: Kernel/Modules/AdminDynamicField.pm
         'Fields configuration is not valid' => '',
@@ -2663,12 +3386,10 @@ sub Data {
         'The name for this field should not change.' => '',
         'Could not update the field %s' => '',
         'Currently' => '',
-        'Unchecked' => '',
-        'Checked' => '',
+        'Unchecked' => 'Fravalgt',
+        'Checked' => 'Valgt',
 
         # Perl Module: Kernel/Modules/AdminDynamicFieldDateTime.pm
-        'No' => 'Nej',
-        'Yes' => 'Ja',
         'Prevent entry of dates in the future' => '',
         'Prevent entry of dates in the past' => '',
 
@@ -2679,19 +3400,8 @@ sub Data {
         'Select at least one recipient.' => '',
 
         # Perl Module: Kernel/Modules/AdminGenericAgent.pm
-        'Time unit' => 'Tidsenhed',
-        'within the last ...' => 'indenfor de sidste ...',
-        'within the next ...' => 'indenfor den næste ...',
-        'more than ... ago' => 'mere end ... siden',
-        'minute(s)' => 'minut(ter)',
-        'hour(s)' => 'time(r)',
-        'day(s)' => 'dag(e)',
-        'week(s)' => 'uge(r)',
-        'month(s)' => 'måned(er)',
-        'year(s)' => 'år',
-        'Unarchived tickets' => 'Uarkiverede sager',
         'archive tickets' => '',
-        'restore tickets from archive' => '',
+        'restore tickets from archive' => 'gendan sager fra arkivet',
         'Need Profile!' => '',
         'Got no values to check.' => '',
         'Please remove the following words because they cannot be used for the ticket selection:' =>
@@ -2712,7 +3422,7 @@ sub Data {
         'Could not get registered configuration for action type %s' => '',
         'Could not get backend for %s %s' => '',
         'Could not update configuration data for WebserviceID %s' => '',
-        'Keep (leave unchanged)' => '',
+        'Keep (leave unchanged)' => 'Behold (ignorer ændringer)',
         'Ignore (drop key/value pair)' => '',
         'Map to (use provided value as default)' => '',
         'Exact value(s)' => '',
@@ -2744,32 +3454,21 @@ sub Data {
         'The imported file has not valid YAML content! Please check OTRS log for details' =>
             '',
         'Web service "%s" deleted!' => 'Web tjeneste "%s" er slettet!',
-        'OTRS as provider' => 'OTRS som provider',
-        'OTRS as requester' => 'OTRS som requester',
+        'New Web service' => '',
 
         # Perl Module: Kernel/Modules/AdminGenericInterfaceWebserviceHistory.pm
         'Got no WebserviceHistoryID!' => '',
         'Could not get history data for WebserviceHistoryID %s' => '',
 
-        # Perl Module: Kernel/Modules/AdminGroup.pm
-        'Group updated!' => 'Gruppe opdateret.',
-
-        # Perl Module: Kernel/Modules/AdminMailAccount.pm
-        'Mail account added!' => 'Mail-konto tilføjet.',
-        'Mail account updated!' => 'Mail-konto opdateret.',
-        'Finished' => 'Færdig',
-        'Dispatching by email To: field.' => 'Sendes via mail til: felt.',
-        'Dispatching by selected Queue.' => 'Sendes via den valgte kø.',
-
         # Perl Module: Kernel/Modules/AdminNotificationEvent.pm
         'Notification updated!' => '',
-        'Notification added!' => '',
+        'Notification added!' => 'Besked tilføjet.',
         'There was an error getting data for Notification with ID:%s!' =>
-            '',
-        'Unknown Notification %s!' => '',
-        'There was an error creating the Notification' => '',
+            'Der var en fejl med at hente data for beskeden med ID:%s!',
+        'Unknown Notification %s!' => 'Ukendt besked %s!',
+        'There was an error creating the Notification' => 'Der opstod en fejl ved oprettelse af beskeden',
         'Notifications could not be Imported due to a unknown error, please check OTRS logs for more information' =>
-            '',
+            'Beskeder kunne ikke importeres grundet en ukendt fejl. Tjek OTRS-loggen for mere information.',
         'The following Notifications have been added successfully: %s' =>
             '',
         'The following Notifications have been updated successfully: %s' =>
@@ -2787,33 +3486,22 @@ sub Data {
         'Customer of the ticket' => 'Sagens kunde',
         'Yes, but require at least one active notification method' => '',
 
-        # Perl Module: Kernel/Modules/AdminOTRSBusiness.pm
-        'Your system was successfully upgraded to %s.' => 'Dit system blev opgraderet til %s.',
-        'There was a problem during the upgrade to %s.' => 'Der var et problem under opgraderingen til %s.',
-        '%s was correctly reinstalled.' => '%s blev geninstalleret korrekt.',
-        'There was a problem reinstalling %s.' => 'Der var et problem med at geninstallere %s.',
-        'Your %s was successfully updated.' => '%s blev opdateret.',
-        'There was a problem during the upgrade of %s.' => 'Der var et problem under opgraderingen af %s.',
-        '%s was correctly uninstalled.' => '%s blev afinstalleret.',
-        'There was a problem uninstalling %s.' => 'Der var et problem med at afinstallere %s.',
-
         # Perl Module: Kernel/Modules/AdminPGP.pm
         'PGP environment is not working. Please check log for more info!' =>
             '',
         'Need param Key to delete!' => '',
-        'Key %s deleted!' => '',
+        'Key %s deleted!' => 'Nøgle %s slettet.',
         'Need param Key to download!' => '',
 
         # Perl Module: Kernel/Modules/AdminPackageManager.pm
         'Sorry, Apache::Reload is needed as PerlModule and PerlInitHandler in Apache config file. See also scripts/apache2-httpd.include.conf. Alternatively, you can use the command line tool bin/otrs.Console.pl to install packages!' =>
             '',
-        'No such package!' => '',
+        'No such package!' => 'Den pakke findes ikke!',
         'No such file %s in package!' => '',
         'No such file %s in local file system!' => '',
-        'Can\'t read %s!' => '',
+        'Can\'t read %s!' => 'Kan ikke læse %s!',
+        'File is OK' => '',
         'Package has locally modified files.' => '',
-        'Package not verified by the OTRS Group! It is recommended not to use this package.' =>
-            'Pakken er ikke godtkendt af OTRS-gruppen! Det anbefales ikke af bruge denne pakke.',
         'No packages or no new packages found in selected repository.' =>
             '',
         'Package not verified due a communication issue with verification server!' =>
@@ -2825,13 +3513,7 @@ sub Data {
         # Perl Module: Kernel/Modules/AdminPostMasterFilter.pm
         'No such filter: %s' => '',
 
-        # Perl Module: Kernel/Modules/AdminPriority.pm
-        'Priority updated!' => 'Prioritet opdateret.',
-        'Priority added!' => 'Prioritet tilføjet.',
-
         # Perl Module: Kernel/Modules/AdminProcessManagement.pm
-        'Process Management information from database is not in sync with the system configuration, please synchronize all processes.' =>
-            'Process Management-informationen i databasen stemmer ikke overens med systemkonfigurationen. Synkroniser alle processer.',
         'Need ExampleProcesses!' => '',
         'Need ProcessID!' => '',
         'Yes (mandatory)' => '',
@@ -2889,13 +3571,7 @@ sub Data {
         'Do not show Field' => '',
         'Show Field' => '',
         'Show Field As Mandatory' => '',
-        'note-internal' => 'bemærkning-intern',
-        'note-external' => 'bemærkning-ekstern',
-        'note-report' => 'bemærkning-rapport',
-        'phone' => 'telefon',
         'fax' => '',
-        'sms' => 'sms',
-        'webrequest' => 'webanmodning',
 
         # Perl Module: Kernel/Modules/AdminProcessManagementPath.pm
         'Edit Path' => '',
@@ -2930,18 +3606,9 @@ sub Data {
         # Perl Module: Kernel/Modules/AdminQueue.pm
         'Don\'t use :: in queue name!' => '',
         'Click back and change it!' => '',
-        'Queue updated!' => 'Kø opdateret.',
-        '-none-' => '-ingen-',
 
         # Perl Module: Kernel/Modules/AdminQueueAutoResponse.pm
         'Queues ( without auto responses )' => '',
-
-        # Perl Module: Kernel/Modules/AdminRole.pm
-        'Role updated!' => 'Rolle opdateret.',
-        'Role added!' => 'Rolle tilføjet.',
-
-        # Perl Module: Kernel/Modules/AdminSLA.pm
-        'Please activate %s first!' => 'Aktiver venligst %s først',
 
         # Perl Module: Kernel/Modules/AdminSMIME.pm
         'S/MIME environment is not working. Please check log for more info!' =>
@@ -2963,14 +3630,6 @@ sub Data {
         'Salutation updated!' => '',
         'Salutation added!' => '',
 
-        # Perl Module: Kernel/Modules/AdminSignature.pm
-        'Signature updated!' => 'Signatur opdateret.',
-        'Signature added!' => 'Signatur tilføjet.',
-
-        # Perl Module: Kernel/Modules/AdminState.pm
-        'State updated!' => 'Tilstand opdateret.',
-        'State added!' => 'Tilstand tilføjet.',
-
         # Perl Module: Kernel/Modules/AdminSupportDataCollector.pm
         'File %s could not be read!' => '',
 
@@ -2978,10 +3637,6 @@ sub Data {
         'Import not allowed!' => '',
         'Need File!' => '',
         'Can\'t write ConfigItem!' => '',
-
-        # Perl Module: Kernel/Modules/AdminSystemAddress.pm
-        'System e-mail address updated!' => 'System-mail-adresse opdateret.',
-        'System e-mail address added!' => 'System-mail-adresse tilføjet.',
 
         # Perl Module: Kernel/Modules/AdminSystemMaintenance.pm
         'Start date shouldn\'t be defined after Stop date!' => '',
@@ -3000,21 +3655,15 @@ sub Data {
 
         # Perl Module: Kernel/Modules/AdminType.pm
         'Need Type!' => '',
-        'Type updated!' => 'Type opdateret.',
-        'Type added!' => 'Type tilføjet.',
-
-        # Perl Module: Kernel/Modules/AdminUser.pm
-        'Agent updated!' => 'Agent opdateret',
-
-        # Perl Module: Kernel/Modules/AgentCustomerSearch.pm
-        'Customer History' => 'Kunde-historik',
 
         # Perl Module: Kernel/Modules/AgentDashboardCommon.pm
         'No such config for %s' => '',
-        'Statistic' => 'Statistik',
+        'Statistic' => 'Rapport',
         'No preferences for %s!' => '',
         'Can\'t get element data of %s!' => '',
         'Can\'t get filter content data of %s!' => '',
+        'Customer Company Name' => '',
+        'Customer User ID' => '',
 
         # Perl Module: Kernel/Modules/AgentLinkObject.pm
         'Need SourceObject and SourceKey!' => '',
@@ -3028,33 +3677,24 @@ sub Data {
         # Perl Module: Kernel/Modules/AgentPreferences.pm
         'Param Group is required!' => '',
 
-        # Perl Module: Kernel/Modules/AgentSpelling.pm
-        'No suggestions' => 'Ingen forslag',
-
         # Perl Module: Kernel/Modules/AgentStatistics.pm
         'Parameter %s is missing.' => '',
         'Invalid Subaction.' => '',
-        'Statistic could not be imported.' => 'Statistik kunne ikke importeres',
-        'Please upload a valid statistic file.' => 'Upload venligst en gyldig statistik fil.',
+        'Statistic could not be imported.' => 'Rapport kunne ikke importeres',
+        'Please upload a valid statistic file.' => 'Upload venligst en gyldig rapport-fil.',
         'Export: Need StatID!' => '',
         'Delete: Get no StatID!' => '',
         'Need StatID!' => '',
         'Could not load stat.' => '',
-        'Could not create statistic.' => '',
+        'Could not create statistic.' => 'Kunne ikke oprette rapport.',
         'Run: Get no %s!' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketActionCommon.pm
         'No TicketID is given!' => '',
         'You need %s permissions!' => '',
-        'Sorry, you need to be the ticket owner to perform this action.' =>
-            'Du skal eje denne sag for at udføre handlingen.',
-        'Please change the owner first.' => 'Skift venligst ejeren først.',
         'Could not perform validation on field %s!' => '',
         'No subject' => 'Intet emne',
         'Previous Owner' => 'Tidligere ejer',
-        'wrote' => 'skrev',
-        'Message from' => 'Besked fra',
-        'End message' => 'Slut på besked',
 
         # Perl Module: Kernel/Modules/AgentTicketBounce.pm
         '%s is needed!' => '',
@@ -3069,21 +3709,17 @@ sub Data {
         'Ticket (%s) is not unlocked!' => '',
         'Bulk feature is not enabled!' => '',
         'No selectable TicketID is given!' => '',
-        'You either selected no ticket or only tickets which are locked by other agents' =>
+        'You either selected no ticket or only tickets which are locked by other agents.' =>
             '',
-        'You need to select at least one ticket' => '',
-        'You don\'t have write access to this ticket.' => 'Du har ikke rettigheder til at ændre denne sag.',
-        'Ticket selected.' => 'Sag valgt.',
-        'Ticket is locked by another agent and will be ignored!' => 'Sagen er trukket af en anden agent og ignoreres',
-        'Ticket locked.' => 'Sag trukker.',
+        'You need to select at least one ticket.' => '',
+        'The following tickets were ignored because they are locked by another agent or you don\'t have write access to these tickets: %s.' =>
+            '',
+        'The following tickets were locked: %s.' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketCompose.pm
         'Can not determine the ArticleType!' => '',
-        'Address %s replaced with registered customer address.' => 'Adresse %s erstattet med kundens registrerede adresse.',
-        'Customer user automatically added in Cc.' => 'Kundebruger automatisk tilføjet til Cc.',
 
         # Perl Module: Kernel/Modules/AgentTicketEmail.pm
-        'Ticket "%s" created!' => 'Sag "%s" oprettet.',
         'No Subaction!' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketEmailOutbound.pm
@@ -3091,15 +3727,7 @@ sub Data {
         'System Error!' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketEscalationView.pm
-        'Today' => 'I dag',
-        'Tomorrow' => 'I morgen',
-        'Next week' => 'Næste uge',
         'Invalid Filter: %s!' => '',
-        'Ticket Escalation View' => 'Oversigt over eskalerede sager',
-
-        # Perl Module: Kernel/Modules/AgentTicketForward.pm
-        'Forwarded message from' => 'Videresendt besked fra',
-        'End forwarded message' => 'Slut på videresendt besked',
 
         # Perl Module: Kernel/Modules/AgentTicketHistory.pm
         'Can\'t show history, no TicketID is given!' => '',
@@ -3110,12 +3738,6 @@ sub Data {
         'Please become the owner first.' => '',
         'Ticket (ID=%s) is locked by %s!' => '',
         'Change the owner!' => '',
-
-        # Perl Module: Kernel/Modules/AgentTicketLockedView.pm
-        'New Article' => 'Nyt indlæg',
-        'Pending' => 'Afventer',
-        'Reminder Reached' => 'Påmindelsesdato nået',
-        'My Locked Tickets' => 'Mine sager',
 
         # Perl Module: Kernel/Modules/AgentTicketMerge.pm
         'Can\'t merge ticket with itself!' => '',
@@ -3142,7 +3764,6 @@ sub Data {
         # Perl Module: Kernel/Modules/AgentTicketProcess.pm
         'Couldn\'t get ActivityDialogEntityID "%s"!' => '',
         'No Process configured!' => '',
-        'The selected process is invalid!' => 'Den valgte proces er ugyldig.',
         'Process %s is invalid!' => '',
         'Subaction is invalid!' => '',
         'Parameter %s is missing in %s.' => '',
@@ -3183,6 +3804,10 @@ sub Data {
         'Could not store ActivityDialog, invalid TicketID: %s!' => '',
         'Invalid TicketID: %s!' => '',
         'Missing ActivityEntityID in Ticket %s!' => '',
+        'This step does not belong anymore the current activity in process for Ticket %s!' =>
+            '',
+        'Another user changed this ticket in the meantime. Please close this window and reload the ticket.' =>
+            '',
         'Missing ProcessEntityID in Ticket %s!' => '',
         'Could not set DynamicField value for %s of Ticket with ID "%s" in ActivityDialog "%s"!' =>
             '',
@@ -3195,75 +3820,64 @@ sub Data {
         'Default Config for Process::Default%s missing!' => '',
         'Default Config for Process::Default%s invalid!' => '',
 
-        # Perl Module: Kernel/Modules/AgentTicketQueue.pm
-        'Available tickets' => 'Frie sager',
-        'including subqueues' => 'Inkluder underkøer',
-        'excluding subqueues' => 'Ekskluder underkøer',
-        'QueueView' => 'Køer',
-
-        # Perl Module: Kernel/Modules/AgentTicketResponsibleView.pm
-        'My Responsible Tickets' => 'Sager, jeg er ansvarlig for',
-
         # Perl Module: Kernel/Modules/AgentTicketSearch.pm
-        'last-search' => 'sidste søgning',
         'Untitled' => '',
-        'Ticket Number' => 'Sagsnummer',
-        'Customer Realname' => 'Kundens rigtige navn',
-        'Ticket' => 'Sager',
+        'Customer Name' => '',
         'Invalid Users' => '',
-        'Normal' => 'Normal',
         'CSV' => 'CSV',
         'Excel' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketService.pm
         'Feature not enabled!' => '',
-        'Service View' => 'Serviceoversigt',
-
-        # Perl Module: Kernel/Modules/AgentTicketStatusView.pm
-        'Status View' => 'Statusoversigt',
-
-        # Perl Module: Kernel/Modules/AgentTicketWatchView.pm
-        'My Watched Tickets' => 'Fulgte sager',
 
         # Perl Module: Kernel/Modules/AgentTicketWatcher.pm
         'Feature is not active' => '',
 
         # Perl Module: Kernel/Modules/AgentTicketZoom.pm
+        'Link Deleted' => 'Link Slettet',
+        'Ticket Locked' => 'Sag Trukket',
+        'Pending Time Set' => '',
+        'Dynamic Field Updated' => 'Dynamisk Felt Opdateret',
+        'Outgoing Email (internal)' => '',
         'Ticket Created' => 'Sag Oprettet',
+        'Type Updated' => 'Type Opdateret',
+        'Escalation Update Time In Effect' => '',
+        'Escalation Update Time Stopped' => '',
+        'Escalation First Response Time Stopped' => '',
+        'Customer Updated' => 'Kunde Opdateret',
+        'Internal Chat' => 'Intern Chat',
+        'Automatic Follow-Up Sent' => 'Automatisk Opfølgning Sendt',
         'Note Added' => 'Note Tilføjet',
         'Note Added (Customer)' => 'Note Tilføjet (Kunde)',
-        'Outgoing Email' => 'Udgående Email',
-        'Outgoing Email (internal)' => '',
-        'Incoming Customer Email' => 'Indgående Kunde Email',
-        'Dynamic Field Updated' => 'Dynamisk Felt Opdateret',
-        'Outgoing Phone Call' => 'Udgående Telefonopkald',
-        'Incoming Phone Call' => 'Indgående Telefonopkald',
-        'Outgoing Answer' => 'Udgående Svar',
-        'SLA Updated' => 'SLA Opdateret',
-        'Service Updated' => 'Service Opdateret',
-        'Customer Updated' => 'Kunde Opdateret',
         'State Updated' => 'Tilstand Opdateret',
-        'Incoming Follow-Up' => 'Indgående Opfølgning',
-        'Escalation Update Time Stopped' => '',
-        'Escalation Solution Time Stopped' => '',
-        'Escalation First Response Time Stopped' => '',
-        'Escalation Response Time Stopped' => '',
+        'Outgoing Answer' => 'Udgående Svar',
+        'Service Updated' => 'Service Opdateret',
         'Link Added' => 'Link Tilføjet',
-        'Link Deleted' => 'Link Slettet',
-        'Ticket Merged' => 'Sag Samlet',
-        'Pending Time Set' => '',
-        'Ticket Locked' => 'Sag Trukket',
-        'Ticket Unlocked' => 'Sag Frigjort',
-        'Queue Updated' => 'Kø Opdateret',
-        'Priority Updated' => 'Prioritet Opdateret',
-        'Title Updated' => 'Titel Opdateret',
-        'Type Updated' => 'Type Opdateret',
+        'Incoming Customer Email' => 'Indgående Kunde Email',
         'Incoming Web Request' => 'Indgående Web Forespørgsel',
-        'Automatic Follow-Up Sent' => 'Automatisk Opfølgning Sendt',
-        'Automatic Reply Sent' => 'Automatisk Svar Sendt',
+        'Priority Updated' => 'Prioritet Opdateret',
+        'Ticket Unlocked' => 'Sag Frigjort',
+        'Outgoing Email' => 'Udgående Email',
+        'Title Updated' => 'Titel Opdateret',
+        'Ticket Merged' => 'Sag Samlet',
+        'Outgoing Phone Call' => 'Udgående Telefonopkald',
+        'Forwarded Message' => '',
+        'Removed User Subscription' => '',
         'Time Accounted' => '',
+        'Incoming Phone Call' => 'Indgående Telefonopkald',
+        'System Request.' => '',
+        'Incoming Follow-Up' => 'Indgående Opfølgning',
+        'Automatic Reply Sent' => 'Automatisk Svar Sendt',
+        'Automatic Reject Sent' => '',
+        'Escalation Solution Time In Effect' => '',
+        'Escalation Solution Time Stopped' => '',
+        'Escalation Response Time In Effect' => '',
+        'Escalation Response Time Stopped' => '',
+        'SLA Updated' => 'SLA Opdateret',
+        'Queue Updated' => 'Kø Opdateret',
         'External Chat' => 'Ekstern Chat',
-        'Internal Chat' => 'Intern Chat',
+        'Queue Changed' => '',
+        'Notification Was Sent' => '',
         'We are sorry, you do not have permissions anymore to access this ticket in its current state.' =>
             '',
         'Can\'t get for ArticleID %s!' => '',
@@ -3271,20 +3885,15 @@ sub Data {
         'Event type filter settings were saved.' => '',
         'Need ArticleID!' => '',
         'Invalid ArticleID!' => '',
+        'Offline' => '',
+        'User is currently offline.' => '',
+        'User is currently active.' => '',
+        'Away' => '',
+        'User was inactive for a while.' => '',
+        'Unavailable' => '',
+        'User set their status to unavailable.' => '',
         'Fields with no group' => '',
-        'Reply All' => 'Svar alle',
-        'Forward' => 'Videresend',
-        'Forward article via mail' => 'Videresend indlæg via mail',
-        'Bounce Article to a different mail address' => 'Bounce Indlæg til en anden mail-adresse',
-        'Bounce' => 'Overgiv',
-        'Split this article' => 'Opdel dette indlæg',
-        'Split' => 'Opdel',
-        'Print this article' => 'Udskriv dette indlæg',
         'View the source for this Article' => '',
-        'Plain Format' => 'Kildetekst',
-        'Mark' => 'Marker',
-        'Unmark' => 'Fjern markering',
-        'Reply to note' => 'Svar på note',
 
         # Perl Module: Kernel/Modules/CustomerTicketAttachment.pm
         'FileID and ArticleID are needed!' => '',
@@ -3302,8 +3911,6 @@ sub Data {
         'Untitled!' => '',
 
         # Perl Module: Kernel/Modules/CustomerTicketSearch.pm
-        'Created within the last' => 'Oprettet indenfor de sidste',
-        'Created more than ... ago' => 'Oprettet mere end ... siden',
         'Please remove the following words because they cannot be used for the search:' =>
             'Fjern venligst følgende ord da de ikke kan bruges i søgningen:',
 
@@ -3316,32 +3923,26 @@ sub Data {
         'Configure "Home" in Kernel/Config.pm first!' => '',
         'File "%s/Kernel/Config.pm" not found!' => '',
         'Directory "%s" not found!' => '',
-        'Install OTRS' => 'Installer OTRS',
-        'Intro' => 'Indledning',
         'Kernel/Config.pm isn\'t writable!' => '',
         'If you want to use the installer, set the Kernel/Config.pm writable for the webserver user!' =>
             '',
-        'Database Selection' => 'Databasevalg',
         'Unknown Check!' => '',
         'The check "%s" doesn\'t exist!' => '',
-        'Enter the password for the database user.' => 'Indtast oasswirdet for databasens bruger.',
         'Database %s' => '',
-        'Enter the password for the administrative database user.' => 'Indtast passwordet for den administrative bruger i databasen.',
+        'Configure MySQL' => '',
+        'Configure PostgreSQL' => '',
+        'Configure Oracle' => '',
         'Unknown database type "%s".' => '',
-        'Please go back' => '',
-        'Create Database' => 'Opret database',
+        'Please go back.' => '',
         'Install OTRS - Error' => '',
         'File "%s/%s.xml" not found!' => '',
         'Contact your Admin!' => '',
-        'System Settings' => 'Systemindstillinger',
-        'Configure Mail' => 'Konfigurer Mail',
-        'Mail Configuration' => 'Mail-konfiguration',
+        'Syslog' => '',
         'Can\'t write Config file!' => '',
         'Unknown Subaction %s!' => '',
         'Can\'t connect to database, Perl module DBD::%s not installed!' =>
             '',
         'Can\'t connect to database, read comment!' => '',
-        'Database already contains data - it should be empty!' => 'Databasen indeholder allerede data - den burde være tom!',
         'Error: Please make sure your database accepts packages over %s MB in size (it currently only accepts packages up to %s MB). Please adapt the max_allowed_packet setting of your database in order to avoid errors.' =>
             'Fejl: Sørg for at din database accepterer pakker over %s MB i størrelse (I øjeblikket accepterer den kun pakker op til %s MB). Tilpas max_allowed_packet indstillingen i din database for at undgå fejl.',
         'Error: Please set the value for innodb_log_file_size on your database to at least %s MB (current: %s MB, recommended: %s MB). For more information, please have a look at %s.' =>
@@ -3349,12 +3950,10 @@ sub Data {
 
         # Perl Module: Kernel/Modules/PublicRepository.pm
         'Need config Package::RepositoryAccessRegExp' => '',
-        'Authentication failed from %s!' => '',
+        'Authentication failed from %s!' => 'Godkendelse fejlede fra %s!',
 
         # Perl Module: Kernel/Output/HTML/ArticleCheck/PGP.pm
-        'Crypted' => 'Krypteret',
-        'Sent message encrypted to recipient!' => '',
-        'Signed' => 'Underskrevet',
+        'Sent message crypted to recipient!' => '',
         '"PGP SIGNED MESSAGE" header found, but invalid!' => '',
 
         # Perl Module: Kernel/Output/HTML/ArticleCheck/SMIME.pm
@@ -3363,108 +3962,44 @@ sub Data {
         'Impossible to decrypt: private key for email was not found!' => '',
         'Successful decryption' => '',
 
-        # Perl Module: Kernel/Output/HTML/ArticleCompose/Crypt.pm
-        'Crypt' => 'Krypter',
-
-        # Perl Module: Kernel/Output/HTML/ArticleCompose/Sign.pm
-        'Sign' => 'Underskriv',
-
-        # Perl Module: Kernel/Output/HTML/Dashboard/CustomerUserList.pm
-        'Shown customer users' => 'Viste kundebrugere',
-
         # Perl Module: Kernel/Output/HTML/Dashboard/EventsTicketCalendar.pm
         'The start time of a ticket has been set after the end time!' => '',
 
+        # Perl Module: Kernel/Output/HTML/Dashboard/News.pm
+        'Can\'t connect to OTRS News server!' => '',
+        'Can\'t get OTRS News from server!' => '',
+
+        # Perl Module: Kernel/Output/HTML/Dashboard/ProductNotify.pm
+        'Can\'t connect to Product News server!' => '',
+        'Can\'t get Product News from server!' => '',
+
+        # Perl Module: Kernel/Output/HTML/Dashboard/RSS.pm
+        'Can\'t connect to %s!' => '',
+
         # Perl Module: Kernel/Output/HTML/Dashboard/TicketGeneric.pm
-        'Shown Tickets' => 'Viste Sager',
-        'Shown Columns' => 'Viste Kolonner',
         'sorted ascending' => '',
         'sorted descending' => '',
         'filter not active' => '',
         'filter active' => '',
         'This ticket has no title or subject' => 'Denne sag mangler overskrift eller emne',
 
-        # Perl Module: Kernel/Output/HTML/Dashboard/TicketStatsGeneric.pm
-        '7 Day Stats' => 'Sidste 7 dage',
-
-        # Perl Module: Kernel/Output/HTML/Dashboard/UserOnline.pm
-        'Shown' => 'Viste',
-        'This user is currently offline' => 'Brugeren er offline',
-        'This user is currently active' => 'Brugeren er aktiv',
-        'This user is currently away' => '',
-        'This user is currently unavailable' => '',
-
         # Perl Module: Kernel/Output/HTML/Layout.pm
-        'Standard' => 'Standard',
-        'h' => 't',
-        'm' => 'm',
-        'hour' => 'time',
-        'minute' => 'minut',
-        'd' => 'd',
-        'day' => 'dag',
         'We are sorry, you do not have permissions anymore to access this ticket in its current state. You can take one of the following actions:' =>
             '',
-        'This is a' => 'Dette er en',
-        'email' => 'mail',
-        'click here' => 'klik her',
-        'to open it in a new window.' => 'for at åbne i et nyt vindue.',
-        'Hours' => 'Timer',
-        'Minutes' => 'Minutter',
-        'Check to activate this date' => 'Marker for at aktivere denne dato',
-        'No Permission!' => 'Ingen tilladelse.',
         'No Permission' => '',
-        'Show Tree Selection' => 'Vis træ',
 
         # Perl Module: Kernel/Output/HTML/Layout/LinkObject.pm
         'Linked as' => '',
         'Search Result' => '',
-        'Linked' => 'Linket',
-        'Bulk' => 'Massehandling',
 
-        # Perl Module: Kernel/Output/HTML/Layout/Ticket.pm
-        'Lite' => 'Let',
-        'Unread article(s) available' => 'Der er ulæste indlæg',
-
-        # Perl Module: Kernel/Output/HTML/Notification/AgentCloudServicesDisabled.pm
-        'Enable cloud services to unleash all OTRS features!' => 'Aktiver cloud service for at få adgang til alle OTRS muligheder!',
+        # Perl Module: Kernel/Output/HTML/LinkObject/Ticket.pm
+        'Archive search' => '',
 
         # Perl Module: Kernel/Output/HTML/Notification/AgentOTRSBusiness.pm
         '%s Upgrade to %s now! %s' => '%s Opgrader til %s nu! %s',
-        'The license for your %s is about to expire. Please make contact with %s to renew your contract!' =>
-            'Licensen for %s er ved at udløbe. Kontakt venligst %s for at forny din kontrakt.',
-        'An update for your %s is available, but there is a conflict with your framework version! Please update your framework first!' =>
-            'En opdatering til %s er tilgængelig, men der er en konflikt med din framework version!
-Opdater venligst dit framework først!',
-
-        # Perl Module: Kernel/Output/HTML/Notification/AgentOnline.pm
-        'Online Agent: %s' => 'Online Agent: %s ',
-
-        # Perl Module: Kernel/Output/HTML/Notification/AgentTicketEscalation.pm
-        'There are more escalated tickets!' => 'Der er ikke flere eskalerede sager.',
-
-        # Perl Module: Kernel/Output/HTML/Notification/AgentTimeZoneCheck.pm
-        'Please select a time zone in your preferences and confirm it by clicking "Update".' =>
-            '',
-
-        # Perl Module: Kernel/Output/HTML/Notification/CustomerOnline.pm
-        'Online Customer: %s' => 'Online kunde: %s ',
 
         # Perl Module: Kernel/Output/HTML/Notification/CustomerSystemMaintenanceCheck.pm
         'A system maintenance period will start at: ' => '',
-
-        # Perl Module: Kernel/Output/HTML/Notification/DaemonCheck.pm
-        'OTRS Daemon is not running.' => 'OTRS-dæmonen kører ikke.',
-
-        # Perl Module: Kernel/Output/HTML/Notification/OutofOfficeCheck.pm
-        'You have Out of Office enabled, would you like to disable it?' =>
-            'Du har Out of Office aktiveret. Vil du deaktivere det?',
-
-        # Perl Module: Kernel/Output/HTML/Notification/UIDCheck.pm
-        'Don\'t use the Superuser account to work with OTRS! Create new Agents and work with these accounts instead.' =>
-            'Brug ikke Superuser-kontoen til at arbejde med OTRS! Opret nye agenter og arbejd med disse konti i stedet.',
-
-        # Perl Module: Kernel/Output/HTML/Preferences/ColumnFilters.pm
-        'Preferences updated successfully!' => 'Indstillingerne er opdateret',
 
         # Perl Module: Kernel/Output/HTML/Preferences/Language.pm
         '(in process)' => '',
@@ -3477,30 +4012,10 @@ Opdater venligst dit framework først!',
         'Please specify an end date that is after the start date.' => 'Angiv en slutdato der ligger efter startdatoen.',
 
         # Perl Module: Kernel/Output/HTML/Preferences/Password.pm
-        'Current password' => 'Nuværende adgangskode',
-        'New password' => 'Ny adgangskode',
-        'Verify password' => 'Gentag adgangskode',
-        'The current password is not correct. Please try again!' => 'Det nuværende password er ikke korrekt. Prøv venligst igen.',
         'Please supply your new password!' => 'Skriv venligst din nye adgangskode!',
-        'Can\'t update password, your new passwords do not match. Please try again!' =>
-            'Kan ikke opdatere password, dine nye passwords er ikke ens. Prøv venligst igen.',
-        'This password is forbidden by the current system configuration. Please contact the administrator if you have additional questions.' =>
-            '',
-        'Can\'t update password, it must be at least %s characters long!' =>
-            'Kan ikke opdatere password, det skal være mindst %s tegn langt.',
-        'Can\'t update password, it must contain at least 2 lowercase and 2 uppercase letter characters!' =>
-            '',
-        'Can\'t update password, it must contain at least 1 digit!' => 'Kan ikke opdatere password, det skal indeholde mindst 1 tal.',
-        'Can\'t update password, it must contain at least 2 letter characters!' =>
-            '',
-
-        # Perl Module: Kernel/Output/HTML/Preferences/TimeZone.pm
-        'Time zone updated successfully!' => '',
 
         # Perl Module: Kernel/Output/HTML/Statistics/View.pm
-        'invalid' => 'ugyldig',
-        'valid' => 'gyldig',
-        'No (not supported)' => '',
+        'No (not supported)' => 'Nej (ikke understøttet)',
         'No past complete or the current+upcoming complete relative time value selected.' =>
             '',
         'The selected time period is larger than the allowed time period.' =>
@@ -3523,51 +4038,18 @@ Opdater venligst dit framework først!',
         'Please select a time scale.' => '',
         'Your reporting time interval is too small, please use a larger time scale.' =>
             '',
-        'second(s)' => 'sekund(er)',
-        'quarter(s)' => 'kvartal(er)',
-        'half-year(s)' => 'halvår',
         'Please remove the following words because they cannot be used for the ticket restrictions: %s.' =>
             '',
-
-        # Perl Module: Kernel/Output/HTML/TicketMenu/Lock.pm
-        'Unlock to give it back to the queue' => 'Frigiv sagen og gør den ledig i køen',
-        'Lock it to work on it' => 'Træk sagen for at arbejde på den',
-
-        # Perl Module: Kernel/Output/HTML/TicketMenu/TicketWatcher.pm
-        'Unwatch' => 'Følg ikke',
-        'Remove from list of watched tickets' => 'Fjern fra listen over fulgte sager',
-        'Watch' => 'Følg',
-        'Add to list of watched tickets' => 'Føj til listen over fulgte sager',
 
         # Perl Module: Kernel/Output/HTML/TicketOverviewMenu/Sort.pm
         'Order by' => 'Sorter efter',
 
-        # Perl Module: Kernel/Output/HTML/TicketZoom/TicketInformation.pm
-        'Ticket Information' => 'Sagsinformation',
-
-        # Perl Module: Kernel/Output/HTML/ToolBar/TicketLocked.pm
-        'Locked Tickets New' => 'Mine nye sager',
-        'Locked Tickets Reminder Reached' => 'Mine sager, hvor påmindelsesfristen er nået',
-        'Locked Tickets Total' => 'Mine sager i alt',
-
-        # Perl Module: Kernel/Output/HTML/ToolBar/TicketResponsible.pm
-        'Responsible Tickets New' => 'Nye sager, jeg er ansvarlig for',
-        'Responsible Tickets Reminder Reached' => 'Sager, jeg er ansvarlig for, hvor påmindelsesfristen er nået',
-        'Responsible Tickets Total' => 'Sager, jeg er ansvarlig for i alt',
-
-        # Perl Module: Kernel/Output/HTML/ToolBar/TicketWatcher.pm
-        'Watched Tickets New' => 'Nye fulgte sager',
-        'Watched Tickets Reminder Reached' => 'Fulgte sager, hvor påmindelsesfristen er nået',
-        'Watched Tickets Total' => 'Fulgte sager i alt',
-
-        # Perl Module: Kernel/System/Auth.pm
-        'It is currently not possible to login due to a scheduled system maintenance.' =>
-            'Det er i øjeblikket ikke muligt at logge ind grundet planlagt system-vedligeholdelde.',
-
-        # Perl Module: Kernel/System/AuthSession/DB.pm
-        'Session invalid. Please log in again.' => 'Ugyldig session. Log venligst ind igen.',
-        'Session has timed out. Please log in again.' => 'Sessionens tidsfrist er udløbet. Vær venlig at logge ind igen.',
-        'Session limit reached! Please try again later.' => 'Systemet kan ikke håndtere flere brugere nu. Prøv venligst igen senere.',
+        # Perl Module: Kernel/System/AuthSession.pm
+        'You have exceeded the number of concurrent agents - contact sales@otrs.com.' =>
+            '',
+        'Please note that the session limit is almost reached.' => '',
+        'Login rejected! You have exceeded the maximum number of concurrent Agents! Contact sales@otrs.com immediately!' =>
+            '',
         'Session per user limit reached!' => '',
 
         # Perl Module: Kernel/System/Console/Command/Dev/Tools/Config2Docbook.pm
@@ -3576,52 +4058,42 @@ Opdater venligst dit framework først!',
         'This setting is not active by default.' => '',
         'This setting can not be deactivated.' => '',
 
-        # Perl Module: Kernel/System/DynamicField/Driver/BaseDateTime.pm
-        'in more than ...' => 'mere end ...',
-        'before/after' => 'før/efter',
-        'between' => 'mellem',
+        # Perl Module: Kernel/System/DynamicField/Driver/BaseText.pm
+        'e.g. Text or Te*t' => '',
 
-        # Perl Module: Kernel/System/DynamicField/Driver/TextArea.pm
-        'This field is required or' => 'Dette felt er påkrævet eller',
-        'The field content is too long!' => 'Indholdet af feltet er for langt.',
-        'Maximum size is %s characters.' => 'Maksimal længde er %s tegn.',
+        # Perl Module: Kernel/System/DynamicField/Driver/Checkbox.pm
+        'Ignore this field.' => '',
 
         # Perl Module: Kernel/System/Package.pm
         'not installed' => '',
-        'installed' => 'installeret',
-        'Unable to parse repository index document.' => 'Ikke i stand til at fortolke repositoriets index-dokument.',
-        'No packages for your framework version found in this repository, it only contains packages for other framework versions.' =>
-            'Ingen pakker for din version af frameworket fundet i dette repositorie, det indeholder kun pakker for andre versioner af frameworket.',
-        '<br>If you continue to install this package, the following issues may occur!<br><br>&nbsp;-Security problems<br>&nbsp;-Stability problems<br>&nbsp;-Performance problems<br><br>Please note that issues that are caused by working with this package are not covered by OTRS service contracts!<br><br>' =>
-            'Hvis du fortsætter installationen af denne pakke, kan følgende opstå:<br><br>&nbsp;-Sikkerhedsproblemer<br>&nbsp;-Stabilitetsproblemer<br>&nbsp;-Performance-problemer<br><br>Vær opmærksom på at problemer opstået ved brug af denne pakke ikke af dækket af OTRS-servicekontrakter!<br>br>',
+        'File is not installed!' => '',
+        'File is different!' => '',
+        'Can\'t read file!' => '',
+
+        # Perl Module: Kernel/System/ProcessManagement/DB/Process/State.pm
+        'Inactive' => 'Inaktiv',
+        'FadeAway' => '',
 
         # Perl Module: Kernel/System/Registration.pm
-        'Can\'t contact registration server. Please try again later.' => 'Kan ikke kontakte registrations-serveren. Prøv venligst igen senere.',
-        'No content received from registration server. Please try again later.' =>
-            'Modtog ikke noget fra registrations-serveren. Prøv venligst igen senere.',
         'Can\'t get Token from sever' => '',
-        'Username and password do not match. Please try again.' => 'Brugernavn og password passer ikke. Prøv venligst igen.',
-        'Problems processing server result. Please try again later.' => 'Problemer med at behandle svaret fra serveren. Prøv venligst igen senere.',
 
         # Perl Module: Kernel/System/Stats.pm
-        'week' => 'uge',
-        'quarter' => 'kvartal',
-        'half-year' => 'halvår',
+        'Sum' => 'Sum',
 
         # Perl Module: Kernel/System/Stats/Dynamic/Ticket.pm
         'State Type' => 'Tilstandstype',
         'Created Priority' => 'Oprettet med prioritet',
         'Created State' => 'Oprettet med status',
-        'CustomerUserLogin' => 'KundeBrugerLogin',
         'Create Time' => 'Oprettet tidspunkt',
-        'Until Time' => '',
         'Close Time' => 'Lukket tidspunkt',
-        'Escalation' => 'Eskalation',
         'Escalation - First Response Time' => '',
         'Escalation - Update Time' => '',
         'Escalation - Solution Time' => '',
         'Agent/Owner' => 'Agent/Ejer',
         'Created by Agent/Owner' => 'Oprettet af Agent/Ejer',
+        'CustomerUserLogin' => 'KundeBrugerLogin',
+        'CustomerUserLogin (complex search)' => '',
+        'CustomerUserLogin (exact match)' => '',
 
         # Perl Module: Kernel/System/Stats/Dynamic/TicketAccountedTime.pm
         'Evaluation by' => 'Evalueret af',
@@ -3629,25 +4101,24 @@ Opdater venligst dit framework først!',
         'Ticket Create Time' => 'Sagens oprettelsestidspunkt',
         'Ticket Close Time' => 'Sagens lukningstidspunkt',
         'Accounted time by Agent' => 'Bogført tid af agent',
-        'Total Time' => '',
-        'Ticket Average' => '',
-        'Ticket Min Time' => '',
-        'Ticket Max Time' => '',
-        'Number of Tickets' => '',
-        'Article Average' => '',
-        'Article Min Time' => '',
-        'Article Max Time' => '',
-        'Number of Articles' => '',
+        'Total Time' => 'Total tid',
+        'Ticket Average' => 'Sagsgennemsnit',
+        'Ticket Min Time' => 'Sag min. tid',
+        'Ticket Max Time' => 'Sag max. tid',
+        'Number of Tickets' => 'Antal sager',
+        'Article Average' => 'Indlæg-gennemsnit',
+        'Article Min Time' => 'Indlæg min. tid',
+        'Article Max Time' => 'Indlæg max. tid',
+        'Number of Articles' => 'Antal indlæg',
 
         # Perl Module: Kernel/System/Stats/Dynamic/TicketList.pm
         'unlimited' => '',
-        'ascending' => '',
-        'descending' => '',
+        'ascending' => 'stigende',
+        'descending' => 'faldende',
         'Attributes to be printed' => 'Attributter til udskrift',
         'Sort sequence' => 'Sorteringsrækkefølge',
-        'State Historic' => 'Tilstands Historik',
-        'State Type Historic' => 'Tilstandstype Historik',
-        'Until times' => '',
+        'State Historic' => 'Historik over tilstande',
+        'State Type Historic' => 'Historik over Tilstandstyper',
         'Historic Time Range' => '',
 
         # Perl Module: Kernel/System/Stats/Dynamic/TicketSolutionResponseTime.pm
@@ -3663,24 +4134,22 @@ Opdater venligst dit framework først!',
             '',
         'Solution Max Working Time (affected by escalation configuration)' =>
             '',
-        'Response Average (affected by escalation configuration)' => '',
-        'Response Min Time (affected by escalation configuration)' => '',
-        'Response Max Time (affected by escalation configuration)' => '',
-        'Response Working Time Average (affected by escalation configuration)' =>
+        'First Response Average (affected by escalation configuration)' =>
             '',
-        'Response Min Working Time (affected by escalation configuration)' =>
+        'First Response Min Time (affected by escalation configuration)' =>
             '',
-        'Response Max Working Time (affected by escalation configuration)' =>
+        'First Response Max Time (affected by escalation configuration)' =>
+            '',
+        'First Response Working Time Average (affected by escalation configuration)' =>
+            '',
+        'First Response Min Working Time (affected by escalation configuration)' =>
+            '',
+        'First Response Max Working Time (affected by escalation configuration)' =>
             '',
         'Number of Tickets (affected by escalation configuration)' => '',
 
         # Perl Module: Kernel/System/Stats/Static/StateAction.pm
         'Days' => 'Dage',
-
-        # Perl Module: Kernel/System/SupportDataCollector/Plugin/Database/OutdatedTables.pm
-        'Outdated Tables' => '',
-        'Outdated tables were found in the database. These can be removed if empty.' =>
-            '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/Database/TablePresence.pm
         'Table Presence' => 'Tabel-tilstedeværelse',
@@ -3757,7 +4226,7 @@ Opdater venligst dit framework først!',
             'Den partition OTRS befinder sig på har ingen pladsproblemer.',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OS/DiskSpacePartitions.pm
-        'Operating System/Disk Partitions Usage' => '',
+        'Disk Partitions Usage' => '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OS/Distribution.pm
         'Distribution' => 'Distribution',
@@ -3783,18 +4252,19 @@ Opdater venligst dit framework først!',
         'There should be no more than 200 MB swap space used.' => 'Der bør ikke være mere end 200 MB brugt swap.',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/ConfigSettings.pm
-        'OTRS/Config Settings' => 'OTRS/Konfigurations indstillinger',
+        'OTRS' => 'OTRS',
+        'Config Settings' => 'Konfigurationsindstillinger',
         'Could not determine value.' => 'Kunne ikke fastslå værdi.',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/DaemonRunning.pm
-        'OTRS' => 'OTRS',
         'Daemon' => 'Tjeneste',
+        'Daemon is running.' => '',
         'Daemon is not running.' => 'Tjeneste kører ikke.',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/DatabaseRecords.pm
-        'OTRS/Database Records' => '',
+        'Database Records' => '',
         'Tickets' => 'Sager',
-        'Ticket History Entries' => 'Sags historik',
+        'Ticket History Entries' => 'Sagens Historik',
         'Articles' => 'Indlæg',
         'Attachments (DB, Without HTML)' => '',
         'Customers With At Least One Ticket' => 'Kunder med mindst én sag',
@@ -3802,6 +4272,7 @@ Opdater venligst dit framework først!',
         'Invalid Dynamic Fields' => '',
         'Invalid Dynamic Field Values' => '',
         'GenericInterface Webservices' => '',
+        'Process Tickets' => '',
         'Months Between First And Last Ticket' => 'Måneder mellem første og sidste sag',
         'Tickets Per Month (avg)' => 'Sager pr. måned (gennemsnit)',
 
@@ -3833,9 +4304,22 @@ Opdater venligst dit framework først!',
         'Package Installation Status' => '',
         'Some packages have locally modified files.' => '',
         'Some packages are not correctly installed.' => 'Nogle pakker er ikke korrekt installeret.',
+        'Package Verification Status' => '',
+        'Some packages are not verified by the OTRS Group! It is recommended not to use this packages.' =>
+            '',
+        'Package Framework Version Status' => '',
+        'Some packages are not allowed for the current framework version.' =>
+            '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/PackageList.pm
-        'OTRS/Package List' => '',
+        'Package List' => 'Pakkeliste',
+
+        # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/SessionConfigSettings.pm
+        'Session Config Settings' => '',
+
+        # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/SpoolMails.pm
+        'Spooled Emails' => '',
+        'There are emails in var/spool that OTRS could not process.' => '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/SystemID.pm
         'Your SystemID setting is invalid, it should only contain digits.' =>
@@ -3870,24 +4354,25 @@ Opdater venligst dit framework først!',
         'Table ticket_lock_index contains orphaned records. Please run bin/otrs.Console.pl "Maint::Ticket::QueueIndexCleanup" to clean the StaticDB index.' =>
             '',
         'Orphaned Records In ticket_index Table' => '',
-        'Table ticket_index contains orphaned records. Please run otrs/bin/otrs.CleanTicketIndex.pl to clean the StaticDB index.' =>
+        'Table ticket_index contains orphaned records. Please run bin/otrs.Console.pl "Maint::Ticket::QueueIndexCleanup" to clean the StaticDB index.' =>
             '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/OTRS/TimeSettings.pm
-        'OTRS/Time Settings' => 'OTRS/Tids indstillinger',
+        'Time Settings' => '',
         'Server time zone' => 'Server tidszone',
-        'OTRS time zone' => '',
-        'OTRS time zone is not set.' => '',
-        'User default time zone' => '',
-        'User default time zone is not set.' => '',
-        'OTRS time zone setting for calendar' => '',
-        'Calendar time zone is not set.' => '',
+        'Computed server time offset' => 'Beregnet server tidsforskydning',
+        'OTRS TimeZone setting (global time offset)' => 'OTRS tidszone indstilling (Global tidsforskydning)',
+        'TimeZone may only be activated for systems running in UTC.' => 'Tidszone kan kun aktiveres for systemer der kører UTC.',
+        'OTRS TimeZoneUser setting (per-user time zone support)' => '',
+        'TimeZoneUser may only be activated for systems running in UTC that don\'t have an OTRS TimeZone set.' =>
+            '',
+        'OTRS TimeZone setting for calendar ' => 'OTRS tidszone indstilling for kalender',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/Apache/LoadedModules.pm
-        'Webserver/Loaded Apache Modules' => 'Webserver/indlæste Apache moduler',
+        'Webserver' => 'Web-server',
+        'Loaded Apache Modules' => 'Indlæste Apache-moduler',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/Apache/MPMModel.pm
-        'Webserver' => 'Web-server',
         'MPM model' => '',
         'OTRS requires apache to be run with the \'prefork\' MPM model.' =>
             'OTRS kræver, at apache kører med MPM-modellen \'prefork\'.',
@@ -3910,14 +4395,19 @@ Opdater venligst dit framework først!',
             '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/EnvironmentVariables.pm
-        'Webserver/Environment Variables' => '',
+        'Environment Variables' => 'Miljøvariable',
 
-        # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/IIS/Performance.pm
-        'You should use PerlEx to increase your performance.' => '',
+        # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/InternalWebRequest.pm
+        'Support Data Collection' => '',
+        'Support data could not be collected from the web server.' => '',
 
         # Perl Module: Kernel/System/SupportDataCollector/Plugin/Webserver/Version.pm
         'Webserver Version' => 'Webserver-version',
         'Could not determine webserver version.' => 'Kunne ikke fastslå webserver-version.',
+
+        # Perl Module: Kernel/System/SupportDataCollector/PluginAsynchronous/OTRS/ConcurrentUsers.pm
+        'Concurrent Users Details' => '',
+        'Concurrent Users' => 'Samtidige brugere',
 
         # Perl Module: Kernel/System/SupportDataCollector/PluginBase.pm
         'Unknown' => 'Ukendt',
@@ -3925,7 +4415,7 @@ Opdater venligst dit framework først!',
         'Problem' => 'Problem',
 
         # Perl Module: Kernel/System/Ticket.pm
-        'Reset of unlock time.' => '',
+        'Reset of unlock time.' => 'Tid til automatisk frigivelse nulstillet.',
 
         # Perl Module: Kernel/System/Ticket/Event/NotificationEvent/Transport/Email.pm
         'PGP sign only' => '',
@@ -3940,33 +4430,21 @@ Opdater venligst dit framework først!',
         'Send unencrypted notification' => '',
 
         # Perl Module: Kernel/System/Web/InterfaceAgent.pm
-        'Login failed! Your user name or password was entered incorrectly.' =>
-            'Login fejlede. Dit brugernavn eller password blev indtastet forkert.',
         'Panic, user authenticated but no user data can be found in OTRS DB!! Perhaps the user is invalid.' =>
-            '',
-        'Can`t remove SessionID.' => '',
-        'Logout successful.' => '',
-        'Feature not active!' => 'Funktionen er ikke aktiv',
-        'Sent password reset instructions. Please check your email.' => 'Instruktioner til nulstilling af password sendt. Tjek venligst din mail.',
-        'Invalid Token!' => 'Ugyldigt Token!',
-        'Sent new password to %s. Please check your email.' => 'Nyt password sendt til %s. Tjek venligst din mail.',
+            'PANIK, bruger login lykkedes, men ingen kundeoplysninger er fundet i OTRS DB!! Brugeren er muligvis ugyldig.',
+        'Can`t remove SessionID.' => 'Kan ikke fjerne SessionsID.',
+        'Logout successful.' => 'Succesfuldt logget ud.',
         'Panic! Invalid Session!!!' => 'Panik! Ugyldig session!!!',
         'No Permission to use this frontend module!' => '',
 
         # Perl Module: Kernel/System/Web/InterfaceCustomer.pm
         'Authentication succeeded, but no customer record is found in the customer backend. Please contact the administrator.' =>
-            '',
+            'Login lykkedes, men ingen kundeoplysninger er fundet i systemet. Kontakt venligst din administrator.',
         'Reset password unsuccessful. Please contact the administrator.' =>
             '',
-        'This e-mail address already exists. Please log in or reset your password.' =>
-            'Denne mail-adresse eksisterer allerede. Log ind eller nulstil dit password.',
-        'This email address is not allowed to register. Please contact support staff.' =>
-            'Denne mail-adresse har ikke tilladelse til at registrere. Kontakt venligst supporten.',
         'Added via Customer Panel (%s)' => '',
         'Customer user can\'t be added!' => '',
         'Can\'t send account info!' => '',
-        'New account created. Sent login information to %s. Please check your email.' =>
-            'Ny konto oprettet. Login-information sendt til %s. Tjek venligst din mail.',
 
         # Perl Module: Kernel/System/Web/InterfaceInstaller.pm
         'SecureMode active!' => '',
@@ -3975,45 +4453,31 @@ Opdater venligst dit framework først!',
         'Action "%s" not found!' => '',
 
         # Database XML Definition: scripts/database/otrs-initial_insert.xml
-        'invalid-temporarily' => 'ugyldig-midlertidigt',
         'Group for default access.' => '',
         'Group of all administrators.' => '',
-        'Group for statistics access.' => '',
-        'new' => 'ny',
+        'Group for statistics access.' => 'Gruppe for adgang til rapporter.',
         'All new state types (default: viewable).' => 'Alle nye tilstandstyper (standard: synlig)',
-        'open' => 'åben',
         'All open state types (default: viewable).' => '',
-        'closed' => 'lukket',
         'All closed state types (default: not viewable).' => '',
-        'pending reminder' => 'afventer påmindelse',
         'All \'pending reminder\' state types (default: viewable).' => '',
-        'pending auto' => 'afventer auto',
         'All \'pending auto *\' state types (default: viewable).' => '',
-        'removed' => 'fjernet',
         'All \'removed\' state types (default: not viewable).' => '',
-        'merged' => 'samlet',
         'State type for merged tickets (default: not viewable).' => 'Tilstandstype for samlede sager (standard: ikke synlig).',
         'New ticket created by customer.' => 'Ny sag oprettet af kunde.',
-        'closed successful' => 'Afsluttet',
         'Ticket is closed successful.' => 'sagen er afsluttet succesfuldt',
-        'closed unsuccessful' => 'Afsluttet uden løsning',
         'Ticket is closed unsuccessful.' => 'Sag lukket uden løsning',
         'Open tickets.' => 'Åbne sager.',
         'Customer removed ticket.' => 'Kunden slettede sagen.',
         'Ticket is pending for agent reminder.' => '',
-        'pending auto close+' => 'afventer autolukning+',
         'Ticket is pending for automatic close.' => '',
-        'pending auto close-' => 'afventer autolukning-',
         'State for merged tickets.' => 'Tilstand for samlede sager.',
         'system standard salutation (en)' => 'Standard system indledning (en)',
         'Standard Salutation.' => 'Standard indledning.',
         'system standard signature (en)' => '',
         'Standard Signature.' => '',
         'Standard Address.' => '',
-        'possible' => 'mulig',
         'Follow-ups for closed tickets are possible. Ticket will be reopened.' =>
             '',
-        'reject' => 'afvis',
         'Follow-ups for closed tickets are not possible. No new ticket will be created.' =>
             '',
         'new ticket' => '',
@@ -4023,19 +4487,14 @@ Opdater venligst dit framework først!',
         'All default incoming tickets.' => '',
         'All junk tickets.' => '',
         'All misc tickets.' => '',
-        'auto reply' => 'autosvar',
         'Automatic reply which will be sent out after a new ticket has been created.' =>
             '',
-        'auto reject' => 'automatisk afvisning',
         'Automatic reject which will be sent out after a follow-up has been rejected (in case queue follow-up option is "reject").' =>
             '',
-        'auto follow up' => 'automatisk opfølgning',
         'Automatic confirmation which is sent out after a follow-up has been received for a ticket (in case queue follow-up option is "possible").' =>
             '',
-        'auto reply/new ticket' => 'autosvar/ny sag',
         'Automatic response which will be sent out after a follow-up has been rejected and a new ticket has been created (in case queue follow-up option is "new ticket").' =>
             '',
-        'auto remove' => 'Auto fjern',
         'Auto remove will be sent out after a customer removed the request.' =>
             '',
         'default reply (after new ticket has been created)' => '',
@@ -4045,283 +4504,33 @@ Opdater venligst dit framework først!',
         'default reject/new ticket created (after closed follow-up with new ticket creation)' =>
             '',
         'Unclassified' => 'Uklassificeret',
-        '1 very low' => '1 meget lav',
-        '2 low' => '2 lav',
-        '3 normal' => '3 normal',
-        '4 high' => '4 høj',
-        '5 very high' => '5 meget høj',
-        'unlock' => 'fri',
-        'lock' => 'tildelt',
         'tmp_lock' => '',
-        'email-external' => 'mail-ekstern',
-        'email-internal' => 'mail-intern',
         'email-notification-ext' => '',
         'email-notification-int' => '',
-        'agent' => 'agent',
-        'system' => 'system',
-        'customer' => 'kunde',
-        'Ticket create notification' => '',
+        'Ticket create notification' => 'Besked om oprettelse af ny sag',
         'You will receive a notification each time a new ticket is created in one of your "My Queues" or "My Services".' =>
             '',
-        'Ticket follow-up notification (unlocked)' => '',
+        'Ticket follow-up notification (unlocked)' => 'Besked om opfølgning på sag (fri)',
         'You will receive a notification if a customer sends a follow-up to an unlocked ticket which is in your "My Queues" or "My Services".' =>
             '',
-        'Ticket follow-up notification (locked)' => '',
+        'Ticket follow-up notification (locked)' => 'Besked om opfølgning på sag (trukket)',
         'You will receive a notification if a customer sends a follow-up to a locked ticket of which you are the ticket owner or responsible.' =>
             '',
-        'Ticket lock timeout notification' => 'Besked om sagsfrigivelse efter tidsfristens udløb',
         'You will receive a notification as soon as a ticket owned by you is automatically unlocked.' =>
             '',
         'Ticket owner update notification' => '',
         'Ticket responsible update notification' => '',
         'Ticket new note notification' => '',
-        'Ticket queue update notification' => '',
+        'Ticket queue update notification' => 'Besked om ændring af sagens kø',
         'You will receive a notification if a ticket is moved into one of your "My Queues".' =>
             '',
         'Ticket pending reminder notification (locked)' => '',
         'Ticket pending reminder notification (unlocked)' => '',
         'Ticket escalation notification' => '',
         'Ticket escalation warning notification' => '',
-        'Ticket service update notification' => '',
+        'Ticket service update notification' => 'Besked om ændring af service på sag',
         'You will receive a notification if a ticket\'s service is changed to one of your "My Services".' =>
             '',
-
-        # JS File: Core.AJAX
-        'Error during AJAX communication. Status: %s, Error: %s' => '',
-
-        # JS File: Core.Agent.Admin.ACL
-        'Add all' => 'Tilføj alle',
-        'An item with this name is already present.' => 'En enhed med dette navn eksisterer allerede.',
-        'This item still contains sub items. Are you sure you want to remove this item including its sub items?' =>
-            'Denne enhed indeholder under-enheder. Er du sikker på, at du vil fjerne denne enhed, inklusive dens underenheder?',
-
-        # JS File: Core.Agent.Admin.Attachment
-        'Do you really want to delete this attachment?' => '',
-
-        # JS File: Core.Agent.Admin.DynamicField
-        'Do you really want to delete this dynamic field? ALL associated data will be LOST!' =>
-            'Vil du virkelig slette dette dynamiske felt? ALT tilhørende data vil GÅ TABT!',
-        'Delete field' => 'Slet felt',
-        'Deleting the field and its data. This may take a while...' => '',
-
-        # JS File: Core.Agent.Admin.GenericAgent
-        'Remove selection' => 'Fjern markering',
-        'Delete this Event Trigger' => 'Slet denne hændelses udløser',
-        'Duplicate event.' => 'Dubliker hændelse',
-        'This event is already attached to the job, Please use a different one.' =>
-            'Denne hændelse er allerede tilknyttet jobbet, brug venligst en anden.',
-
-        # JS File: Core.Agent.Admin.GenericInterfaceDebugger
-        'An error occurred during communication.' => 'En fejl skete under kommunikation.',
-        'Show or hide the content.' => 'Vis eller skjul indholdet.',
-        'Clear debug log' => 'Tøm debug-log',
-
-        # JS File: Core.Agent.Admin.GenericInterfaceInvoker
-        'Delete this Invoker' => '',
-
-        # JS File: Core.Agent.Admin.GenericInterfaceOperation
-        'Delete this Operation' => 'Slet denne operation',
-
-        # JS File: Core.Agent.Admin.GenericInterfaceWebservice
-        'Delete webservice' => 'Slet webtjeneste',
-        'Clone webservice' => 'kopier webtjeneste',
-        'Import webservice' => 'Importer webtjeneste',
-        'Delete operation' => '',
-        'Delete invoker' => '',
-
-        # JS File: Core.Agent.Admin.Group
-        'WARNING: When you change the name of the group \'admin\', before making the appropriate changes in the SysConfig, you will be locked out of the administrations panel! If this happens, please rename the group back to admin per SQL statement.' =>
-            'ADVARSEL: Når du skifter navnet på gruppen \'admin\', før du laver de passende ændringer i SysConfig, vil du blive låst ude af administrationspanelet! Hvis det sker, skal du omdøbe gruppen tilbage til admin via SQL-statements.',
-        'Confirm' => 'Bekræft',
-
-        # JS File: Core.Agent.Admin.NotificationEvent
-        'Do you really want to delete this notification language?' => 'Er du sikker på at du vil slette dette notifikationsssprog',
-        'Do you really want to delete this notification?' => 'Ønsker du at slette denne notifikation?',
-
-        # JS File: Core.Agent.Admin.PostMasterFilter
-        'Do you really want to delete this filter?' => '',
-
-        # JS File: Core.Agent.Admin.ProcessManagement.Canvas
-        'Remove Entity from canvas' => '',
-        'No TransitionActions assigned.' => '',
-        'No dialogs assigned yet. Just pick an activity dialog from the list on the left and drag it here.' =>
-            '',
-        'This Activity cannot be deleted because it is the Start Activity.' =>
-            '',
-        'Remove the Transition from this Process' => '',
-
-        # JS File: Core.Agent.Admin.ProcessManagement
-        'As soon as you use this button or link, you will leave this screen and its current state will be saved automatically. Do you want to continue?' =>
-            '',
-        'Delete Entity' => '',
-        'This Activity is already used in the Process. You cannot add it twice!' =>
-            '',
-        'Error during AJAX communication' => '',
-        'An unconnected transition is already placed on the canvas. Please connect this transition first before placing another transition.' =>
-            '',
-        'This Transition is already used for this Activity. You cannot use it twice!' =>
-            '',
-        'This TransitionAction is already used in this Path. You cannot use it twice!' =>
-            '',
-        'Hide EntityIDs' => '',
-        'Edit Field Details' => '',
-        'Customer interface does not support internal article types.' => 'Kundeinterfacet understøtter ikke interne indlægs-typer.',
-        'Sorry, the only existing condition can\'t be removed.' => '',
-        'Sorry, the only existing field can\'t be removed.' => '',
-        'Sorry, the only existing parameter can\'t be removed.' => '',
-
-        # JS File: Core.Agent.Admin.SMIME
-        'Do you really want to delete this certificate?' => '',
-
-        # JS File: Core.Agent.Admin.SysConfig
-        'Show more' => 'Vis mere',
-
-        # JS File: Core.Agent.Admin.SystemMaintenance
-        'Do you really want to delete this scheduled system maintenance?' =>
-            'Vil du virkelig fjerne denne planlagte systemvedligeholdelse?',
-
-        # JS File: Core.Agent.CustomerInformationCenterSearch
-        'Loading...' => 'Indlæser...',
-
-        # JS File: Core.Agent.CustomerSearch
-        'Duplicated entry' => 'Dublet',
-        'It is going to be deleted from the field, please try again.' => 'Det vil blive slettet fra feltet. Prøv venligst igen.',
-
-        # JS File: Core.Agent.Daemon
-        'Information about the OTRS Daemon' => 'Information om OTRS tjenesten',
-
-        # JS File: Core.Agent.Dashboard
-        'Please check the fields marked as red for valid inputs.' => 'Tjek de røde felter og udfyld dem med gyldigt indhold.',
-        'All-day' => 'Alle dage',
-        'Jan' => 'Jan',
-        'Feb' => 'Feb',
-        'Mar' => 'Mar',
-        'Apr' => 'Apr',
-        'May' => 'Maj',
-        'Jun' => 'Jun',
-        'Jul' => 'Jul',
-        'Aug' => 'Aug',
-        'Sep' => 'Sep',
-        'Oct' => 'Okt',
-        'Nov' => 'Nov',
-        'Dec' => 'Dec',
-        'January' => 'Januar',
-        'February' => 'Februar',
-        'March' => 'Marts',
-        'April' => 'April',
-        'May_long' => 'Maj',
-        'June' => 'Juni',
-        'July' => 'Juli',
-        'August' => 'August',
-        'September' => 'September',
-        'October' => 'Oktober',
-        'November' => 'November',
-        'December' => 'December',
-        'Sunday' => 'Søndag',
-        'Monday' => 'Mandag',
-        'Tuesday' => 'Tirsdag',
-        'Wednesday' => 'Onsdag',
-        'Thursday' => 'Torsdag',
-        'Friday' => 'Fredag',
-        'Saturday' => 'Lørdag',
-        'Su' => 'Sø',
-        'Mo' => 'Ma',
-        'Tu' => 'Ti',
-        'We' => 'On',
-        'Th' => 'To',
-        'Fr' => 'Fr',
-        'Sa' => 'Lø',
-        'month' => 'måned',
-
-        # JS File: Core.Agent.LinkObject.SearchForm
-        'Please enter at least one search value or * to find anything.' =>
-            'Angiv venligst mindst ét søgeord eller * for at finde alt.',
-
-        # JS File: Core.Agent.Login
-        'Are you using a browser plugin like AdBlock or AdBlockPlus? This can cause several issues and we highly recommend you to add an exception for this domain.' =>
-            '',
-        'Do not show this warning again.' => '',
-
-        # JS File: Core.Agent.Preferences
-        'Sorry, but you can\'t disable all methods for notifications marked as mandatory.' =>
-            '',
-        'Sorry, but you can\'t disable all methods for this notification.' =>
-            '',
-
-        # JS File: Core.Agent.Responsive
-        'Switch to desktop mode' => 'Skift til desktop-tilstand',
-
-        # JS File: Core.Agent.Search
-        'Please remove the following words from your search as they cannot be searched for:' =>
-            'Fjern venligst følgende ord fra søgningen da der ikke kan søges efter dem:',
-
-        # JS File: Core.Agent.Statistics
-        'Do you really want to delete this statistic?' => 'Vil du virkelig slette denne statistik?',
-
-        # JS File: Core.Agent.TicketAction
-        'Please perform a spell check on the the text first.' => 'Kontroller venligst stavningen i teksten først.',
-        'Close this dialog' => 'Luk dette vindue',
-        'Do you really want to continue?' => 'Ønsker du at fortsætte?',
-
-        # JS File: Core.Agent
-        'Slide the navigation bar' => '',
-        'Please turn off Compatibility Mode in Internet Explorer!' => 'Slå venligst kompatibilitet fra i Internet Explorer!',
-
-        # JS File: Core.App.Responsive
-        'Switch to mobile mode' => 'Skift til mobil-tilstand',
-
-        # JS File: Core.Customer
-        'You have unanswered chat requests' => '',
-
-        # JS File: Core.Debug
-        'Namespace %s could not be initialized, because %s could not be found.' =>
-            '',
-
-        # JS File: Core.Exception
-        'An error occurred! Do you want to see the complete error message?' =>
-            '',
-
-        # JS File: Core.Form.Validate
-        'One or more errors occurred!' => 'En eller flere fejl opstod!',
-
-        # JS File: Core.Installer
-        'Mail check successful.' => 'Mail er tjekket ok.',
-        'Error in the mail settings. Please correct and try again.' => 'Fejl i mail-indstillingerne. Ret dem venligst og prøv igen.',
-
-        # JS File: Core.UI.Datepicker
-        'Previous' => 'Forrige',
-        'Sun' => 'Søn',
-        'Mon' => 'Man',
-        'Tue' => 'Tir',
-        'Wed' => 'Ons',
-        'Thu' => 'Tor',
-        'Fri' => 'Fre',
-        'Sat' => 'Lør',
-        'Open date selection' => 'Åbn datovælger',
-        'Invalid date (need a future date)!' => 'Ugyldig dato (angiv dato i fremtiden)',
-        'Invalid date (need a past date)!' => 'Ugyldig dato (angiv en dato i fortiden)',
-        'Invalid date!' => 'Ugyldig dato!',
-
-        # JS File: Core.UI.Dialog
-        'Close' => 'Luk',
-
-        # JS File: Core.UI.InputFields
-        'Not available' => 'Ikke tilgængelig',
-        'and %s more...' => 'og %s flere...',
-        'Clear all' => 'Slet alt',
-        'Filters' => 'Filtre',
-        'Clear search' => 'Slet søgning',
-
-        # JS File: Core.UI.Popup
-        'If you now leave this page, all open popup windows will be closed, too!' =>
-            'Hvis du forlader denne side, vil alle pop-up vinduer også blive lukket!',
-        'A popup of this screen is already open. Do you want to close it and load this one instead?' =>
-            'Et pop-up vindue med dette billede er allerede åbent. Vil du lukke det og åbne denne i stedet?',
-        'Could not open popup window. Please disable any popup blockers for this application.' =>
-            'Kan ikke åbne nyt vindue. Deaktiver din browsers popup-blokering for denne applikation.',
-
-        # JS File: Core.UI.TreeSelection
-        'There are currently no elements available to select from.' => 'Der er i øjeblikket ingen elementer at vælge fra.',
 
         # SysConfig
         '
@@ -4337,21 +4546,16 @@ Thanks for your help!
  Your Helpdesk Team
 ' => '',
         ' (work units)' => '',
-        ' 2 minutes' => ' 2 minutter',
-        ' 5 minutes' => ' 5 minutter',
-        ' 7 minutes' => ' 7 minutter',
-        '"%s" notification was sent to "%s" by "%s".' => '',
+        '"%s" notification was sent to "%s" by "%s".' => '"%s" besked blev sendt til "%s" via "%s".',
         '"Slim" skin which tries to save screen space for power users.' =>
             '',
         '%s' => 'Diverse %s',
-        '%s time unit(s) accounted. Now total %s time unit(s).' => '%s tidsenheder registreret. Nu totalt %s tidsenheder brugt.',
+        '%s time unit(s) accounted. Now total %s time unit(s).' => '%s tidsenheder registreret. Nu i alt %s tidsenheder brugt.',
         '(UserLogin) Firstname Lastname' => '(BrugerLogin) Fornavn Efternavn',
         '(UserLogin) Lastname Firstname' => '(BrugerLogin) Efternavn Fornavn',
         '(UserLogin) Lastname, Firstname' => '(BrugerLogin) Efternavn Fornavn',
         '*** out of office until %s (%s d left) ***' => '',
-        '10 minutes' => '10 minutter',
         '100 (Expert)' => '',
-        '15 minutes' => '15 minutter',
         '200 (Advanced)' => '',
         '300 (Beginner)' => '',
         'A TicketWatcher Module.' => '',
@@ -4379,7 +4583,6 @@ Thanks for your help!
             '',
         'Activates time accounting.' => '',
         'ActivityID' => '',
-        'Add a note to this ticket' => 'Tilføj en note til denne sag',
         'Add an inbound phone call to this ticket' => 'Tilføj indgående telefonopkald til denne sag',
         'Add an outbound phone call to this ticket' => 'Tilføj udgående telefonopkald til denne sag',
         'Added email. %s' => 'Tilføjet email. %s',
@@ -4401,13 +4604,9 @@ Thanks for your help!
             '',
         'Admin Area.' => '',
         'After' => 'Efter',
-        'Agent Customer Search' => '',
-        'Agent Customer Search.' => '',
         'Agent Name' => '',
         'Agent Name + FromSeparator + System Address Display Name' => '',
         'Agent Preferences.' => '',
-        'Agent User Search' => '',
-        'Agent User Search.' => '',
         'Agent called customer.' => 'Agent ringede kunden op.',
         'Agent interface article notification module to check PGP.' => '',
         'Agent interface article notification module to check S/MIME.' =>
@@ -4428,21 +4627,13 @@ Thanks for your help!
             '',
         'Agent interface notification module to see the number of watched tickets. Additional access control to show or not show this link can be done by using Key "Group" and Content like "rw:group1;move_into:group2".' =>
             '',
-        'AgentTicketZoom widget that displays a table of objects linked to the ticket.' =>
-            '',
-        'AgentTicketZoom widget that displays customer information for the ticket in the side bar.' =>
-            '',
-        'AgentTicketZoom widget that displays ticket data in the side bar.' =>
-            '',
-        'Agents ↔ Groups' => '',
-        'Agents ↔ Roles' => '',
+        'AgentCustomerSearch' => '',
+        'AgentCustomerSearch.' => '',
+        'AgentUserSearch' => '',
+        'AgentUserSearch.' => '',
+        'Agents <-> Groups' => 'Agenter <-> Grupper',
+        'Agents <-> Roles' => 'Agenter <-> Roller',
         'All customer users of a CustomerID' => 'Alle kundebrugere af et CustomerID',
-        'All escalated tickets' => 'Alle eskalerede sager',
-        'All new tickets, these tickets have not been worked on yet' => 'Alle nye sager, der ikke er blevet arbejdet på endnu',
-        'All open tickets, these tickets have already been worked on, but need a response' =>
-            'Alle åbne sager, der er i gang med at blive arbejdet på',
-        'All tickets with a reminder set where the reminder date has been reached' =>
-            'Alle sager med påmindelser, hvor påmindelsesfristen er nået',
         'Allows adding notes in the close ticket screen of the agent interface. Can be overwritten by Ticket::Frontend::NeedAccountedTime.' =>
             '',
         'Allows adding notes in the ticket free text screen of the agent interface. Can be overwritten by Ticket::Frontend::NeedAccountedTime.' =>
@@ -4482,12 +4673,12 @@ Thanks for your help!
             '',
         'Allows defining services and SLAs for tickets (e. g. email, desktop, network, ...), and escalation attributes for SLAs (if ticket service/SLA feature is enabled).' =>
             '',
-        'Allows extended search conditions in ticket search of the agent interface. With this feature you can search e. g. with this kind of conditions like "(key1&&key2)" or "(key1||key2)".' =>
+        'Allows extended search conditions in ticket search of the agent interface. With this feature you can search e. g. ticket title with this kind of conditions like "(*key1*&&*key2*)" or "(*key1*||*key2*)".' =>
             '',
-        'Allows extended search conditions in ticket search of the customer interface. With this feature you can search e. g. with this kind of conditions like "(key1&&key2)" or "(key1||key2)".' =>
+        'Allows extended search conditions in ticket search of the customer interface. With this feature you can search e. g. ticket title with this kind of conditions like "(*key1*&&*key2*)" or "(*key1*||*key2*)".' =>
             '',
         'Allows extended search conditions in ticket search of the generic agent interface. With this feature you can search e. g. ticket title with this kind of conditions like "(*key1*&&*key2*)" or "(*key1*||*key2*)".' =>
-            '',
+            'Tillader udvidede søgetermer i sagssøgningen i automatisk agent-interfacet. Med denne funktionalitet kan du søge f.eks. "(nøgle1&&nøgle2)" eller "(nøgle1||nøgle2)".',
         'Allows having a medium format ticket overview (CustomerInfo => 1 - shows also the customer information).' =>
             '',
         'Allows having a small format ticket overview (CustomerInfo => 1 - shows also the customer information).' =>
@@ -4500,18 +4691,15 @@ Thanks for your help!
         'Allows to set a new ticket state in the move ticket screen of the agent interface.' =>
             '',
         'Always show RichText if available' => '',
-        'Answer' => 'Svar',
         'Arabic (Saudi Arabia)' => 'Arabisk (Saudi Arabien)',
         'Archive state changed: "%s"' => 'Arkivflag opdateret',
         'ArticleTree' => 'Indlægstræ',
-        'Attachments ↔ Templates' => '',
-        'Auto Responses ↔ Queues' => '',
+        'Attachments <-> Templates' => 'Vedhæftede filer <-> Skabeloner',
+        'Auto Responses <-> Queues' => 'Autosvar <-> Køer',
         'AutoFollowUp sent to "%s".' => 'Automatisk opfølgning send til "%s".',
         'AutoReject sent to "%s".' => 'Automatisk afvisning sendt til "%s".',
         'AutoReply sent to "%s".' => 'Automatisk svar sendt til "%s".',
         'Automated line break in text messages after x number of chars.' =>
-            '',
-        'Automatically change the state of a ticket with an invalid owner once it is unlocked. Maps from a state type to a new ticket state.' =>
             '',
         'Automatically lock and set owner to current Agent after opening the move ticket screen of the agent interface.' =>
             '',
@@ -4532,10 +4720,8 @@ Thanks for your help!
         'Builds an article index right after the article\'s creation.' =>
             '',
         'Bulgarian' => '',
-        'Bulk Action' => 'Massehandling',
         'CMD example setup. Ignores emails where external CMD returns some output on STDOUT (email will be piped into STDIN of some.bin).' =>
             '',
-        'CSV Separator' => 'CSV-skilletegn',
         'Cache time in seconds for agent authentication in the GenericInterface.' =>
             '',
         'Cache time in seconds for customer authentication in the GenericInterface.' =>
@@ -4551,7 +4737,6 @@ Thanks for your help!
         'Change queue!' => 'Skift kø',
         'Change the customer for this ticket' => 'Ændr denne sags kunde',
         'Change the free fields for this ticket' => 'Ændr denne sags frie felter',
-        'Change the owner for this ticket' => 'Ændr denne sags ejer',
         'Change the priority for this ticket' => 'Ændr denne sags prioritet',
         'Change the responsible for this ticket' => 'Skift sagens ansvarlige',
         'Changed priority from "%s" (%s) to "%s" (%s).' => 'Ændrede prioritet fra "%s" (%s) til "%s" (%s)',
@@ -4565,20 +4750,17 @@ Thanks for your help!
         'Checks the availability of OTRS Business Solution™ for this system.' =>
             '',
         'Checks the entitlement status of OTRS Business Solution™.' => '',
-        'Child' => 'Barn',
         'Chinese (Simplified)' => '',
         'Chinese (Traditional)' => '',
         'Choose for which kind of ticket changes you want to receive notifications.' =>
             '',
-        'Christmas Eve' => 'Juleaften',
-        'Close this ticket' => 'Luk denne sag',
         'Closed tickets (customer user)' => 'Lukkede sager (kundebruger)',
         'Closed tickets (customer)' => 'Afsluttede sager (kunde)',
         'Cloud Services' => 'Sky-tjenester',
         'Cloud service admin module registration for the transport layer.' =>
             '',
         'Collect support data for asynchronous plug-in modules.' => '',
-        'Column ticket filters for Ticket Overviews type "Small".' => '',
+        'Column ticket filters for Ticket Overviews type "Small".' => 'Kolonnefiltre for sagsoversigter af typen "Small".',
         'Columns that can be filtered in the escalation view of the agent interface. Possible settings: 0 = Disabled, 1 = Available, 2 = Enabled by default. Note: Only Ticket attributes, Dynamic Fields (DynamicField_NameX) and Customer attributes (e.g. CustomerUserPhone, CustomerCompanyName, ...) are allowed.' =>
             '',
         'Columns that can be filtered in the locked view of the agent interface. Possible settings: 0 = Disabled, 1 = Available, 2 = Enabled by default. Note: Only Ticket attributes, Dynamic Fields (DynamicField_NameX) and Customer attributes (e.g. CustomerUserPhone, CustomerCompanyName, ...) are allowed.' =>
@@ -4604,7 +4786,6 @@ Thanks for your help!
             'Firmanavn der inkluderes som en X-Header i udgående email.',
         'Compat module for AgentZoom to AgentTicketZoom.' => '',
         'Complex' => '',
-        'Compose' => 'Skrive',
         'Configure Processes.' => '',
         'Configure and manage ACLs.' => 'Konfigurer og håndter ACL\'er.',
         'Configure any additional readonly mirror databases that you want to use.' =>
@@ -4618,7 +4799,9 @@ Thanks for your help!
             '',
         'Controls how to display the ticket history entries as readable values.' =>
             '',
-        'Controls if CutomerID is editable in the agent interface.' => '',
+        'Controls if CustomerID is automatically copied from the sender address for unknown customers.' =>
+            '',
+        'Controls if CustomerID is read-only in the agent interface.' => '',
         'Controls if customers have the ability to sort their tickets.' =>
             '',
         'Controls if more than one from entry can be set in the new phone ticket in the agent interface.' =>
@@ -4641,11 +4824,11 @@ Thanks for your help!
         'Create and manage queues.' => 'Administrer køer.',
         'Create and manage responses that are automatically sent.' => 'Administrer svar, der sendes automatisk.',
         'Create and manage roles.' => 'Administrer roller',
-        'Create and manage salutations.' => 'Administrer tituleringer.',
+        'Create and manage salutations.' => 'Administrer indledninger.',
         'Create and manage services.' => 'Administrer services.',
         'Create and manage signatures.' => 'Administrer signaturer.',
         'Create and manage templates.' => 'Opret og administrer skabeloner',
-        'Create and manage ticket notifications.' => 'Opret og håndter sags notifikationer.',
+        'Create and manage ticket notifications.' => 'Opret og håndter beskeder om sager',
         'Create and manage ticket priorities.' => 'Administrer sagsprioriteter.',
         'Create and manage ticket states.' => 'Administrer sagstilstande.',
         'Create and manage ticket types.' => 'Administrer sagstyper.',
@@ -4662,13 +4845,12 @@ Thanks for your help!
         'Custom text for the page shown to customers that have no tickets yet (if you need those text translated add them to a custom translation module).' =>
             '',
         'Customer Administration' => 'Kunde Administration',
-        'Customer Companies' => 'Kunde/Firmaer',
         'Customer Information Center Search.' => '',
         'Customer Information Center.' => '',
         'Customer Ticket Print Module.' => '',
+        'Customer User <-> Groups' => 'Kundebruger <-> Grupper',
+        'Customer User <-> Services' => 'Kundebruger <-> Services',
         'Customer User Administration' => 'Kundebruger-administration',
-        'Customer User ↔ Groups' => '',
-        'Customer User ↔ Services' => '',
         'Customer Users' => 'Kundebrugere',
         'Customer called us.' => 'Kundende ringede os op.',
         'Customer item (icon) which shows the closed tickets of this customer as info block. Setting CustomerUserLogin to 1 searches for tickets based on login name rather than CustomerID.' =>
@@ -4684,7 +4866,7 @@ Thanks for your help!
         'CustomerID search' => 'KundeID søgning',
         'CustomerName' => 'KundeNavn',
         'CustomerUser' => '',
-        'Customers ↔ Groups' => '',
+        'Customers <-> Groups' => 'Kunder <-> Grupper',
         'Customizable stop words for fulltext index. These words will be removed from the search index.' =>
             '',
         'Czech' => '',
@@ -4712,7 +4894,6 @@ Thanks for your help!
         'Default skin for the agent interface (slim version).' => '',
         'Default skin for the agent interface.' => '',
         'Default skin for the customer interface.' => '',
-        'Default spelling dictionary' => 'Standard-stavekontrol',
         'Default ticket ID used by the system in the agent interface.' =>
             '',
         'Default ticket ID used by the system in the customer interface.' =>
@@ -4788,7 +4969,6 @@ Thanks for your help!
         'Defines an alternate logout URL for the customer panel.' => '',
         'Defines an external link to the database of the customer (e.g. \'http://yourhost/customer.php?CID=[% Data.CustomerID %]\' or \'\').' =>
             '',
-        'Defines default headers for outgoing emails.' => '',
         'Defines from which ticket attributes the agent can select the result order.' =>
             '',
         'Defines how the From field from the emails (sent from answers and email tickets) should look like.' =>
@@ -4833,6 +5013,8 @@ Thanks for your help!
             '',
         'Defines if customers should be allowed to login if they have no shared secret stored in their preferences and therefore are not using two-factor authentication.' =>
             '',
+        'Defines if the enhanced mode should be used (enables use of table, replace, subscript, superscript, paste from word, etc.) in customer interface.' =>
+            '',
         'Defines if the enhanced mode should be used (enables use of table, replace, subscript, superscript, paste from word, etc.).' =>
             '',
         'Defines if the previously valid token should be accepted for authentication. This is slightly less secure but gives users 30 seconds more time to enter their one-time password.' =>
@@ -4846,6 +5028,8 @@ Thanks for your help!
         'Defines out of office message template. Two string parameters (%s) available: end date and number of days left.' =>
             '',
         'Defines queues that\'s tickets are used for displaying as calendar events.' =>
+            '',
+        'Defines the HTTP hostname for the support data collection with the public module \'PublicSupportDataCollector\' (e.g. used from the OTRS Daemon).' =>
             '',
         'Defines the IP regular expression for accessing the local repository. You need to enable this to have access to your local repository and the package::RepositoryList is required on the remote host.' =>
             '',
@@ -4899,7 +5083,7 @@ Thanks for your help!
         'Defines the default maximum number of X-axis attributes for the time scale.' =>
             '',
         'Defines the default maximum number of statistics per page on the overview screen.' =>
-            '',
+            'Definerer det maksimale antal rapporter pr. side på oversigtsskærmen.',
         'Defines the default next state for a ticket after customer follow-up in the customer interface.' =>
             '',
         'Defines the default next state of a ticket after adding a note, in the close ticket screen of the agent interface.' =>
@@ -4976,21 +5160,21 @@ Thanks for your help!
         'Defines the default the number of seconds (from current time) to re-schedule a generic interface failed task.' =>
             '',
         'Defines the default ticket attribute for ticket sorting in a ticket search of the customer interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i en søgning foretaget i kunde-interfacet.',
         'Defines the default ticket attribute for ticket sorting in the escalation view of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i oversigten over eskalerede sager i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting in the locked ticket view of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i oversigten over trukkede sager i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting in the responsible view of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i oversigten over ansvarlige i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting in the status view of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i status-oversigten i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting in the watch view of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i oversigten over fulgte sager i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting of the ticket search result of the agent interface.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i en søgning foretaget i agent-interfacet.',
         'Defines the default ticket attribute for ticket sorting of the ticket search result of this operation.' =>
-            '',
+            'Vælg standard-feltet for sortering af sager i en søgning foretaget af denne handling.',
         'Defines the default ticket bounced notification for customer/sender in the ticket bounce screen of the agent interface.' =>
             '',
         'Defines the default ticket next state after adding a phone note in the ticket phone inbound screen of the agent interface.' =>
@@ -5174,13 +5358,13 @@ Thanks for your help!
             '',
         'Defines the module that shows a generic notification in the agent interface. Either "Text" - if configured - or the contents of "File" will be displayed.' =>
             '',
-        'Defines the module that shows all the currently loged in customers in the agent interface.' =>
-            '',
         'Defines the module that shows all the currently logged in agents in the agent interface.' =>
             '',
-        'Defines the module that shows the currently loged in agents in the customer interface.' =>
+        'Defines the module that shows all the currently logged in customers in the agent interface.' =>
             '',
-        'Defines the module that shows the currently loged in customers in the customer interface.' =>
+        'Defines the module that shows the currently logged in agents in the customer interface.' =>
+            '',
+        'Defines the module that shows the currently logged in customers in the customer interface.' =>
             '',
         'Defines the module to authenticate customers.' => 'Definerer modul til godkendelse af kunder.',
         'Defines the module to display a notification if cloud services are disabled.' =>
@@ -5189,17 +5373,13 @@ Thanks for your help!
             '',
         'Defines the module to display a notification in the agent interface if the OTRS Daemon is not running.' =>
             '',
-        'Defines the module to display a notification in the agent interface, if the agent has not yet selected a time zone.' =>
-            '',
         'Defines the module to display a notification in the agent interface, if the agent is logged in while having out-of-office active.' =>
             '',
         'Defines the module to display a notification in the agent interface, if the agent is logged in while having system maintenance active.' =>
             '',
+        'Defines the module to display a notification in the agent interface, if the agent session limit prior warning is reached.' =>
+            '',
         'Defines the module to display a notification in the agent interface, if the system is used by the admin user (normally you shouldn\'t work as admin).' =>
-            '',
-        'Defines the module to display a notification in the customer interface, if the customer is logged in while having system maintenance active.' =>
-            '',
-        'Defines the module to display a notification in the customer interface, if the customer user has not yet selected a time zone.' =>
             '',
         'Defines the module to generate code for periodic page reloads.' =>
             '',
@@ -5341,7 +5521,7 @@ Thanks for your help!
         'Defines the valid state types for a ticket.' => 'Definerer de gyldige tilstandstyper for en sag.',
         'Defines the valid states for unlocked tickets. To unlock tickets the script "bin/otrs.Console.pl Maint::Ticket::UnlockTimeout" can be used.' =>
             '',
-        'Defines the viewable locks of a ticket. Default: unlock, tmp_lock.' =>
+        'Defines the viewable locks of a ticket. NOTE: When you change this setting, make sure to delete the cache in order to use the new value. Default: unlock, tmp_lock.' =>
             '',
         'Defines the width for the rich text editor component for this screen. Enter number (pixels) or percent value (relative).' =>
             '',
@@ -5364,8 +5544,6 @@ Thanks for your help!
         'Delete expired cache from core modules.' => '',
         'Delete expired loader cache weekly (Sunday mornings).' => '',
         'Delete expired sessions.' => '',
-        'Delete expired upload cache hourly.' => '',
-        'Delete this ticket' => 'Slet denne sag',
         'Deleted link to ticket "%s".' => 'Slettet link til sag %s.',
         'Deletes a session if the session id is used with an invalid remote IP address.' =>
             '',
@@ -5376,12 +5554,14 @@ Thanks for your help!
         'Determines if the list of possible queues to move to ticket into should be displayed in a dropdown list or in a new window in the agent interface. If "New Window" is set you can add a move note to the ticket.' =>
             '',
         'Determines if the statistics module may generate ticket lists.' =>
-            '',
+            'Angiver om rapport-modulet må generere sagslister.',
         'Determines the next possible ticket states, after the creation of a new email ticket in the agent interface.' =>
             '',
         'Determines the next possible ticket states, after the creation of a new phone ticket in the agent interface.' =>
             '',
         'Determines the next possible ticket states, for process tickets in the agent interface.' =>
+            '',
+        'Determines the next possible ticket states, for process tickets in the customer interface.' =>
             '',
         'Determines the next screen after new customer ticket in the customer interface.' =>
             '',
@@ -5401,7 +5581,12 @@ Thanks for your help!
             '',
         'Determines which queues will be valid for ticket\'s recepients in the customer interface.' =>
             '',
+        'Development' => '',
+        'Disable HTTP header "Content-Security-Policy" to allow loading of external script contents. Disabling this HTTP header can be a security issue! Only disable it, if you know what you are doing!' =>
+            '',
         'Disable HTTP header "X-Frame-Options: SAMEORIGIN" to allow OTRS to be included as an IFrame in other websites. Disabling this HTTP header can be a security issue! Only disable it, if you know what you are doing!' =>
+            '',
+        'Disable restricted security for IFrames in IE. May be required for SSO to work in IE.' =>
             '',
         'Disables sending reminder notifications to the responsible agent of a ticket (Ticket::Responsible needs to be activated).' =>
             '',
@@ -5414,7 +5599,6 @@ Thanks for your help!
         'Display settings to override defaults for Process Tickets.' => '',
         'Displays the accounted time for an article in the ticket zoom view.' =>
             '',
-        'Down' => 'Ned',
         'Dropdown' => '',
         'Dutch stop words for fulltext index. These words will be removed from the search index.' =>
             '',
@@ -5500,11 +5684,12 @@ Thanks for your help!
         'Email sent to "%s".' => 'Email sendt til "%s".',
         'Email sent to customer.' => 'Email sendt til agent.',
         'Enable keep-alive connection header for SOAP responses.' => '',
-        'Enabled filters.' => '',
+        'Enabled filters.' => 'Aktive filtre.',
         'Enables PGP support. When PGP support is enabled for signing and encrypting mail, it is HIGHLY recommended that the web server runs as the OTRS user. Otherwise, there will be problems with the privileges when accessing .gnupg folder.' =>
             '',
         'Enables S/MIME support.' => 'Aktiverer S/MIME-understøttelse',
         'Enables customers to create their own accounts.' => 'Lader kunder oprette deres egne konti.',
+        'Enables fetch S/MIME from CustomerUser backend support.' => '',
         'Enables file upload in the package manager frontend.' => '',
         'Enables or disables the caching for templates. WARNING: Do NOT disable template caching for production environments for it will cause a massive performance drop! This setting should only be disabled for debugging reasons!' =>
             '',
@@ -5531,7 +5716,6 @@ Thanks for your help!
         'Enroll process for this ticket' => '',
         'Enter your shared secret to enable two factor authentication.' =>
             '',
-        'Escalated Tickets' => 'Eskalerede Sager',
         'Escalation response time finished' => '',
         'Escalation response time forewarned' => '',
         'Escalation response time in effect' => '',
@@ -5549,10 +5733,6 @@ Thanks for your help!
         'Event module registration. For more performance you can define a trigger event (e. g. Event => TicketCreate). This is only possible if all Ticket dynamic fields need the same event.' =>
             '',
         'Event module that performs an update statement on TicketIndex to rename the queue name there if needed and if StaticDB is actually used.' =>
-            '',
-        'Event module that updates customer company object name for dynamic fields.' =>
-            '',
-        'Event module that updates customer user object name for dynamic fields.' =>
             '',
         'Event module that updates customer user search profiles if login changes.' =>
             '',
@@ -5591,7 +5771,6 @@ Thanks for your help!
             '',
         'Filter incoming emails.' => 'Filtrer indgående mail.',
         'Finnish' => '',
-        'First Christmas Day' => 'Første juledag',
         'First Queue' => '',
         'FirstLock' => '',
         'FirstResponse' => '',
@@ -5600,8 +5779,6 @@ Thanks for your help!
         'Firstname Lastname' => 'Fornavn Efternavn',
         'Firstname Lastname (UserLogin)' => 'Fornavn Efternavn (BrugerLogin)',
         'FollowUp for [%s]. %s' => 'Opfølgning til sag %s. %s',
-        'For these state types the ticket numbers are striked through in the link table.' =>
-            '',
         'Forces encoding of outgoing emails (7bit|8bit|quoted-printable|base64).' =>
             '',
         'Forces to choose a different ticket state (from current) after lock action. Define the current state as key, and the next state after lock action as content.' =>
@@ -5609,7 +5786,6 @@ Thanks for your help!
         'Forces to unlock tickets after being moved to another queue.' =>
             '',
         'Forwarded to "%s".' => 'Videresendt til "%s".',
-        'Free Fields' => 'Frie felter',
         'French' => '',
         'French (Canada)' => '',
         'French stop words for fulltext index. These words will be removed from the search index.' =>
@@ -5632,7 +5808,7 @@ Thanks for your help!
         'Galician' => '',
         'General ticket data shown in the ticket overviews (fall-back). Possible settings: 0 = Disabled, 1 = Available, 2 = Enabled by default. Note that TicketNumber can not be disabled, because it is necessary.' =>
             '',
-        'Generate dashboard statistics.' => '',
+        'Generate dashboard statistics.' => 'Generer dashboard-rapporter.',
         'Generic Info module.' => '',
         'GenericAgent' => 'Automatisk Agent',
         'GenericInterface Debugger GUI' => '',
@@ -5656,8 +5832,7 @@ Thanks for your help!
             '',
         'Global Search Module.' => '',
         'Go back' => 'Tilbage',
-        'Go to dashboard!' => 'Gå til dashboard!',
-        'Google Authenticator' => '',
+        'Google Authenticator' => 'Google Authenticator',
         'Graph: Bar Chart' => '',
         'Graph: Line Chart' => '',
         'Graph: Stacked Area Chart' => '',
@@ -5679,7 +5854,7 @@ Thanks for your help!
             '',
         'If "DB" was selected for Customer::AuthModule, the column name for the CustomerPassword in the customer table must be specified.' =>
             '',
-        'If "DB" was selected for Customer::AuthModule, the encryption type of passwords must be specified.' =>
+        'If "DB" was selected for Customer::AuthModule, the crypt type of passwords must be specified.' =>
             '',
         'If "DB" was selected for Customer::AuthModule, the name of the column for the CustomerKey in the customer table must be specified.' =>
             '',
@@ -5714,7 +5889,7 @@ Thanks for your help!
         'If "LDAP" was selected for Customer::AuthModule, you can specify if the applications will stop if e. g. a connection to a server can\'t be established due to network problems.' =>
             '',
         'If "LDAP" was selected for Customer::Authmodule, you can check if the user is allowed to authenticate because he is in a posixGroup, e.g. user needs to be in a group xyz to use OTRS. Specify the group, who may access the system.' =>
-            '',
+            'Hvis "LDAP" er valgt for Customer::Authmodule kan du bestemme om en bruger må logge ind ved at gøre dem til medlem af en possixGroup, f.eks. brugeren skal være medlem af gruppe xyz for at benytte OTRS. Angiv gruppen der skal have adgang til systemet.',
         'If "LDAP" was selected, you can add a filter to each LDAP query, e.g. (mail=*), (objectclass=user) or (!objectclass=computer).' =>
             '',
         'If "Radius" was selected for Customer::AuthModule, the password to authenticate to the radius host must be specified.' =>
@@ -5727,25 +5902,11 @@ Thanks for your help!
             '',
         'If "SysLog" was selected for LogModule, a special log facility can be specified.' =>
             '',
+        'If "SysLog" was selected for LogModule, a special log sock can be specified (on solaris you may need to use \'stream\').' =>
+            '',
         'If "SysLog" was selected for LogModule, the charset that should be used for logging can be specified.' =>
             '',
         'If "file" was selected for LogModule, a logfile must be specified. If the file doesn\'t exist, it will be created by the system.' =>
-            '',
-        'If a note is added by an agent, sets the state of a ticket in the close ticket screen of the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of a ticket in the ticket bulk screen of the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of a ticket in the ticket free text screen of the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of a ticket in the ticket note screen of the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of a ticket in the ticket responsible screen of the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of the ticket in the ticket owner screen of a zoomed ticket in the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of the ticket in the ticket pending screen of a zoomed ticket in the agent interface.' =>
-            '',
-        'If a note is added by an agent, sets the state of the ticket in the ticket priority screen of a zoomed ticket in the agent interface.' =>
             '',
         'If active, none of the regular expressions may match the user\'s email address to allow registration.' =>
             '',
@@ -5765,13 +5926,13 @@ Thanks for your help!
             '',
         'If enabled the daemon will redirect the standard output stream to a log file.' =>
             '',
-        'If enabled, OTRS will deliver all CSS files in minified form.' =>
+        'If enabled, OTRS will deliver all CSS files in minified form. WARNING: If you turn this off, there will likely be problems in IE 7, because it cannot load more than 32 CSS files.' =>
             '',
         'If enabled, OTRS will deliver all JavaScript files in minified form.' =>
             '',
         'If enabled, TicketPhone and TicketEmail will be open in new windows.' =>
             '',
-        'If enabled, the OTRS version tag will be removed from the Webinterface, the HTTP headers and the X-Headers of outgoing mails.' =>
+        'If enabled, the OTRS version tag will be removed from the Webinterface, the HTTP headers and the X-Headers of outgoing mails. NOTE: If you change this option, please make sure to delete the cache.' =>
             '',
         'If enabled, the customer can search for tickets in all services (regardless what services are assigned to the customer).' =>
             '',
@@ -5779,9 +5940,9 @@ Thanks for your help!
             'Hvis aktiveret, vil de forskellige oversigter (Dashboard, Sagsoversigt, Køoversigt) automatisk opdateres efter den angivne periode.',
         'If enabled, the first level of the main menu opens on mouse hover (instead of click only).' =>
             '',
-        'If enabled, users that haven\'t selected a time zone yet will be notified to do so. Note: Notification will not be shown if (1) user has not yet selected a time zone and (2) OTRSTimeZone and UserDefaultTimeZone do match and (3) are not set to UTC.' =>
+        'If no SendmailNotificationEnvelopeFrom is specified, this setting makes it possible to use the email\'s from address instead of an empty envelope sender (required in certain mail server configurations).' =>
             '',
-        'If set, this address is used as envelope sender header in outgoing notifications. If no address is specified, the envelope sender header is empty.' =>
+        'If set, this address is used as envelope sender header in outgoing notifications. If no address is specified, the envelope sender header is empty (unless SendmailNotificationEnvelopeFrom::FallbackToEmailFrom is set).' =>
             '',
         'If set, this address is used as envelope sender in outgoing messages (not notifications - see below). If no address is specified, the envelope sender is equal to queue e-mail address.' =>
             '',
@@ -5793,7 +5954,9 @@ Thanks for your help!
             'Hvis denne regex passer, sendes der ikke autosvar.',
         'If this setting is active, local modifications will not be highlighted as errors in the package manager and support data collector.' =>
             '',
-        'Ignore article with system sender type for new article feature (e. g. auto responses or email notifications).' =>
+        'If you\'re going to be out of office, you may wish to let other users know by setting the exact dates of your absence.' =>
+            '',
+        'Ignore system sender article types (e. g. auto responses or email notifications) to be flagged as \'Unread Article\' in AgentTicketZoom or expanded automatically in Large view screens.' =>
             '',
         'Include tickets of subqueues per default when selecting a queue.' =>
             '',
@@ -5808,7 +5971,6 @@ Thanks for your help!
         'Install ispell or aspell on the system, if you want to use a spell checker. Please specify the path to the aspell or ispell binary on your operating system.' =>
             '',
         'Interface language' => 'Sprog',
-        'International Workers\' Day' => 'Arbejdernes internationale kampdag',
         'It is possible to configure different skins, for example to distinguish between diferent agents, to be used on a per-domain basis within the application. Using a regular expression (regex), you can configure a Key/Content pair to match a domain. The value in "Key" should match the domain, and the value in "Content" should be a valid skin on your system. Please see the example entries for the proper form of the regex.' =>
             '',
         'It is possible to configure different skins, for example to distinguish between diferent customers, to be used on a per-domain basis within the application. Using a regular expression (regex), you can configure a Key/Content pair to match a domain. The value in "Key" should match the domain, and the value in "Content" should be a valid skin on your system. Please see the example entries for the proper form of the regex.' =>
@@ -5822,7 +5984,6 @@ Thanks for your help!
         'Ivory (Slim)' => '',
         'Japanese' => '',
         'JavaScript function for the search frontend.' => '',
-        'Large' => 'Stor',
         'Last customer subject' => '',
         'Lastname Firstname' => 'Efternavn Fornavn',
         'Lastname Firstname (UserLogin)' => 'Efternavn Fornavn (BrugerLogin)',
@@ -5837,10 +5998,9 @@ Thanks for your help!
         'Link attachments to templates.' => 'Kæd vedhæftede filer til skabeloner',
         'Link customer user to groups.' => 'Kæd kundebrugere til grupper.',
         'Link customer user to services.' => 'Kæd kundebrugere til services.',
-        'Link queues to auto responses.' => 'Kæd køer til autosvar',
+        'Link queues to auto responses.' => 'Kæd autosvar til køer',
         'Link roles to groups.' => 'Kæd roller til grupper.',
         'Link templates to queues.' => 'Kæd skabeloner til køer',
-        'Link this ticket to other objects' => 'Kæd denne sag til andre objekter',
         'Links 2 tickets with a "Normal" type link.' => '',
         'Links 2 tickets with a "ParentChild" type link.' => '',
         'List of CSS files to always be loaded for the agent interface.' =>
@@ -5868,12 +6028,10 @@ Thanks for your help!
         'List view' => '',
         'Lithuanian' => '',
         'Lock / unlock this ticket' => 'Træk/Frigør denne sag',
-        'Locked Tickets' => 'Mine sager',
         'Locked Tickets.' => '',
         'Locked ticket.' => 'Sag trukket.',
         'Log file for the ticket counter.' => 'Log-fil for sagsnummer-tælleren.',
         'Logout of customer panel.' => '',
-        'Look into a ticket!' => 'Se nærmere på en sag.',
         'Loop-Protection! No auto-response sent to "%s".' => 'Loop-beskyttelse! Intet autosvar sendt til "%s".',
         'Mail Accounts' => 'Mail Kontoer',
         'Main menu registration.' => '',
@@ -5888,10 +6046,9 @@ Thanks for your help!
         'Manage POP3 or IMAP accounts to fetch email from.' => 'Administrer POP3- eller IMAP-konto, der skal hentes mail fra.',
         'Manage S/MIME certificates for email encryption.' => 'Administrer S/MIME-certifikater for mail-kryptering.',
         'Manage existing sessions.' => 'Administrer eksisterende sessioner.',
-        'Manage support data.' => 'Håndter support data.',
-        'Manage system registration.' => 'Håndter system registrering.',
+        'Manage support data.' => 'Håndter support-data.',
+        'Manage system registration.' => 'Håndter systemregistrering.',
         'Manage tasks triggered by event or time based execution.' => 'Administrer opgaver, der bliver udført på baggrund af hændelser eller tid.',
-        'Mark as Spam!' => 'Marker som spam.',
         'Mark this ticket as junk!' => 'Marker denne sag som junk!',
         'Max size (in characters) of the customer information table (phone and email) in the compose screen.' =>
             '',
@@ -5911,14 +6068,13 @@ Thanks for your help!
         'Maximum length (in characters) of the dynamic field in the sidebar of the ticket zoom view.' =>
             '',
         'Maximum number of tickets to be displayed in the result of a search in the agent interface.' =>
-            '',
+            'Det højeste antal sager, der kan vises som resultat af en søgning i agent-interfacet.',
         'Maximum number of tickets to be displayed in the result of a search in the customer interface.' =>
-            '',
+            'Det højeste antal sager, der kan vises som resultat af en søgning i kunde-interfacet.',
         'Maximum number of tickets to be displayed in the result of this operation.' =>
-            '',
+            'Det højeste antal sager, der kan vises som resultat af denne handling.',
         'Maximum size (in characters) of the customer information table in the ticket zoom view.' =>
             '',
-        'Medium' => 'Medium',
         'Merge this ticket and all articles into a another ticket' => 'Saml denne sag og alle indlæg med en anden sag',
         'Merged Ticket <OTRS_TICKET> to <OTRS_MERGE_TO_TICKET>.' => 'Samlet sag <OTRS_TICKET> med <OTRS_MERGE_TO_TICKET>.',
         'Miscellaneous' => 'Diverse',
@@ -5931,11 +6087,14 @@ Thanks for your help!
         'Module to check the group permissions for the access to tickets.' =>
             '',
         'Module to compose signed messages (PGP or S/MIME).' => '',
-        'Module to encrypt composed messages (PGP or S/MIME).' => '',
+        'Module to crypt composed messages (PGP or S/MIME).' => '',
+        'Module to fetch customer users SMIME certificates of incoming messages.' =>
+            '',
         'Module to filter and manipulate incoming messages. Block/ignore all spam email with From: noreply@ address.' =>
             '',
         'Module to filter and manipulate incoming messages. Get a 4 digit number to ticket free text, use regex in Match e. g. From => \'(.+?)@.+?\', and use () as [***] in Set =>.' =>
             '',
+        'Module to filter encrypted bodies of incoming messages.' => '',
         'Module to generate accounted time ticket statistics.' => '',
         'Module to generate html OpenSearch profile for short ticket search in the agent interface.' =>
             '',
@@ -5959,46 +6118,37 @@ Thanks for your help!
             '',
         'Module to use database filter storage.' => '',
         'Multiselect' => '',
-        'My Queues' => 'Mine køer',
         'My Services' => 'Mine Services',
-        'My Tickets.' => '',
+        'My Tickets.' => 'Mine Sager.',
         'Name of custom queue. The custom queue is a queue selection of your preferred queues and can be selected in the preferences settings.' =>
             '',
         'Name of custom service. The custom service is a service selection of your preferred services and can be selected in the preferences settings.' =>
             '',
         'NameX' => '',
         'Nederlands' => '',
-        'New Ticket' => 'Ny sag',
         'New Ticket [%s] created (Q=%s;P=%s;S=%s).' => 'Ny sag [%s] oprettet (Kø=%s;P=%s;S=%s).',
-        'New Tickets' => 'Nye Sager',
         'New Window' => 'Nyt vindue',
-        'New Year\'s Day' => 'Nytårsdag',
-        'New Year\'s Eve' => 'Nytårs aften',
         'New owner is "%s" (ID=%s).' => 'Ny ejer er "%s" (ID=%s)',
         'New process ticket' => '',
         'New responsible is "%s" (ID=%s).' => 'Ny ansvarlig er "%s" (ID=%s)',
-        'News about OTRS releases!' => 'Nyheder om OTRS-udgivelser.',
         'Next possible ticket states after adding a phone note in the ticket phone inbound screen of the agent interface.' =>
             '',
         'Next possible ticket states after adding a phone note in the ticket phone outbound screen of the agent interface.' =>
             '',
         'None' => 'Ingen',
         'Norwegian' => '',
-        'Notification Settings' => 'Notifikations indstillinger',
         'Notification sent to "%s".' => 'Besked sendt til "%s".',
         'Number of displayed tickets' => 'Antal viste sager',
         'Number of lines (per ticket) that are shown by the search utility in the agent interface.' =>
-            '',
+            'Antal linier (per sag), der vises af søgeprogrammet i agent-interfacet.',
         'Number of tickets to be displayed in each page of a search result in the agent interface.' =>
-            '',
+            'Antallet af sager i søgeresultatet, der vises på hver side i agent-interfacet.',
         'Number of tickets to be displayed in each page of a search result in the customer interface.' =>
-            '',
-        'OTRS News' => 'OTRS-nyheder',
+            'Antallet af sager i søgeresultatet, der vises på hver side i kunde-interfacet.',
         'OTRS can use one or more readonly mirror databases for expensive operations like fulltext search or statistics generation. Here you can specify the DSN for the first mirror database.' =>
             '',
         'Old: "%s" New: "%s"' => 'Gammel status var "%s", ny status er "%s".',
         'Online' => 'Online',
-        'Open Tickets / Need to be answered' => 'Åbne Sager',
         'Open tickets (customer user)' => 'Åbne sager (kundebruger)',
         'Open tickets (customer)' => 'Åbne sager (kunde)',
         'Option' => '',
@@ -6010,9 +6160,7 @@ Thanks for your help!
             '',
         'Optional queue limitation for the ResponsibleCheck permission module. If set, permission is only granted for tickets in the specified queues.' =>
             '',
-        'Other Settings' => 'Andre Indstillinger',
         'Out Of Office' => 'Out Of Office',
-        'Out Of Office Time' => 'Ude af Kontoret',
         'Overloads (redefines) existing functions in Kernel::System::Ticket. Used to easily add customizations.' =>
             '',
         'Overview Escalated Tickets.' => '',
@@ -6021,10 +6169,8 @@ Thanks for your help!
         'Overview of all open Tickets.' => 'Oversigt over alle åbne sager.',
         'Overview of all open tickets.' => '',
         'Overview of customer tickets.' => '',
-        'PGP Key' => 'PGP-nøgle',
         'PGP Key Management' => '',
         'PGP Key Upload' => '',
-        'PGP Keys' => 'PGP-nøgler',
         'Package event module file a scheduler task for update registration.' =>
             '',
         'Parameters for the CreateNextMask object in the preference view of the agent interface.' =>
@@ -6072,7 +6218,6 @@ Thanks for your help!
         'Parameters of the example SLA attribute Comment2.' => '',
         'Parameters of the example queue attribute Comment2.' => '',
         'Parameters of the example service attribute Comment2.' => '',
-        'Parent' => 'Forælder',
         'ParentChild' => '',
         'Path for the log file (it only applies if "FS" was selected for LoopProtectionModule and it is mandatory).' =>
             '',
@@ -6082,11 +6227,7 @@ Thanks for your help!
         'Permitted width for compose email windows.' => '',
         'Permitted width for compose note windows.' => '',
         'Persian' => '',
-        'Phone Call Inbound' => 'Kunden ringer',
-        'Phone Call Outbound' => 'Ring til kunden',
         'Phone Call.' => '',
-        'Phone call' => 'Telefonopkald',
-        'Phone-Ticket' => 'Ny Sag',
         'Picture Upload' => '',
         'Picture upload module.' => '',
         'Picture-Upload' => 'Billede Upload',
@@ -6095,8 +6236,6 @@ Thanks for your help!
         'Portuguese (Brasil)' => '',
         'PostMaster Filters' => 'Postmaster-filtre',
         'PostMaster Mail Accounts' => 'Postmaster mail-konti',
-        'Print this ticket' => 'Udskriv denne sag',
-        'Priorities' => 'Prioriteter',
         'Process Management Activity Dialog GUI' => '',
         'Process Management Activity GUI' => '',
         'Process Management Path GUI' => '',
@@ -6106,19 +6245,19 @@ Thanks for your help!
         'Process pending tickets.' => '',
         'Process ticket' => '',
         'ProcessID' => '',
-        'Product News' => 'Produktnyheder',
         'Protection against CSRF (Cross Site Request Forgery) exploits (for more info see http://en.wikipedia.org/wiki/Cross-site_request_forgery).' =>
             '',
-        'Provides a matrix overview of the tickets per state per queue' =>
+        'Provides a matrix overview of the tickets per state per queue.' =>
             '',
         'Queue view' => 'Køer',
         'Rebuild the ticket index for AgentTicketQueue.' => '',
         'Recognize if a ticket is a follow-up to an existing ticket using an external ticket number.' =>
             '',
         'Refresh interval' => 'Opdateringsfrekvens',
-        'Reminder Tickets' => 'Sager med påmindelser',
         'Removed subscription for user "%s".' => 'Bruger "%s" følger ikke længere sagen.',
         'Removes the ticket watcher information when a ticket is archived.' =>
+            '',
+        'Renew existing SMIME certificates from customer backend. Note: SMIME and SMIME::FetchFromCustomer needs to be active in SysConfig and customer backend needs to be configured to fetch UserSMIMECertificate attribute.' =>
             '',
         'Replaces the original sender with current customer\'s email address on compose answer in the ticket compose screen of the agent interface.' =>
             '',
@@ -6160,12 +6299,12 @@ Thanks for your help!
             '',
         'Responsible Tickets' => '',
         'Responsible Tickets.' => '',
-        'Restores a ticket from the archive (only if the event is a state change, from closed to any open available state).' =>
+        'Restores a ticket from the archive (only if the event is a state change to any open available state).' =>
             '',
         'Retains all services in listings even if they are children of invalid elements.' =>
             '',
         'Right' => 'Højre',
-        'Roles ↔ Groups' => '',
+        'Roles <-> Groups' => 'Roller <-> Grupper',
         'Run file based generic agent jobs (Note: module name need needs to be specified in -configuration-module param e.g. "Kernel::System::GenericAgent").' =>
             '',
         'Running Process Tickets' => '',
@@ -6177,28 +6316,28 @@ Thanks for your help!
             '',
         'Russian' => '',
         'S/MIME Certificate Upload' => 'S/MIME Certifikat Upload',
-        'S/MIME Certificates' => 'S/MIME-certifikater',
         'SMS' => 'SMS',
         'SMS (Short Message Service)' => 'SMS (Short Message Service)',
-        'Salutations' => 'Indledninger',
         'Sample command output' => '',
         'Saves the attachments of articles. "DB" stores all data in the database (not recommended for storing big attachments). "FS" stores the data on the filesystem; this is faster but the webserver should run under the OTRS user. You can switch between the modules even on a system that is already in production without any loss of data. Note: Searching for attachment names is not supported when "FS" is used.' =>
             '',
         'Schedule a maintenance period.' => 'Planlæg et vedligeholdelses tidspunkt.',
         'Screen' => '',
-        'Screen after new ticket' => 'Skærm efter oprettelse af ny sag',
         'Search Customer' => 'Søg kunde',
-        'Search Ticket.' => '',
-        'Search Tickets.' => '',
+        'Search Ticket.' => 'Søg sag.',
+        'Search Tickets.' => 'Søg sager.',
         'Search User' => 'Søg Bruger',
         'Search backend default router.' => '',
         'Search backend router.' => '',
-        'Search.' => '',
-        'Second Christmas Day' => 'Anden juledag',
+        'Search.' => 'Søg.',
         'Second Queue' => '',
-        'Select the separator character used in CSV files (stats and searches). If you don\'t select a separator here, the default separator for your language will be used.' =>
-            'Vælg det tegn, der skal bruges som separator i CSV-filer (rapporter og søgninger). Hvis du ikke vælger en separator her, vil standard-separatoren for dit sprog blive brugt.',
+        'Select after which period ticket overviews should refresh automatically.' =>
+            '',
+        'Select how many tickets should be shown in overviews by default.' =>
+            '',
+        'Select the main interface language.' => '',
         'Select your frontend Theme.' => 'Vælg dit tema til frontend.',
+        'Select your preferred layout for OTRS.' => '',
         'Selects the cache backend to use.' => '',
         'Selects the module to handle uploads via the web interface. "DB" stores all uploads in the database, "FS" uses the file system.' =>
             '',
@@ -6211,8 +6350,7 @@ Thanks for your help!
             '',
         'Sends all outgoing email via bcc to the specified address. Please use this only for backup reasons.' =>
             'Sender kopi af alle udgående emails til denne adresse via bcc. Benyt kun funktionen til backup.',
-        'Sends customer notifications just to the mapped customer. Normally, if no customer is mapped, the latest customer sender gets the notification.' =>
-            '',
+        'Sends customer notifications just to the mapped customer.' => '',
         'Sends registration information to OTRS group.' => '',
         'Sends reminder notifications of unlocked ticket after reaching the reminder date (only sent to ticket owner).' =>
             '',
@@ -6220,9 +6358,10 @@ Thanks for your help!
             '',
         'Serbian Cyrillic' => '',
         'Serbian Latin' => '',
-        'Service Level Agreements' => 'Service Level Agreements',
         'Service view' => '',
         'ServiceView' => '',
+        'Set a new password by filling in your current password and a new one.' =>
+            '',
         'Set minimum loglevel. If you select \'error\', just errors are logged. With \'debug\' you get all logging messages.' =>
             '',
         'Set sender email addresses for this system.' => 'Administrer afsenderadresser for dette system.',
@@ -6232,7 +6371,6 @@ Thanks for your help!
             '',
         'Set the maximum height (in pixels) of inline HTML articles in AgentTicketZoom.' =>
             '',
-        'Set this ticket to pending' => 'Sæt denne sag til at afvente',
         'Set this to yes if you trust in all your public and private pgp keys, even if they are not certified with a trusted signature.' =>
             '',
         'Sets if SLA must be selected by the agent.' => '',
@@ -6242,7 +6380,6 @@ Thanks for your help!
         'Sets if service must be selected by the agent.' => '',
         'Sets if service must be selected by the customer.' => '',
         'Sets if ticket owner must be selected by the agent.' => '',
-        'Sets if ticket responsible must be selected by the agent.' => '',
         'Sets the PendingTime of a ticket to 0 if the state is changed to a non-pending state.' =>
             '',
         'Sets the age in minutes (first level) for highlighting queues that contain untouched tickets.' =>
@@ -6315,7 +6452,9 @@ Thanks for your help!
             '',
         'Sets the display order of the different items in the preferences view.' =>
             '',
-        'Sets the inactivity time (in seconds) to pass before a session is killed and a user is loged out.' =>
+        'Sets the inactivity time (in seconds) to pass before a session is killed and a user is logged out.' =>
+            '',
+        'Sets the maximum number of active agents within the timespan defined in SessionActiveTime before a prior warning will be visible for the logged in agents.' =>
             '',
         'Sets the maximum number of active agents within the timespan defined in SessionActiveTime.' =>
             '',
@@ -6337,7 +6476,6 @@ Thanks for your help!
         'Sets the password for private PGP key.' => '',
         'Sets the prefered time units (e.g. work units, hours, minutes).' =>
             '',
-        'Sets the preferred digest to be used for PGP binary.' => '',
         'Sets the prefix to the scripts folder on the server, as configured on the web server. This setting is used as a variable, OTRS_CONFIG_ScriptAlias which is found in all forms of messaging used by the application, to build links to the tickets within the system.' =>
             '',
         'Sets the queue in the ticket close screen of a zoomed ticket in the agent interface.' =>
@@ -6384,7 +6522,25 @@ Thanks for your help!
             '',
         'Sets the service in the ticket responsible screen of the agent interface (Ticket::Service needs to be activated).' =>
             '',
+        'Sets the state of a ticket in the close ticket screen of the agent interface.' =>
+            '',
+        'Sets the state of a ticket in the ticket bulk screen of the agent interface.' =>
+            '',
+        'Sets the state of a ticket in the ticket free text screen of the agent interface.' =>
+            '',
+        'Sets the state of a ticket in the ticket note screen of the agent interface.' =>
+            '',
+        'Sets the state of a ticket in the ticket responsible screen of the agent interface.' =>
+            '',
+        'Sets the state of the ticket in the ticket owner screen of a zoomed ticket in the agent interface.' =>
+            '',
+        'Sets the state of the ticket in the ticket pending screen of a zoomed ticket in the agent interface.' =>
+            '',
+        'Sets the state of the ticket in the ticket priority screen of a zoomed ticket in the agent interface.' =>
+            '',
         'Sets the stats hook.' => '',
+        'Sets the system time zone (required a system with UTC as system time). Otherwise this is a diff time to the local time.' =>
+            '',
         'Sets the ticket owner in the close ticket screen of the agent interface.' =>
             '',
         'Sets the ticket owner in the ticket bulk screen of the agent interface.' =>
@@ -6417,13 +6573,14 @@ Thanks for your help!
             '',
         'Sets the ticket type in the ticket responsible screen of the agent interface (Ticket::Type needs to be activated).' =>
             '',
-        'Sets the time (in seconds) a user is marked as active.' => '',
-        'Sets the time zone being used internally by OTRS to e. g. store dates and times in the database. WARNING: This setting must not be changed once set and tickets or any other data containing date/time have been created.' =>
-            '',
-        'Sets the time zone that will be assigned to newly created users and will be used for users that haven\'t yet set a time zone. This is the time zone being used as default to convert date and time between the OTRS time zone and the user\'s time zone.' =>
+        'Sets the time (in seconds) a user is marked as active (minimum active time is 300 seconds).' =>
             '',
         'Sets the timeout (in seconds) for http/ftp downloads.' => '',
         'Sets the timeout (in seconds) for package downloads. Overwrites "WebUserAgent::Timeout".' =>
+            '',
+        'Sets the user time zone per user (required a system with UTC as system time and UTC under TimeZone). Otherwise this is a diff time to the local time.' =>
+            '',
+        'Sets the user time zone per user based on java script / browser time zone offset feature at login time.' =>
             '',
         'Shared Secret' => '',
         'Should the cache data be held in memory?' => '',
@@ -6433,11 +6590,10 @@ Thanks for your help!
             '',
         'Show article as rich text even if rich text writing is disabled.' =>
             '',
-        'Show queues even when only locked tickets are in.' => '',
+        'Show queues even when only locked tickets are in.' => 'Skjul køer uden frie sager',
         'Show the current owner in the customer interface.' => '',
         'Show the current queue in the customer interface.' => '',
         'Show the history for this ticket' => 'Vis historik for sagen',
-        'Show the ticket history' => 'Vis sagens historik',
         'Shows a count of icons in the ticket zoom, if the article has attachments.' =>
             '',
         'Shows a link in the menu for subscribing / unsubscribing from a ticket in the ticket zoom view of the agent interface. Additional access control to show or not show this link can be done by using Key "Group" and Content like "rw:group1;move_into:group2". To cluster menu items use for Key "ClusterName" and for the Content any name you want to see in the UI. Use "ClusterPriority" to configure the order of a certain cluster within the toolbar.' =>
@@ -6543,6 +6699,8 @@ Thanks for your help!
             '',
         'Shows all the customer identifiers in a multi-select field (not useful if you have a lot of customer identifiers).' =>
             '',
+        'Shows all the customer user identifiers in a multi-select field (not useful if you have a lot of customer user identifiers).' =>
+            '',
         'Shows an owner selection in phone and email tickets in the agent interface.' =>
             '',
         'Shows colors for different article types in the article table.' =>
@@ -6585,9 +6743,9 @@ Thanks for your help!
             '',
         'Shows the ticket priority options in the ticket responsible screen of the agent interface.' =>
             '',
-        'Shows the title fields in the close ticket screen of the agent interface.' =>
+        'Shows the title field in the ticket free text screen of the agent interface.' =>
             '',
-        'Shows the title fields in the ticket free text screen of the agent interface.' =>
+        'Shows the title fields in the close ticket screen of the agent interface.' =>
             '',
         'Shows the title fields in the ticket note screen of the agent interface.' =>
             '',
@@ -6603,12 +6761,10 @@ Thanks for your help!
             '',
         'Shows time use complete description (days, hours, minutes), if set to "Yes"; or just first letter (d, h, m), if set to "No".' =>
             '',
-        'Signatures' => 'Signaturer',
         'Simple' => '',
         'Skin' => '',
         'Slovak' => '',
         'Slovenian' => '',
-        'Small' => 'Lille',
         'Software Package Manager.' => '',
         'SolutionDiffInMin' => '',
         'SolutionInMin' => '',
@@ -6678,7 +6834,7 @@ Thanks for your help!
         'Specify the username to authenticate for the first mirror database.' =>
             '',
         'Spell checker.' => '',
-        'Spelling Dictionary' => 'Ordbog til stavekontrol',
+        'Stable' => '',
         'Standard available permissions for agents within the application. If more permissions are needed, they can be entered here. Permissions must be defined to be effective. Some other good permissions have also been provided built-in: note, close, pending, customer, freetext, move, compose, responsible, forward, and bounce. Make sure that "rw" is always the last registered permission.' =>
             '',
         'Start number for statistics counting. Every new stat increments this number.' =>
@@ -6686,7 +6842,6 @@ Thanks for your help!
         'Starts a wildcard search of the active object after the link object mask is started.' =>
             '',
         'Stat#' => 'Rapport',
-        'States' => 'Tilstande',
         'Status view' => 'Statusoversigt',
         'Stores cookies after the browser has been closed.' => '',
         'Strips empty lines on the ticket preview in the queue view.' => '',
@@ -6698,7 +6853,7 @@ Thanks for your help!
         'System Maintenance' => 'System vedligeholdelse',
         'System Request (%s).' => 'System Request (%s)',
         'Target' => '',
-        'Templates ↔ Queues' => '',
+        'Templates <-> Queues' => 'Skabeloner <-> Køer',
         'Textarea' => '',
         'Thai' => '',
         'The agent skin\'s InternalName which should be used in the agent interface. Please check the available skins in Frontend::Agent::Skins.' =>
@@ -6745,7 +6900,6 @@ Thanks for your help!
             '',
         'The text at the beginning of the subject when an email is forwarded, e.g. FW, Fwd, or WG.' =>
             '',
-        'Theme' => 'Tema',
         'This event module stores attributes from CustomerUser as DynamicFields tickets. Please see the setting above for how to configure the mapping.' =>
             '',
         'This is the default orange - black skin for the customer interface.' =>
@@ -6766,7 +6920,6 @@ Thanks for your help!
             '',
         'This setting allows you to override the built-in country list with your own list of countries. This is particularly handy if you just want to use a small select group of countries.' =>
             '',
-        'This setting is deprecated. Set OTRSTimeZone instead.' => '',
         'This will allow the system to send text messages via SMS.' => 'Dette tillader systemet at sende tekstbeskeder via SMS.',
         'Ticket Close.' => '',
         'Ticket Compose Bounce Email.' => '',
@@ -6779,11 +6932,8 @@ Thanks for your help!
         'Ticket Merge.' => '',
         'Ticket Move.' => '',
         'Ticket Note.' => '',
-        'Ticket Notifications' => 'Sagsnotifikationer',
+        'Ticket Notifications' => 'Sagsbeskeder',
         'Ticket Outbound Email.' => '',
-        'Ticket Overview "Medium" Limit' => 'Sagsoversigt "Mellem" grænse',
-        'Ticket Overview "Preview" Limit' => 'Sagsoversigt "Forhåndsvisnings" grænse',
-        'Ticket Overview "Small" Limit' => 'Sagsoversigt "Lille" grænse',
         'Ticket Owner.' => '',
         'Ticket Pending.' => '',
         'Ticket Print.' => '',
@@ -6795,11 +6945,8 @@ Thanks for your help!
         'Ticket bulk module.' => '',
         'Ticket event module that triggers the escalation stop events.' =>
             '',
-        'Ticket limit per page for Ticket Overview "Medium"' => 'Antal sager pr side for Sagsoversigt "Mellem"',
-        'Ticket limit per page for Ticket Overview "Preview"' => 'Antal sager pr side for Sagsoversigt "Forhåndsvisning"',
-        'Ticket limit per page for Ticket Overview "Small"' => 'Antal sager pr side for Sagsoversigt "Lille"',
         'Ticket moved into Queue "%s" (%s) from Queue "%s" (%s).' => 'Sag flyttet til kø "%s" (%s) fra kø "%s".',
-        'Ticket notifications' => 'Sagsnotifikationer',
+        'Ticket notifications' => 'Sagsbeskeder',
         'Ticket overview' => 'Sagsoversigt',
         'Ticket plain view of an email.' => '',
         'Ticket title' => '',
@@ -6823,6 +6970,8 @@ Thanks for your help!
         'Turns off SSL certificate validation, for example if you use a transparent HTTPS proxy. Use at your own risk!' =>
             '',
         'Turns on drag and drop for the main navigation.' => '',
+        'Turns on the animations used in the GUI. If you have problems with these animations (e.g. performance issues), you can turn them off here.' =>
+            '',
         'Turns on the remote ip address check. It should be set to "No" if the application is used, for example, via a proxy farm or a dialup connection, because the remote ip address is mostly different for the requests.' =>
             '',
         'Ukrainian' => 'Ukrainsk',
@@ -6830,14 +6979,12 @@ Thanks for your help!
         'Unlock tickets whenever a note is added and the owner is out of office.' =>
             '',
         'Unlocked ticket.' => 'Sag frigivet.',
-        'Up' => 'Op',
-        'Upcoming Events' => 'Forestående Hændelser',
         'Update Ticket "Seen" flag if every article got seen or a new Article got created.' =>
             '',
         'Updated SLA to %s (ID=%s).' => 'Opdateret SLA til %s (ID=%s).',
         'Updated Service to %s (ID=%s).' => 'Opdaterede Service til %s (ID=%s).',
         'Updated Type to %s (ID=%s).' => 'Opdaterede Type til %s (ID=%s).',
-        'Updated: %s' => 'Sag afventer til %s',
+        'Updated: %s' => 'Opdateret: %s',
         'Updated: %s=%s;%s=%s;%s=%s;' => 'Opdateret: %s=%s;%s=%s;%s=%s;',
         'Updates the ticket escalation index after a ticket attribute got updated.' =>
             '',
@@ -6846,16 +6993,16 @@ Thanks for your help!
             '',
         'Use new type of select and autocomplete fields in customer interface, where applicable (InputFields).' =>
             '',
-        'User Profile' => 'Brugerprofil',
         'UserFirstname' => 'BrugerFornavn',
         'UserLastname' => 'BrugerEfternavn',
-        'Uses richtext for viewing and editing ticket notification.' => 'Bruger richtext til til visning og redigering af sagsnotifikationer.',
+        'Uses Cc recipients in reply Cc list on compose an email answer in the ticket compose screen of the agent interface.' =>
+            '',
+        'Uses richtext for viewing and editing ticket notification.' => 'Bruger richtext til til visning og redigering af sagsbeskeder.',
         'Uses richtext for viewing and editing: articles, salutations, signatures, standard templates, auto responses and notifications.' =>
             '',
         'Vietnam' => 'Vietnam',
         'View performance benchmark results.' => 'Se resultat af performance test.',
         'Watch this ticket' => 'Følg denne sag',
-        'Watched Tickets' => 'Fulgte sager',
         'Watched Tickets.' => '',
         'We are performing scheduled maintenance.' => 'Vi udfører planlagt vedligeholdelse.',
         'We are performing scheduled maintenance. Login is temporarily not available.' =>
@@ -6874,188 +7021,24 @@ Thanks for your help!
         'Yes, but hide archived tickets' => 'Ja, men skjul arkiverede sager',
         'Your email with ticket number "<OTRS_TICKET>" is bounced to "<OTRS_BOUNCE_TO>". Contact this address for further information.' =>
             'Din e-mail med sagsnummer "<OTRS_TICKET>" er overgivet til "<OTRS_BOUNCE_TO>". Kontakt denne adresse for yderligere information.',
-        'Your email with ticket number "<OTRS_TICKET>" is merged to "<OTRS_MERGE_TO_TICKET>".' =>
-            'Din sag nummer "<OTRS_TICKET>" er blevet samlet med sag nummer "<OTRS_MERGE_TO_TICKET>".',
-        'Your queue selection of your favorite queues. You also get notified about those queues via email if enabled.' =>
-            'Dit valg af foretrukne køer. Du får besked om handlinger i disse køer via mail, hvis det er aktiveret.',
-        'Your service selection of your favorite services. You also get notified about those services via email if enabled.' =>
+        'Your queue selection of your preferred queues. You also get notified about those queues via email if enabled.' =>
+            '',
+        'Your service selection of your preferred services. You also get notified about those services via email if enabled.' =>
             '',
         'attachment' => '',
+        'bounce' => '',
+        'compose' => '',
         'debug' => '',
         'error' => '',
+        'forward' => '',
         'info' => '',
         'inline' => '',
-        'normal' => 'normal',
         'notice' => '',
-        'off' => 'fra',
-        'reverse' => 'omvendt',
+        'pending' => '',
+        'responsible' => '',
+        'stats' => '',
 
     };
-
-    $Self->{JavaScriptStrings} = [
-        'A popup of this screen is already open. Do you want to close it and load this one instead?',
-        'Add all',
-        'All-day',
-        'An error occurred during communication.',
-        'An error occurred! Do you want to see the complete error message?',
-        'An item with this name is already present.',
-        'An unconnected transition is already placed on the canvas. Please connect this transition first before placing another transition.',
-        'Apply',
-        'Apr',
-        'April',
-        'Are you using a browser plugin like AdBlock or AdBlockPlus? This can cause several issues and we highly recommend you to add an exception for this domain.',
-        'As soon as you use this button or link, you will leave this screen and its current state will be saved automatically. Do you want to continue?',
-        'Attachments',
-        'Aug',
-        'August',
-        'Cancel',
-        'Clear',
-        'Clear all',
-        'Clear debug log',
-        'Clear search',
-        'Clone webservice',
-        'Close',
-        'Close this dialog',
-        'Confirm',
-        'Could not open popup window. Please disable any popup blockers for this application.',
-        'Customer interface does not support internal article types.',
-        'Data Protection',
-        'Dec',
-        'December',
-        'Delete',
-        'Delete Entity',
-        'Delete field',
-        'Delete invoker',
-        'Delete operation',
-        'Delete this Event Trigger',
-        'Delete this Invoker',
-        'Delete this Operation',
-        'Delete webservice',
-        'Deleting the field and its data. This may take a while...',
-        'Do not show this warning again.',
-        'Do you really want to continue?',
-        'Do you really want to delete this attachment?',
-        'Do you really want to delete this certificate?',
-        'Do you really want to delete this dynamic field? ALL associated data will be LOST!',
-        'Do you really want to delete this filter?',
-        'Do you really want to delete this notification language?',
-        'Do you really want to delete this notification?',
-        'Do you really want to delete this scheduled system maintenance?',
-        'Do you really want to delete this statistic?',
-        'Duplicate event.',
-        'Duplicated entry',
-        'Edit Field Details',
-        'Edit this transition',
-        'Error',
-        'Error during AJAX communication',
-        'Error during AJAX communication. Status: %s, Error: %s',
-        'Error in the mail settings. Please correct and try again.',
-        'Feb',
-        'February',
-        'Filters',
-        'Fr',
-        'Fri',
-        'Friday',
-        'Hide EntityIDs',
-        'If you now leave this page, all open popup windows will be closed, too!',
-        'Import webservice',
-        'Information about the OTRS Daemon',
-        'Invalid date (need a future date)!',
-        'Invalid date (need a past date)!',
-        'Invalid date!',
-        'It is going to be deleted from the field, please try again.',
-        'Jan',
-        'January',
-        'Jul',
-        'July',
-        'Jun',
-        'June',
-        'Loading...',
-        'Mail check successful.',
-        'Mar',
-        'March',
-        'May',
-        'May_long',
-        'Mo',
-        'Mon',
-        'Monday',
-        'Namespace %s could not be initialized, because %s could not be found.',
-        'Next',
-        'No TransitionActions assigned.',
-        'No data found.',
-        'No dialogs assigned yet. Just pick an activity dialog from the list on the left and drag it here.',
-        'No matches found.',
-        'Not available',
-        'Nov',
-        'November',
-        'OTRS runs with a huge lists of browsers, please upgrade to one of these.',
-        'Oct',
-        'October',
-        'One or more errors occurred!',
-        'Open date selection',
-        'Please check the fields marked as red for valid inputs.',
-        'Please enter at least one search value or * to find anything.',
-        'Please perform a spell check on the the text first.',
-        'Please remove the following words from your search as they cannot be searched for:',
-        'Please see the documentation or ask your admin for further information.',
-        'Please turn off Compatibility Mode in Internet Explorer!',
-        'Previous',
-        'Remove Entity from canvas',
-        'Remove selection',
-        'Remove the Transition from this Process',
-        'Restore web service configuration',
-        'Sa',
-        'Sat',
-        'Saturday',
-        'Save',
-        'Search',
-        'Select all',
-        'Sep',
-        'September',
-        'Setting a template will overwrite any text or attachment.',
-        'Settings',
-        'Show EntityIDs',
-        'Show more',
-        'Show or hide the content.',
-        'Slide the navigation bar',
-        'Sorry, but you can\'t disable all methods for notifications marked as mandatory.',
-        'Sorry, but you can\'t disable all methods for this notification.',
-        'Sorry, the only existing condition can\'t be removed.',
-        'Sorry, the only existing field can\'t be removed.',
-        'Sorry, the only existing parameter can\'t be removed.',
-        'Su',
-        'Sun',
-        'Sunday',
-        'Switch to desktop mode',
-        'Switch to mobile mode',
-        'System Registration',
-        'Th',
-        'The browser you are using is too old.',
-        'There are currently no elements available to select from.',
-        'This Activity cannot be deleted because it is the Start Activity.',
-        'This Activity is already used in the Process. You cannot add it twice!',
-        'This Transition is already used for this Activity. You cannot use it twice!',
-        'This TransitionAction is already used in this Path. You cannot use it twice!',
-        'This address already exists on the address list.',
-        'This event is already attached to the job, Please use a different one.',
-        'This item still contains sub items. Are you sure you want to remove this item including its sub items?',
-        'Thu',
-        'Thursday',
-        'Today',
-        'Tu',
-        'Tue',
-        'Tuesday',
-        'WARNING: When you change the name of the group \'admin\', before making the appropriate changes in the SysConfig, you will be locked out of the administrations panel! If this happens, please rename the group back to admin per SQL statement.',
-        'We',
-        'Wed',
-        'Wednesday',
-        'You have unanswered chat requests',
-        'and %s more...',
-        'day',
-        'month',
-        'week',
-    ];
-
     # $$STOP$$
     return;
 }

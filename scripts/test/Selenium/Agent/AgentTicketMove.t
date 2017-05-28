@@ -36,7 +36,7 @@ $Selenium->RunTest(
             my $QueueID   = $Kernel::OM->Get('Kernel::System::Queue')->QueueAdd(
                 Name            => $QueueName,
                 ValidID         => 1,
-                GroupID         => 1,                       # users
+                GroupID         => 1,
                 SystemAddressID => 1,
                 SalutationID    => 1,
                 SignatureID     => 1,
@@ -68,12 +68,13 @@ $Selenium->RunTest(
         for my $SysConfigUpdate (@SysConfigData) {
 
             # enable menu module and modify destination link
-            my %MenuModuleConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+            my %MenuModuleConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
                 Name    => $SysConfigUpdate->{MenuModule},
                 Default => 1,
             );
+            my %MenuModuleConfigUpdate = map { $_->{Key} => $_->{Content} }
+                grep { defined $_->{Key} } @{ $MenuModuleConfig{Setting}->[1]->{Hash}->[1]->{Item} };
 
-            my %MenuModuleConfigUpdate = %{ $MenuModuleConfig{EffectiveValue} };
             $MenuModuleConfigUpdate{Link} =~ s/$SysConfigUpdate->{OrgQueueLink}/$SysConfigUpdate->{TestQueueLink}/g;
 
             $Helper->ConfigSettingChange(
@@ -88,7 +89,7 @@ $Selenium->RunTest(
 
         # create test ACL with possible not selection of test queues
         my $ACLID = $ACLObject->ACLAdd(
-            Name           => 'AACL' . $Helper->GetRandomID(),
+            Name           => 'ACL' . $Helper->GetRandomID(),
             Comment        => 'Selenium ACL',
             Description    => 'Description',
             StopAfterMatch => 1,
@@ -227,7 +228,7 @@ $Selenium->RunTest(
         );
 
         # click to return back to AgentTicketZoom screen
-        $Selenium->find_element( ".ReturnToPreviousPage", 'css' )->VerifiedClick();
+        $Selenium->find_element( "#GoBack", 'css' )->VerifiedClick();
 
         # click on 'Spam' and check for ACL error message
         $Selenium->find_element("//a[contains(\@title, 'Mark this ticket as junk!')]")->VerifiedClick();

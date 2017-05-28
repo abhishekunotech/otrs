@@ -6,33 +6,32 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst AdminGenericInterfaceInvokerDefault">
-    <h1>[% Translate("GenericInterface Web Service Management") | html %]</h1>
+[% RenderBlockStart("TitleAdd") %]
+    <h1>[% Translate("Add new Invoker to Web Service %s", Data.WebserviceName) | html %]</h1>
+[% RenderBlockEnd("TitleAdd") %]
+[% RenderBlockStart("TitleChange") %]
+    <h1>[% Translate("Change Invoker %s of Web Service %s", Data.Invoker, Data.WebserviceName) | html %]</h1>
+[% RenderBlockEnd("TitleChange") %]
+<!-- breadcrumb -->
 
-    [% USE WebserviceLink = String("AdminGenericInterfaceWebservice;Subaction=Change;WebserviceID=") %]
+    <ul class="BreadCrumb">
+        <li>[% Translate("You are here") | html %]:</li>
+        <li>
+            <a href="[% Env("Baselink") %]Action=AdminGenericInterfaceWebservice">[% Translate("Web Services") | html %]</a>
+        </li>
+        <li>
+            <a href="[% Env("Baselink") %]Action=AdminGenericInterfaceWebservice;Subaction=Change;WebserviceID=[% Data.WebserviceID | uri %]">[% Data.WebserviceName | html %]</a>
+        </li>
+        <li>
+[% RenderBlockStart("NavigationAdd") %]
+            [% Translate("Add new invoker") | html %]
+[% RenderBlockEnd("NavigationAdd") %]
+[% RenderBlockStart("NavigationChange") %]
+            [% Translate("Change invoker %s", Data.Invoker) | html %]
+[% RenderBlockEnd("NavigationChange") %]
+        </li>
+    </ul>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate( 'Web Service Management' ),
-                Link => 'AdminGenericInterfaceWebservice',
-            },
-            {
-                Name => Data.WebserviceName,
-                Link => WebserviceLink.append( Data.WebserviceID ),
-            },
-        ]
-    %]
-
-    [% SWITCH Data.Mode %]
-        [% CASE 'Add' %]
-            [% BreadcrumbPath.push({ Name => Translate("Add Invoker"),}) %]
-        [% CASE 'Change' %]
-            [% USE EditTitle = String(Translate("Edit Invoker")) %]
-            [% BreadcrumbPath.push({ Name => EditTitle.append( ': ', Data.Invoker ), }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
-    <div class="Clear"></div>
     <div class="SidebarColumn">
         <div class="WidgetSimple">
             <div class="Header">
@@ -168,6 +167,15 @@
                                             </a>
                                         </td>
                                     </tr>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Core.Agent.Admin.GenericInterfaceInvoker.BindDeleteEventDialog({
+        ElementID:                  'DeleteEvent[% Data.Event | html %]',
+        EventName:                  "[% Data.Event | html %]",
+        ElementSelector:            '#DeleteEvent[% Data.Event | html %]'
+    });
+//]]></script>
+[% END %]
 [% RenderBlockEnd("EventRow") %]
                                 </tbody>
                             </table>
@@ -209,7 +217,14 @@
 [% RenderBlockStart("SaveAndFinishButton") %]
                             [% Translate("or") | html %]
                             <button type="submit" id="SaveAndFinishButton" class="CallForAction" value="[% Translate("Save and finish") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
-                            <input autocomplete="off" type="hidden" name="ReturnToWebservice" id="ReturnToWebservice" value="" />
+                            <input type="hidden" name="ReturnToWebservice" id="ReturnToWebservice" value="" autocomplete="off" />
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+$('#SaveAndFinishButton').bind('click', function(){
+    $('#ReturnToWebservice').val(1);
+});
+//]]></script>
+[% END %]
 [% RenderBlockEnd("SaveAndFinishButton") %]
                             [% Translate("or") | html %]
                             <a href="[% Env("Baselink") %]Action=AdminGenericInterfaceWebservice;Subaction=Change;WebserviceID=[% Data.WebserviceID | uri %]">[% Translate("Cancel") | html %]</a>
@@ -222,3 +237,39 @@
     </div>
     <div class="Clear"></div>
 </div>
+
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+Core.Agent.Admin.GenericInterfaceInvoker.Init({
+    WebserviceID: [% Data.WebserviceID | html %],
+    Invoker: "[% Data.Invoker | html %]",
+    Action: 'AdminGenericInterfaceInvokerDefault',
+    EventTypeSelected: $('#EventType').val(),
+    Localization: {
+        CommunicationErrorMsg: [% Translate("An error occurred during communication.") | JSON %],
+        DeleteInvokerMsg: [% Translate("Delete this Invoker") | JSON %],
+        DeleteEventMsg: [% Translate("Delete this Event Trigger") | JSON %],
+        DeleteMsg: [% Translate("Delete") | JSON %],
+        CancelMsg: [% Translate("Cancel") | JSON %]
+    }
+});
+
+$('.RegisterChange').bind('change.RegisterChange keyup.RegisterChange', function (Event) {
+    $('.HideOnChange').hide();
+    $('.ShowOnChange').show();
+});
+
+$('#DeleteButton').bind('click', Core.Agent.Admin.GenericInterfaceInvoker.ShowDeleteDialog);
+
+$('#EventType').bind('change', function (){
+    Core.Agent.Admin.GenericInterfaceInvoker.ToogleEventSelect($(this).val());
+});
+
+$('#AddEvent').bind('click', function (){
+    Core.Agent.Admin.GenericInterfaceInvoker.AddEvent( $('#EventType').val() );
+});
+
+//]]></script>
+
+
+[% END %]

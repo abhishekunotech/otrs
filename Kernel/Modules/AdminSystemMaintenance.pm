@@ -11,8 +11,8 @@ package Kernel::Modules::AdminSystemMaintenance;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -168,19 +168,10 @@ sub Run {
         }
 
         # redirect to edit screen
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect(
-                OP =>
-                    "Action=$Self->{Action};Subaction=SystemMaintenanceEdit;SystemMaintenanceID=$SystemMaintenanceID;Notification=Add"
-            );
-        }
-        else {
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Notification=Add" );
-        }
+        return $LayoutObject->Redirect(
+            OP =>
+                "Action=$Self->{Action};Subaction=SystemMaintenanceEdit;SystemMaintenanceID=$SystemMaintenanceID;Saved=1"
+        );
     }
 
     # ------------------------------------------------------------ #
@@ -223,21 +214,12 @@ sub Run {
             );
         }
 
-        if ( $ParamObject->GetParam( Param => 'Notification' ) eq 'Add' ) {
+        if ( $ParamObject->GetParam( Param => 'Saved' ) ) {
 
             # add notification
             push @NotifyData, {
                 Priority => 'Notice',
-                Info     => Translatable('System Maintenance was added successfully!'),
-            };
-        }
-
-        if ( $ParamObject->GetParam( Param => 'Notification' ) eq 'Update' ) {
-
-            # add notification
-            push @NotifyData, {
-                Priority => 'Notice',
-                Info     => Translatable('System Maintenance was updated successfully!'),
+                Info     => Translatable('System Maintenance was saved successfully!'),
             };
         }
 
@@ -358,20 +340,10 @@ sub Run {
         }
 
         # redirect to edit screen
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect(
-                OP =>
-                    "Action=$Self->{Action};Subaction=SystemMaintenanceEdit;SystemMaintenanceID=$SystemMaintenanceID;Notification=Update"
-            );
-        }
-        else {
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Notification=Update" );
-        }
-
+        return $LayoutObject->Redirect(
+            OP =>
+                "Action=$Self->{Action};Subaction=SystemMaintenanceEdit;SystemMaintenanceID=$SystemMaintenanceID;Saved=1"
+        );
     }
 
     # ------------------------------------------------------------ #
@@ -432,15 +404,10 @@ sub Run {
                 # include time stamps on the correct key
                 for my $Key (qw(StartDate StopDate)) {
 
-                    my $DateTimeObject = $Kernel::OM->Create(
-                        'Kernel::System::DateTime',
-                        ObjectParams => {
-                            Epoch => $SystemMaintenance->{$Key},
-                        },
+                    # try to convert SystemTime to TimeStamp
+                    $SystemMaintenance->{ $Key . 'TimeStamp' } = $TimeObject->SystemTime2TimeStamp(
+                        SystemTime => $SystemMaintenance->{$Key},
                     );
-                    $DateTimeObject->ToTimeZone( TimeZone => $Self->{UserTimeZone} );
-
-                    $SystemMaintenance->{ $Key . 'TimeStamp' } = $DateTimeObject->ToString();
                 }
 
                 # create blocks
@@ -456,18 +423,6 @@ sub Run {
         # generate output
         my $Output = $LayoutObject->Header();
         $Output .= $LayoutObject->NavigationBar();
-
-        if ( $ParamObject->GetParam( Param => 'Notification' ) eq 'Update' ) {
-            $Output .= $LayoutObject->Notify(
-                Info => Translatable('System Maintenance was updated successfully!')
-            );
-        }
-        elsif ( $ParamObject->GetParam( Param => 'Notification' ) eq 'Add' ) {
-            $Output .= $LayoutObject->Notify(
-                Info => Translatable('System Maintenance was added successfully!')
-            );
-        }
-
         $Output .= $LayoutObject->Output(
             TemplateFile => 'AdminSystemMaintenance',
         );
@@ -575,15 +530,13 @@ sub _ShowEdit {
         for my $SessionID (@List) {
             my $List = '';
             my %Data = $SessionObject->GetSessionIDData( SessionID => $SessionID );
-            if ( $Data{UserType} && $Data{UserLogin} ) {
-                $MetaData{"$Data{UserType}Session"}++;
-                if ( !$MetaData{"$Data{UserLogin}"} ) {
-                    $MetaData{"$Data{UserType}SessionUniq"}++;
-                    $MetaData{"$Data{UserLogin}"} = 1;
-                }
+            $MetaData{"$Data{UserType}Session"}++;
+            if ( !$MetaData{"$Data{UserLogin}"} ) {
+                $MetaData{"$Data{UserType}SessionUniq"}++;
+                $MetaData{"$Data{UserLogin}"} = 1;
             }
 
-            $Data{UserType} = 'Agent' if ( !$Data{UserType} || $Data{UserType} ne 'Customer' );
+            $Data{UserType} = 'Agent' if ( $Data{UserType} ne 'Customer' );
 
             # store data to be used later for showing a users session table
             push @UserSessions, {
@@ -642,6 +595,8 @@ sub _ShowEdit {
 sub _GetParams {
     my ( $Self, %Param ) = @_;
 
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
+
     my $GetParam;
 
     # get parameters from web browser
@@ -673,20 +628,22 @@ sub _GetParams {
             $DateStructure{$Period} = $GetParam->{ $Item . $Period };
         }
 
-        my $DateTimeObject = $Kernel::OM->Create(
-            'Kernel::System::DateTime',
-            ObjectParams => {
-                %DateStructure,
-                TimeZone => $Self->{UserTimeZone},
-            },
-        );
-        if ( !$DateTimeObject ) {
+        # check date
+        if ( !$TimeObject->Date2SystemTime( %DateStructure, Second => 0 ) ) {
             $Param{Error}->{ $Item . 'Invalid' } = 'ServerError';
             next ITEM;
         }
 
-        $GetParam->{$Item} = $DateTimeObject->ToEpoch();
-        $GetParam->{ $Item . 'TimeStamp' } = $DateTimeObject->ToString();
+        # try to convert date to a SystemTime
+        $GetParam->{$Item} = $TimeObject->Date2SystemTime(
+            %DateStructure,
+            Second => 0,
+        );
+
+        # try to convert SystemTime to TimeStamp
+        $GetParam->{ $Item . 'TimeStamp' } = $TimeObject->SystemTime2TimeStamp(
+            SystemTime => $GetParam->{$Item},
+        );
     }
 
     return $GetParam;

@@ -15,13 +15,17 @@ use warnings;
 
 Kernel::System::Daemon::BaseDaemon - daemon base class
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Base class for daemon modules.
 
 =head1 PUBLIC INTERFACE
 
-=head2 PreRun()
+=over 4
+
+=cut
+
+=item PreRun()
 
 Perform additional validations/preparations and wait times before Run().
 
@@ -39,7 +43,7 @@ sub PreRun {
     return 1;
 }
 
-=head2 Run()
+=item Run()
 
 Runs the daemon.
 
@@ -57,7 +61,7 @@ sub Run {
     return 1;
 }
 
-=head2 PostRun()
+=item PostRun()
 
 Perform additional clean-ups and wait times after Run().
 
@@ -77,7 +81,7 @@ sub PostRun {
     return 1;
 }
 
-=head2 Summary()
+=item Summary()
 
 Provides a summary of what is the daemon doing in the current time, the summary is in form of tabular
 data and it must contain a header, the definition of the columns, the data, and a message if there
@@ -120,6 +124,8 @@ sub Summary {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

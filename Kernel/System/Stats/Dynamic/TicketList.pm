@@ -31,7 +31,6 @@ our @ObjectDependencies = (
     'Kernel::System::State',
     'Kernel::System::Stats',
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
     'Kernel::System::Time',
     'Kernel::System::Type',
     'Kernel::System::User',
@@ -171,6 +170,7 @@ sub GetObjectAttributes {
             Values           => \%TicketAttributes,
             Sort             => 'IndividualKey',
             SortIndividual   => $Self->_SortedAttributes(),
+
         },
         {
             Name             => Translatable('Order by'),
@@ -313,7 +313,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_From',
+            Element          => 'From',
             Block            => 'InputField',
         },
         {
@@ -321,7 +321,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_To',
+            Element          => 'To',
             Block            => 'InputField',
         },
         {
@@ -329,7 +329,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Cc',
+            Element          => 'Cc',
             Block            => 'InputField',
         },
         {
@@ -337,7 +337,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Subject',
+            Element          => 'Subject',
             Block            => 'InputField',
         },
         {
@@ -345,7 +345,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Body',
+            Element          => 'Body',
             Block            => 'InputField',
         },
         {
@@ -385,19 +385,6 @@ sub GetObjectAttributes {
             Values           => {
                 TimeStart => 'TicketChangeTimeNewerDate',
                 TimeStop  => 'TicketChangeTimeOlderDate',
-            },
-        },
-        {
-            Name             => Translatable('Pending until time'),
-            UseAsXvalue      => 0,
-            UseAsValueSeries => 0,
-            UseAsRestriction => 1,
-            Element          => 'PendingUntilTime',
-            TimePeriodFormat => 'DateInputFormat',                    # 'DateInputFormatLong',
-            Block            => 'Time',
-            Values           => {
-                TimeStart => 'TicketPendingTimeNewerDate',
-                TimeStop  => 'TicketPendingTimeOlderDate',
             },
         },
         {
@@ -649,7 +636,7 @@ sub GetObjectAttributes {
         }
 
         my %ObjectAttribute = (
-            Name             => Translatable('Assigned to Customer User Login'),
+            Name             => Translatable('CustomerUserLogin'),
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
@@ -662,9 +649,9 @@ sub GetObjectAttributes {
     }
     else {
 
-        my @CustomerUserAttributes = (
+        my @CustomerIDAttributes = (
             {
-                Name             => Translatable('Assigned to Customer User Login (complex search)'),
+                Name             => Translatable('CustomerUserLogin (complex search)'),
                 UseAsXvalue      => 0,
                 UseAsValueSeries => 0,
                 UseAsRestriction => 1,
@@ -672,36 +659,17 @@ sub GetObjectAttributes {
                 Block            => 'InputField',
             },
             {
-                Name               => Translatable('Assigned to Customer User Login (exact match)'),
-                UseAsXvalue        => 0,
-                UseAsValueSeries   => 0,
-                UseAsRestriction   => 1,
-                Element            => 'CustomerUserLoginRaw',
-                Block              => 'InputField',
-                CSSClass           => 'CustomerAutoCompleteSimple',
-                HTMLDataAttributes => {
-                    'customer-search-type' => 'CustomerUser',
-                },
+                Name             => Translatable('CustomerUserLogin (exact match)'),
+                UseAsXvalue      => 0,
+                UseAsValueSeries => 0,
+                UseAsRestriction => 1,
+                Element          => 'CustomerUserLoginRaw',
+                Block            => 'InputField',
             },
         );
 
-        push @ObjectAttributes, @CustomerUserAttributes;
+        push @ObjectAttributes, @CustomerIDAttributes;
     }
-
-    # Add always the field for the customer user login accessible tickets as auto complete field.
-    my %ObjectAttribute = (
-        Name               => Translatable('Accessible to Customer User Login (exact match)'),
-        UseAsXvalue        => 0,
-        UseAsValueSeries   => 0,
-        UseAsRestriction   => 1,
-        Element            => 'CustomerUserID',
-        Block              => 'InputField',
-        CSSClass           => 'CustomerAutoCompleteSimple',
-        HTMLDataAttributes => {
-            'customer-search-type' => 'CustomerUser',
-        },
-    );
-    push @ObjectAttributes, \%ObjectAttribute;
 
     if ( $ConfigObject->Get('Ticket::ArchiveSystem') ) {
 
@@ -1111,18 +1079,14 @@ sub GetStatTable {
         )
     {
 
-        my $SQLTicketIDInCondition = $DBObject->QueryInCondition(
-            Key       => 'ticket_id',
-            Values    => \@TicketIDs,
-            QuoteType => 'Integer',
-            BindMode  => 0,
-        );
-
         # start building the SQL query from back to front
         # what's fixed is the history_type_id we have to search for
         # 1 is ticketcreate
         # 27 is state update
-        my $SQL = $SQLTicketIDInCondition . ' AND history_type_id IN (1,27) ORDER BY ticket_id ASC';
+        my $SQL = 'history_type_id IN (1,27) ORDER BY ticket_id ASC';
+
+        $SQL = 'ticket_id IN ('
+            . ( join ', ', @TicketIDs ) . ') AND ' . $SQL;
 
         my %StateIDs;
 
@@ -1284,8 +1248,6 @@ sub GetStatTable {
         }
     }
 
-    my $StatsObject = $Kernel::OM->Get('Kernel::System::Stats');
-
     # generate the ticket list
     my @StatArray;
     for my $TicketID (@TicketIDs) {
@@ -1297,11 +1259,6 @@ sub GetStatTable {
             DynamicFields => $NeedDynamicFields,
         );
 
-        # Format Ticket 'Age' param into human readable format.
-        $Ticket{Age} = $StatsObject->_HumanReadableAgeGet(
-            Age => $Ticket{Age},
-        );
-
         # add the accounted time if needed
         if ( $TicketAttributes{AccountedTime} ) {
             $Ticket{AccountedTime} = $TicketObject->TicketAccountedTimeGet( TicketID => $TicketID );
@@ -1309,10 +1266,7 @@ sub GetStatTable {
 
         # add the number of articles if needed
         if ( $TicketAttributes{NumberOfArticles} ) {
-            $Ticket{NumberOfArticles} = $Kernel::OM->Get('Kernel::System::Ticket::Article')->ArticleList(
-                TicketID => $TicketID,
-                UserID   => 1
-            );
+            $Ticket{NumberOfArticles} = $TicketObject->ArticleCount( TicketID => $TicketID );
         }
 
         $Ticket{Closed}                      ||= '';
@@ -1380,33 +1334,25 @@ sub GetStatTable {
         for my $Attribute ( @{$SortedAttributesRef} ) {
             next ATTRIBUTE if !$TicketAttributes{$Attribute};
 
-            # convert from OTRS time zone to given time zone
+            # add the given TimeZone for time values
             if (
                 $Param{TimeZone}
                 && $Ticket{$Attribute}
-                && $Ticket{$Attribute} =~ /\A(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})\z/
+                && $Ticket{$Attribute} =~ /(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})/
                 )
             {
-
-                $Ticket{$Attribute} = $StatsObject->_FromOTRSTimeZone(
-                    String   => $Ticket{$Attribute},
-                    TimeZone => $Param{TimeZone},
+                $Ticket{$Attribute} = $Kernel::OM->Get('Kernel::System::Stats')->_AddTimeZone(
+                    TimeStamp => $Ticket{$Attribute},
+                    TimeZone  => $Param{TimeZone},
                 );
                 $Ticket{$Attribute} .= " ($Param{TimeZone})";
             }
-
-            if ( $Attribute =~ /Owner|Responsible/ ) {
-                $Ticket{$Attribute} = $Kernel::OM->Get('Kernel::System::User')->UserName(
-                    User => $Ticket{$Attribute},
-                );
-            }
-
             push @ResultRow, $Ticket{$Attribute};
         }
         push @StatArray, \@ResultRow;
     }
 
-    # use a individual sort if the sort mechanism of the TicketSearch is not usable
+    # use a individual sort if the sort mechanismn of the TicketSearch is not useable
     if ( !$OrderByIsValueOfTicketSearchSort ) {
         @StatArray = $Self->_IndividualResultOrder(
             StatArray          => \@StatArray,
@@ -1636,12 +1582,12 @@ sub _TicketAttributes {
 
         #PriorityID     => 'PriorityID',
         CustomerID => 'CustomerID',
-        Changed    => 'Last Changed',
+        Changed    => 'Changed',
         Created    => 'Created',
 
         #CreateTimeUnix => 'CreateTimeUnix',
         CustomerUserID => 'Customer User',
-        Lock           => 'Lock',
+        Lock           => 'lock',
 
         #LockID         => 'LockID',
         UnlockTimeout       => 'UnlockTimeout',

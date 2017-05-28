@@ -11,7 +11,9 @@ package Kernel::System::SupportDataCollector::PluginAsynchronous::OTRS::Concurre
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginAsynchronous);
+use base qw(Kernel::System::SupportDataCollector::PluginAsynchronous);
+
+use Date::Pcalc qw(Add_Delta_YMD Add_Delta_DHMS);
 
 use Kernel::Language qw(Translatable);
 use Kernel::System::VariableCheck qw(:all);
@@ -86,22 +88,28 @@ sub Run {
 sub RunAsynchronous {
     my $Self = shift;
 
-    my $DateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
-    my $SystemTimeNow  = $DateTimeObject->ToEpoch();
+    # get time object
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
-    $DateTimeObject->Add( Hours => 1 );
+    # get system time
+    my $SystemTimeNow = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
 
-    # Get the time values and use only the full hour.
-    my $DateTimeValues = $DateTimeObject->Get();
-    $DateTimeObject->Set(
-        Year   => $DateTimeValues->{Year},
-        Month  => $DateTimeValues->{Month},
-        Day    => $DateTimeValues->{Day},
-        Hour   => $DateTimeValues->{Hour},
+    my ( $Sec, $Min, $Hour, $Day, $Month, $Year, $WeekDay ) = $TimeObject->SystemTime2Date(
+        SystemTime => $SystemTimeNow + 3600,
+    );
+
+    my $SystemTime = $TimeObject->Date2SystemTime(
+        Year   => $Year,
+        Month  => $Month,
+        Day    => $Day,
+        Hour   => $Hour,
         Minute => 0,
         Second => 0,
     );
-    my $TimeStamp = $DateTimeObject->ToString();
+
+    my $TimeStamp = $TimeObject->SystemTime2TimeStamp(
+        SystemTime => $SystemTime,
+    );
 
     my $AsynchronousData = $Self->_GetAsynchronousData();
 
@@ -110,11 +118,11 @@ sub RunAsynchronous {
     if ( IsArrayRefWithData($AsynchronousData) ) {
 
         # already existing entry counter
-        my $AsynchronousDataCount = scalar @{$AsynchronousData} - 1;
+        my $AsynchronousDataCounter = scalar @{$AsynchronousData} - 1;
 
         # check if for the current hour already a value exists
         COUNTER:
-        for my $Counter ( 0 .. $AsynchronousDataCount ) {
+        for my $Counter ( 0 .. $AsynchronousDataCounter ) {
 
             next COUNTER
                 if $AsynchronousData->[$Counter]->{TimeStamp}
@@ -126,8 +134,20 @@ sub RunAsynchronous {
         }
 
         # set the check timestamp to one week ago
-        $DateTimeObject->Subtract( Days => 7 );
-        my $CheckTimeStamp = $DateTimeObject->ToString();
+        my ( $CheckYear, $CheckMonth, $CheckDay ) = Date::Pcalc::Add_Delta_YMD( $Year, $Month, $Day, 0, 0, -7 );
+
+        my $CheckSystemTime = $TimeObject->Date2SystemTime(
+            Year   => $CheckYear,
+            Month  => $CheckMonth,
+            Day    => $CheckDay,
+            Hour   => $Hour,
+            Minute => 0,
+            Second => 0,
+        );
+
+        my $CheckTimeStamp = $TimeObject->SystemTime2TimeStamp(
+            SystemTime => $CheckSystemTime,
+        );
 
         # remove all entries older than one week
         @{$AsynchronousData} = grep { $_->{TimeStamp} && $_->{TimeStamp} ge $CheckTimeStamp } @{$AsynchronousData};
@@ -144,6 +164,9 @@ sub RunAsynchronous {
         }
     }
 
+    # get the session active time
+    my $SessionActiveTime = $Kernel::OM->Get('Kernel::Config')->Get('SessionActiveTime') || 60 * 10;
+
     # get all sessions
     my @Sessions = $AuthSessionObject->GetAllSessionIDs();
 
@@ -156,18 +179,47 @@ sub RunAsynchronous {
         CustomerSessionUnique => 0,
     );
 
-    for my $UserType (qw(User Customer)) {
+    # to save the unique agents and customer users
+    my %LookupUsers;
+    my %LookupCustomers;
 
-        my %ActiveSessions = $AuthSessionObject->GetActiveSessions(
-            UserType => $UserType,
-        );
+    # collect the existing sessions of each user (not customer user)
+    SESSION:
+    for my $SessionID (@Sessions) {
 
-        $CountConcurrentUser{ $UserType . 'Session' }       = $ActiveSessions{Total};
-        $CountConcurrentUser{ $UserType . 'SessionUnique' } = scalar keys %{ $ActiveSessions{PerUser} };
+        # get session data
+        my %SessionData = $AuthSessionObject->GetSessionIDData( SessionID => $SessionID );
+
+        next SESSION if !%SessionData;
+
+        # get needed data
+        my $UserType        = $SessionData{UserType}        || '';
+        my $UserLastRequest = $SessionData{UserLastRequest} || $SystemTimeNow;
+        my $UserLogin       = $SessionData{UserLogin};
+
+        next SESSION if $UserType ne 'User' && $UserType ne 'Customer';
+        next SESSION if ( $UserLastRequest + $SessionActiveTime ) < $SystemTimeNow;
+
+        $CountConcurrentUser{ $UserType . 'Session' }++;
+
+        if ( $UserType eq 'User' ) {
+
+            if ( !$LookupUsers{$UserLogin} ) {
+                $CountConcurrentUser{UserSessionUnique}++;
+                $LookupUsers{$UserLogin} = 1;
+            }
+        }
+        elsif ( $UserType eq 'Customer' ) {
+
+            if ( !$LookupCustomers{$UserLogin} ) {
+                $CountConcurrentUser{CustomerSessionUnique}++;
+                $LookupCustomers{$UserLogin} = 1;
+            }
+        }
     }
 
     # update the concurrent user counter, if a higher value for the current hour exists
-    if ( defined $CurrentHourPosition ) {
+    if ($CurrentHourPosition) {
 
         my $ChangedConcurrentUserCounter;
 

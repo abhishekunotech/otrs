@@ -18,12 +18,10 @@ my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 $Selenium->RunTest(
     sub {
 
-        my $Helper               = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-        my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $SystemAddressObject  = $Kernel::OM->Get('Kernel::System::SystemAddress');
-        my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-            ChannelName => 'Email',
-        );
+        # get needed objects
+        my $Helper              = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
+        my $TicketObject        = $Kernel::OM->Get('Kernel::System::Ticket');
+        my $SystemAddressObject = $Kernel::OM->Get('Kernel::System::SystemAddress');
 
         my @TicketIDs;
 
@@ -79,19 +77,19 @@ $Selenium->RunTest(
         # create test articles for test ticket
         my @ArticleIDs;
         for my $TestArticle (@TestArticles) {
-            my $ArticleID = $ArticleBackendObject->ArticleCreate(
-                TicketID             => $TicketID,
-                IsVisibleForCustomer => 1,
-                SenderType           => $TestArticle->{SenderType},
-                From                 => $TestArticle->{From},
-                To                   => $TestArticle->{To},
-                Subject              => 'Selenium test',
-                Body                 => 'Just a test body for selenium testing',
-                Charset              => 'ISO-8859-15',
-                MimeType             => 'text/plain',
-                HistoryType          => 'PhoneCallCustomer',
-                HistoryComment       => 'Selenium testing',
-                UserID               => 1,
+            my $ArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $TicketID,
+                ArticleType    => 'email-external',
+                SenderType     => $TestArticle->{SenderType},
+                From           => $TestArticle->{From},
+                To             => $TestArticle->{To},
+                Subject        => 'Selenium test',
+                Body           => 'Just a test body for selenium testing',
+                Charset        => 'ISO-8859-15',
+                MimeType       => 'text/plain',
+                HistoryType    => 'PhoneCallCustomer',
+                HistoryComment => 'Selenium testing',
+                UserID         => 1,
             );
             $Self->True(
                 $ArticleID,

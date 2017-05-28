@@ -8,17 +8,24 @@
 
 package Kernel::Output::HTML::Notification::AgentOTRSBusiness;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 use utf8;
 
 our @ObjectDependencies = (
-    'Kernel::Output::HTML::Layout',
-    'Kernel::System::Group',
     'Kernel::System::OTRSBusiness',
+    'Kernel::Output::HTML::Layout',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;
@@ -98,14 +105,12 @@ if (!window.location.search.match(/^[?]Action=(AgentOTRSBusiness|Admin.*)/)) {
         );
     }
 
-    my $HasPermission = $Kernel::OM->Get('Kernel::System::Group')->PermissionCheck(
-        UserID    => $Self->{UserID},
-        GroupName => $Group,
-        Type      => 'rw',
-    );
-
     # all following notifications should only be visible for administrators
-    if ( !$HasPermission ) {
+    if (
+        !defined $LayoutObject->{"UserIsGroup[$Group]"}
+        || $LayoutObject->{"UserIsGroup[$Group]"} ne 'Yes'
+        )
+    {
         return '';
     }
 

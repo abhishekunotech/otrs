@@ -8,8 +8,6 @@
 
 package Kernel::Output::HTML::Notification::CustomerSystemMaintenanceCheck;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 
@@ -19,6 +17,19 @@ our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Time',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;
@@ -51,12 +62,12 @@ sub Run {
         );
     }
 
-    my $SystemMaintenanceIsComing = $SystemMaintenanceObject->SystemMaintenanceIsComing();
+    my $SystemMaintenanceIsComming = $SystemMaintenanceObject->SystemMaintenanceIsComming();
 
-    if ($SystemMaintenanceIsComing) {
+    if ($SystemMaintenanceIsComming) {
 
         my $MaintenanceTime = $Kernel::OM->Get('Kernel::System::Time')->SystemTime2TimeStamp(
-            SystemTime => $SystemMaintenanceIsComing,
+            SystemTime => $SystemMaintenanceIsComming,
         );
         return $LayoutObject->Notify(
             Priority => 'Notice',

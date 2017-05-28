@@ -11,8 +11,6 @@ package Kernel::Output::HTML::LinkObject::Ticket;
 use strict;
 use warnings;
 
-use List::Util qw(first);
-
 use Kernel::Output::HTML::Layout;
 use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
@@ -21,7 +19,6 @@ our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::Language',
     'Kernel::Output::HTML::Layout',
-    'Kernel::System::CustomerCompany',
     'Kernel::System::CustomerUser',
     'Kernel::System::DynamicField',
     'Kernel::System::DynamicField::Backend',
@@ -38,12 +35,15 @@ our @ObjectDependencies = (
 
 Kernel::Output::HTML::LinkObject::Ticket - layout backend module
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All layout functions of link object (ticket).
 
+=over 4
 
-=head2 new()
+=cut
+
+=item new()
 
 create an object
 
@@ -86,7 +86,7 @@ sub new {
     return $Self;
 }
 
-=head2 TableCreateComplex()
+=item TableCreateComplex()
 
 return an array with the block data
 
@@ -301,37 +301,8 @@ sub TableCreateComplex {
     # Define Headline columns
 
     # Sort
-    my @AllColumns;
     COLUMN:
     for my $Column ( sort { $SortOrder{$a} <=> $SortOrder{$b} } keys %UserColumns ) {
-
-        my $ColumnTranslate = $Column;
-        if ( $Column eq 'EscalationTime' ) {
-            $ColumnTranslate = Translatable('Service Time');
-        }
-        elsif ( $Column eq 'EscalationResponseTime' ) {
-            $ColumnTranslate = Translatable('First Response Time');
-        }
-        elsif ( $Column eq 'EscalationSolutionTime' ) {
-            $ColumnTranslate = Translatable('Solution Time');
-        }
-        elsif ( $Column eq 'EscalationUpdateTime' ) {
-            $ColumnTranslate = Translatable('Update Time');
-        }
-        elsif ( $Column eq 'PendingTime' ) {
-            $ColumnTranslate = Translatable('Pending till');
-        }
-        elsif ( $Column eq 'CustomerCompanyName' ) {
-            $ColumnTranslate = Translatable('Customer Company Name');
-        }
-        elsif ( $Column eq 'CustomerUserID' ) {
-            $ColumnTranslate = Translatable('Customer User ID');
-        }
-
-        push @AllColumns, {
-            ColumnName      => $Column,
-            ColumnTranslate => $ColumnTranslate,
-        };
 
         # if enabled by default
         if ( $UserColumns{$Column} == 2 ) {
@@ -339,7 +310,7 @@ sub TableCreateComplex {
 
             # Ticket fields
             if ( $Column !~ m{\A DynamicField_}xms ) {
-                $ColumnName = $Column eq 'TicketNumber' ? $TicketHook : $ColumnTranslate;
+                $ColumnName = $Column eq 'TicketNumber' ? $TicketHook : $Column;
             }
 
             # Dynamic fields
@@ -379,8 +350,7 @@ sub TableCreateComplex {
 
         # set css
         my $CssClass;
-        my @StatesToStrike = @{ $ConfigObject->Get('LinkObject::StrikeThroughLinkedTicketStateTypes') || [] };
-        if ( first { $Ticket->{StateType} eq $_ } @StatesToStrike ) {
+        if ( $Ticket->{StateType} eq 'merged' ) {
             $CssClass = 'StrikeThrough';
         }
 
@@ -436,25 +406,22 @@ sub TableCreateComplex {
                     }
                     elsif ( $Column eq 'EscalationSolutionTime' ) {
 
-                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAge(
+                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAgeInHours(
                             Age => $Ticket->{SolutionTime} || 0,
-                            TimeShowAlwaysLong => 1,
-                            Space              => ' ',
+                            Space => ' ',
                         );
                     }
                     elsif ( $Column eq 'EscalationResponseTime' ) {
 
-                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAge(
+                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAgeInHours(
                             Age => $Ticket->{FirstResponseTime} || 0,
-                            TimeShowAlwaysLong => 1,
-                            Space              => ' ',
+                            Space => ' ',
                         );
                     }
                     elsif ( $Column eq 'EscalationUpdateTime' ) {
-                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAge(
+                        $Hash{'Content'} = $Self->{LayoutObject}->CustomerAgeInHours(
                             Age => $Ticket->{UpdateTime} || 0,
-                            TimeShowAlwaysLong => 1,
-                            Space              => ' ',
+                            Space => ' ',
                         );
                     }
                     elsif ( $Column eq 'PendingTime' ) {
@@ -490,12 +457,6 @@ sub TableCreateComplex {
                             );
                         }
                         $Hash{'Content'} = $CustomerName;
-                    }
-                    elsif ( $Column eq 'CustomerCompanyName' ) {
-                        my %CustomerCompany = $Kernel::OM->Get('Kernel::System::CustomerCompany')->CustomerCompanyGet(
-                            CustomerID => $Ticket->{CustomerID},
-                        );
-                        $Hash{'Content'} = $CustomerCompany{CustomerCompanyName};
                     }
                     elsif ( $Column eq 'State' || $Column eq 'Priority' || $Column eq 'Lock' ) {
                         $Hash{'Content'} = $LanguageObject->Translate( $Ticket->{$Column} );
@@ -553,13 +514,12 @@ sub TableCreateComplex {
         ObjectID   => $Param{ObjectID},
         Headline   => \@Headline,
         ItemList   => \@ItemList,
-        AllColumns => \@AllColumns,
     );
 
     return ( \%Block );
 }
 
-=head2 TableCreateSimple()
+=item TableCreateSimple()
 
 return a hash with the link output data
 
@@ -610,10 +570,8 @@ sub TableCreateSimple {
         return;
     }
 
-    my $ConfigObject      = $Kernel::OM->Get('Kernel::Config');
-    my $TicketHook        = $ConfigObject->Get('Ticket::Hook');
-    my $TicketHookDivider = $ConfigObject->Get('Ticket::HookDivider');
-
+    my $TicketHook        = $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Hook');
+    my $TicketHookDivider = $Kernel::OM->Get('Kernel::Config')->Get('Ticket::HookDivider');
     my %LinkOutputData;
     for my $LinkType ( sort keys %{ $Param{ObjectLinkListWithData} } ) {
 
@@ -633,9 +591,7 @@ sub TableCreateSimple {
 
                 # set css
                 my $CssClass;
-                my @StatesToStrike = @{ $ConfigObject->Get('LinkObject::StrikeThroughLinkedTicketStateTypes') || [] };
-
-                if ( first { $Ticket->{StateType} eq $_ } @StatesToStrike ) {
+                if ( $Ticket->{StateType} eq 'merged' ) {
                     $CssClass = 'StrikeThrough';
                 }
 
@@ -661,7 +617,7 @@ sub TableCreateSimple {
     return %LinkOutputData;
 }
 
-=head2 ContentStringCreate()
+=item ContentStringCreate()
 
 return a output string
 
@@ -686,7 +642,7 @@ sub ContentStringCreate {
     return;
 }
 
-=head2 SelectableObjectList()
+=item SelectableObjectList()
 
 return an array hash with select-able objects
 
@@ -725,7 +681,7 @@ sub SelectableObjectList {
     return @ObjectSelectList;
 }
 
-=head2 SearchOptionList()
+=item SearchOptionList()
 
 return an array hash with search options
 
@@ -915,6 +871,8 @@ sub SearchOptionList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

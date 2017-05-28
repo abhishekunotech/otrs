@@ -23,16 +23,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::Entity
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB Entity backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $EntityObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::Entity');
 
 =cut
@@ -55,7 +61,7 @@ sub new {
     return $Self;
 }
 
-=head2 EntityIDGenerate()
+=item EntityIDGenerate()
 
 generate unique Entity ID
 
@@ -107,7 +113,7 @@ sub EntityIDGenerate {
     return $EntityID;
 }
 
-=head2 EntitySyncStateSet()
+=item EntitySyncStateSet()
 
 set sync state for an entity.
 
@@ -177,7 +183,7 @@ sub EntitySyncStateSet {
     return 1;
 }
 
-=head2 EntitySyncStateGet()
+=item EntitySyncStateGet()
 
 gets the sync state of an entity
 
@@ -191,7 +197,7 @@ gets the sync state of an entity
 
 If sync state was found, returns:
 
-    $EntitySyncState = {
+    $ObjectLockState = {
         EntityType       => 'Process',
         EntityID         => 'P1',
         SyncState        => 'not_sync',
@@ -258,7 +264,7 @@ sub EntitySyncStateGet {
     return \%Result;
 }
 
-=head2 EntitySyncStateDelete()
+=item EntitySyncStateDelete()
 
 deletes sync state of an entity.
 
@@ -310,7 +316,7 @@ sub EntitySyncStateDelete {
     return 1;
 }
 
-=head2 EntitySyncStatePurge()
+=item EntitySyncStatePurge()
 
 deletes all entries .
 
@@ -343,7 +349,7 @@ sub EntitySyncStatePurge {
     return 1;
 }
 
-=head2 EntitySyncStateList()
+=item EntitySyncStateList()
 
 gets a list of sync states.
 
@@ -442,6 +448,8 @@ sub EntitySyncStateList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

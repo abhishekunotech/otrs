@@ -21,13 +21,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::Output::HTML::Layout::LinkObject - all LinkObject-related HTML functions
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All LinkObject-related HTML functions
 
 =head1 PUBLIC INTERFACE
 
-=head2 LinkObjectTableCreate()
+=over 4
+
+=item LinkObjectTableCreate()
 
 create a output table
 
@@ -55,25 +57,23 @@ sub LinkObjectTableCreate {
     if ( $Param{ViewMode} =~ m{ \A Simple }xms ) {
 
         return $Self->LinkObjectTableCreateSimple(
-            LinkListWithData               => $Param{LinkListWithData},
-            ViewMode                       => $Param{ViewMode},
-            AdditionalLinkListWithDataJSON => $Param{AdditionalLinkListWithDataJSON},
+            LinkListWithData => $Param{LinkListWithData},
+            ViewMode         => $Param{ViewMode},
         );
     }
     else {
 
         return $Self->LinkObjectTableCreateComplex(
-            LinkListWithData               => $Param{LinkListWithData},
-            ViewMode                       => $Param{ViewMode},
-            AJAX                           => $Param{AJAX},
-            SourceObject                   => $Param{Object},
-            ObjectID                       => $Param{Key},
-            AdditionalLinkListWithDataJSON => $Param{AdditionalLinkListWithDataJSON},
+            LinkListWithData => $Param{LinkListWithData},
+            ViewMode         => $Param{ViewMode},
+            AJAX             => $Param{AJAX},
+            SourceObject     => $Param{Object},
+            ObjectID         => $Param{Key},
         );
     }
 }
 
-=head2 LinkObjectTableCreateComplex()
+=item LinkObjectTableCreateComplex()
 
 create a complex output table
 
@@ -345,12 +345,6 @@ sub LinkObjectTableCreateComplex {
                 $SourceObjectData = "<input type='hidden' name='$Block->{ObjectName}' value='$Block->{ObjectID}' />";
             }
 
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'LinkObjectName',
-                Value => $Block->{Blockname},
-            );
-
             $LayoutObject->Block(
                 Name => 'ContentLargePreferences',
                 Data => {
@@ -361,20 +355,6 @@ sub LinkObjectTableCreateComplex {
             my %Preferences = $Self->ComplexTablePreferencesGet(
                 Config  => $Config->{ $Block->{Blockname} },
                 PrefKey => "LinkObject::ComplexTable-" . $Block->{Blockname},
-            );
-
-            # Add translations for the allocation lists for regular columns.
-            for my $Column ( @{ $Block->{AllColumns} } ) {
-                $LayoutObject->AddJSData(
-                    Key   => 'Column' . $Column->{ColumnName},
-                    Value => $LayoutObject->{LanguageObject}->Translate( $Column->{ColumnTranslate} ),
-                );
-            }
-
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'LinkObjectPreferences',
-                Value => \%Preferences,
             );
 
             $LayoutObject->Block(
@@ -389,14 +369,13 @@ sub LinkObjectTableCreateComplex {
                 Name => $Preferences{Name} . 'PreferencesItem' . $Preferences{Block},
                 Data => {
                     %Preferences,
-                    NameForm                       => $Block->{Blockname},
-                    NamePref                       => $Preferences{Name},
-                    Name                           => $Block->{Blockname},
-                    SourceObject                   => $Param{SourceObject},
-                    DestinationObject              => $Block->{Blockname},
-                    OriginalAction                 => $OriginalAction,
-                    SourceObjectData               => $SourceObjectData,
-                    AdditionalLinkListWithDataJSON => $Param{AdditionalLinkListWithDataJSON},
+                    NameForm          => $Block->{Blockname},
+                    NamePref          => $Preferences{Name},
+                    Name              => $Block->{Blockname},
+                    SourceObject      => $Param{SourceObject},
+                    DestinationObject => $Block->{Blockname},
+                    OriginalAction    => $OriginalAction,
+                    SourceObjectData  => $SourceObjectData,
                 },
             );
         }
@@ -496,12 +475,12 @@ sub LinkObjectTableCreateComplex {
     }
 
     return $LayoutObject->Output(
-        TemplateFile => 'LinkObject',
-        AJAX         => $Param{AJAX},
+        TemplateFile   => 'LinkObject',
+        KeepScriptTags => $Param{AJAX},
     );
 }
 
-=head2 LinkObjectTableCreateSimple()
+=item LinkObjectTableCreateSimple()
 
 create a simple output table
 
@@ -623,7 +602,7 @@ sub LinkObjectTableCreateSimple {
     );
 }
 
-=head2 LinkObjectSelectableObjectList()
+=item LinkObjectSelectableObjectList()
 
 return a selection list of link-able objects
 
@@ -728,7 +707,7 @@ sub LinkObjectSelectableObjectList {
     return $TargetObjectStrg;
 }
 
-=head2 LinkObjectSearchOptionList()
+=item LinkObjectSearchOptionList()
 
 return a list of search options
 
@@ -766,7 +745,7 @@ sub LinkObjectSearchOptionList {
     return @SearchOptionList;
 }
 
-=head2 ComplexTablePreferencesGet()
+=item ComplexTablePreferencesGet()
 
 get items needed for AllocationList initialization.
 
@@ -888,7 +867,7 @@ sub ComplexTablePreferencesGet {
     return %Params;
 }
 
-=head2 ComplexTablePreferencesSet()
+=item ComplexTablePreferencesSet()
 
 set user preferences.
 
@@ -986,7 +965,7 @@ sub ComplexTablePreferencesSet {
 
 =begin Internal:
 
-=head2 _LinkObjectContentStringCreate()
+=item _LinkObjectContentStringCreate()
 
 return a output string
 
@@ -1155,7 +1134,7 @@ sub _LinkObjectContentStringCreate {
     );
 }
 
-=head2 _LoadLinkObjectLayoutBackend()
+=item _LoadLinkObjectLayoutBackend()
 
 load a linkobject layout backend module
 
@@ -1220,6 +1199,8 @@ sub _LoadLinkObjectLayoutBackend {
 =cut
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

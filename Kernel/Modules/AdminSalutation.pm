@@ -95,21 +95,16 @@ sub Run {
                 UserID      => $Self->{UserID},
             );
             if ($Update) {
-
-                # if the user would like to continue editing the salutation, just redirect to the edit screen
-                if (
-                    defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-                    && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-                    )
-                {
-                    my $ID = $ParamObject->GetParam( Param => 'ID' ) || '';
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Subaction=Change;ID=$ID" );
-                }
-                else {
-
-                    # otherwise return to overview
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-                }
+                $Self->_Overview();
+                my $Output = $LayoutObject->Header();
+                $Output .= $LayoutObject->NavigationBar();
+                $Output .= $LayoutObject->Notify( Info => Translatable('Salutation updated!') );
+                $Output .= $LayoutObject->Output(
+                    TemplateFile => 'AdminSalutation',
+                    Data         => \%Param,
+                );
+                $Output .= $LayoutObject->Footer();
+                return $Output;
             }
         }
 
@@ -247,9 +242,8 @@ sub _Edit {
 
     # add rich text editor
     if ( $LayoutObject->{BrowserRichText} ) {
-
-        # set up rich text editor
-        $LayoutObject->SetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
 
@@ -301,6 +295,14 @@ sub _Edit {
         },
     );
 
+    # shows header
+    if ( $Param{Action} eq 'Change' ) {
+        $LayoutObject->Block( Name => 'HeaderEdit' );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
+
     return 1;
 }
 
@@ -321,11 +323,6 @@ sub _Overview {
     $LayoutObject->Block(
         Name => 'ActionAdd',
     );
-
-    $LayoutObject->Block(
-        Name => 'Filter',
-    );
-
     $LayoutObject->Block(
         Name => 'OverviewResult',
         Data => \%Param,

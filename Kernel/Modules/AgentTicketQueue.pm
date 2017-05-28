@@ -11,8 +11,8 @@ package Kernel::Modules::AgentTicketQueue;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -381,7 +381,7 @@ sub Run {
                 %{ $Filters{$FilterColumn}->{Search} },
                 %ColumnFilter,
                 Result => 'COUNT',
-            ) || 0;
+            );
         }
 
         if ( $FilterColumn eq $Filter ) {
@@ -640,7 +640,6 @@ sub _MaskQueueView {
             && $Queue{QueueID} != 0
             )
         {
-            # TODO: check what 'Ticket::ViewableLocks' affects
             next QUEUE;
         }
 

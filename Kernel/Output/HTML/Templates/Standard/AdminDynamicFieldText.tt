@@ -7,30 +7,7 @@
 # --
 
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
-    <h1>
-        [% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]:
-        [% USE Title = String(Data.Mode) %]
-        [% Title = Translate(Title.append( ' ', Data.FieldTypeName, ' Field')) %]
-        [% Title | html %]
-    </h1>
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Dynamic Fields Management'),
-                Link => 'AdminDynamicField',
-            },
-        ]
-    %]
-
-    [% USE BreadcrumbName = String(Translate(Data.ObjectTypeName)) %]
-
-    [% SWITCH Data.Mode %]
-        [% CASE 'Add' %]
-            [% BreadcrumbPath.push({ Name => BreadcrumbName.append( ': ', Title ) }) %]
-        [% CASE 'Change' %]
-            [% BreadcrumbPath.push({ Name => BreadcrumbName.append( ': ', Title, ' - ', Data.Name ) }) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
+    <h1>[% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]: [% Translate(Data.Mode) | html %] [% Translate(Data.FieldTypeName) | html %] [% Translate("Field") | html %]</h1>
 
     <div class="Clear"></div>
 
@@ -50,7 +27,7 @@
     </div>
 
     <div class="ContentColumn">
-        <form id="EntityUpdate" action="[% Env("CGIHandle") %]" method="post" class="Validate PreventMultipleSubmits">
+        <form action="[% Env("CGIHandle") %]" method="post" class="Validate PreventMultipleSubmits">
             <input type="hidden" name="Action" value="AdminDynamicFieldText">
             <input type="hidden" name="Subaction" value="[% Data.Mode | html %]Action">
             <input type="hidden" name="ObjectType" value="[% Data.ObjectType | html %]">
@@ -99,19 +76,6 @@
                                 <label for="ValidID">[% Translate("Validity") | html %]:</label>
                                 <div class="Field">
                                     [% Data.ValidityStrg %]
-                                    <div id="ValidIDError" class="TooltipErrorMessage">
-                                        <p>[% Translate("This field is required.") | html %]</p>
-                                    </div>
-                                    <div id="ValidIDServerError" class="TooltipErrorMessage">
-                                        <p>
-[% RenderBlockStart("RequiredValidOptionServerError") %]
-                                            [% Translate("This field is required.") | html %]
-[% RenderBlockEnd("RequiredValidOptionServerError") %]
-[% RenderBlockStart("InSettingValidOptionServerError") %]
-                                            [% Translate("Is not possible to invalidate this entry, all config settings have to be changed beforehand.") | html %]
-[% RenderBlockEnd("InSettingValidOptionServerError") %]
-                                        </p>
-                                    </div>
                                 </div>
                                 <div class="Clear"></div>
 
@@ -141,24 +105,6 @@
                                 </div>
 [% RenderBlockEnd("InternalField") %]
                             </fieldset>
-[% RenderBlockStart("DynamicFieldInSysConfig") %]
-                    <input type="hidden" name="OldName" id="OldName" value="[% Data.OldName | html %]"/>
-                    <input type="hidden" name="UpdateEntity" id="UpdateEntity" value=""/>
-                    <div id="EntityInSetting" class="Hidden">
-                        <div class="TextDialog">
-                            <h1>[% Translate("This dynamic field is used in the following config settings:") | html %]</h1>
-                            <ul>
-                                [% RenderBlockStart("DynamicFieldInSysConfigRow") %]
-                                <li class="InSysConfigSetting">[% Data.SettingName %]</li>
-                                [% RenderBlockEnd("DynamicFieldInSysConfigRow") %]
-                            </ul>
-                            <p class="FieldExplanation"></p>
-                        </div>
-                    </div>
-[% RenderBlockEnd("DynamicFieldInSysConfig") %]
-[% RenderBlockStart("DynamicFieldInSysConfigDirty") %]
-                    <input type="hidden" name="SysConfigDirty" id="SysConfigDirty" value="1"/>
-[% RenderBlockEnd("DynamicFieldInSysConfigDirty") %]
                         </div>
                     </div>
                 </div>
@@ -168,7 +114,6 @@
                     <h2>[% Translate(Data.FieldTypeName) | html %] [% Translate("Field Settings") | html %]</h2>
                 </div>
                 <div class="Content">
-                    <input type="hidden" name="ContinueAfterSave" id="ContinueAfterSave" value=""/>
                     <fieldset class="TableLike">
 [% RenderBlockStart("ColsRowsValues") %]
                         <label for="Rows">[% Translate("Number of rows") | html %]:</label>
@@ -291,13 +236,7 @@
             </div>
             <fieldset class="TableLike">
                 <div class="Field SpacingTop">
-                    [% IF Data.Mode == 'Change' %]
-                    <button class="Primary CallForAction" id="SubmitAndContinue" type="button" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                    [% Translate("or") | html %]
-                    <button class="Primary CallForAction" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
-                    [% ELSE %]
-                    <button class="Primary CallForAction" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                    [% END %]
+                    <button type="submit" class="Primary CallForAction" value="[% Translate("Submit") | html %]"><span>[% Translate("Submit") | html %]</span></button>
                     [% Translate("or") | html %]
                     <a href="[% Env("Baselink") %]Action=AdminDynamicField">[% Translate("Cancel") | html %]</a>
                 </div>
@@ -306,3 +245,25 @@
         </form>
     </div>
 </div>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+$('.ShowWarning').bind('change keyup', function (Event) {
+    $('p.Warning').removeClass('Hidden');
+});
+
+// click handler to remove regex
+$('.RemoveRegEx').bind('click', function () {
+    Core.Agent.Admin.DynamicFieldText.RemoveRegEx( $(this).attr('id') );
+    return false;
+});
+// click handler to add regex
+$('#AddRegEx').bind('click', function () {
+    Core.Agent.Admin.DynamicFieldText.AddRegEx(
+        $(this).closest('fieldset').find('.RegExInsert')
+    );
+    return false;
+});
+
+Core.Agent.Admin.DynamicField.ValidationInit();
+//]]></script>
+[% END %]

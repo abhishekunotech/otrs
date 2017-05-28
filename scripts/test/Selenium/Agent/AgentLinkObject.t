@@ -35,11 +35,17 @@ $Selenium->RunTest(
             Value => '60',
         );
 
-        # disable Ticket::ArchiveSystem
+        # Enable Ticket::ArchiveSystem
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'Ticket::ArchiveSystem',
-            Value => 0,
+            Value => 1,
+        );
+
+        # Enable Ticket::ArchiveSystem
+        $Helper->ConfigSettingChange(
+            Key   => 'Ticket::ArchiveSystem',
+            Value => 1,
         );
 
         # create test user and login
@@ -108,19 +114,6 @@ $Selenium->RunTest(
         $Selenium->switch_to_window( $Handles->[1] );
         $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("body").length' );
 
-        $Selenium->find_element( "#SubmitSearch", 'css' )->click();
-        $Selenium->WaitFor(
-            AlertPresent => 1,
-        );
-        $Selenium->accept_alert();
-
-        # enable Ticket::ArchiveSystem
-        $Helper->ConfigSettingChange(
-            Valid => 1,
-            Key   => 'Ticket::ArchiveSystem',
-            Value => 1,
-        );
-
         # search for second created test ticket
         $Selenium->find_element(".//*[\@id='SEARCH::TicketNumber']")->send_keys( $TicketNumbers[1] );
         $Selenium->find_element(".//*[\@id='SEARCH::TicketNumber']")->VerifiedSubmit();
@@ -130,7 +123,7 @@ $Selenium->RunTest(
         $Selenium->execute_script(
             "\$('#TypeIdentifier').val('ParentChild::Target').trigger('redraw.InputField').trigger('change');"
         );
-        $Selenium->find_element("//button[\@type='submit'][\@name='AddLinks']")->click();
+        $Selenium->find_element("//button[\@type='submit'][\@name='AddLinks']")->VerifiedClick();
 
         # close link object window and switch back to agent ticket zoom
         $Selenium->close();

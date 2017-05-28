@@ -28,23 +28,13 @@ nv.models.OTRSmultiBarChart = function() {
         , tooltips = true
         , tooltip = function(key, x, y, e, graph) {
             return '<h3>' + key + '</h3>' +
-// ---
-// OTRS
-// ---
-//                '<p>' +  y + ' on ' + x + '</p>'
-                '<p>' +  y + ' - ' + x + '</p>'
-// ---
+                '<p>' +  y + ' on ' + x + '</p>'
         }
         , x //can be accessed via chart.xScale()
         , y //can be accessed via chart.yScale()
         , state = nv.utils.state()
         , defaultState = null
-// ---
-// OTRS
-// ---
-//        , noData = 'No Data Available.'
-        , noData = Core.Language.Translate('No Data Available.')
-// ---
+        , noData = Core.Config.Get('NoDataAvailable')
         , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState', 'renderEnd')
 // ---
 // OTRS
@@ -226,14 +216,8 @@ nv.models.OTRSmultiBarChart = function() {
             // Controls
             if (showControls) {
                 var controlsData = [
-// ---
-// OTRS
-// ---
-//                    { key: controlLabels.grouped || 'Grouped', disabled: multibar.stacked() },
-//                    { key: controlLabels.stacked || 'Stacked', disabled: !multibar.stacked() }
-                    { key: controlLabels.grouped || Core.Language.Translate('Grouped'), disabled: multibar.stacked() },
-                    { key: controlLabels.stacked || Core.Language.Translate('Stacked'), disabled: !multibar.stacked() }
-// ---
+                    { key: controlLabels.grouped || Core.Config.Get('Grouped') || 'Grouped', disabled: multibar.stacked() },
+                    { key: controlLabels.stacked || Core.Config.Get('Stacked') || 'Stacked', disabled: !multibar.stacked() }
                 ];
 
                 controls.width(controlWidth()).color(['#444', '#444', '#444']);
@@ -350,20 +334,10 @@ nv.models.OTRSmultiBarChart = function() {
                 d.disabled = false;
 
                 switch (d.key) {
-// ---
-// OTRS
-// ---
-//                    case 'Grouped':
-                    case Core.Language.Translate('Grouped'):
-// ---
+                    case Core.Config.Get('Grouped') || 'Grouped':
                         multibar.stacked(false);
                         break;
-// ---
-// OTRS
-// ---
-//                    case 'Stacked':
-                    case Core.Language.Translate('Stacked'):
-// ---
+                    case Core.Config.Get('Grouped') || 'Stacked':
                         multibar.stacked(true);
                         break;
                 }

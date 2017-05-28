@@ -31,16 +31,22 @@ our @ObjectDependencies = (
 
 Kernel::System::User - user lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All user functions. E. g. to add and updated user and other functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $UserObject = $Kernel::OM->Get('Kernel::System::User');
 
 =cut
@@ -73,7 +79,7 @@ sub new {
     return $Self;
 }
 
-=head2 GetUserData()
+=item GetUserData()
 
 get user data (UserLogin, UserFirstname, UserLastname, UserEmail, ...)
 
@@ -322,7 +328,7 @@ sub GetUserData {
     return %Data;
 }
 
-=head2 UserAdd()
+=item UserAdd()
 
 to add new users
 
@@ -462,7 +468,7 @@ sub UserAdd {
     return $UserID;
 }
 
-=head2 UserUpdate()
+=item UserUpdate()
 
 to update users
 
@@ -593,7 +599,7 @@ sub UserUpdate {
     return 1;
 }
 
-=head2 UserSearch()
+=item UserSearch()
 
 to search users
 
@@ -714,7 +720,7 @@ sub UserSearch {
     return %Users;
 }
 
-=head2 SetPassword()
+=item SetPassword()
 
 to set users passwords
 
@@ -792,16 +798,10 @@ sub SetPassword {
     elsif ( $CryptType eq 'sha1' ) {
 
         my $SHAObject = Digest::SHA->new('sha1');
-        $Kernel::OM->Get('Kernel::System::Encode')->EncodeOutput( \$Pw );
-        $SHAObject->add($Pw);
-        $CryptedPw = $SHAObject->hexdigest();
-    }
 
-    # crypt with sha512
-    elsif ( $CryptType eq 'sha512' ) {
-
-        my $SHAObject = Digest::SHA->new('sha512');
+        # encode output, needed by sha1_hex() only non utf8 signs
         $Kernel::OM->Get('Kernel::System::Encode')->EncodeOutput( \$Pw );
+
         $SHAObject->add($Pw);
         $CryptedPw = $SHAObject->hexdigest();
     }
@@ -868,7 +868,7 @@ sub SetPassword {
     return 1;
 }
 
-=head2 UserLookup()
+=item UserLookup()
 
 user login or id lookup
 
@@ -992,12 +992,12 @@ sub UserLookup {
     }
 }
 
-=head2 UserName()
+=item UserName()
 
 get user name
 
     my $Name = $UserObject->UserName(
-        User => 'some-login',
+        UserLogin => 'some-login',
     );
 
     or
@@ -1017,7 +1017,7 @@ sub UserName {
     return $User{UserFullname};
 }
 
-=head2 UserList()
+=item UserList()
 
 return a hash with all users
 
@@ -1129,7 +1129,7 @@ sub UserList {
     return %Users;
 }
 
-=head2 GenerateRandomPassword()
+=item GenerateRandomPassword()
 
 generate a random password
 
@@ -1156,7 +1156,7 @@ sub GenerateRandomPassword {
     return $Password;
 }
 
-=head2 SetPreferences()
+=item SetPreferences()
 
 set user preferences
 
@@ -1259,7 +1259,7 @@ sub _UserCacheClear {
     return 1;
 }
 
-=head2 GetPreferences()
+=item GetPreferences()
 
 get user preferences
 
@@ -1282,7 +1282,7 @@ sub GetPreferences {
     return $PreferencesObject->GetPreferences(%Param);
 }
 
-=head2 SearchPreferences()
+=item SearchPreferences()
 
 search in user preferences
 
@@ -1306,7 +1306,7 @@ sub SearchPreferences {
     return $PreferencesObject->SearchPreferences(@_);
 }
 
-=head2 TokenGenerate()
+=item TokenGenerate()
 
 generate a random token
 
@@ -1341,7 +1341,7 @@ sub TokenGenerate {
     return $Token;
 }
 
-=head2 TokenCheck()
+=item TokenCheck()
 
 check password token
 
@@ -1389,7 +1389,7 @@ sub TokenCheck {
 
 =begin Internal:
 
-=head2 _UserFullname()
+=item _UserFullname()
 
 Builds the user fullname based on firstname, lastname and login. The order
 can be configured.
@@ -1469,7 +1469,7 @@ sub _UserFullname {
 
 =cut
 
-=head2 UserLoginExistsCheck()
+=item UserLoginExistsCheck()
 
 return 1 if another user with this login (username) already exists
 
@@ -1506,6 +1506,8 @@ sub UserLoginExistsCheck {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

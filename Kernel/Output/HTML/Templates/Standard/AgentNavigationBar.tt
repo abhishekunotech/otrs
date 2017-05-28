@@ -32,5 +32,12 @@
             </a>
         </li>
 [% RenderBlockEnd("SearchIcon") %]
+[% RenderBlockStart("NavbarOrderItems") %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+Core.Agent.ReorderNavigationItems([% Data.NavbarOrderItems %]);
+//]]></script>
+[% END %]
+[% RenderBlockEnd("NavbarOrderItems") %]
     </ul>
 </div>

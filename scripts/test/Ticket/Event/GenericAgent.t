@@ -59,11 +59,11 @@ my %NewJob  = (
 
     Data => {
         TicketNumber                => '',
-        MIMEBase_From               => '',
-        MIMEBase_Body               => '',
-        MIMEBase_To                 => '',
-        MIMEBase_Cc                 => '',
-        MIMEBase_Subject            => '',
+        From                        => '',
+        Body                        => '',
+        To                          => '',
+        Cc                          => '',
+        Subject                     => '',
         CustomerID                  => '',
         TimeSearchType              => 'TimePoint',
         TicketCreateTimePoint       => 1,
@@ -142,10 +142,8 @@ for my $FieldName ( sort keys %AddDynamicFields ) {
     $NewJob{Data}->{ 'DynamicField_' . $FieldName . $RandomID } = $AddDynamicFields{$FieldName};
 }
 
-my $TicketObject          = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject         = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleInternalObject = $Kernel::OM->Get('Kernel::System::Ticket::Article::Backend::Internal');
-my $GenericAgentObject    = $Kernel::OM->Get('Kernel::System::GenericAgent');
+my $TicketObject       = Kernel::System::Ticket->new();
+my $GenericAgentObject = Kernel::System::GenericAgent->new();
 
 # create the new job
 my $JobAdd = $GenericAgentObject->JobAdd(
@@ -196,14 +194,14 @@ for my $Item ( sort keys %{ $TicketValues{Create} } ) {
     );
 }
 
-my $ArticleID = $ArticleInternalObject->ArticleCreate(
-    TicketID             => $TicketID,
-    IsVisibleForCustomer => 0,
-    SenderType           => 'agent',
-    From                 => 'Agent Some Agent Some Agent <email@example.com>',
-    To                   => 'Customer A <customer-a@example.com>',
-    Subject              => 'some short description',
-    Body                 => 'this article is just for trigger a ArticleCreate event.',
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID    => $TicketID,
+    ArticleType => 'note-internal',
+    SenderType  => 'agent',
+    From        => 'Agent Some Agent Some Agent <email@example.com>',
+    To          => 'Customer A <customer-a@example.com>',
+    Subject     => 'some short description',
+    Body        => 'this article is just for trigger a ArticleCreate event.',
 
     #    MessageID => '<asdasdasd.123@example.com>',
     ContentType    => 'text/plain; charset=ISO-8859-15',
@@ -215,16 +213,8 @@ my $ArticleID = $ArticleInternalObject->ArticleCreate(
 
 # Destroy the ticket object for triggering the transactional events.
 # Recreate all objects which have references to the old TicketObject too!
-$Kernel::OM->ObjectsDiscard(
-    Objects => [
-        'Kernel::System::Ticket',
-        'Kernel::System::Ticket::Article',
-        'Kernel::System::Ticket::GenericAgent',
-    ],
-);
-$TicketObject       = $Kernel::OM->Get('Kernel::System::Ticket');
-$ArticleObject      = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-$GenericAgentObject = $Kernel::OM->Get('Kernel::System::GenericAgent');
+$TicketObject       = Kernel::System::Ticket->new();
+$GenericAgentObject = Kernel::System::GenericAgent->new();
 
 my %TicketMod = $TicketObject->TicketGet(
     TicketID      => $TicketID,
@@ -296,16 +286,8 @@ $Self->True(
     'Update #2',
 );
 
-$Kernel::OM->ObjectsDiscard(
-    Objects => [
-        'Kernel::System::Ticket',
-        'Kernel::System::Ticket::Article',
-        'Kernel::System::Ticket::GenericAgent',
-    ],
-);
-$TicketObject       = $Kernel::OM->Get('Kernel::System::Ticket');
-$ArticleObject      = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-$GenericAgentObject = $Kernel::OM->Get('Kernel::System::GenericAgent');
+$TicketObject       = Kernel::System::Ticket->new();
+$GenericAgentObject = Kernel::System::GenericAgent->new();
 
 %Ticket = $TicketObject->TicketGet(
     TicketID      => $TicketID,
@@ -313,10 +295,7 @@ $GenericAgentObject = $Kernel::OM->Get('Kernel::System::GenericAgent');
 );
 
 # get current time
-my $DateTimeObject = $Kernel::OM->Create(
-    'Kernel::System::DateTime',
-);
-my $SystemTime = $DateTimeObject->ToEpoch();
+my $SystemTime = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
 
 $Self->True(
     ( $Ticket{RealTillTimeNotUsed} > $SystemTime + 863500 )

@@ -55,19 +55,8 @@ sub LoadPreferences {
     # our results: "PostgreSQL 9.2.4", "PostgreSQL 9.1.9".
     $Self->{'DB::Version'} = "SELECT SUBSTRING(VERSION(), 'PostgreSQL [0-9\.]*')";
 
-    $Self->{'DB::ListTables'} = <<'EOF',
-SELECT
-    table_name
-FROM
-    information_schema.tables
-WHERE
-    table_type = 'BASE TABLE'
-    AND table_schema NOT IN ('pg_catalog', 'information_schema')
-ORDER BY table_name
-EOF
-
-        # dbi attributes
-        $Self->{'DB::Attribute'} = {};
+    # dbi attributes
+    $Self->{'DB::Attribute'} = {};
 
     # set current time stamp if different to "current_timestamp"
     $Self->{'DB::CurrentTimestamp'} = '';
@@ -290,27 +279,31 @@ sub TableCreate {
     $SQL .= "\n";
     push @Return, $SQLStart . $SQL . $SQLEnd;
 
-    # add indexes
+    # add indexs
     for my $Name ( sort keys %Index ) {
-        push @Return,
+        push(
+            @Return,
             $Self->IndexCreate(
-            TableName => $TableName,
-            Name      => $Name,
-            Data      => $Index{$Name},
-            );
+                TableName => $TableName,
+                Name      => $Name,
+                Data      => $Index{$Name},
+            ),
+        );
     }
 
     # add foreign keys
     for my $ForeignKey ( sort keys %Foreign ) {
         my @Array = @{ $Foreign{$ForeignKey} };
         for ( 0 .. $#Array ) {
-            push @{ $Self->{Post} },
+            push(
+                @{ $Self->{Post} },
                 $Self->ForeignKeyCreate(
-                LocalTableName   => $TableName,
-                Local            => $Array[$_]->{Local},
-                ForeignTableName => $ForeignKey,
-                Foreign          => $Array[$_]->{Foreign},
-                );
+                    LocalTableName   => $TableName,
+                    Local            => $Array[$_]->{Local},
+                    ForeignTableName => $ForeignKey,
+                    Foreign          => $Array[$_]->{Foreign},
+                ),
+            );
         }
     }
     return @Return;
@@ -528,37 +521,23 @@ sub IndexCreate {
             return;
         }
     }
-    my $CreateIndexSQL = "CREATE INDEX $Param{Name} ON $Param{TableName} (";
-    my @Array          = @{ $Param{Data} };
+    my $SQL   = "CREATE INDEX $Param{Name} ON $Param{TableName} (";
+    my @Array = @{ $Param{Data} };
     for ( 0 .. $#Array ) {
         if ( $_ > 0 ) {
-            $CreateIndexSQL .= ', ';
+            $SQL .= ', ';
         }
-        $CreateIndexSQL .= $Array[$_]->{Name};
+        $SQL .= $Array[$_]->{Name};
+        if ( $Array[$_]->{Size} ) {
+
+            #           $SQL .= "($Array[$_]->{Size})";
+        }
     }
-    $CreateIndexSQL .= ')';
-
-    # put two literal dollar characters in a string
-    # this is needed for the postgres 'do' statement
-    my $DollarDollar = '$$';
-
-    # build SQL to create index within a "try/catch block"
-    # to prevent errors if index exists already
-    $CreateIndexSQL = <<"EOF";
-DO $DollarDollar
-BEGIN
-IF NOT EXISTS (
-    SELECT 1
-    FROM pg_indexes
-    WHERE indexname = '$Param{Name}'
-    ) THEN
-    $CreateIndexSQL;
-END IF;
-END$DollarDollar;
-EOF
+    $SQL .= ')';
 
     # return SQL
-    return ($CreateIndexSQL);
+    return ($SQL);
+
 }
 
 sub IndexDrop {

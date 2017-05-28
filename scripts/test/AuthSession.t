@@ -12,12 +12,13 @@ use utf8;
 
 use vars (qw($Self));
 
+use Storable;
+
 use Kernel::System::AuthSession;
 
 # get needed objects
-my $ConfigObject   = $Kernel::OM->Get('Kernel::Config');
-my $MainObject     = $Kernel::OM->Get('Kernel::System::Main');
-my $StorableObject = $Kernel::OM->Get('Kernel::System::Storable');
+my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+my $MainObject   = $Kernel::OM->Get('Kernel::System::Main');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
@@ -59,7 +60,7 @@ for my $SessionFile (@SampleSessionFiles) {
     next SESSIONFILE if ref $Content ne 'SCALAR';
 
     # read data structure back from file dump, use block eval for safety reasons
-    my $Session = eval { $StorableObject->Deserialize( Data => ${$Content} ) };
+    my $Session = eval { Storable::thaw( ${$Content} ) };
     delete $Session->{UserLastRequest};
 
     push @SampleSessionData, $Session;
@@ -104,13 +105,13 @@ for my $ModuleFile (@BackendModuleFiles) {
         my $Length = length($LongString);
         my $Size   = $Length;
         if ( $Size > ( 1024 * 1024 ) ) {
-            $Size = sprintf "%.1f MB", ( $Size / ( 1024 * 1024 ) );
+            $Size = sprintf "%.1f MBytes", ( $Size / ( 1024 * 1024 ) );
         }
         elsif ( $Size > 1024 ) {
-            $Size = sprintf "%.1f KB", ( ( $Size / 1024 ) );
+            $Size = sprintf "%.1f KBytes", ( ( $Size / 1024 ) );
         }
         else {
-            $Size = $Size . ' B';
+            $Size = $Size . ' Bytes';
         }
 
         my %NewSessionData = (
@@ -130,11 +131,6 @@ for my $ModuleFile (@BackendModuleFiles) {
         $Self->True(
             $SessionID,
             "#$Module - CreateSessionID()",
-        );
-
-        $Self->False(
-            scalar $SessionObject->CheckSessionID( SessionID => $SessionID ),
-            "CheckSessionID on empty session"
         );
 
         my %NewSessionDataCheck = $SessionObject->GetSessionIDData( SessionID => $SessionID );

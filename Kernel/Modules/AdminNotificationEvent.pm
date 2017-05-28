@@ -51,11 +51,6 @@ sub Run {
     my $NotificationEventObject = $Kernel::OM->Get('Kernel::System::NotificationEvent');
     my $BackendObject           = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
     my $MainObject              = $Kernel::OM->Get('Kernel::System::Main');
-    my $Notification            = $ParamObject->GetParam( Param => 'Notification' );
-
-    # get the search article fields to retrieve values for
-    my %ArticleSearchableFields = $Kernel::OM->Get('Kernel::System::Ticket::Article')->ArticleSearchableFieldsList();
-    my @ArticleSearchableFieldsKeys = sort keys %ArticleSearchableFields;
 
     # get registered transport layers
     my %RegisteredTransports = %{ $Kernel::OM->Get('Kernel::Config')->Get('Notification::Transport') || {} };
@@ -75,8 +70,6 @@ sub Run {
 
         my $Output = $LayoutObject->Header();
         $Output .= $LayoutObject->NavigationBar();
-        $Output .= $LayoutObject->Notify( Info => Translatable('Notification updated!') )
-            if ( $Notification && $Notification eq 'Update' );
         $Self->_Edit(
             %Data,
             Action             => 'Change',
@@ -102,18 +95,17 @@ sub Run {
 
         my %GetParam;
         for my $Parameter (
-            @ArticleSearchableFieldsKeys,
-            qw(ID Name Comment ValidID Events IsVisibleForCustomer ArticleSenderTypeID Transports)
+            qw(ID Name Comment ValidID Events ArticleSubjectMatch ArticleBodyMatch ArticleTypeID ArticleSenderTypeID Transports)
             )
         {
             $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter ) || '';
         }
         PARAMETER:
         for my $Parameter (
-            @ArticleSearchableFieldsKeys,
             qw(Recipients RecipientAgents RecipientGroups RecipientRoles
             Events StateID QueueID PriorityID LockID TypeID ServiceID SLAID
-            CustomerID CustomerUserID IsVisibleForCustomer ArticleAttachmentInclude
+            CustomerID CustomerUserID
+            ArticleTypeID ArticleSubjectMatch ArticleBodyMatch ArticleAttachmentInclude
             ArticleSenderTypeID Transports OncePerDay SendOnOutOfOffice
             VisibleForAgent VisibleForAgentTooltip LanguageID AgentEnabledByDefault)
             )
@@ -153,7 +145,7 @@ sub Run {
         for my $DynamicFieldConfig ( @{$DynamicField} ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-            # extract the dynamic field value from the web request
+            # extract the dynamic field value form the web request
             my $DynamicFieldValue = $BackendObject->SearchFieldValueGet(
                 DynamicFieldConfig     => $DynamicFieldConfig,
                 ParamObject            => $ParamObject,
@@ -203,26 +195,23 @@ sub Run {
         my $Ok;
         my $ArticleFilterMissing;
 
+        $GetParam{Data}->{NotificationType} = ['Ticket'];
+
         # checking if article filter exist if necessary
         if (
             grep { $_ eq 'ArticleCreate' || $_ eq 'ArticleSend' }
             @{ $GetParam{Data}->{Events} || [] }
             )
         {
-            my $ArticleFilterValueSet = $GetParam{ArticleSenderTypeID} ? 1 : 0;
-
-            ARTICLEFIELDKEY:
-            for my $ArticleFieldKey (@ArticleSearchableFieldsKeys) {
-
-                last ARTICLEFIELDKEY if $ArticleFilterValueSet;
-                next ARTICLEFIELDKEY if !$GetParam{$ArticleFieldKey};
-
-                $ArticleFilterValueSet = 1;
-
-                last ARTICLEFIELDKEY;
+            if (
+                !$GetParam{ArticleTypeID}
+                && !$GetParam{ArticleSenderTypeID}
+                && $GetParam{ArticleSubjectMatch} eq ''
+                && $GetParam{ArticleBodyMatch} eq ''
+                )
+            {
+                $ArticleFilterMissing = 1;
             }
-
-            $ArticleFilterMissing = 1 if !$ArticleFilterValueSet;
         }
 
         # required Article filter only on ArticleCreate and ArticleSend event
@@ -236,23 +225,17 @@ sub Run {
         }
 
         if ($Ok) {
+            $Self->_Overview();
+            my $Output = $LayoutObject->Header();
+            $Output .= $LayoutObject->NavigationBar();
+            $Output .= $LayoutObject->Notify( Info => Translatable('Notification updated!') );
+            $Output .= $LayoutObject->Output(
+                TemplateFile => 'AdminNotificationEvent',
+                Data         => \%Param,
+            );
+            $Output .= $LayoutObject->Footer();
 
-            # if the user would like to continue editing the notification event, just redirect to the edit screen
-            if (
-                defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-                && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-                )
-            {
-                my $ID = $ParamObject->GetParam( Param => 'ID' ) || '';
-                return $LayoutObject->Redirect(
-                    OP => "Action=$Self->{Action};Subaction=Change;ID=$ID;Notification=Update"
-                );
-            }
-            else {
-
-                # otherwise return to overview
-                return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Notification=Update" );
-            }
+            return $Output;
         }
         else {
             for my $Needed (qw(Name Events Transports)) {
@@ -263,15 +246,16 @@ sub Run {
             }
 
             # define ServerError Class attribute if necessary
+            $GetParam{ArticleTypeIDServerError}       = "";
             $GetParam{ArticleSenderTypeIDServerError} = "";
+            $GetParam{ArticleSubjectMatchServerError} = "";
+            $GetParam{ArticleBodyMatchServerError}    = "";
 
             if ($ArticleFilterMissing) {
-
+                $GetParam{ArticleTypeIDServerError}       = "ServerError";
                 $GetParam{ArticleSenderTypeIDServerError} = "ServerError";
-
-                for my $ArticleTypeKey (@ArticleSearchableFieldsKeys) {
-                    $GetParam{ $ArticleTypeKey . 'ServerError' } = "ServerError";
-                }
+                $GetParam{ArticleSubjectMatchServerError} = "ServerError";
+                $GetParam{ArticleBodyMatchServerError}    = "ServerError";
             }
 
             my $Output = $LayoutObject->Header();
@@ -323,18 +307,16 @@ sub Run {
 
         my %GetParam;
         for my $Parameter (
-            @ArticleSearchableFieldsKeys,
-            qw(Name Comment ValidID Events IsVisibleForCustomer ArticleSenderTypeID Transports)
+            qw(Name Comment ValidID Events ArticleSubjectMatch ArticleBodyMatch ArticleTypeID ArticleSenderTypeID Transports)
             )
         {
             $GetParam{$Parameter} = $ParamObject->GetParam( Param => $Parameter ) || '';
         }
         PARAMETER:
         for my $Parameter (
-            @ArticleSearchableFieldsKeys,
             qw(Recipients RecipientAgents RecipientRoles RecipientGroups Events StateID QueueID
             PriorityID LockID TypeID ServiceID SLAID CustomerID CustomerUserID
-            IsVisibleForCustomer ArticleAttachmentInclude
+            ArticleTypeID ArticleSubjectMatch ArticleBodyMatch ArticleAttachmentInclude
             ArticleSenderTypeID Transports OncePerDay SendOnOutOfOffice
             VisibleForAgent VisibleForAgentTooltip LanguageID AgentEnabledByDefault)
             )
@@ -374,7 +356,7 @@ sub Run {
         for my $DynamicFieldConfig ( @{$DynamicField} ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-            # extract the dynamic field value from the web request
+            # extract the dynamic field value form the web request
             my $DynamicFieldValue = $BackendObject->SearchFieldValueGet(
                 DynamicFieldConfig     => $DynamicFieldConfig,
                 ParamObject            => $ParamObject,
@@ -424,26 +406,23 @@ sub Run {
         my $ID;
         my $ArticleFilterMissing;
 
+        $GetParam{Data}->{NotificationType} = ['Ticket'];
+
         # define ServerError Message if necessary
         if (
             grep { $_ eq 'ArticleCreate' || $_ eq 'ArticleSend' }
             @{ $GetParam{Data}->{Events} || [] }
             )
         {
-            my $ArticleFilterValueSet = $GetParam{ArticleSenderTypeID} ? 1 : 0;
-
-            ARTICLEFIELDKEY:
-            for my $ArticleFieldKey (@ArticleSearchableFieldsKeys) {
-
-                last ARTICLEFIELDKEY if $ArticleFilterValueSet;
-                next ARTICLEFIELDKEY if !$GetParam{$ArticleFieldKey};
-
-                $ArticleFilterValueSet = 1;
-
-                last ARTICLEFIELDKEY;
+            if (
+                !$GetParam{ArticleTypeID}
+                && !$GetParam{ArticleSenderTypeID}
+                && $GetParam{ArticleSubjectMatch} eq ''
+                && $GetParam{ArticleBodyMatch} eq ''
+                )
+            {
+                $ArticleFilterMissing = 1;
             }
-
-            $ArticleFilterMissing = 1 if !$ArticleFilterValueSet;
         }
 
         # required Article filter only on ArticleCreate and Article Send event
@@ -481,15 +460,16 @@ sub Run {
             }
 
             # checking if article filter exist if necessary
+            $GetParam{ArticleTypeIDServerError}       = "";
             $GetParam{ArticleSenderTypeIDServerError} = "";
+            $GetParam{ArticleSubjectMatchServerError} = "";
+            $GetParam{ArticleBodyMatchServerError}    = "";
 
             if ($ArticleFilterMissing) {
-
+                $GetParam{ArticleTypeIDServerError}       = "ServerError";
                 $GetParam{ArticleSenderTypeIDServerError} = "ServerError";
-
-                for my $ArticleTypeKey (@ArticleSearchableFieldsKeys) {
-                    $GetParam{ $ArticleTypeKey . 'ServerError' } = "ServerError";
-                }
+                $GetParam{ArticleSubjectMatchServerError} = "ServerError";
+                $GetParam{ArticleBodyMatchServerError}    = "ServerError";
             }
 
             my $Output = $LayoutObject->Header();
@@ -723,8 +703,6 @@ sub Run {
         $Self->_Overview();
         my $Output = $LayoutObject->Header();
         $Output .= $LayoutObject->NavigationBar();
-        $Output .= $LayoutObject->Notify( Info => Translatable('Notification updated!') )
-            if ( $Notification && $Notification eq 'Update' );
         $Output .= $LayoutObject->Output(
             TemplateFile => 'AdminNotificationEvent',
             Data         => \%Param,
@@ -759,16 +737,14 @@ sub _Edit {
 
     $Param{RecipientsStrg} = $LayoutObject->BuildSelection(
         Data => {
-            AgentOwner                => Translatable('Agent who owns the ticket'),
-            AgentResponsible          => Translatable('Agent who is responsible for the ticket'),
-            AgentWatcher              => Translatable('All agents watching the ticket'),
-            AgentWritePermissions     => Translatable('All agents with write permission for the ticket'),
-            AgentMyQueues             => Translatable('All agents subscribed to the ticket\'s queue'),
-            AgentMyServices           => Translatable('All agents subscribed to the ticket\'s service'),
-            AgentMyQueuesMyServices   => Translatable('All agents subscribed to both the ticket\'s queue and service'),
-            Customer                  => Translatable('Customer of the ticket'),
-            AllRecipientsFirstArticle => Translatable('All recipients of the first article'),
-            AllRecipientsLastArticle  => Translatable('All recipients of the last article'),
+            AgentOwner              => Translatable('Agent who owns the ticket'),
+            AgentResponsible        => Translatable('Agent who is responsible for the ticket'),
+            AgentWatcher            => Translatable('All agents watching the ticket'),
+            AgentWritePermissions   => Translatable('All agents with write permission for the ticket'),
+            AgentMyQueues           => Translatable('All agents subscribed to the ticket\'s queue'),
+            AgentMyServices         => Translatable('All agents subscribed to the ticket\'s service'),
+            AgentMyQueuesMyServices => Translatable('All agents subscribed to both the ticket\'s queue and service'),
+            Customer                => Translatable('Customer of the ticket'),
         },
         Name       => 'Recipients',
         Multiple   => 1,
@@ -813,6 +789,12 @@ sub _Edit {
     my $EventClass = 'Validate_Required';
     if ( $Param{EventsServerError} ) {
         $EventClass .= ' ' . $Param{EventsServerError};
+    }
+
+    # Set class name for article type...
+    my $ArticleTypeIDClass = '';
+    if ( $Param{ArticleTypeIDServerError} ) {
+        $ArticleTypeIDClass .= ' ' . $Param{ArticleTypeIDServerError};
     }
 
     # Set class name for article sender type...
@@ -915,6 +897,14 @@ sub _Edit {
         Name => 'OverviewUpdate',
         Data => \%Param,
     );
+
+    # shows header
+    if ( $Param{Action} eq 'Change' ) {
+        $LayoutObject->Block( Name => 'HeaderEdit' );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
 
     # build type string
     if ( $ConfigObject->Get('Ticket::Type') ) {
@@ -1034,8 +1024,8 @@ sub _Edit {
         $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-        # set up rich text editor
-        $LayoutObject->SetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }
@@ -1171,10 +1161,21 @@ sub _Edit {
         HTMLQuote    => 0,
     );
 
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+    my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
+    $Param{ArticleTypesStrg} = $LayoutObject->BuildSelection(
+        Data        => { $TicketObject->ArticleTypeList( Result => 'HASH' ), },
+        Name        => 'ArticleTypeID',
+        SelectedID  => $Param{Data}->{ArticleTypeID},
+        Class       => $ArticleTypeIDClass . ' Modernize W75pc',
+        Size        => 5,
+        Multiple    => 1,
+        Translation => 1,
+        Max         => 200,
+    );
 
     $Param{ArticleSenderTypesStrg} = $LayoutObject->BuildSelection(
-        Data        => { $ArticleObject->ArticleSenderTypeList(), },
+        Data        => { $TicketObject->ArticleSenderTypeList( Result => 'HASH' ), },
         Name        => 'ArticleSenderTypeID',
         SelectedID  => $Param{Data}->{ArticleSenderTypeID},
         Class       => $ArticleSenderTypeIDClass . ' Modernize W75pc',
@@ -1196,31 +1197,10 @@ sub _Edit {
         Class       => 'Modernize W75pc',
     );
 
-    # get all searchable article field definitions
-    my %ArticleSearchableFields = $Kernel::OM->Get('Kernel::System::Ticket::Article')->ArticleSearchableFieldsList();
-
-    for my $ArticleFieldKey ( sort keys %ArticleSearchableFields ) {
-
-        my $Value = '';
-
-        if ( IsArrayRefWithData( $Param{Data}->{$ArticleFieldKey} ) ) {
-            $Value = $Param{Data}->{$ArticleFieldKey}->[0];
-        }
-
-        $LayoutObject->Block(
-            Name => 'BackendArticleField',
-            Data => {
-                Label => Translatable( $ArticleSearchableFields{$ArticleFieldKey}->{Label} ),
-                Key   => $ArticleSearchableFields{$ArticleFieldKey}->{Key},
-                Value => $Value,
-            },
-        );
-    }
-
     # take over data fields
     KEY:
     for my $Key (
-        qw(VisibleForAgent VisibleForAgentTooltip CustomerID CustomerUserID)
+        qw(VisibleForAgent VisibleForAgentTooltip CustomerID CustomerUserID ArticleSubjectMatch ArticleBodyMatch)
         )
     {
         next KEY if !$Param{Data}->{$Key};
@@ -1379,7 +1359,6 @@ sub _Overview {
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionAdd' );
     $LayoutObject->Block( Name => 'ActionImport' );
-    $LayoutObject->Block( Name => 'Filter' );
 
     $LayoutObject->Block(
         Name => 'OverviewResult',

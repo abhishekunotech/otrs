@@ -6,7 +6,6 @@
 
     body, html {
         font-size: 1em;
-        overflow-x: hidden;
     }
 
     .ArticleBody {
@@ -107,7 +106,7 @@
 
     #Header #Logo {
         width: 208px !important;
-        background-size: contain;
+        background-size: 100%;
         position: static;
         margin: -2px auto 0px auto;
         background-position: center;
@@ -349,10 +348,6 @@
         display: none;
     }
 
-    .AdditionlFieldIcon span {
-        display: none;
-    }
-
     .MainBox.FormScreen > .AsteriskExplanation {
         margin: -10px 0px 10px 0px;
     }
@@ -393,8 +388,6 @@
         width: 90%;
     }
 
-    fieldset.TableLike > .Field > input[type=radio],
-    fieldset.TableLike > .Row > .Field > input[type=radio],
     fieldset.TableLike > .Field > input[type=radio],
     fieldset.TableLike > .Row > .Field > input[type=checkbox] {
         width: auto;
@@ -676,14 +669,12 @@
         font-size: 16px;
     }
 
-    #SearchForm, #AgentCustomerInformationCenterSearchForm, #AgentCustomerUserInformationCenterSearchForm {
+    #SearchForm, #AgentCustomerInformationCenterSearchForm {
         width: auto;
     }
 
     #AgentCustomerInformationCenterSearchForm fieldset.TableLike > .Field > input,
-    #AgentCustomerInformationCenterSearchForm fieldset.TableLike > .Row > .Field > input,
-    #AgentCustomerUserInformationCenterSearchForm fieldset.TableLike > .Field > input,
-    #AgentCustomerUserInformationCenterSearchForm fieldset.TableLike > .Row > .Field > input {
+    #AgentCustomerInformationCenterSearchForm fieldset.TableLike > .Row > .Field > input {
         width: 100%;
     }
 
@@ -1197,12 +1188,14 @@
     /* Breadcrumb */
 
     .BreadCrumb {
-        overflow-x: auto;
+        overflow-x: scroll;
+        padding: 7px 0px;
     }
 
     .BreadCrumb li,
     .BreadCrumb a {
         font-size: 12px;
+        line-height: 20px;
         max-width: none;
         white-space: nowrap;
     }

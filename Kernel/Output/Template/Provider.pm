@@ -13,7 +13,7 @@ package Kernel::Output::Template::Provider;
 use strict;
 use warnings;
 
-use parent qw (Template::Provider);
+use base qw (Template::Provider);
 
 use Scalar::Util qw();
 use Template::Constants;
@@ -37,7 +37,11 @@ Kernel::Output::Template::Provider - Template Toolkit custom provider
 
 =head1 PUBLIC INTERFACE
 
-=head2 OTRSInit()
+=over 4
+
+=cut
+
+=item OTRSInit()
 
 performs some post-initialization and creates a bridge between Template::Toolkit
 and OTRS by adding the OTRS objects to the Provider object. This method must be
@@ -69,9 +73,7 @@ sub OTRSInit {
     $Self->{CachingEnabled} = $Kernel::OM->Get('Kernel::Config')->Get('Frontend::TemplateCache') // 1;
 }
 
-=begin Internal:
-
-=head2 _fetch()
+=item _fetch()
 
 try to get a compiled version of a template from the CacheObject,
 otherwise compile the template and return it.
@@ -169,7 +171,7 @@ sub _fetch {
 
 }
 
-=head2 _load()
+=item _load()
 
 calls our pre processor when loading a template.
 
@@ -194,7 +196,7 @@ sub _load {
     return @Result;
 }
 
-=head2 _compile()
+=item _compile()
 
 compiles a .tt template into a Perl package and uses the CacheObject
 to cache it.
@@ -275,9 +277,7 @@ sub _compile {
         : ( $error, Template::Constants::STATUS_ERROR )
 }
 
-=end Internal:
-
-=head2 store()
+=item store()
 
 inherited from Template::Provider. This function override just makes sure that the original
 in-memory cache cannot be used.
@@ -290,9 +290,7 @@ sub store {
     return $Data;    # no-op
 }
 
-=begin Internal:
-
-=head2 _PreProcessTemplateContent()
+=item _PreProcessTemplateContent()
 
 this is our template pre processor.
 
@@ -376,9 +374,7 @@ sub _PreProcessTemplateContent {
 
 }
 
-=end Internal:
-
-=head2 MigrateDTLtoTT()
+=item MigrateDTLtoTT()
 
 translates old C<DTL> template content to L<Template::Toolkit> syntax.
 
@@ -690,6 +686,8 @@ sub MigrateDTLtoTT {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

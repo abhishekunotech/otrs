@@ -23,15 +23,20 @@ our @ObjectDependencies = (
 
 Kernel::System::FetchMail - FetchMail wrapper functions
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions for email fetch.
 
+=over 4
 
-=head2 new()
+=cut
+
+=item new()
 
 create a FetchMail object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $FetchMailObject = $Kernel::OM->Get('Kernel::System::FetchMail');
 
 =cut
@@ -46,7 +51,7 @@ sub new {
     return $Self;
 }
 
-=head2 Fetch()
+=item Fetch()
 
 Retrieves messages from an email server using fetchmail backend.
 
@@ -349,6 +354,8 @@ sub Fetch {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

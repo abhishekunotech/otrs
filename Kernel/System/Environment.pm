@@ -25,16 +25,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Environment - collect environment info
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions to collect environment info
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create environment object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $EnvironmentObject = $Kernel::OM->Get('Kernel::System::Environment');
 
 =cut
@@ -49,7 +55,7 @@ sub new {
     return $Self;
 }
 
-=head2 OSInfoGet()
+=item OSInfoGet()
 
 collect operating system information
 
@@ -156,7 +162,7 @@ sub OSInfoGet {
     return %EnvOS;
 }
 
-=head2 ModuleVersionGet()
+=item ModuleVersionGet()
 
 Return the version of an installed perl module:
 
@@ -200,7 +206,7 @@ sub ModuleVersionGet {
     return MM->parse_version($Path);
 }
 
-=head2 PerlInfoGet()
+=item PerlInfoGet()
 
 collect perl information:
 
@@ -249,6 +255,7 @@ sub PerlInfoGet {
             Class::Inspector
             Crypt::PasswdMD5
             CSS::Minifier
+            Date::Pcalc
             Email::Valid
             Encode::Locale
             IO::Interactive
@@ -288,7 +295,7 @@ sub PerlInfoGet {
     return %EnvPerl;
 }
 
-=head2 DBInfoGet()
+=item DBInfoGet()
 
 collect database information
 
@@ -325,7 +332,7 @@ sub DBInfoGet {
     return %EnvDB;
 }
 
-=head2 OTRSInfoGet()
+=item OTRSInfoGet()
 
 collect OTRS information
 
@@ -364,6 +371,8 @@ sub OTRSInfoGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

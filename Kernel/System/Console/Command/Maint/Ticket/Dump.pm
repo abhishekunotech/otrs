@@ -11,11 +11,10 @@ package Kernel::System::Console::Command::Maint::Ticket::Dump;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
 );
 
 sub Configure {
@@ -66,28 +65,26 @@ sub Run {
 
     $Self->Print( "<green>" . ( '-' x 69 ) . "</green>\n" );
 
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
     # get article index
-    my @MetaArticles = $ArticleObject->ArticleList(
+    my @Index = $Kernel::OM->Get('Kernel::System::Ticket')->ArticleIndex(
         TicketID => $Self->GetArgument('ticket-id'),
     );
 
     my $Counter      = 1;
     my $ArticleLimit = $Self->GetOption('article-limit');
-    META_ARTICLE:
-    for my $MetaArticle (@MetaArticles) {
+    ARTICLEID:
+    for my $ArticleID (@Index) {
 
-        last META_ARTICLE if defined $ArticleLimit && $ArticleLimit < $Counter;
+        last ARTICLEID if defined $ArticleLimit && $ArticleLimit < $Counter;
+        next ARTICLEID if !$ArticleID;
 
         # get article data
-        my %Article = $ArticleObject->BackendForArticle( %{$MetaArticle} )->ArticleGet(
-            %{$MetaArticle},
+        my %Article = $Kernel::OM->Get('Kernel::System::Ticket')->ArticleGet(
+            ArticleID     => $ArticleID,
             DynamicFields => 0,
-            UserID        => 1,
         );
 
-        next META_ARTICLE if !%Article;
+        next ARTICLEID if !%Article;
 
         KEY:
         for my $Key (qw(ArticleID From To Cc Subject ReplyTo InReplyTo Created SenderType)) {

@@ -29,12 +29,21 @@ our @ObjectDependencies = (
 
 Kernel::GenericInterface::Provider - handler for incoming webservice requests.
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object
+
+    use Kernel::System::ObjectManager;
+
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ProviderObject = $Kernel::OM->Get('Kernel::GenericInterface::Provider');
 
 =cut
@@ -49,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 receives the current incoming web service request, handles it,
 and returns an appropriate answer based on the configured requested
@@ -356,9 +365,7 @@ sub Run {
     return;
 }
 
-=begin Internal:
-
-=head2 _GenerateErrorResponse()
+=item _GenerateErrorResponse()
 
 returns an error message to the client.
 
@@ -388,7 +395,7 @@ sub _GenerateErrorResponse {
 
 1;
 
-=end Internal:
+=back
 
 =head1 TERMS AND CONDITIONS
 

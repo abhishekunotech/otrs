@@ -222,7 +222,16 @@ sub Run {
                 # dates are exactly the same (ESecond is 00 normally)
                 $Data{ESecond}++;
 
-                push @{ $Self->{EventsTicketCalendar} }, \%Data;
+                $LayoutObject->Block(
+                    Name => 'CalendarEvent',
+                    Data => \%Data,
+                );
+
+                if ( $Counter < $Limit ) {
+                    $LayoutObject->Block(
+                        Name => 'CalendarEventComma',
+                    );
+                }
 
                 # add ticket info container
                 $LayoutObject->Block(
@@ -336,6 +345,11 @@ sub Run {
             }
         }
     }
+    if ( $Counter < $Limit ) {
+        $LayoutObject->Block(
+            Name => 'CalendarEventComma',
+        );
+    }
 
     $LayoutObject->Block(
         Name => 'CalendarDiv',
@@ -345,19 +359,12 @@ sub Run {
             }
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'EventsTicketCalendar',
-        Value => $Self->{EventsTicketCalendar},
-    );
-    $LayoutObject->AddJSData(
-        Key   => 'FirstDay',
-        Value => $ConfigObject->Get('CalendarWeekDayStart') || 0,
-    );
-
     $Content .= $LayoutObject->Output(
         TemplateFile => 'DashboardEventsTicketCalendar',
-        Data         => {},
+        Data         => {
+            %{ $Self->{Config} },
+            FirstDay => $Kernel::OM->Get('Kernel::Config')->Get('CalendarWeekDayStart') || 0,
+        },
     );
 
     return $Content;

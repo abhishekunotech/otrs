@@ -14,7 +14,7 @@ use warnings;
 use IPC::Open3;
 use Symbol;
 
-use parent qw(Kernel::System::Daemon::DaemonModules::BaseTaskWorker);
+use base qw(Kernel::System::Daemon::DaemonModules::BaseTaskWorker);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -28,14 +28,20 @@ our @ObjectDependencies = (
 
 Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker::Cron - Scheduler daemon task handler module for cron like jobs
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This task handler executes scheduler tasks based in cron notation.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
+=cut
+
+=item new()
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TaskHandlerObject = $Kernel::OM-Get('Kernel::System::Daemon::DaemonModules::SchedulerTaskWorker::Cron');
 
 =cut
@@ -52,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 Performs the selected Cron task.
 
@@ -193,6 +199,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

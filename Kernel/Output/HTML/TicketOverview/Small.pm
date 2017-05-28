@@ -16,18 +16,15 @@ use Kernel::Language qw(Translatable);
 
 our @ObjectDependencies = (
     'Kernel::Config',
-    'Kernel::Language',
     'Kernel::System::Log',
     'Kernel::Output::HTML::Layout',
     'Kernel::System::CustomerUser',
-    'Kernel::System::Group',
     'Kernel::System::User',
     'Kernel::System::JSON',
     'Kernel::System::DynamicField',
     'Kernel::System::Ticket::ColumnFilter',
     'Kernel::System::DynamicField::Backend',
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
     'Kernel::System::Main',
 );
 
@@ -246,15 +243,10 @@ sub ActionRow {
             $BulkFeature = 1;
         }
         else {
-            my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
             GROUP:
             for my $Group (@Groups) {
-                my $HasPermission = $GroupObject->PermissionCheck(
-                    UserID    => $Self->{UserID},
-                    GroupName => $Group,
-                    Type      => 'rw',
-                );
-                if ($HasPermission) {
+                next GROUP if !$LayoutObject->{"UserIsGroup[$Group]"};
+                if ( $LayoutObject->{"UserIsGroup[$Group]"} eq 'Yes' ) {
                     $BulkFeature = 1;
                     last GROUP;
                 }
@@ -286,9 +278,6 @@ sub ActionRow {
             },
         );
     }
-
-    my %ColumnTranslations;
-    my $LanguageObject = $Kernel::OM->Get('Kernel::Language');
 
     # add translations for the allocation lists for regular columns
     my $Columns = $Self->{Config}->{DefaultColumns} || $ConfigObject->Get('DefaultOverviewColumns') || {};
@@ -323,10 +312,15 @@ sub ActionRow {
                 $TranslatedWord = Translatable('Customer User ID');
             }
 
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'Column' . $Column,
-                Value => $LanguageObject->Translate($TranslatedWord),
+            $LayoutObject->Block(
+                Name => 'ColumnTranslation',
+                Data => {
+                    ColumnName      => $Column,
+                    TranslateString => $TranslatedWord,
+                },
+            );
+            $LayoutObject->Block(
+                Name => 'ColumnTranslationSeparator',
             );
         }
     }
@@ -348,11 +342,19 @@ sub ActionRow {
 
             $Counter++;
 
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'ColumnDynamicField_' . $DynamicField->{Name},
-                Value => $LanguageObject->Translate( $DynamicField->{Label} ),
+            $LayoutObject->Block(
+                Name => 'ColumnTranslation',
+                Data => {
+                    ColumnName      => 'DynamicField_' . $DynamicField->{Name},
+                    TranslateString => $DynamicField->{Label},
+                },
             );
+
+            if ( $Counter < scalar @{$ColumnsDynamicField} ) {
+                $LayoutObject->Block(
+                    Name => 'ColumnTranslationSeparator',
+                );
+            }
         }
     }
 
@@ -381,6 +383,7 @@ sub Run {
         $Self->{AvailableFilterableColumns} = {};    # disable all column filters
     }
 
+    # check needed stuff
     for (qw(TicketIDs PageShown StartHit)) {
         if ( !$Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
@@ -406,15 +409,10 @@ sub Run {
             $BulkFeature = 1;
         }
         else {
-            my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
             GROUP:
             for my $Group (@Groups) {
-                my $HasPermission = $GroupObject->PermissionCheck(
-                    UserID    => $Self->{UserID},
-                    GroupName => $Group,
-                    Type      => 'rw',
-                );
-                if ($HasPermission) {
+                next GROUP if !$LayoutObject->{"UserIsGroup[$Group]"};
+                if ( $LayoutObject->{"UserIsGroup[$Group]"} eq 'Yes' ) {
                     $BulkFeature = 1;
                     last GROUP;
                 }
@@ -424,56 +422,26 @@ sub Run {
 
     my $Counter = 0;
     my @ArticleBox;
-
-    my $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
     for my $TicketID ( @{ $Param{TicketIDs} } ) {
         $Counter++;
         if ( $Counter >= $Param{StartHit} && $Counter < ( $Param{PageShown} + $Param{StartHit} ) ) {
 
-            # Get last customer article.
-            my @Articles = $ArticleObject->ArticleList(
-                TicketID   => $TicketID,
-                SenderType => 'customer',
-                OnlyLast   => 1,
+            # get ticket object
+            my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
+            # get last customer article
+            my %Article = $TicketObject->ArticleLastCustomerArticle(
+                TicketID      => $TicketID,
+                DynamicFields => 0,
             );
 
-            # If the ticket has no customer article, get the last agent article.
-            if ( !@Articles ) {
-                @Articles = $ArticleObject->ArticleList(
-                    TicketID   => $TicketID,
-                    SenderType => 'agent',
-                    OnlyLast   => 1,
-                );
-            }
-
-            # Finally, if everything failed, get latest article.
-            if ( !@Articles ) {
-                @Articles = $ArticleObject->ArticleList(
-                    TicketID => $TicketID,
-                    OnlyLast => 1,
-                );
-            }
-
-            my %Article;
-            for my $Article (@Articles) {
-                %Article = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-                    %{$Article},
-                    DynamicFields => 0,
-                    UserID        => $Self->{UserID},
-                );
-            }
-
-            # Get ticket data.
+            # get ticket data
             my %Ticket = $TicketObject->TicketGet(
                 TicketID      => $TicketID,
                 DynamicFields => 0,
             );
 
-            %Article = ( %Article, %Ticket );
-
-            # Fallback for tickets without articles: get at least basic ticket data.
+            # Fallback for tickets without articles: get at least basic ticket data
             if ( !%Article ) {
                 %Article = %Ticket;
                 if ( !$Article{Title} ) {
@@ -629,12 +597,6 @@ sub Run {
 
     my $ColumnValues = $Self->_GetColumnValues(
         OriginalTicketIDs => $Param{OriginalTicketIDs},
-    );
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'LinkPage',
-        Value => $Param{LinkPage},
     );
 
     $LayoutObject->Block(
@@ -831,7 +793,7 @@ sub Run {
                     )
                 {
                     my $Css;
-                    if ( $Column eq 'CustomerID' || $Column eq 'Owner' || $Column eq 'Responsible' ) {
+                    if ( $Column eq 'CustomerID' || $Column eq 'Owner' ) {
                         $Css .= ' Hidden';
                     }
 
@@ -863,40 +825,28 @@ sub Run {
                         $LayoutObject->Block(
                             Name =>
                                 'ContentLargeTicketGenericHeaderColumnFilterLinkCustomerIDSearch',
-                            Data => {},
-                        );
-
-                        # send data to JS
-                        $LayoutObject->AddJSData(
-                            Key   => 'CustomerIDAutocomplete',
-                            Value => {
-                                'QueryDelay'          => 100,
-                                'MaxResultsDisplayed' => 20,
-                                'MinQueryLength'      => 2,
+                            Data => {
+                                minQueryLength      => 2,
+                                queryDelay          => 100,
+                                maxResultsDisplayed => 20,
                             },
                         );
                     }
-                    elsif ( $Column eq 'Owner' || $Column eq 'Responsible' ) {
+                    elsif ( $Column eq 'Owner' ) {
 
                         $LayoutObject->Block(
                             Name => 'ContentLargeTicketGenericHeaderColumnFilterLinkUserSearch',
-                            Data => {},
-                        );
-
-                        # send data to JS
-                        $LayoutObject->AddJSData(
-                            Key   => 'UserAutocomplete',
-                            Value => {
-                                'QueryDelay'          => 100,
-                                'MaxResultsDisplayed' => 20,
-                                'MinQueryLength'      => 2,
+                            Data => {
+                                minQueryLength      => 2,
+                                queryDelay          => 100,
+                                maxResultsDisplayed => 20,
                             },
                         );
                     }
 
                 }
 
-                # verify if column is filterable
+                # verify if column is filterable and sortable
                 elsif ( $Self->{ValidFilterableColumns}->{$Column} ) {
 
                     # variable to save the filter's HTML code
@@ -1021,6 +971,10 @@ sub Run {
                     && $Self->{ValidSortableColumns}->{$Column}
                     )
                 {
+                    my $Css;
+                    if ( $Column eq 'Responsible' ) {
+                        $Css .= ' Hidden';
+                    }
 
                     # variable to save the filter's HTML code
                     my $ColumnFilterHTML = $Self->_InitialColumnFilter(
@@ -1028,6 +982,7 @@ sub Run {
                         Label         => $Column,
                         ColumnValues  => $ColumnValues->{$Column},
                         SelectedValue => $Param{GetColumnFilter}->{$Column} || '',
+                        Css           => $Css,
                     );
 
                     $LayoutObject->Block(
@@ -1043,6 +998,19 @@ sub Run {
                             FilterTitle          => $FilterTitle,
                         },
                     );
+
+                    if ( $Column eq 'Responsible' ) {
+
+                        $LayoutObject->Block(
+                            Name => 'ContentLargeTicketGenericHeaderColumnFilterLinkUserSearch',
+                            Data => {
+                                minQueryLength      => 2,
+                                queryDelay          => 100,
+                                maxResultsDisplayed => 20,
+                            },
+                        );
+                    }
+
                 }
 
                 # verify if column is just filterable
@@ -1079,16 +1047,10 @@ sub Run {
                         $LayoutObject->Block(
                             Name =>
                                 'ContentLargeTicketGenericHeaderColumnFilterLinkCustomerUserSearch',
-                            Data => {},
-                        );
-
-                        # send data to JS
-                        $LayoutObject->AddJSData(
-                            Key   => 'CustomerUserAutocomplete',
-                            Value => {
-                                'QueryDelay'          => 100,
-                                'MaxResultsDisplayed' => 20,
-                                'MinQueryLength'      => 2,
+                            Data => {
+                                minQueryLength      => 2,
+                                queryDelay          => 100,
+                                maxResultsDisplayed => 20,
                             },
                         );
                     }
@@ -1379,8 +1341,6 @@ sub Run {
         $LayoutObject->Block( Name => 'NoTicketFound' );
     }
 
-    my %ActionRowTickets;
-
     for my $ArticleRef (@ArticleBox) {
 
         # get last customer article
@@ -1388,15 +1348,13 @@ sub Run {
 
         # escalation human times
         if ( $Article{EscalationTime} ) {
-            $Article{EscalationTimeHuman} = $LayoutObject->CustomerAge(
-                Age                => $Article{EscalationTime},
-                TimeShowAlwaysLong => 1,
-                Space              => ' ',
+            $Article{EscalationTimeHuman} = $LayoutObject->CustomerAgeInHours(
+                Age   => $Article{EscalationTime},
+                Space => ' ',
             );
-            $Article{EscalationTimeWorkingTime} = $LayoutObject->CustomerAge(
-                Age                => $Article{EscalationTimeWorkingTime},
-                TimeShowAlwaysLong => 1,
-                Space              => ' ',
+            $Article{EscalationTimeWorkingTime} = $LayoutObject->CustomerAgeInHours(
+                Age   => $Article{EscalationTimeWorkingTime},
+                Space => ' ',
             );
         }
 
@@ -1522,15 +1480,13 @@ sub Run {
                     $EscalationData{EscalationTime}            = $Article{EscalationTime};
                     $EscalationData{EscalationDestinationDate} = $Article{EscalationDestinationDate};
 
-                    $EscalationData{EscalationTimeHuman} = $LayoutObject->CustomerAge(
-                        Age                => $EscalationData{EscalationTime},
-                        TimeShowAlwaysLong => 1,
-                        Space              => ' ',
+                    $EscalationData{EscalationTimeHuman} = $LayoutObject->CustomerAgeInHours(
+                        Age   => $EscalationData{EscalationTime},
+                        Space => ' ',
                     );
-                    $EscalationData{EscalationTimeWorkingTime} = $LayoutObject->CustomerAge(
-                        Age                => $EscalationData{EscalationTimeWorkingTime},
-                        TimeShowAlwaysLong => 1,
-                        Space              => ' ',
+                    $EscalationData{EscalationTimeWorkingTime} = $LayoutObject->CustomerAgeInHours(
+                        Age   => $EscalationData{EscalationTimeWorkingTime},
+                        Space => ' ',
                     );
                     if (
                         defined $Article{EscalationTime}
@@ -1550,10 +1506,9 @@ sub Run {
                 my $CSSClass  = '';
                 if ( $TicketColumn eq 'EscalationSolutionTime' ) {
                     $BlockType = 'Escalation';
-                    $DataValue = $LayoutObject->CustomerAge(
+                    $DataValue = $LayoutObject->CustomerAgeInHours(
                         Age => $Article{SolutionTime} || 0,
-                        TimeShowAlwaysLong => 1,
-                        Space              => ' ',
+                        Space => ' ',
                     );
                     if ( defined $Article{SolutionTime} && $Article{SolutionTime} < 60 * 60 * 1 ) {
                         $CSSClass = 'Warning';
@@ -1561,10 +1516,9 @@ sub Run {
                 }
                 elsif ( $TicketColumn eq 'EscalationResponseTime' ) {
                     $BlockType = 'Escalation';
-                    $DataValue = $LayoutObject->CustomerAge(
+                    $DataValue = $LayoutObject->CustomerAgeInHours(
                         Age => $Article{FirstResponseTime} || 0,
-                        TimeShowAlwaysLong => 1,
-                        Space              => ' ',
+                        Space => ' ',
                     );
                     if (
                         defined $Article{FirstResponseTime}
@@ -1576,10 +1530,9 @@ sub Run {
                 }
                 elsif ( $TicketColumn eq 'EscalationUpdateTime' ) {
                     $BlockType = 'Escalation';
-                    $DataValue = $LayoutObject->CustomerAge(
+                    $DataValue = $LayoutObject->CustomerAgeInHours(
                         Age => $Article{UpdateTime} || 0,
-                        TimeShowAlwaysLong => 1,
-                        Space              => ' ',
+                        Space => ' ',
                     );
                     if ( defined $Article{UpdateTime} && $Article{UpdateTime} < 60 * 60 * 1 ) {
                         $CSSClass = 'Warning';
@@ -1718,24 +1671,20 @@ sub Run {
         # add action items as js
         if ( $Article{ActionItems} ) {
 
-            # replace TT directives from string with values
-            for my $ActionItem ( @{ $Article{ActionItems} } ) {
-                $ActionItem->{Link} = $LayoutObject->Output(
-                    Template => $ActionItem->{Link},
-                    Data     => {
-                        TicketID => $Article{TicketID},
-                    },
-                );
-            }
-
-            $ActionRowTickets{ $Article{TicketID} } = $LayoutObject->JSONEncode( Data => $Article{ActionItems} );
+            $LayoutObject->Block(
+                Name => 'DocumentReadyActionRowAdd',
+                Data => {
+                    TicketID => $Article{TicketID},
+                    Data     => $Article{ActionItems},
+                },
+            );
         }
     }
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'ActionRowTickets',
-        Value => \%ActionRowTickets,
+    # init for table control
+    $LayoutObject->Block(
+        Name => 'DocumentReadyStart',
+        Data => \%Param,
     );
 
     # set column filter form, to correctly fill the column filters is necessary to pass each
@@ -1946,21 +1895,23 @@ sub FilterContent {
     return $ColumnFilterJSON;
 }
 
-# =head2 _ColumnFilterJSON()
+=over
 
-#     creates a JSON select filter for column header
+=item _ColumnFilterJSON()
 
-#     my $ColumnFilterJSON = $TicketOverviewSmallObject->_ColumnFilterJSON(
-#         ColumnName => 'Queue',
-#         Label      => 'Queue',
-#         ColumnValues => {
-#             1 => 'PostMaster',
-#             2 => 'Junk',
-#         },
-#         SelectedValue '1',
-#     );
+    creates a JSON select filter for column header
 
-# =cut
+    my $ColumnFilterJSON = $TicketOverviewSmallObject->_ColumnFilterJSON(
+        ColumnName => 'Queue',
+        Label      => 'Queue',
+        ColumnValues => {
+            1 => 'PostMaster',
+            2 => 'Junk',
+        },
+        SelectedValue '1',
+    );
+
+=cut
 
 sub _ColumnFilterJSON {
     my ( $Self, %Param ) = @_;
@@ -2084,3 +2035,5 @@ sub _DefaultColumnSort {
 }
 
 1;
+
+=back

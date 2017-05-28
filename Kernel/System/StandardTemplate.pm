@@ -22,16 +22,22 @@ our @ObjectDependencies = (
 
 Kernel::System::StandardTemplate - standard template lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All standard template functions. E. g. to add standard template or other functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $StandardTemplateObject = $Kernel::OM->Get('Kernel::System::StandardTemplate');
 
 =cut
@@ -46,7 +52,7 @@ sub new {
     return $Self;
 }
 
-=head2 StandardTemplateAdd()
+=item StandardTemplateAdd()
 
 add new standard template
 
@@ -117,7 +123,7 @@ sub StandardTemplateAdd {
     return $ID;
 }
 
-=head2 StandardTemplateGet()
+=item StandardTemplateGet()
 
 get standard template attributes
 
@@ -188,7 +194,7 @@ sub StandardTemplateGet {
     return %Data;
 }
 
-=head2 StandardTemplateDelete()
+=item StandardTemplateDelete()
 
 delete a standard template
 
@@ -239,7 +245,7 @@ sub StandardTemplateDelete {
     return 1;
 }
 
-=head2 StandardTemplateUpdate()
+=item StandardTemplateUpdate()
 
 update standard template attributes
 
@@ -305,7 +311,7 @@ sub StandardTemplateUpdate {
     return 1;
 }
 
-=head2 StandardTemplateLookup()
+=item StandardTemplateLookup()
 
 return the name or the standard template id
 
@@ -383,7 +389,7 @@ sub StandardTemplateLookup {
     return $Self->{"StandardTemplate$Suffix"};
 }
 
-=head2 StandardTemplateList()
+=item StandardTemplateList()
 
 get all valid standard templates
 
@@ -466,7 +472,7 @@ sub StandardTemplateList {
     return %Data;
 }
 
-=head2 NameExistsCheck()
+=item NameExistsCheck()
 
     return 1 if another standard template with this name already exists
 
@@ -502,6 +508,8 @@ sub NameExistsCheck {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

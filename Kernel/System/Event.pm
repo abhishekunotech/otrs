@@ -20,16 +20,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Event - events management
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Global module to manage events.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $EventObject = $Kernel::OM->Get('Kernel::System::Event');
 
 =cut
@@ -44,7 +50,7 @@ sub new {
     return $Self;
 }
 
-=head2 EventList()
+=item EventList()
 
 get a list of available events in the system.
 
@@ -102,6 +108,8 @@ sub EventList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

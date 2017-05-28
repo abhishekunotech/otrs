@@ -25,13 +25,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Web::Request - global CGI interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All cgi param functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create param object. Do not use it directly, instead use:
 
@@ -74,7 +78,7 @@ sub new {
     return $Self;
 }
 
-=head2 Error()
+=item Error()
 
 to get the error back
 
@@ -99,7 +103,7 @@ sub Error {
     ## use critic
 }
 
-=head2 GetParam()
+=item GetParam()
 
 to get single request parameters. By default, trimming is performed on the data.
 
@@ -140,7 +144,7 @@ sub GetParam {
     return $Value;
 }
 
-=head2 GetParamNames()
+=item GetParamNames()
 
 to get names of all parameters passed to the script.
 
@@ -148,7 +152,7 @@ to get names of all parameters passed to the script.
 
 Example:
 
-Called URL: index.pl?Action=AdminSystemConfiguration;Subaction=Save;Name=Config::Option::Valid
+Called URL: index.pl?Action=AdminSysConfig;Subaction=Save;Name=Config::Option::Valid
 
     my @ParamNames = $ParamObject->GetParamNames();
     print join " :: ", @ParamNames;
@@ -182,7 +186,7 @@ sub GetParamNames {
     return @ParamNames;
 }
 
-=head2 GetArray()
+=item GetArray()
 
 to get array request parameters.
 By default, trimming is performed on the data.
@@ -231,7 +235,7 @@ sub GetArray {
     return @Values;
 }
 
-=head2 GetUploadAll()
+=item GetUploadAll()
 
 gets file upload data.
 
@@ -265,11 +269,14 @@ sub GetUploadAll {
     $NewFileName =~ s/.*\\(.+?)/$1/g;
 
     # return a string
-    my $Content = '';
+    my $Content;
     while (<$Upload>) {
         $Content .= $_;
     }
     close $Upload;
+
+    # Check if content is there, IE is always sending file uploads without content.
+    return if !$Content;
 
     my $ContentType = $Self->_GetUploadInfo(
         Filename => $UploadFilenameOrig,
@@ -299,7 +306,7 @@ sub _GetUploadInfo {
     return $FileInfo->{ $Param{Header} };
 }
 
-=head2 SetCookie()
+=item SetCookie()
 
 set a cookie
 
@@ -329,7 +336,7 @@ sub SetCookie {
     );
 }
 
-=head2 GetCookie()
+=item GetCookie()
 
 get a cookie
 
@@ -345,7 +352,7 @@ sub GetCookie {
     return $Self->{Query}->cookie( $Param{Key} );
 }
 
-=head2 IsAJAXRequest()
+=item IsAJAXRequest()
 
 checks if the current request was sent by AJAX
 
@@ -360,6 +367,8 @@ sub IsAJAXRequest {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

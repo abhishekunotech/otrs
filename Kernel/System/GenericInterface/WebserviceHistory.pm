@@ -23,17 +23,23 @@ our @ObjectDependencies = (
 
 Kernel::System::WebserviceHistory
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 WebserviceHistory configuration history backend.
 It holds older versions of web service configuration data.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a debug log object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $WebserviceHistoryObject = $Kernel::OM->Get('Kernel::System::GenericInterface::WebserviceHistory');
 
 =cut
@@ -48,7 +54,7 @@ sub new {
     return $Self;
 }
 
-=head2 WebserviceHistoryAdd()
+=item WebserviceHistoryAdd()
 
 add new WebserviceHistory entry
 
@@ -114,7 +120,7 @@ sub WebserviceHistoryAdd {
     return $ID;
 }
 
-=head2 WebserviceHistoryGet()
+=item WebserviceHistoryGet()
 
 get WebserviceHistory attributes
 
@@ -177,7 +183,7 @@ sub WebserviceHistoryGet {
     return \%Data;
 }
 
-=head2 WebserviceHistoryUpdate()
+=item WebserviceHistoryUpdate()
 
 update WebserviceHistory attributes
 
@@ -223,7 +229,7 @@ sub WebserviceHistoryUpdate {
     return 1;
 }
 
-=head2 WebserviceHistoryDelete()
+=item WebserviceHistoryDelete()
 
 delete WebserviceHistory
 
@@ -258,7 +264,7 @@ sub WebserviceHistoryDelete {
     return 1;
 }
 
-=head2 WebserviceHistoryList()
+=item WebserviceHistoryList()
 
 get WebserviceHistory list for a GenericInterface web service
 
@@ -301,6 +307,8 @@ sub WebserviceHistoryList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -59,18 +59,13 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
      * @name Init
      * @memberof Core.Agent.Admin.GenericInterfaceDebugger
      * @function
+     * @param {Object} Params
      * @description
      *      Initializes the module functions.
      */
-    TargetNS.Init = function () {
-
-        TargetNS.WebserviceID = parseInt(Core.Config.Get('WebserviceID'), 10);
-
-        // add click binds
-        $('#FilterRefresh').on('click', TargetNS.GetRequestList);
-        $('#DeleteButton').on('click', TargetNS.ShowDeleteDialog);
-
-        TargetNS.GetRequestList();
+    TargetNS.Init = function (Params) {
+        TargetNS.WebserviceID = parseInt(Params.WebserviceID, 10);
+        TargetNS.Localization = Params.Localization;
     };
 
     /**
@@ -90,6 +85,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
             FilterType: $('#FilterType').val() || ''
         };
 
+
         Data.FilterFrom = FormatISODate($('#FilterFromYear').val(), $('#FilterFromMonth').val(), $('#FilterFromDay').val()) + ' 00:00:00';
         Data.FilterTo = FormatISODate($('#FilterToYear').val(), $('#FilterToMonth').val(), $('#FilterToDay').val()) + ' 23:59:59';
 
@@ -100,14 +96,14 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
             var HTML = '';
 
             if (!Response || !Response.LogData) {
-                alert(Core.Language.Translate('An error occurred during communication.'));
+                alert(TargetNS.Localization.CommunicationErrorMsg);
                 return;
             }
 
             $('.RequestListWidget').removeClass('Loading');
 
             if (!Response.LogData.length) {
-                $('#RequestList tbody').empty().append('<tr><td colspan="3">' + Core.Language.Translate('No data found.') + '</td></tr>');
+                $('#RequestList tbody').empty().append('<tr><td colspan="3">' + TargetNS.Localization.NoDataFoundMsg + '</td></tr>');
                 return;
             }
 
@@ -123,7 +119,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
 
             $('#RequestList tbody').html(HTML);
 
-            $('#RequestList a').on('click', function() {
+            $('#RequestList a').bind('click', function() {
                 var CommunicationID = $(this).blur().parents('tr').find('input.CommunicationID').val();
 
                 TargetNS.LoadCommunicationDetails(CommunicationID);
@@ -156,7 +152,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
 
         Core.AJAX.FunctionCall(Core.Config.Get('CGIHandle'), Data, function (Response) {
             if (!Response || !Response.LogData || !Response.LogData.Data) {
-                alert(Core.Language.Translate('An error occurred during communication.'));
+                alert(TargetNS.Localization.CommunicationErrorMsg);
                 return;
             }
 
@@ -164,7 +160,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
             $('.RequestListWidget').removeClass('Loading');
 
             if (!Response.LogData.Data.length) {
-                $('#CommunicationDetails > .Content').append('<p class="ErrorMessage">' + Core.Language.Translate('No data found.') + '</p>');
+                $('#CommunicationDetails > .Content').append('<p class="ErrorMessage">' + TargetNS.Localization.NoDataFoundMsg + '</p>');
                 $('#CommunicationDetails').css('visibility', 'visible').show();
             }
             else {
@@ -173,7 +169,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
                         $Header = $('<div class="Header"></div>'),
                         $Content = $('<div class="Content"></div>');
 
-                    $Header.append('<div class="WidgetAction Toggle"><a href="#" title="' + Core.Language.Translate('Show or hide the content.') + '"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i></a></div>');
+                    $Header.append('<div class="WidgetAction Toggle"><a href="#" title="' + TargetNS.Localization.ToggleContentMsg + '"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i></a></div>');
                     $Header.append('<h3 class="DebugLevel_' + this.DebugLevel + '">' + this.Summary + ' (' + this.Created + ', ' + this.DebugLevel + ')</h3>');
                     $Container.append($Header);
 
@@ -207,19 +203,19 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
     TargetNS.ShowDeleteDialog = function(Event){
         Core.UI.Dialog.ShowContentDialog(
             $('#DeleteDialogContainer'),
-            Core.Language.Translate('Clear debug log'),
+            TargetNS.Localization.ClearDebugLogMsg,
             '240px',
             'Center',
             true,
             [
                {
-                   Label: Core.Language.Translate('Cancel'),
+                   Label: TargetNS.Localization.CancelMsg,
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('#DeleteDialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Clear'),
+                   Label: TargetNS.Localization.ClearMsg,
                    Function: function () {
                        var Data = {
                             Action: 'AdminGenericInterfaceDebugger',
@@ -232,7 +228,7 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
 
                         Core.AJAX.FunctionCall(Core.Config.Get('CGIHandle'), Data, function (Response) {
                             if (!Response || !Response.Success) {
-                                alert(Core.Language.Translate('An error occurred during communication.'));
+                                alert(TargetNS.Localization.CommunicationErrorMsg);
                                 return;
                             }
 
@@ -248,8 +244,6 @@ Core.Agent.Admin.GenericInterfaceDebugger = (function (TargetNS) {
 
         Event.stopPropagation();
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.GenericInterfaceDebugger || {}));

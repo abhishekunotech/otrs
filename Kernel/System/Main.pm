@@ -8,7 +8,6 @@
 
 package Kernel::System::Main;
 ## nofilter(TidyAll::Plugin::OTRS::Perl::Dumper)
-## nofilter(TidyAll::Plugin::OTRS::Perl::Require)
 
 use strict;
 use warnings;
@@ -18,28 +17,34 @@ use Data::Dumper;
 use File::stat;
 use Unicode::Normalize;
 use List::Util qw();
+use Storable;
 use Fcntl qw(:flock);
 
 our @ObjectDependencies = (
     'Kernel::System::Encode',
     'Kernel::System::Log',
-    'Kernel::System::Storable',
 );
 
 =head1 NAME
 
 Kernel::System::Main - main object
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All main functions to load modules, die, and handle files.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create new object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
 =cut
@@ -54,7 +59,7 @@ sub new {
     return $Self;
 }
 
-=head2 Require()
+=item Require()
 
 require/load a module
 
@@ -76,12 +81,29 @@ sub Require {
         return;
     }
 
-    eval {
-        my $FileName = $Module =~ s{::}{/}smxgr;
-        require $FileName . '.pm';
-    };
+    # prepare module
+    $Module =~ s/::/\//g;
+    $Module .= '.pm';
 
-    # Handle errors.
+    # just return if it's already loaded
+    return 1 if $INC{$Module};
+
+    my $Result;
+    my $File;
+
+    # find full path of module
+    PREFIX:
+    for my $Prefix (@INC) {
+        $File = $Prefix . '/' . $Module;
+
+        next PREFIX if !-f $File;
+
+        $Result = do $File;
+
+        last PREFIX;
+    }
+
+    # if there was an error
     if ($@) {
 
         if ( !$Param{Silent} ) {
@@ -96,10 +118,35 @@ sub Require {
         return;
     }
 
+    # check result value, should be true
+    if ( !$Result ) {
+
+        if ( !$Param{Silent} ) {
+            my $Message = "Module $Module not found/could not be loaded";
+            if ( !-f $File ) {
+                $Message = "Module $Module not in \@INC (@INC)";
+            }
+            elsif ( !-r $File ) {
+                $Message = "Module could not be loaded (no read permissions on $File)";
+            }
+
+            $Kernel::OM->Get('Kernel::System::Log')->Log(
+                Caller   => 1,
+                Priority => 'error',
+                Message  => $Message,
+            );
+        }
+
+        return;
+    }
+
+    # add module
+    $INC{$Module} = $File;
+
     return 1;
 }
 
-=head2 RequireBaseClass()
+=item RequireBaseClass()
 
 require/load a module and add it as a base class to the
 calling package, if not already present (this check is needed
@@ -131,7 +178,7 @@ sub RequireBaseClass {
     return 1;
 }
 
-=head2 Die()
+=item Die()
 
 to die
 
@@ -154,7 +201,7 @@ sub Die {
     exit;
 }
 
-=head2 FilenameCleanUp()
+=item FilenameCleanUp()
 
 to clean up filenames which can be used in any case (also quoting is done)
 
@@ -222,7 +269,7 @@ sub FilenameCleanUp {
     return $Param{Filename};
 }
 
-=head2 FileRead()
+=item FileRead()
 
 to read files from file system
 
@@ -342,7 +389,7 @@ sub FileRead {
     return \$String;
 }
 
-=head2 FileWrite()
+=item FileWrite()
 
 to write data to file system
 
@@ -468,7 +515,7 @@ sub FileWrite {
     return $Param{Location};
 }
 
-=head2 FileDelete()
+=item FileDelete()
 
 to delete a file from file system
 
@@ -533,7 +580,7 @@ sub FileDelete {
     return 1;
 }
 
-=head2 FileGetMTime()
+=item FileGetMTime()
 
 get timestamp of file change time
 
@@ -597,7 +644,7 @@ sub FileGetMTime {
     return $Stat->mtime();
 }
 
-=head2 MD5sum()
+=item MD5sum()
 
 get an C<MD5> sum of a file or a string
 
@@ -619,7 +666,7 @@ get an C<MD5> sum of a file or a string
 sub MD5sum {
     my ( $Self, %Param ) = @_;
 
-    if ( !$Param{Filename} && !defined( $Param{String} ) ) {
+    if ( !$Param{Filename} && !$Param{String} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
             Message  => 'Need Filename or String!',
@@ -679,7 +726,7 @@ sub MD5sum {
     return;
 }
 
-=head2 Dump()
+=item Dump()
 
 dump variable to an string
 
@@ -742,7 +789,7 @@ sub Dump {
         # Clone the data because we need to disable the utf8 flag in all
         # reference variables and do not to want to do this in the orig.
         # variables because they will still used in the system.
-        my $DataNew = $Kernel::OM->Get('Kernel::System::Storable')->Clone( Data => \$Data );
+        my $DataNew = Storable::dclone( \$Data );
 
         # Disable utf8 flag.
         $Self->_Dump($DataNew);
@@ -761,7 +808,7 @@ sub Dump {
 
 }
 
-=head2 DirectoryRead()
+=item DirectoryRead()
 
 reads a directory and returns an array with results.
 
@@ -918,35 +965,35 @@ sub DirectoryRead {
     return @Results;
 }
 
-=head2 GenerateRandomString()
+=item GenerateRandomString()
 
 generate a random string of defined length, and of a defined alphabet.
 defaults to a length of 16 and alphanumerics ( 0..9, A-Z and a-z).
 
     my $String = $MainObject->GenerateRandomString();
 
-returns
+    returns
 
     $String = 'mHLOx7psWjMe5Pj7';
 
-with specific length:
+    with specific length:
 
     my $String = $MainObject->GenerateRandomString(
         Length => 32,
     );
 
-returns
+    returns
 
     $String = 'azzHab72wIlAXDrxHexsI5aENsESxAO7';
 
-with specific length and alphabet:
+    with specific length and alphabet:
 
     my $String = $MainObject->GenerateRandomString(
         Length     => 32,
         Dictionary => [ 0..9, 'a'..'f' ], # hexadecimal
         );
 
-returns
+    returns
 
     $String = '9fec63d37078fe72f5798d2084fea8ad';
 
@@ -1069,6 +1116,8 @@ sub _Dump {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -22,14 +22,18 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Operation - GenericInterface Operation interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Operations are called by web service requests from remote
 systems.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object.
 
@@ -101,7 +105,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 perform the selected Operation.
 
@@ -129,6 +133,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

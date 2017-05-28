@@ -52,20 +52,10 @@ sub Run {
         # challenge token check for write action
         $LayoutObject->ChallengeTokenCheck();
 
-        my $Delete = $PostMasterFilter->FilterDelete(
-            Name => $Name,
-        );
-
-        if ( !$Delete ) {
+        if ( !$PostMasterFilter->FilterDelete( Name => $Name ) ) {
             return $LayoutObject->ErrorScreen();
         }
-
-        return $LayoutObject->Attachment(
-            ContentType => 'text/html',
-            Content     => $Delete,
-            Type        => 'inline',
-            NoCache     => 1,
-        );
+        return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
     }
 
     # ------------------------------------------------------------ #
@@ -150,20 +140,11 @@ sub Run {
             $Errors{"NameInvalid"} = 'ServerError';
         }
 
-        # If it's not edit action, verify there is no filters with same name.
-        if ( $Name ne $OldName ) {
-            my %Data = $PostMasterFilter->FilterGet( Name => $Name );
-            if (%Data) {
-                $Errors{"NameInvalid"} = 'ServerError';
-            }
-        }
-
         if (%Errors) {
             return $Self->_MaskUpdate(
                 Name => $Name,
                 Data => {
                     %Errors,
-                    OldName        => $OldName,
                     Name           => $Name,
                     Set            => \%Set,
                     Match          => \%Match,
@@ -180,21 +161,6 @@ sub Run {
             StopAfterMatch => $StopAfterMatch,
             Not            => \%Not,
         );
-
-        # if the user would like to continue editing the postmaster filter, just redirect to the update screen
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action};Subaction=Update;Name=$Name" );
-        }
-        else {
-
-            # otherwise return to overview
-            return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-        }
-
         return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
     }
 
@@ -210,7 +176,6 @@ sub Run {
         );
         $LayoutObject->Block( Name => 'ActionList' );
         $LayoutObject->Block( Name => 'ActionAdd' );
-        $LayoutObject->Block( Name => 'Filter' );
 
         $LayoutObject->Block(
             Name => 'OverviewResult',
@@ -275,13 +240,7 @@ sub _MaskUpdate {
     my $Output = $LayoutObject->Header();
     $Output .= $LayoutObject->NavigationBar();
 
-    $LayoutObject->Block(
-        Name => 'Overview',
-        Data => {
-            Action => $Self->{Subaction},
-            Name   => $Param{Name},
-        },
-    );
+    $LayoutObject->Block( Name => 'Overview' );
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionOverview' );
 
@@ -345,19 +304,21 @@ sub _MaskUpdate {
         HTMLQuote   => 1,
     );
 
-    my $OldName = $Data{Name};
-    if ( $Param{Data}->{NameInvalid} ) {
-        $OldName = $Data{OldName};
-    }
-
     $LayoutObject->Block(
         Name => 'OverviewUpdate',
         Data => {
             %Param, %Data,
-            OldName => $OldName,
-            Action  => $Self->{Subaction},
+            OldName => $Data{Name},
         },
     );
+
+    # shows header
+    if ( $Self->{Subaction} eq 'AddAction' ) {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderEdit' );
+    }
 
     $Output .= $LayoutObject->Output(
         TemplateFile => 'AdminPostMasterFilter',

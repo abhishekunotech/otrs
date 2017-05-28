@@ -50,12 +50,6 @@ sub Run {
         );
     }
 
-    # send value to JS
-    $LayoutObject->AddJSData(
-        Key   => 'WebserviceID',
-        Value => $WebserviceID,
-    );
-
     if ( $Self->{Subaction} eq 'GetRequestList' ) {
         return $Self->_GetRequestList(
             %Param,
@@ -100,9 +94,9 @@ sub _ShowScreen {
             '10',
             '100',
             '1000',
-            '10000',
         ],
         Name          => 'FilterLimit',
+        PossibleNone  => 1,
         SelectedValue => '100',
         Translate     => 0,
         Class         => 'Modernize',

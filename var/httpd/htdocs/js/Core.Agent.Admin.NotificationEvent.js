@@ -25,21 +25,24 @@ Core.Agent.Admin.NotificationEvent = (function (TargetNS) {
      * @name Init
      * @memberof Core.Agent.Admin.NotificationEvent
      * @function
+     * @param {Object} Params - Initialization and internationalization parameters.
      * @description
      *      This function initialize correctly all other function according to the local language.
      */
-    TargetNS.Init = function () {
+    TargetNS.Init = function (Params) {
+
+        TargetNS.Localization = Params.Localization;
 
         // bind click function to add button
-        $('.LanguageAdd').on('change', function () {
+        $('.LanguageAdd').bind('change', function () {
             TargetNS.AddLanguage($(this).val(), $('.LanguageAdd option:selected').text());
             return false;
         });
 
-        // bind click function to remove button
-        $('.LanguageRemove').on('click', function () {
+        //bind click function to remove button
+        $('.LanguageRemove').bind('click', function () {
 
-            if (window.confirm(Core.Language.Translate('Do you really want to delete this notification language?'))) {
+            if (window.confirm(TargetNS.Localization.DeleteNotificationLanguageMsg)) {
                 TargetNS.RemoveLanguage($(this));
             }
             return false;
@@ -62,36 +65,10 @@ Core.Agent.Admin.NotificationEvent = (function (TargetNS) {
             }
         }
 
-        $('#VisibleForAgent').on('change', VisibleForAgentHandler);
+        $('#VisibleForAgent').bind('change', VisibleForAgentHandler);
 
         // Run on first view.
         VisibleForAgentHandler();
-
-        // initialize table filter
-        Core.UI.Table.InitTableFilter($("#FilterNotifications"), $("#Notifications"));
-
-        // register dialog box for delete notification
-        $('.NotificationDelete').click(function (Event) {
-            if (window.confirm(Core.Language.Translate('Do you really want to delete this notification?'))) {
-                window.location = $(this).attr('href');
-            }
-
-            // don't interfere with MasterAction
-            Event.stopPropagation();
-            Event.preventDefault();
-            return false;
-        });
-
-        // add special validation method
-        Core.Form.Validate.AddMethod("Validate_OneChecked", function() {
-            if($(".Validate_OneChecked:checkbox:checked").length > 0){
-                return true;
-            }
-           return false;
-        });
-
-        // add special validation rule
-        Core.Form.Validate.AddRule("Validate_OneChecked", {Validate_OneChecked: true});
 
         // set up attributes (enable/disable) to some fields on click
         $('#EmailSecuritySettings').click(function() {
@@ -187,13 +164,13 @@ Core.Agent.Admin.NotificationEvent = (function (TargetNS) {
 
         // initialize the rich text editor if set
         if (parseInt(Core.Config.Get('RichTextSet'), 10) === 1) {
-            Core.UI.RichTextEditor.InitAllEditors();
+            Core.UI.RichTextEditor.InitAll();
         }
 
         // bind click function to remove button
-        $('.LanguageRemove').on('click', function () {
+        $('.LanguageRemove').bind('click', function () {
 
-            if (window.confirm(Core.Language.Translate('Do you really want to delete this notification language?'))) {
+            if (window.confirm(TargetNS.Localization.DeleteNotificationLanguageMsg)) {
                 TargetNS.RemoveLanguage($(this));
             }
             return false;
@@ -242,15 +219,13 @@ Core.Agent.Admin.NotificationEvent = (function (TargetNS) {
         });
 
         // bind click function to add button
-        $('.LanguageAdd').on('change', function () {
+        $('.LanguageAdd').bind('change', function () {
             TargetNS.AddLanguage($(this).val(), $('.LanguageAdd option:selected').text());
             return false;
         });
 
         return true;
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Admin.NotificationEvent || {}));

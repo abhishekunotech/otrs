@@ -26,13 +26,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Web::InterfacePublic - the public web interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 the global public web interface
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create public web interface object
 
@@ -79,7 +83,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 execute the object
 
@@ -158,20 +162,20 @@ sub Run {
 
     if ( !$DBCanConnect ) {
         $LayoutObject->CustomerFatalError(
-            Comment => Translatable('Please contact the administrator.'),
+            Comment => Translatable('Please contact your administrator'),
         );
     }
     if ( $ParamObject->Error() ) {
         $LayoutObject->CustomerFatalError(
             Message => $ParamObject->Error(),
-            Comment => Translatable('Please contact the administrator.'),
+            Comment => Translatable('Please contact your administrator'),
         );
     }
 
     # run modules if a version value exists
     if ( !$Kernel::OM->Get('Kernel::System::Main')->Require("Kernel::Modules::$Param{Action}") ) {
         $LayoutObject->CustomerFatalError(
-            Comment => Translatable('Please contact the administrator.'),
+            Comment => Translatable('Please contact your administrator'),
         );
         return 1;
     }
@@ -185,7 +189,7 @@ sub Run {
                 "Module Kernel::Modules::$Param{Action} not registered in Kernel/Config.pm!",
         );
         $LayoutObject->CustomerFatalError(
-            Comment => Translatable('Please contact the administrator.'),
+            Comment => Translatable('Please contact your administrator'),
         );
         return;
     }
@@ -230,7 +234,7 @@ sub Run {
                 . "::-::$QueryString\n";
             close $Out;
             $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'debug',
+                Priority => 'notice',
                 Message  => 'Response::Public: '
                     . ( time() - $Self->{PerformanceLogStart} )
                     . "s taken (URL:$QueryString)",
@@ -262,6 +266,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -20,16 +20,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Scheduler - Scheduler lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Includes the functions to add a new task to the scheduler daemon.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a scheduler object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SchedulerObject = $Kernel::OM->Get('Kernel::System::Scheduler');
 
 =cut
@@ -44,7 +50,7 @@ sub new {
     return $Self;
 }
 
-=head2 TaskAdd()
+=item TaskAdd()
 
 add a task to scheduler
 
@@ -94,7 +100,7 @@ sub TaskAdd {
     return;
 }
 
-=head2 FutureTaskList()
+=item FutureTaskList()
 
 get the list of scheduler future tasks
 
@@ -130,7 +136,7 @@ sub FutureTaskList {
     return @List;
 }
 
-=head2 FutureTaskDelete()
+=item FutureTaskDelete()
 
 delete a task from scheduler future task list
 
@@ -158,6 +164,8 @@ sub FutureTaskDelete {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

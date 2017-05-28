@@ -11,7 +11,7 @@ package Kernel::Output::Template::Plugin::OTRS;
 use strict;
 use warnings;
 
-use parent qw(Template::Plugin);
+use base qw(Template::Plugin);
 
 use Scalar::Util;
 
@@ -23,7 +23,11 @@ Kernel::Output::Template::Plugin::OTRS - Template Toolkit extension plugin
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 this plugin registers a few filters and functions in Template::Toolkit.
 
@@ -94,9 +98,6 @@ sub new {
         elsif ( $Format eq 'Date' ) {
             return $LayoutObject->{LanguageObject}->FormatTimeString( $_[0], 'DateFormatShort' );
         }
-        elsif ( $Format eq 'Filesize' ) {
-            return $LayoutObject->HumanReadableDataSize( Size => $_[0] );
-        }
         return;
     };
 
@@ -113,9 +114,6 @@ sub new {
             }
             elsif ( $Format eq 'Date' ) {
                 return $LayoutObject->{LanguageObject}->FormatTimeString( $_[0], 'DateFormatShort' );
-            }
-            elsif ( $Format eq 'Filesize' ) {
-                return $LayoutObject->HumanReadableDataSize( Size => $_[0] );
             }
             return;
         };
@@ -169,6 +167,8 @@ sub new {
         _PARAMS  => \@Params,
     }, $Class;
 }
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -20,17 +20,23 @@ our @ObjectDependencies = (
 
 Kernel::System::PostMaster::Filter
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All postmaster database filters
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
-    my $PMFilterObject = $Kernel::OM->Get('Kernel::System::PostMaster::Filter');
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
+    my $FilterObject = $Kernel::OM->Get('Kernel::System::PostMaster::Filter');
 
 =cut
 
@@ -44,7 +50,7 @@ sub new {
     return $Self;
 }
 
-=head2 FilterList()
+=item FilterList()
 
 get all filter
 
@@ -70,7 +76,7 @@ sub FilterList {
     return %Data;
 }
 
-=head2 FilterAdd()
+=item FilterAdd()
 
 add a filter
 
@@ -128,7 +134,7 @@ sub FilterAdd {
     return 1;
 }
 
-=head2 FilterDelete()
+=item FilterDelete()
 
 delete a filter
 
@@ -163,7 +169,7 @@ sub FilterDelete {
     return 1;
 }
 
-=head2 FilterGet()
+=item FilterGet()
 
 get filter properties, returns HASH ref Match and Set
 
@@ -211,6 +217,8 @@ sub FilterGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

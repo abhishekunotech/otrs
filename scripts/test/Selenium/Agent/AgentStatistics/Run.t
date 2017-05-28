@@ -18,9 +18,8 @@ my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 $Selenium->RunTest(
     sub {
 
-        # get needed objects
-        my $Helper       = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-        my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+        # get helper object
+        my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
         # show more stats per page as the default 50
         my $Success = $Helper->ConfigSettingChange(
@@ -40,7 +39,7 @@ $Selenium->RunTest(
             Password => $TestUserLogin,
         );
 
-        my $ScriptAlias = $ConfigObject->Get('ScriptAlias');
+        my $ScriptAlias = $Kernel::OM->Get('Kernel::Config')->Get('ScriptAlias');
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentStatistics;Subaction=Import");
 
         # get test user ID
@@ -49,7 +48,7 @@ $Selenium->RunTest(
         );
 
         # import test selenium statistic
-        my $Location = $ConfigObject->Get('Home')
+        my $Location = $Kernel::OM->Get('Kernel::Config')->Get('Home')
             . "/scripts/test/sample/Stats/Stats.TicketOverview.de.xml";
         $Selenium->find_element( "#File", 'css' )->send_keys($Location);
         $Selenium->find_element("//button[\@value='Import'][\@type='submit']")->VerifiedClick();
@@ -95,28 +94,6 @@ $Selenium->RunTest(
         # go to imported stat to run it
         $Selenium->find_element("//a[contains(\@href, \'Action=AgentStatistics;Subaction=View;StatID=$StatsIDLast\' )]")
             ->VerifiedClick();
-
-        # get stat data
-        my $StatData = $Kernel::OM->Get('Kernel::System::Stats')->StatsGet(
-            StatID => $StatsIDLast,
-            UserID => 1,
-        );
-
-        # check breadcrumb on View screen
-        $Count = 1;
-        for my $BreadcrumbText (
-            'Statistics Overview',
-            'View ' . $ConfigObject->Get('Stats::StatsHook') . $StatData->{StatNumber}
-            )
-        {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
-        }
 
         # run test statistic
         $Selenium->find_element( "#StartStatistic", 'css' )->VerifiedClick();

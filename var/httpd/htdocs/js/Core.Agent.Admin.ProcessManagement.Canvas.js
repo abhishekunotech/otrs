@@ -121,20 +121,20 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
 
         Core.UI.Dialog.ShowContentDialog(
             $('#Dialogs #' + DialogID),
-            Core.Language.Translate('Remove Entity from canvas'),
+            Core.Agent.Admin.ProcessManagement.Localization.RemoveEntityCanvasTitle,
             '240px',
             'Center',
             true,
             [
                {
-                   Label:Core.Language.Translate('Cancel'),
+                   Label: Core.Agent.Admin.ProcessManagement.Localization.CancelMsg,
+                   Class: 'Primary',
                    Function: function () {
                        Core.UI.Dialog.CloseDialog($('.Dialog'));
                    }
                },
                {
-                   Label: Core.Language.Translate('Delete'),
-                   Class: 'Primary',
+                   Label: Core.Agent.Admin.ProcessManagement.Localization.DeleteMsg,
                    Function: function () {
                        if (typeof Callback !== 'undefined') {
                            Callback();
@@ -191,7 +191,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
                 'top': PosY + 'px',
                 'left': PosX + 'px'
             })
-            .on('mouseenter.Activity', function() {
+            .bind('mouseenter.Activity', function() {
                 TargetNS.ShowActivityTooltip($(this));
                 TargetNS.ShowActivityDeleteButton($(this));
                 TargetNS.ShowActivityEditButton($(this));
@@ -200,15 +200,14 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
                 }
                 $(this).addClass('Hovered');
             })
-            .on('mouseleave.Activity', function() {
+            .bind('mouseleave.Activity', function() {
                 $('#DiagramTooltip').hide();
                 $(this).removeClass('ReadyToDrop').find('.DiagramDeleteLink').remove();
                 $(this).removeClass('ReadyToDrop').find('.DiagramEditLink').remove();
                 $(this).removeClass('Hovered');
             })
-            .on('dblclick.Activity', function() {
-                var ConfigProcess = Core.Config.Get('ConfigProcess'),
-                    Path = ConfigProcess.PopupPathActivity + "EntityID=" + EntityID + ";ID=" + ActivityID,
+            .bind('dblclick.Activity', function() {
+                var Path = Core.Config.Get('Config.PopupPathActivity') + "EntityID=" + EntityID + ";ID=" + ActivityID,
                     SessionData = Core.App.GetSessionInformation();
                 if (!Core.Config.Get('SessionIDCookie') && Path.indexOf(SessionData[Core.Config.Get('SessionName')]) === -1) {
                     Path += ';' + encodeURIComponent(Core.Config.Get('SessionName')) + '=' + encodeURIComponent(SessionData[Core.Config.Get('SessionName')]);
@@ -331,7 +330,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
             });
         }
         else {
-            text += '<li class="NoDialogsAssigned">' + Core.Language.Translate('No TransitionActions assigned.') + '</li>';
+            text += '<li class="NoDialogsAssigned">' + Core.Agent.Admin.ProcessManagement.Localization.NoTransitionActionsAssigned + '</li>';
         }
         text += "</ul>";
 
@@ -428,7 +427,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
             });
         }
         else {
-            text += '<li class="NoDialogsAssigned">' + Core.Language.Translate('No dialogs assigned yet. Just pick an activity dialog from the list on the left and drag it here.') + '</li>';
+            text += '<li class="NoDialogsAssigned">' + Core.Agent.Admin.ProcessManagement.Localization.NoDialogsAssigned + '</li>';
         }
 
         text += "</ul>";
@@ -495,8 +494,8 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
 
         $delete
             .show()
-            .off('click')
-            .on('click', function () {
+            .unbind('click')
+            .bind('click', function () {
                 ShowRemoveEntityCanvasConfirmationDialog('Activity', Activity[ElementID].Name, ElementID, function () {
                     TargetNS.RemoveActivity(ElementID);
                     Core.UI.Dialog.CloseDialog($('.Dialog'));
@@ -517,8 +516,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
     TargetNS.ShowActivityEditButton = function ($Element) {
         var $edit = $('.DiagramEditLink').clone(),
             Activity = Core.Agent.Admin.ProcessManagement.ProcessData.Activity,
-            ElementID = $Element.attr('id'),
-            ConfigProcess = Core.Config.Get('ConfigProcess');
+            ElementID = $Element.attr('id');
 
         if (typeof Activity[ElementID] === 'undefined') {
             return false;
@@ -532,9 +530,9 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
 
         $edit
             .show()
-            .off('click')
-            .on('click', function () {
-                var Path = ConfigProcess.PopupPathActivity + "EntityID=" + ElementID + ";ID=" + Activity[ElementID].ID,
+            .unbind('click')
+            .bind('click', function () {
+                var Path = Core.Config.Get('Config.PopupPathActivity') + "EntityID=" + ElementID + ";ID=" + Activity[ElementID].ID,
                     SessionData = Core.App.GetSessionInformation();
                 if (!Core.Config.Get('SessionIDCookie') && Path.indexOf(SessionData[Core.Config.Get('SessionName')]) === -1) {
                     Path += ';' + encodeURIComponent(Core.Config.Get('SessionName')) + '=' + encodeURIComponent(SessionData[Core.Config.Get('SessionName')]);
@@ -614,7 +612,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
 
         // if Activity is StartActivity, this Activity cannot be removed...
         if (Config.Process[ProcessEntityID].StartActivity === EntityID) {
-            alert(Core.Language.Translate('This Activity cannot be deleted because it is the Start Activity.'));
+            alert(Core.Agent.Admin.ProcessManagement.Localization.ActivityCannotBeDeleted);
             return;
         }
 
@@ -739,7 +737,6 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
     TargetNS.CreateTransition = function (StartElement, EndElement, EntityID, TransitionName) {
 
         var Config = Core.Agent.Admin.ProcessManagement.ProcessData,
-            ConfigProcess = Config = Core.Config.Get('ConfigProcess'),
             ProcessEntityID = $('#ProcessEntityID').val(),
             StartActivity, EndActivity, Connection,
             PopupPath;
@@ -766,7 +763,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
             }
         }
 
-        PopupPath = ConfigProcess.PopupPathPath + "ProcessEntityID=" + ProcessEntityID + ";TransitionEntityID=" + EntityID + ";StartActivityID=" + StartElement;
+        PopupPath = Core.Config.Get('Config.PopupPathPath') + "ProcessEntityID=" + ProcessEntityID + ";TransitionEntityID=" + EntityID + ";StartActivityID=" + StartElement;
 
         Connection = jsPlumb.connect({
             source: StartActivity,
@@ -855,12 +852,11 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
     TargetNS.HighlightTransitionLabel = function(Connection, StartActivity, EndActivity) {
 
         var Config = Core.Agent.Admin.ProcessManagement.ProcessData,
-            ConfigProcess = Config = Core.Config.Get('ConfigProcess'),
             ProcessEntityID = $('#ProcessEntityID').val(),
             Path = Config.Process[ProcessEntityID].Path,
             TransitionEntityID = Connection.component.getParameter('TransitionID'),
             StartActivityID = Connection.component.sourceId,
-            PopupPath = ConfigProcess.PopupPathPath + "ProcessEntityID=" + ProcessEntityID + ";TransitionEntityID=" + TransitionEntityID + ";StartActivityID=" + StartActivityID,
+            PopupPath = Core.Config.Get('Config.PopupPathPath') + "ProcessEntityID=" + ProcessEntityID + ";TransitionEntityID=" + TransitionEntityID + ";StartActivityID=" + StartActivityID,
             SessionData = Core.App.GetSessionInformation();
 
         if (TargetNS.DragTransitionAction) {
@@ -873,7 +869,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
         }
 
         if (!$(Connection.canvas).find('.Delete').length) {
-            $(Connection.canvas).append('<a class="Delete" title="' + Core.Language.Translate('Remove the Transition from this Process') + '" href="#"><i class="fa fa-trash-o"></i></a>').find('.Delete').on('click', function(Event) {
+            $(Connection.canvas).append('<a class="Delete" title="' + Core.Agent.Admin.ProcessManagement.Localization.TransitionDeleteLink + '" href="#"><i class="fa fa-trash-o"></i></a>').find('.Delete').bind('click', function(Event) {
                 ShowRemoveEntityCanvasConfirmationDialog('Path', Config.Transition[TransitionEntityID].Name, TransitionEntityID, function () {
                     jsPlumb.detach(Connection.component);
                     delete Path[StartActivityID][TransitionEntityID];
@@ -886,7 +882,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
         }
 
         if (!$(Connection.canvas).find('.Edit').length) {
-            $(Connection.canvas).append('<a class="Edit" title="' + Core.Language.Translate('Edit this transition') + '" href="#"><i class="fa fa-edit"></i></a>').find('.Edit').on('click', function(Event) {
+            $(Connection.canvas).append('<a class="Edit" title="' + Core.Agent.Admin.ProcessManagement.Localization.TransitionEditLink + '" href="#"><i class="fa fa-edit"></i></a>').find('.Edit').bind('click', function(Event) {
                 if (EndActivity !== 'Dummy') {
                     if (!Core.Config.Get('SessionIDCookie') && PopupPath.indexOf(SessionData[Core.Config.Get('SessionName')]) === -1) {
                         PopupPath += ';' + encodeURIComponent(Core.Config.Get('SessionName')) + '=' + encodeURIComponent(SessionData[Core.Config.Get('SessionName')]);
@@ -906,7 +902,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
         // show tooltip with assigned transition actions
         TargetNS.ShowTransitionTooltip(Connection, StartActivity);
 
-        $(Connection.canvas).off('dblclick.Transition').on('dblclick.Transition', function(Event) {
+        $(Connection.canvas).unbind('dblclick.Transition').bind('dblclick.Transition', function(Event) {
             if (EndActivity !== 'Dummy') {
                 Core.Agent.Admin.ProcessManagement.ShowOverlay();
                 Core.UI.Popup.OpenPopup(PopupPath, 'Path');
@@ -1036,10 +1032,10 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
         TargetNS.MakeDraggable();
 
         $('div.TransitionLabel')
-            .on('mouseenter', 'a.Delete, a.Edit, span', function () {
+            .delegate('a.Delete, a.Edit, span', 'mouseenter', function () {
                 TargetNS.HighlightTransitionLabel(TargetNS.LastTransitionDetails.LabelOverlay, TargetNS.LastTransitionDetails.StartElement, TargetNS.LastTransitionDetails.EndElement);
             })
-            .on('mouseleave', 'a.Delete, a.Edit, span', function () {
+            .delegate('a.Delete, a.Edit, span', 'mouseleave', function () {
                 TargetNS.UnHighlightTransitionLabel(TargetNS.LastTransitionDetails.LabelOverlay);
             });
     };
@@ -1074,7 +1070,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
      *      Redraws diagram.
      */
     TargetNS.Redraw = function () {
-        $('#ShowEntityIDs').removeClass('Visible').text(Core.Language.Translate('Show EntityIDs'));
+        $('#ShowEntityIDs').removeClass('Visible').text(Core.Agent.Admin.ProcessManagement.Localization.ShowEntityIDs);
         jsPlumb.reset();
         $('#Canvas').empty();
         TargetNS.Init();
@@ -1199,7 +1195,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
         // show EntityIDs of Activities
         $('.Activity').each(function() {
             ActivityEntityID = $(this).attr('id');
-            $(this).append('<em class="EntityID"><input type="text" value="' + ActivityEntityID + '" /></em>').find('.EntityID input').off().on('focus', function(Event) {
+            $(this).append('<em class="EntityID"><input type="text" value="' + ActivityEntityID + '" /></em>').find('.EntityID input').unbind().bind('focus', function(Event) {
                 this.select();
                 Event.stopPropagation();
             });
@@ -1211,7 +1207,7 @@ Core.Agent.Admin.ProcessManagement.Canvas = (function (TargetNS) {
             TransitionEntityID = this.getParameter('TransitionID');
             Overlay = this.getOverlay('label');
             if (Overlay) {
-                $(Overlay.canvas).append('<em class="EntityID"><input type="text" value="' + TransitionEntityID + '" /></em>').find('.EntityID input').off().on('focus', function(Event) {
+                $(Overlay.canvas).append('<em class="EntityID"><input type="text" value="' + TransitionEntityID + '" /></em>').find('.EntityID input').unbind().bind('focus', function(Event) {
                     this.select();
                     Event.stopPropagation();
                 });

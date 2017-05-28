@@ -37,11 +37,7 @@ use Kernel::System::ObjectManager;
 # response loop
 while ( my $WebRequest = new CGI::Fast ) {
 
-    local $Kernel::OM = Kernel::System::ObjectManager->new(
-        'Kernel::System::Web::Request' => {
-            WebRequest => $WebRequest,
-            }
-    );
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $Provider = Kernel::GenericInterface::Provider->new();
 
     $Provider->Run();

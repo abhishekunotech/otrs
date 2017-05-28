@@ -11,6 +11,7 @@ package Kernel::System::AuthSession::DB;
 use strict;
 use warnings;
 
+use Storable qw();
 use MIME::Base64 qw();
 
 use Kernel::Language qw(Translatable);
@@ -21,7 +22,6 @@ our @ObjectDependencies = (
     'Kernel::System::Encode',
     'Kernel::System::Log',
     'Kernel::System::Main',
-    'Kernel::System::Storable',
     'Kernel::System::Time',
 );
 
@@ -32,7 +32,15 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    $Self->{SessionTable} = $Kernel::OM->Get('Kernel::Config')->Get('SessionTable') || 'sessions';
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+
+    # get more common params
+    $Self->{SessionTable}      = $ConfigObject->Get('SessionTable')      || 'sessions';
+    $Self->{SessionActiveTime} = $ConfigObject->Get('SessionActiveTime') || 60 * 10;
+
+    if ( $Self->{SessionActiveTime} < 300 ) {
+        $Self->{SessionActiveTime} = 300;
+    }
 
     # get database type
     $Self->{DBType} = $Kernel::OM->Get('Kernel::System::DB')->{'DB::Type'} || '';
@@ -178,9 +186,6 @@ sub GetSessionIDData {
     # get encode object
     my $EncodeObject = $Kernel::OM->Get('Kernel::System::Encode');
 
-    # get storable object
-    my $StorableObject = $Kernel::OM->Get('Kernel::System::Storable');
-
     my %Session;
     my %SessionID;
     ROW:
@@ -188,9 +193,7 @@ sub GetSessionIDData {
 
         # deserialize data if needed
         if ( $Row[3] ) {
-            my $Value = eval {
-                $StorableObject->Deserialize( Data => MIME::Base64::decode_base64( $Row[2] ) )
-            };
+            my $Value = eval { Storable::thaw( MIME::Base64::decode_base64( $Row[2] ) ) };
 
             # workaround for the oracle problem with empty
             # strings and NULL values in VARCHAR columns
@@ -384,8 +387,6 @@ sub GetAllSessionIDs {
 sub GetActiveSessions {
     my ( $Self, %Param ) = @_;
 
-    my $MaxSessionIdleTime = $Kernel::OM->Get('Kernel::Config')->Get('SessionMaxIdleTime');
-
     # get system time
     my $TimeNow = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
 
@@ -426,7 +427,7 @@ sub GetActiveSessions {
 
         next SESSIONID if $UserType ne $Param{UserType};
 
-        next SESSIONID if ( $UserLastRequest + $MaxSessionIdleTime ) < $TimeNow;
+        next SESSIONID if ( $UserLastRequest + $Self->{SessionActiveTime} ) < $TimeNow;
 
         $ActiveSessionCount++;
 
@@ -621,8 +622,6 @@ sub _SQLCreate {
     return if !$Param{SQLs};
     return if ref $Param{SQLs} ne 'ARRAY';
 
-    my $StorableObject = $Kernel::OM->Get('Kernel::System::Storable');
-
     if ( $Self->{DBType} eq 'mysql' || $Self->{DBType} eq 'postgresql' ) {
 
         # define row
@@ -646,9 +645,7 @@ sub _SQLCreate {
             {
 
                 # dump the data
-                $Value = MIME::Base64::encode_base64(
-                    $StorableObject->Serialize( Data => $Value )
-                );
+                $Value      = MIME::Base64::encode_base64( Storable::nfreeze($Value) );
                 $Serialized = 1;
             }
 
@@ -712,9 +709,7 @@ sub _SQLCreate {
                 }
 
                 # dump the data
-                $Value = MIME::Base64::encode_base64(
-                    $StorableObject->Serialize( Data => $Value )
-                );
+                $Value      = MIME::Base64::encode_base64( Storable::nfreeze($Value) );
                 $Serialized = 1;
             }
 
@@ -780,9 +775,7 @@ sub _SQLCreate {
             {
 
                 # dump the data
-                $Value = MIME::Base64::encode_base64(
-                    $StorableObject->Serialize( Data => $Value )
-                );
+                $Value      = MIME::Base64::encode_base64( Storable::nfreeze($Value) );
                 $Serialized = 1;
             }
 

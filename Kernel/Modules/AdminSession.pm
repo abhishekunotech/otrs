@@ -139,10 +139,6 @@ sub Run {
 
         $Output .= $LayoutObject->Output(
             TemplateFile => 'AdminSession',
-            Data         => {
-                Action => $Self->{Subaction},
-                %Data,
-            },
         );
 
         $Output .= $LayoutObject->Footer();
@@ -168,22 +164,16 @@ sub Run {
             Name => 'Overview',
         );
 
-        $LayoutObject->Block(
-            Name => 'Filter'
-        );
-
         for my $SessionID (@List) {
             my $List = '';
             my %Data = $SessionObject->GetSessionIDData( SessionID => $SessionID );
-            if ( $Data{UserType} && $Data{UserLogin} ) {
-                $MetaData{"$Data{UserType}Session"}++;
-                if ( !$MetaData{"$Data{UserLogin}"} ) {
-                    $MetaData{"$Data{UserType}SessionUniq"}++;
-                    $MetaData{"$Data{UserLogin}"} = 1;
-                }
+            $MetaData{"$Data{UserType}Session"}++;
+            if ( !$MetaData{"$Data{UserLogin}"} ) {
+                $MetaData{"$Data{UserType}SessionUniq"}++;
+                $MetaData{"$Data{UserLogin}"} = 1;
             }
 
-            $Data{UserType} = 'Agent' if ( !$Data{UserType} || $Data{UserType} ne 'Customer' );
+            $Data{UserType} = 'Agent' if ( $Data{UserType} ne 'Customer' );
 
             # create blocks
             $LayoutObject->Block(

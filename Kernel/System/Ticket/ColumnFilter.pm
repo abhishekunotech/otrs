@@ -24,16 +24,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Ticket::ColumnFilter - Column Filter library
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All functions for Column Filters.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TicketColumnFilterObject = $Kernel::OM->Get('Kernel::System::Ticket::ColumnFilter');
 
 =cut
@@ -48,7 +54,7 @@ sub new {
     return $Self;
 }
 
-=head2 StateFilterValuesGet()
+=item StateFilterValuesGet()
 
 get a list of states within the given ticket is list
 
@@ -113,7 +119,7 @@ sub StateFilterValuesGet {
     return \%Data;
 }
 
-=head2 QueueFilterValuesGet()
+=item QueueFilterValuesGet()
 
 get a list of queues within the given ticket is list
 
@@ -180,7 +186,7 @@ sub QueueFilterValuesGet {
     return \%Data;
 }
 
-=head2 PriorityFilterValuesGet()
+=item PriorityFilterValuesGet()
 
 get a list of priorities within the given ticket is list
 
@@ -245,7 +251,7 @@ sub PriorityFilterValuesGet {
     return \%Data;
 }
 
-=head2 TypeFilterValuesGet()
+=item TypeFilterValuesGet()
 
 get a list of ticket types within the given ticket is list
 
@@ -310,7 +316,7 @@ sub TypeFilterValuesGet {
     return \%Data;
 }
 
-=head2 LockFilterValuesGet()
+=item LockFilterValuesGet()
 
 get a list of ticket lock values within the given ticket is list
 
@@ -376,7 +382,7 @@ sub LockFilterValuesGet {
     return \%Data;
 }
 
-=head2 ServiceFilterValuesGet()
+=item ServiceFilterValuesGet()
 
 get a list of services within the given ticket is list
 
@@ -441,7 +447,7 @@ sub ServiceFilterValuesGet {
     return \%Data;
 }
 
-=head2 SLAFilterValuesGet()
+=item SLAFilterValuesGet()
 
 get a list of service level agreements within the given ticket is list
 
@@ -506,7 +512,7 @@ sub SLAFilterValuesGet {
     return \%Data;
 }
 
-=head2 CustomerFilterValuesGet()
+=item CustomerFilterValuesGet()
 
 get a list of customer ids within the given ticket is list
 
@@ -575,7 +581,7 @@ sub CustomerFilterValuesGet {
     return \%Data;
 }
 
-=head2 CustomerUserIDFilterValuesGet()
+=item CustomerUserIDFilterValuesGet()
 
 get a list of customer users within the given ticket is list
 
@@ -644,7 +650,7 @@ sub CustomerUserIDFilterValuesGet {
     return \%Data;
 }
 
-=head2 OwnerFilterValuesGet()
+=item OwnerFilterValuesGet()
 
 get a list of ticket owners within the given ticket is list
 
@@ -732,7 +738,7 @@ sub OwnerFilterValuesGet {
     return \%Data;
 }
 
-=head2 ResponsibleFilterValuesGet()
+=item ResponsibleFilterValuesGet()
 
 get a list of agents responsible for the tickets within the given ticket list
 
@@ -820,7 +826,7 @@ sub ResponsibleFilterValuesGet {
     return \%Data;
 }
 
-=head2 DynamicFieldFilterValuesGet()
+=item DynamicFieldFilterValuesGet()
 
 get a list of a specific ticket dynamic field values within the given tickets list
 
@@ -920,7 +926,7 @@ sub DynamicFieldFilterValuesGet {
 
 =begin Internal:
 
-=head2 _GeneralDataGet()
+=item _GeneralDataGet()
 
 get data list
 
@@ -954,7 +960,7 @@ sub _GeneralDataGet {
         }
     }
 
-    my $FunctionName = $Param{FunctionName};
+    my $FuctionName = $Param{FunctionName};
 
     # set the backend file
     my $BackendModule = $Param{ModuleName};
@@ -988,7 +994,7 @@ sub _GeneralDataGet {
     }
 
     # get data list
-    my %DataList = $BackendObject->$FunctionName(
+    my %DataList = $BackendObject->$FuctionName(
         Valid  => 1,
         UserID => $Param{UserID},
     );
@@ -1050,6 +1056,8 @@ sub _TicketIDStringGet {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

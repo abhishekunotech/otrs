@@ -25,16 +25,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::Transition
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB Transition backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TransitionObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::Transition');
 
 =cut
@@ -58,7 +64,7 @@ sub new {
     return $Self;
 }
 
-=head2 TransitionAdd()
+=item TransitionAdd()
 
 add new Trnsition
 
@@ -184,7 +190,7 @@ sub TransitionAdd {
     return $ID;
 }
 
-=head2 TransitionDelete()
+=item TransitionDelete()
 
 delete an Transition
 
@@ -232,7 +238,7 @@ sub TransitionDelete {
     return 1;
 }
 
-=head2 TransitionGet()
+=item TransitionGet()
 
 get Transition attributes
 
@@ -350,7 +356,7 @@ sub TransitionGet {
     return \%Data;
 }
 
-=head2 TransitionUpdate()
+=item TransitionUpdate()
 
 update Transition attributes
 
@@ -487,7 +493,7 @@ sub TransitionUpdate {
     return 1;
 }
 
-=head2 TransitionList()
+=item TransitionList()
 
 get an Transition list
 
@@ -570,7 +576,7 @@ sub TransitionList {
     return \%Data;
 }
 
-=head2 TransitionListGet()
+=item TransitionListGet()
 
 get a Transition list with all Transition details
 
@@ -663,6 +669,8 @@ sub TransitionListGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

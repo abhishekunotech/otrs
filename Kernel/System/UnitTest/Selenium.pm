@@ -22,7 +22,6 @@ use Kernel::System::UnitTest::Helper;
 
 our @ObjectDependencies = (
     'Kernel::Config',
-    'Kernel::System::AuthSession',
     'Kernel::System::Log',
     'Kernel::System::Main',
     'Kernel::System::Time',
@@ -43,7 +42,11 @@ In case of an error, an exception will be thrown that you can catch in your
 unit test file and handle with C<HandleError()> in this class. It will output
 a failing test result and generate a screen shot for analysis.
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a selenium object to run front end tests.
 
@@ -112,13 +115,10 @@ sub new {
     $Self->{BaseURL} = $Kernel::OM->Get('Kernel::Config')->Get('HttpType') . '://';
     $Self->{BaseURL} .= Kernel::System::UnitTest::Helper->GetTestHTTPHostname();
 
-    # Remember the start system time for the selenium test run.
-    $Self->{TestStartSystemTime} = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
-
     return $Self;
 }
 
-=head2 RunTest()
+=item RunTest()
 
 runs a selenium test if Selenium testing is configured and performs proper
 error handling (calls C<HandleError()> if needed).
@@ -143,16 +143,12 @@ sub RunTest {
     return 1;
 }
 
-=begin Internal:
-
-=head2 _execute_command()
+=item _execute_command()
 
 Override internal command of base class.
 
 We use it to output successful command runs to the UnitTest object.
 Errors will cause an exeption and be caught elsewhere.
-
-=end Internal:
 
 =cut
 
@@ -179,7 +175,7 @@ sub _execute_command {    ## no critic
     return $Result;
 }
 
-=head2 get()
+=item get()
 
 Override get method of base class to prepend the correct base URL.
 
@@ -201,7 +197,7 @@ sub get {    ## no critic
     return;
 }
 
-=head2 VerifiedGet()
+=item VerifiedGet()
 
 perform a get() call, but wait for the page to be fully loaded (works only within OTRS).
 Will die() if the verification fails.
@@ -225,7 +221,7 @@ sub VerifiedGet {
     return;
 }
 
-=head2 VerifiedRefresh()
+=item VerifiedRefresh()
 
 perform a refresh() call, but wait for the page to be fully loaded (works only within OTRS).
 Will die() if the verification fails.
@@ -247,7 +243,7 @@ sub VerifiedRefresh {
     return;
 }
 
-=head2 Login()
+=item Login()
 
 login to agent or customer interface
 
@@ -324,7 +320,7 @@ sub Login {
     return 1;
 }
 
-=head2 WaitFor()
+=item WaitFor()
 
 wait with increasing sleep intervals until the given condition is true or the wait time is over.
 Exactly one condition (JavaScript or WindowCount) must be specified.
@@ -371,17 +367,10 @@ sub WaitFor {
         $WaitedSeconds += $Interval;
         $Interval += 0.1;
     }
-
-    my $Argument = '';
-    for my $Key (qw(JavaScript WindowCount AlertPresent)) {
-        $Argument = "$Key => $Param{$Key}" if $Param{$Key};
-    }
-    $Argument = "Callback" if $Param{Callback};
-
-    die "WaitFor($Argument) failed.";
+    return;
 }
 
-=head2 DragAndDrop()
+=item DragAndDrop()
 
 Drag and drop an element.
 
@@ -445,7 +434,7 @@ sub DragAndDrop {
     return;
 }
 
-=head2 HandleError()
+=item HandleError()
 
 use this method to handle any Selenium exceptions.
 
@@ -540,25 +529,11 @@ sub DEMOLISH {
             File::Path::remove_tree($LeftoverFirefoxProfile);
         }
     }
-
-    # Cleanup all sessions, which was created after the selenium test start time.
-    my $AuthSessionObject = $Kernel::OM->Get('Kernel::System::AuthSession');
-
-    my @Sessions = $AuthSessionObject->GetAllSessionIDs();
-
-    SESSION:
-    for my $SessionID (@Sessions) {
-
-        my %SessionData = $AuthSessionObject->GetSessionIDData( SessionID => $SessionID );
-
-        next SESSION if !%SessionData;
-        next SESSION if $SessionData{UserSessionStart} && $SessionData{UserSessionStart} < $Self->{TestStartSystemTime};
-
-        $AuthSessionObject->RemoveSessionID( SessionID => $SessionID );
-    }
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

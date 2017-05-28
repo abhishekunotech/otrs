@@ -24,7 +24,7 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    $Self->{TempDir} = $Kernel::OM->Get('Kernel::Config')->Get('TempDir') . '/upload_cache';
+    $Self->{TempDir} = $Kernel::OM->Get('Kernel::Config')->Get('TempDir') . '/upload_cache/';
 
     if ( !-d $Self->{TempDir} ) {
         mkdir $Self->{TempDir};
@@ -35,6 +35,9 @@ sub new {
 
 sub FormIDCreate {
     my ( $Self, %Param ) = @_;
+
+    # cleanup temp form ids
+    $Self->FormIDCleanUp();
 
     # return requested form id
     return time() . '.' . rand(12341241);
@@ -51,18 +54,12 @@ sub FormIDRemove {
         return;
     }
 
-    my $Directory = $Self->{TempDir} . '/' . $Param{FormID};
-
-    if ( !-d $Directory ) {
-        return 1;
-    }
-
     # get main object
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
     my @List = $MainObject->DirectoryRead(
-        Directory => $Directory,
-        Filter    => "*",
+        Directory => $Self->{TempDir},
+        Filter    => "$Param{FormID}.*",
     );
 
     my @Data;
@@ -72,20 +69,13 @@ sub FormIDRemove {
         );
     }
 
-    if ( !rmdir($Directory) ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => "Can't remove: $Directory: $!!",
-        );
-    }
-
     return 1;
 }
 
 sub FormIDAddFile {
     my ( $Self, %Param ) = @_;
 
-    for (qw(FormID Filename ContentType)) {
+    for (qw(FormID Filename Content ContentType)) {
         if ( !$Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
@@ -94,8 +84,6 @@ sub FormIDAddFile {
             return;
         }
     }
-
-    $Param{Content} = '' if !defined( $Param{Content} );
 
     # create content id
     my $ContentID = $Param{ContentID};
@@ -108,51 +96,34 @@ sub FormIDAddFile {
         $ContentID = "$Disposition$Random.$Param{FormID}\@$FQDN";
     }
 
-    # create cache subdirectory if not exist
-    my $Directory = $Self->{TempDir} . '/' . $Param{FormID};
-    if ( !-d $Directory ) {
-
-        # Create directory. This could fail if another process creates the
-        #   same directory, so don't use the return value.
-        File::Path::mkpath( $Directory, 0, 0770 );    ## no critic
-
-        if ( !-d $Directory ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "Can't create directory '$Directory': $!",
-            );
-            return;
-        }
-    }
-
     # get main object
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
     # files must readable for creator
     return if !$MainObject->FileWrite(
-        Directory  => $Directory,
-        Filename   => "$Param{Filename}",
+        Directory  => $Self->{TempDir},
+        Filename   => "$Param{FormID}.$Param{Filename}",
         Content    => \$Param{Content},
         Mode       => 'binmode',
         Permission => '640',
     );
     return if !$MainObject->FileWrite(
-        Directory  => $Directory,
-        Filename   => "$Param{Filename}.ContentType",
+        Directory  => $Self->{TempDir},
+        Filename   => "$Param{FormID}.$Param{Filename}.ContentType",
         Content    => \$Param{ContentType},
         Mode       => 'binmode',
         Permission => '640',
     );
     return if !$MainObject->FileWrite(
-        Directory  => $Directory,
-        Filename   => "$Param{Filename}.ContentID",
+        Directory  => $Self->{TempDir},
+        Filename   => "$Param{FormID}.$Param{Filename}.ContentID",
         Content    => \$ContentID,
         Mode       => 'binmode',
         Permission => '640',
     );
     return if !$MainObject->FileWrite(
-        Directory  => $Directory,
-        Filename   => "$Param{Filename}.Disposition",
+        Directory  => $Self->{TempDir},
+        Filename   => "$Param{FormID}.$Param{Filename}.Disposition",
         Content    => \$Disposition,
         Mode       => 'binmode',
         Permission => '644',
@@ -181,30 +152,24 @@ sub FormIDRemoveFile {
     my $ID   = $Param{FileID} - 1;
     my %File = %{ $Index[$ID] };
 
-    my $Directory = $Self->{TempDir} . '/' . $Param{FormID};
-
-    if ( !-d $Directory ) {
-        return 1;
-    }
-
     # get main object
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
     $MainObject->FileDelete(
-        Directory => $Directory,
-        Filename  => "$File{Filename}",
+        Directory => $Self->{TempDir},
+        Filename  => "$Param{FormID}.$File{Filename}",
     );
     $MainObject->FileDelete(
-        Directory => $Directory,
-        Filename  => "$File{Filename}.ContentType",
+        Directory => $Self->{TempDir},
+        Filename  => "$Param{FormID}.$File{Filename}.ContentType",
     );
     $MainObject->FileDelete(
-        Directory => $Directory,
-        Filename  => "$File{Filename}.ContentID",
+        Directory => $Self->{TempDir},
+        Filename  => "$Param{FormID}.$File{Filename}.ContentID",
     );
     $MainObject->FileDelete(
-        Directory => $Directory,
-        Filename  => "$File{Filename}.Disposition",
+        Directory => $Self->{TempDir},
+        Filename  => "$Param{FormID}.$File{Filename}.Disposition",
     );
 
     return 1;
@@ -221,23 +186,16 @@ sub FormIDGetAllFilesData {
         return;
     }
 
-    my @Data;
-
-    my $Directory = $Self->{TempDir} . '/' . $Param{FormID};
-
-    if ( !-d $Directory ) {
-        return \@Data;
-    }
-
     # get main object
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
     my @List = $MainObject->DirectoryRead(
-        Directory => $Directory,
-        Filter    => "*",
+        Directory => $Self->{TempDir},
+        Filter    => "$Param{FormID}.*",
     );
 
     my $Counter = 0;
+    my @Data;
 
     FILE:
     for my $File (@List) {
@@ -251,28 +209,37 @@ sub FormIDGetAllFilesData {
         my $FileSize = -s $File;
 
         # human readable file size
-        if ( defined $FileSize ) {
+        if ($FileSize) {
 
             # remove meta data in files
             if ( $FileSize > 30 ) {
                 $FileSize = $FileSize - 30
             }
+            if ( $FileSize > 1048576 ) {    # 1024 * 1024
+                $FileSize = sprintf "%.1f MBytes", ( $FileSize / 1048576 );    # 1024 * 1024
+            }
+            elsif ( $FileSize > 1024 ) {
+                $FileSize = sprintf "%.1f KBytes", ( ( $FileSize / 1024 ) );
+            }
+            else {
+                $FileSize = $FileSize . ' Bytes';
+            }
         }
         my $Content = $MainObject->FileRead(
             Location => $File,
-            Mode     => 'binmode',    # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
         next FILE if !$Content;
 
         my $ContentType = $MainObject->FileRead(
             Location => "$File.ContentType",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
         next FILE if !$ContentType;
 
         my $ContentID = $MainObject->FileRead(
             Location => "$File.ContentID",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
         next FILE if !$ContentID;
 
@@ -283,12 +250,11 @@ sub FormIDGetAllFilesData {
 
         my $Disposition = $MainObject->FileRead(
             Location => "$File.Disposition",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
-        next FILE if !$Disposition;
 
         # strip filename
-        $File =~ s/^.*\/(.+?)$/$1/;
+        $File =~ s/^.*\/$Param{FormID}\.(.+?)$/$1/;
         push(
             @Data,
             {
@@ -317,23 +283,16 @@ sub FormIDGetAllFilesMeta {
         return;
     }
 
-    my @Data;
-
-    my $Directory = $Self->{TempDir} . '/' . $Param{FormID};
-
-    if ( !-d $Directory ) {
-        return \@Data;
-    }
-
     # get main object
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
     my @List = $MainObject->DirectoryRead(
-        Directory => $Directory,
-        Filter    => "*",
+        Directory => $Self->{TempDir},
+        Filter    => "$Param{FormID}.*",
     );
 
     my $Counter = 0;
+    my @Data;
 
     FILE:
     for my $File (@List) {
@@ -347,23 +306,32 @@ sub FormIDGetAllFilesMeta {
         my $FileSize = -s $File;
 
         # human readable file size
-        if ( defined $FileSize ) {
+        if ($FileSize) {
 
             # remove meta data in files
             if ( $FileSize > 30 ) {
                 $FileSize = $FileSize - 30
             }
+            if ( $FileSize > 1048576 ) {    # 1024 * 1024
+                $FileSize = sprintf "%.1f MBytes", ( $FileSize / 1048576 );    # 1024 * 1024
+            }
+            elsif ( $FileSize > 1024 ) {
+                $FileSize = sprintf "%.1f KBytes", ( ( $FileSize / 1024 ) );
+            }
+            else {
+                $FileSize = $FileSize . ' Bytes';
+            }
         }
 
         my $ContentType = $MainObject->FileRead(
             Location => "$File.ContentType",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
         next FILE if !$ContentType;
 
         my $ContentID = $MainObject->FileRead(
             Location => "$File.ContentID",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
         next FILE if !$ContentID;
 
@@ -374,12 +342,11 @@ sub FormIDGetAllFilesMeta {
 
         my $Disposition = $MainObject->FileRead(
             Location => "$File.Disposition",
-            Mode     => 'binmode',             # optional - binmode|utf8
+            Mode     => 'binmode',                                             # optional - binmode|utf8
         );
-        next FILE if !$Disposition;
 
         # strip filename
-        $File =~ s/^.*\/(.+?)$/$1/;
+        $File =~ s/^.*\/$Param{FormID}\.(.+?)$/$1/;
         push(
             @Data,
             {
@@ -398,51 +365,26 @@ sub FormIDGetAllFilesMeta {
 sub FormIDCleanUp {
     my ( $Self, %Param ) = @_;
 
-    # get main object
-    my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
-
-    my $RetentionTime = int( time() - 86400 );        # remove subdirs older than 24h
-    my @List          = $MainObject->DirectoryRead(
+    my $CurrentTile = time() - 86400;                                            # 60 * 60 * 24 * 1
+    my @List        = $Kernel::OM->Get('Kernel::System::Main')->DirectoryRead(
         Directory => $Self->{TempDir},
         Filter    => '*'
     );
 
-    SUBDIR:
-    for my $Subdir (@List) {
-        my $SubdirTime = $Subdir;
+    my %RemoveFormIDs;
+    for my $File (@List) {
 
-        if ( $SubdirTime =~ /^.*\/\d+\..+$/ ) {
-            $SubdirTime =~ s/^.*\/(\d+?)\..+$/$1/
-        }
-        else {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message =>
-                    "Won't delete upload cache directory $Subdir: timestamp in directory name not found! Please fix it manually.",
-            );
-            next SUBDIR;
-        }
-
-        if ( $RetentionTime > $SubdirTime ) {
-            my @Sublist = $MainObject->DirectoryRead(
-                Directory => $Subdir,
-                Filter    => "*",
-            );
-
-            for my $File (@Sublist) {
-                $MainObject->FileDelete(
-                    Location => $File,
-                );
-            }
-
-            if ( !rmdir($Subdir) ) {
-                $Kernel::OM->Get('Kernel::System::Log')->Log(
-                    Priority => 'error',
-                    Message  => "Can't remove: $Subdir: $!!",
-                );
-                return;
+        # get FormID
+        $File =~ s/^.*\/(.+?)\..+?$/$1/;
+        if ( $CurrentTile > $File ) {
+            if ( !$RemoveFormIDs{$File} ) {
+                $RemoveFormIDs{$File} = 1;
             }
         }
+    }
+
+    for ( sort keys %RemoveFormIDs ) {
+        $Self->FormIDRemove( FormID => $_ );
     }
 
     return 1;

@@ -8,8 +8,6 @@
 
 package Kernel::Output::HTML::Notification::CustomerOTRSBusiness;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 use utf8;
@@ -18,6 +16,16 @@ our @ObjectDependencies = (
     'Kernel::System::OTRSBusiness',
     'Kernel::Output::HTML::Layout',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;

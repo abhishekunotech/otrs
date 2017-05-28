@@ -15,7 +15,6 @@ use warnings;
 
 use List::Util qw( first );
 
-use Kernel::System::DateTime qw(:all);
 use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = (
@@ -29,7 +28,7 @@ our @ObjectDependencies = (
     'Kernel::System::Main',
     'Kernel::System::PDF',
     'Kernel::System::Stats',
-    'Kernel::System::Ticket::Article',
+    'Kernel::System::Ticket',
     'Kernel::System::Time',
     'Kernel::System::User',
     'Kernel::System::Web::Request',
@@ -41,11 +40,13 @@ use Kernel::Language qw(Translatable);
 
 Kernel::Output::HTML::Statistics::View - View object for statistics
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Provides several functions to generate statistics GUI elements.
 
 =head1 PUBLIC INTERFACE
+
+=over 4
 
 =cut
 
@@ -59,7 +60,7 @@ sub new {
     return $Self;
 }
 
-=head2 StatsParamsWidget()
+=item StatsParamsWidget()
 
 generate HTML for statistics run widget.
 
@@ -180,12 +181,13 @@ sub StatsParamsWidget {
         return;    # no possible output format
     }
 
-    # provide the time zone field only for dynamic statistics
-    if ( $Stat->{StatType} eq 'dynamic' ) {
-        my $SelectedTimeZone = $LocalGetParam->( Param => 'TimeZone' )
-            // $Stat->{TimeZone}
-            // OTRSTimeZoneGet();
-
+# provide the time zone field only, if the system use UTC as system time, the TimeZoneUser is active and for dynamic statistics
+    if (
+        !$Kernel::OM->Get('Kernel::System::Time')->ServerLocalTimeOffsetSeconds()
+        && $ConfigObject->Get('TimeZoneUser')
+        && $Stat->{StatType} eq 'dynamic'
+        )
+    {
         my %TimeZoneBuildSelection = $Self->_TimeZoneBuildSelection();
 
         my %Frontend;
@@ -193,7 +195,8 @@ sub StatsParamsWidget {
             %TimeZoneBuildSelection,
             Name       => 'TimeZone',
             Class      => 'Modernize',
-            SelectedID => $SelectedTimeZone,
+            SelectedID => $LocalGetParam->( Param => 'TimeZone' ) // $Stat->{TimeZone}
+                // $ConfigObject->Get('TimeZone') || 0,
         );
 
         $LayoutObject->Block(
@@ -419,8 +422,6 @@ sub StatsParamsWidget {
                                 Key   => $ElementName,
                                 Value => $LocalGetParam->( Param => $ElementName )
                                     // $ObjectAttribute->{SelectedValues}[0],
-                                CSSClass           => $ObjectAttribute->{CSSClass},
-                                HTMLDataAttributes => $ObjectAttribute->{HTMLDataAttributes},
                             },
                         );
                     }
@@ -543,14 +544,7 @@ sub StatsParamsWidget {
                                 Name => 'TimeScale',
                                 Data => {
                                     %BlockData,
-                                },
-                            );
-
-                            # send data to JS
-                            $LayoutObject->AddJSData(
-                                Key   => 'StatsParamData',
-                                Value => {
-                                    %BlockData
+                                    Use => $Use,
                                 },
                             );
                         }
@@ -586,22 +580,13 @@ sub StatsParamsWidget {
         $Stat->{$Field} = $Kernel::OM->Get('Kernel::System::User')->UserName( UserID => $Stat->{$Field} );
     }
 
-    if ( $Param{AJAX} ) {
-
-        # send data to JS
-        $LayoutObject->AddJSData(
-            Key   => 'StatsWidgetAJAX',
-            Value => $Param{AJAX}
-        );
-    }
-
     $Output .= $LayoutObject->Output(
         TemplateFile => 'Statistics/StatsParamsWidget',
         Data         => {
             %{$Stat},
             AJAX => $Param{AJAX},
         },
-        AJAX => $Param{AJAX},
+        KeepScriptTags => $Param{AJAX},
     );
     return $Output;
 }
@@ -794,21 +779,17 @@ sub GeneralSpecificationsWidget {
     }
     $Stat->{SelectPermission} = $LayoutObject->BuildSelection(%Permission);
 
-    # provide the timezone field only for dynamic statistics
+    # provide the timezone field only if the system use UTC as system time, the TimeZoneUser is active
+    # and for dynamic statistics
     if (
-        ( $Stat->{StatType} && $Stat->{StatType} eq 'dynamic' )
-        || ( $Frontend{StatType} && $Frontend{StatType} eq 'dynamic' )
+        !$Kernel::OM->Get('Kernel::System::Time')->ServerLocalTimeOffsetSeconds()
+        && $ConfigObject->Get('TimeZoneUser')
+        && (
+            ( $Stat->{StatType} && $Stat->{StatType} eq 'dynamic' )
+            || ( $Frontend{StatType} && $Frontend{StatType} eq 'dynamic' )
+        )
         )
     {
-
-        my $SelectedTimeZone = $GetParam{TimeZone} // $Stat->{TimeZone};
-        if ( !defined $SelectedTimeZone ) {
-            my %UserPreferences = $Kernel::OM->Get('Kernel::System::User')->GetPreferences(
-                UserID => $Param{UserID}
-            );
-            $SelectedTimeZone = $UserPreferences{UserTimeZone}
-                // OTRSTimeZoneGet();
-        }
 
         my %TimeZoneBuildSelection = $Self->_TimeZoneBuildSelection();
 
@@ -816,7 +797,7 @@ sub GeneralSpecificationsWidget {
             %TimeZoneBuildSelection,
             Name       => 'TimeZone',
             Class      => 'Modernize ' . ( $Errors{TimeZoneServerError} ? ' ServerError' : '' ),
-            SelectedID => $SelectedTimeZone,
+            SelectedID => $GetParam{TimeZone} // $Stat->{TimeZone} // $ConfigObject->Get('TimeZone') || 0,
         );
     }
 
@@ -837,8 +818,9 @@ sub XAxisWidget {
 
     my $Stat = $Param{Stat};
 
-    # get needed objects
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
+    #my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # if only one value is available select this value
@@ -846,8 +828,6 @@ sub XAxisWidget {
         $Stat->{UseAsXvalue}[0]{Selected} = 1;
         $Stat->{UseAsXvalue}[0]{Fixed}    = 1;
     }
-
-    my @XAxisElements;
 
     for my $ObjectAttribute ( @{ $Stat->{UseAsXvalue} } ) {
         my %BlockData;
@@ -915,21 +895,12 @@ sub XAxisWidget {
             $Block = 'MultiSelectField';
         }
 
-        # store data, which will be sent to JS
-        push @XAxisElements, $BlockData{Element} if $BlockData{Checked};
-
         # show the input element
         $LayoutObject->Block(
             Name => $Block,
             Data => \%BlockData,
         );
     }
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'XAxisElements',
-        Value => \@XAxisElements,
-    );
 
     my $Output .= $LayoutObject->Output(
         TemplateFile => 'Statistics/XAxisWidget',
@@ -945,11 +916,10 @@ sub YAxisWidget {
 
     my $Stat = $Param{Stat};
 
-    # get needed objects
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
-    my @YAxisElements;
+    #my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     OBJECTATTRIBUTE:
     for my $ObjectAttribute ( @{ $Stat->{UseAsValueSeries} } ) {
@@ -1021,21 +991,12 @@ sub YAxisWidget {
             $Block = 'MultiSelectField';
         }
 
-        # store data, which will be sent to JS
-        push @YAxisElements, $BlockData{Element} if $BlockData{Checked};
-
         # show the input element
         $LayoutObject->Block(
             Name => $Block,
             Data => \%BlockData,
         );
     }
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'YAxisElements',
-        Value => \@YAxisElements,
-    );
 
     my $Output .= $LayoutObject->Output(
         TemplateFile => 'Statistics/YAxisWidget',
@@ -1051,19 +1012,16 @@ sub RestrictionsWidget {
 
     my $Stat = $Param{Stat};
 
-    # get needed objects
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
-    my @RestrictionElements;
+    #my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     for my $ObjectAttribute ( @{ $Stat->{UseAsRestriction} } ) {
         my %BlockData;
-        $BlockData{Fixed}              = 'checked="checked"';
-        $BlockData{Checked}            = '';
-        $BlockData{Block}              = $ObjectAttribute->{Block};
-        $BlockData{CSSClass}           = $ObjectAttribute->{CSSClass};
-        $BlockData{HTMLDataAttributes} = $ObjectAttribute->{HTMLDataAttributes};
+        $BlockData{Fixed}   = 'checked="checked"';
+        $BlockData{Checked} = '';
+        $BlockData{Block}   = $ObjectAttribute->{Block};
 
         if ( $ObjectAttribute->{Selected} ) {
             $BlockData{Checked} = 'checked="checked"';
@@ -1130,21 +1088,12 @@ sub RestrictionsWidget {
             %BlockData = ( %BlockData, %TimeData );
         }
 
-        # store data, which will be sent to JS
-        push @RestrictionElements, $BlockData{Element} if $BlockData{Checked};
-
         # show the input element
         $LayoutObject->Block(
             Name => $ObjectAttribute->{Block},
             Data => \%BlockData,
         );
     }
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'RestrictionElements',
-        Value => \@RestrictionElements,
-    );
 
     my $Output .= $LayoutObject->Output(
         TemplateFile => 'Statistics/RestrictionsWidget',
@@ -1179,12 +1128,6 @@ sub PreviewWidget {
             UserID   => $Param{UserID},
         );
     }
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'PreviewResult',
-        Value => $Frontend{PreviewResult},
-    );
 
     my $Output .= $LayoutObject->Output(
         TemplateFile => 'Statistics/PreviewWidget',
@@ -1231,7 +1174,12 @@ sub StatsParamsGet {
     my ( %GetParam, @Errors );
 
     # get the time zone param
-    if ( length $LocalGetParam->( Param => 'TimeZone' ) ) {
+    if (
+        !$TimeObject->ServerLocalTimeOffsetSeconds()
+        && $ConfigObject->Get('TimeZoneUser')
+        && length $LocalGetParam->( Param => 'TimeZone' )
+        )
+    {
         $GetParam{TimeZone} = $LocalGetParam->( Param => 'TimeZone' ) // $Stat->{TimeZone};
     }
 
@@ -1543,23 +1491,15 @@ sub StatsResultRender {
             Value => $Title,
             Type  => 'Small',
         );
-
-        # send data to JS
-        $LayoutObject->AddJSData(
-            Key   => 'D3Data',
-            Value => {
+        $Output .= $LayoutObject->Output(
+            Data => {
+                %{$Stat},
                 RawData => [
                     [$Title],
                     $HeadArrayRef,
                     @StatArray,
                 ],
-                Format => $Param{Format},
-                }
-        );
-
-        $Output .= $LayoutObject->Output(
-            Data => {
-                %{$Stat},
+                %Param,
             },
             TemplateFile => 'Statistics/StatsResultRender/D3',
         );
@@ -1629,7 +1569,7 @@ sub StatsResultRender {
     }
 }
 
-=head2 StatsConfigurationValidate()
+=item StatsConfigurationValidate()
 
     my $StatCorrectlyConfigured = $StatsViewObject->StatsConfigurationValidate(
         StatData => \%StatData,
@@ -2289,10 +2229,34 @@ sub _TimeScaleYAxis {
 sub _TimeZoneBuildSelection {
     my ( $Self, %Param ) = @_;
 
-    my $TimeZones = TimeZoneList();
-
     my %TimeZoneBuildSelection = (
-        Data => { map { $_ => $_ } @{$TimeZones} },
+        Data => {
+            '0'   => '+ 0',
+            '+1'  => '+ 1',
+            '+2'  => '+ 2',
+            '+3'  => '+ 3',
+            '+4'  => '+ 4',
+            '+5'  => '+ 5',
+            '+6'  => '+ 6',
+            '+7'  => '+ 7',
+            '+8'  => '+ 8',
+            '+9'  => '+ 9',
+            '+10' => '+10',
+            '+11' => '+11',
+            '+12' => '+12',
+            '-1'  => '- 1',
+            '-2'  => '- 2',
+            '-3'  => '- 3',
+            '-4'  => '- 4',
+            '-5'  => '- 5',
+            '-6'  => '- 6',
+            '-7'  => '- 7',
+            '-8'  => '- 8',
+            '-9'  => '- 9',
+            '-10' => '-10',
+            '-11' => '-11',
+            '-12' => '-12',
+        },
     );
 
     return %TimeZoneBuildSelection;
@@ -2341,11 +2305,27 @@ sub _GetSelectedXAxisTimeScaleValue {
     return $SelectedXAxisTimeScaleValue;
 }
 
+=item _ColumnAndRowTranslation()
+
+DEPRECATED: This function will be removed in further versions of OTRS.
+The function do nothing at the moment, because the functionality was moved
+in the backend module (Stats.pm) and the statistic results will always be translated in
+the "StatsRun" function.
+
+=cut
+
+sub _ColumnAndRowTranslation {
+    my ( $Self, %Param ) = @_;
+
+    return 1;
+}
+
 sub _StopWordErrorCheck {
     my ( $Self, %Param ) = @_;
 
-    my $LayoutObject  = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+    # get needed objects
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
     if ( !%Param ) {
         $LayoutObject->FatalError(
@@ -2354,7 +2334,7 @@ sub _StopWordErrorCheck {
     }
 
     my %StopWordsServerErrors;
-    if ( !$ArticleObject->SearchStringStopWordsUsageWarningActive() ) {
+    if ( !$TicketObject->SearchStringStopWordsUsageWarningActive() ) {
         return %StopWordsServerErrors;
     }
 
@@ -2372,8 +2352,8 @@ sub _StopWordErrorCheck {
 
     if (%SearchStrings) {
 
-        my $StopWords = $ArticleObject->SearchStringStopWordsFind(
-            SearchStrings => \%SearchStrings,
+        my $StopWords = $TicketObject->SearchStringStopWordsFind(
+            SearchStrings => \%SearchStrings
         );
 
         FIELD:
@@ -2395,22 +2375,24 @@ sub _StopWordErrorCheck {
 sub _StopWordFieldsGet {
     my ( $Self, %Param ) = @_;
 
-    if ( !$Kernel::OM->Get('Kernel::System::Ticket::Article')->SearchStringStopWordsUsageWarningActive() ) {
+    if ( !$Kernel::OM->Get('Kernel::System::Ticket')->SearchStringStopWordsUsageWarningActive() ) {
         return ();
     }
 
     my %StopWordFields = (
-        'MIME_From'    => 1,
-        'MIME_To'      => 1,
-        'MIME_Cc'      => 1,
-        'MIME_Subject' => 1,
-        'MIME_Body'    => 1,
+        'From'    => 1,
+        'To'      => 1,
+        'Cc'      => 1,
+        'Subject' => 1,
+        'Body'    => 1,
     );
 
     return %StopWordFields;
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

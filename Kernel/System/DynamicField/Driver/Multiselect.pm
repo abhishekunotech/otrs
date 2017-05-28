@@ -13,7 +13,7 @@ use warnings;
 
 use Kernel::System::VariableCheck qw(:all);
 
-use parent qw(Kernel::System::DynamicField::Driver::BaseSelect);
+use base qw(Kernel::System::DynamicField::Driver::BaseSelect);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -26,7 +26,7 @@ our @ObjectDependencies = (
 
 Kernel::System::DynamicField::Driver::Multiselect
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 DynamicFields Multiselect Driver delegate
 
@@ -35,7 +35,9 @@ DynamicFields Multiselect Driver delegate
 This module implements the public interface of L<Kernel::System::DynamicField::Backend>.
 Please look there for a detailed reference of the functions.
 
-=head2 new()
+=over 4
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::System::DynamicField::Backend->new();
@@ -57,7 +59,6 @@ sub new {
         'IsFiltrable'                  => 0,
         'IsStatsCondition'             => 1,
         'IsCustomerInterfaceCapable'   => 1,
-        'IsLikeOperatorCapable'        => 1,
     };
 
     # get the Dynamic Field Backend custom extensions
@@ -260,7 +261,7 @@ sub EditFieldRender {
         $Value = $Param{Template}->{$FieldName};
     }
 
-    # extract the dynamic field value from the web request
+    # extract the dynamic field value form the web request
     my $FieldValue = $Self->EditFieldValueGet(
         %Param,
     );
@@ -503,7 +504,7 @@ sub EditFieldValueValidate {
 sub DisplayValueRender {
     my ( $Self, %Param ) = @_;
 
-    # set HTMLOutput as default if not specified
+    # set HTMLOuput as default if not specified
     if ( !defined $Param{HTMLOutput} ) {
         $Param{HTMLOutput} = 1;
     }
@@ -580,7 +581,7 @@ sub DisplayValueRender {
             }
         }
 
-        # HTMLOutput transformations
+        # HTMLOuput transformations
         if ( $Param{HTMLOutput} ) {
 
             $ReadableValue = $Param{LayoutObject}->Ascii2Html(
@@ -997,6 +998,8 @@ sub BuildSelectionDataGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

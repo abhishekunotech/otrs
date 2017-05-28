@@ -11,13 +11,14 @@ package Kernel::System::AuthSession::FS;
 use strict;
 use warnings;
 
+use Storable qw();
+
 use Kernel::Language qw(Translatable);
 
 our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Log',
     'Kernel::System::Main',
-    'Kernel::System::Storable',
     'Kernel::System::Time',
 );
 
@@ -32,8 +33,13 @@ sub new {
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # get more common params
-    $Self->{SessionSpool} = $ConfigObject->Get('SessionDir');
-    $Self->{SystemID}     = $ConfigObject->Get('SystemID');
+    $Self->{SessionSpool}      = $ConfigObject->Get('SessionDir');
+    $Self->{SystemID}          = $ConfigObject->Get('SystemID');
+    $Self->{SessionActiveTime} = $ConfigObject->Get('SessionActiveTime') || 60 * 10;
+
+    if ( $Self->{SessionActiveTime} < 300 ) {
+        $Self->{SessionActiveTime} = 300;
+    }
 
     return $Self;
 }
@@ -174,9 +180,7 @@ sub GetSessionIDData {
     return if ref $Content ne 'SCALAR';
 
     # read data structure back from file dump, use block eval for safety reasons
-    my $Session = eval {
-        $Kernel::OM->Get('Kernel::System::Storable')->Deserialize( Data => ${$Content} )
-    };
+    my $Session = eval { Storable::thaw( ${$Content} ) };
 
     if ( !$Session || ref $Session ne 'HASH' ) {
         delete $Self->{Cache}->{ $Param{SessionID} };
@@ -226,7 +230,7 @@ sub CreateSessionID {
     $Data{UserChallengeToken}  = $ChallengeToken;
 
     # dump the data
-    my $DataContent = $Kernel::OM->Get('Kernel::System::Storable')->Serialize( Data => \%Data );
+    my $DataContent = Storable::nfreeze( \%Data );
 
     # write data file
     my $FileLocation = $MainObject->FileWrite(
@@ -356,8 +360,6 @@ sub GetAllSessionIDs {
 sub GetActiveSessions {
     my ( $Self, %Param ) = @_;
 
-    my $MaxSessionIdleTime = $Kernel::OM->Get('Kernel::Config')->Get('SessionMaxIdleTime');
-
     my $TimeNow = $Kernel::OM->Get('Kernel::System::Time')->SystemTime();
 
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
@@ -398,7 +400,7 @@ sub GetActiveSessions {
 
         next SESSIONID if $UserType ne $Param{UserType};
 
-        next SESSIONID if ( $UserLastRequest + $MaxSessionIdleTime ) < $TimeNow;
+        next SESSIONID if ( $UserLastRequest + $Self->{SessionActiveTime} ) < $TimeNow;
 
         $ActiveSessionCount++;
 
@@ -524,9 +526,7 @@ sub DESTROY {
         }
 
         # dump the data
-        my $DataContent = $Kernel::OM->Get('Kernel::System::Storable')->Serialize(
-            Data => \%SessionData,
-        );
+        my $DataContent = Storable::nfreeze( \%SessionData );
 
         # write data file
         $MainObject->FileWrite(

@@ -32,6 +32,7 @@ $Selenium->RunTest(
             Password => $TestUserLogin,
         );
 
+        # get config object
         my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
         # disable frontend AdminCustomerCompany module

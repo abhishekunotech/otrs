@@ -22,15 +22,19 @@ $Selenium->RunTest(
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
         # get dashboard IFrame plugin default sysconfig
-        my %IFrameConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %IFrameConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name    => 'DashboardBackend###0300-IFrame',
             Default => 1,
         );
 
+        # set dashboard IFrame plugin to valid
+        my %IFrameConfigUpdate = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $IFrameConfig{Setting}->[1]->{Hash}->[1]->{Item} };
+
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'DashboardBackend###0300-IFrame',
-            Value => $IFrameConfig{EffectiveValue},
+            Value => \%IFrameConfigUpdate,
         );
 
         # create test user and login
@@ -45,7 +49,7 @@ $Selenium->RunTest(
         );
 
         # test if IFrame plugin shows correct link
-        my $IFrameLink = $IFrameConfig{EffectiveValue}->{Link};
+        my $IFrameLink = $IFrameConfig{Setting}->[1]->{Hash}->[1]->{Item}->[8]->{Content};
         $Self->True(
             index( $Selenium->get_page_source(), $IFrameLink ) > -1,
             "IFrame dashboard plugin link '$IFrameLink' - found",

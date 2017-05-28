@@ -18,9 +18,9 @@ my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 $Selenium->RunTest(
     sub {
 
-        my $Helper               = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-        my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article::Backend::Email');
+        # Get needed objects.
+        my $Helper       = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
+        my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         # Do not check email addresses.
         $Helper->ConfigSettingChange(
@@ -90,17 +90,17 @@ $Selenium->RunTest(
             );
 
             # Create test email article.
-            my $ArticleID = $ArticleBackendObject->ArticleCreate(
-                TicketID             => $TicketID,
-                IsVisibleForCustomer => 1,
-                SenderType           => 'customer',
-                Subject              => 'some short description',
-                Body                 => 'the message text',
-                Charset              => 'ISO-8859-15',
-                MimeType             => 'text/plain',
-                HistoryType          => 'EmailCustomer',
-                HistoryComment       => 'Some free text!',
-                UserID               => 1,
+            my $ArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $TicketID,
+                ArticleType    => 'email-external',
+                SenderType     => 'customer',
+                Subject        => 'some short description',
+                Body           => 'the message text',
+                Charset        => 'ISO-8859-15',
+                MimeType       => 'text/plain',
+                HistoryType    => 'EmailCustomer',
+                HistoryComment => 'Some free text!',
+                UserID         => 1,
             );
             $Self->True(
                 $ArticleID,
@@ -154,23 +154,7 @@ $Selenium->RunTest(
                 $Selenium->WaitFor(
                     JavaScript => 'return typeof($) === "function" && $("li.ui-menu-item:visible").length'
                 );
-
-                $Self->Is(
-                    $Selenium->execute_script(
-                        'return typeof($) === "function" && $("li.ui-menu-item:visible").length'
-                    ),
-                    1,
-                    "Check search result count",
-                );
-
-                $Self->Is(
-                    $Selenium->execute_script('return $("li.ui-menu-item:nth-child(1) a").html()'),
-                    "\"<strong>$TestUser</strong> $TestUser\" &lt;$TestUser\@example.com&gt; ($TestUser)",
-                    "Check link html.",
-                );
-
-                $Selenium->find_element( "li.ui-menu-item:nth-child(1) a", 'css' )->VerifiedClick();
-                $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $(".OverviewBox").length' );
+                $Selenium->find_element("//li[contains(text(), '$TestUser')]")->click();
             }
 
             $Selenium->WaitFor(
@@ -182,7 +166,7 @@ $Selenium->RunTest(
             $Selenium->find_element("//a[\@name='OverviewControl'][contains(\@href, \'View=Preview')]")->click();
             $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("#TicketOverviewLarge").length' );
 
-            # wait for JavaScript to be executed completely (event bindings etc.)
+            # wait for JS event to load
             sleep 1;
 
             # Check sorting by title, ascending.
@@ -191,12 +175,15 @@ $Selenium->RunTest(
 
             # Get first and last ticket ID.
             my $FirstTicketID = $Tickets[0]->{TicketID};
-            my $LastTicketID  = $Tickets[ $NumberOfTickets - 1 ]->{TicketID};
+            my $LastIndex     = $NumberOfTickets - 1;
+            my $LastTicketID  = $Tickets[$LastIndex]->{TicketID};
 
             # Wait until sorting is finished.
             $Selenium->WaitFor(
                 JavaScript =>
-                    "return typeof(\$) === 'function' && \$('#TicketOverviewLarge > li:eq(0)').attr('id') === 'TicketID_$FirstTicketID'"
+                    "return typeof(\$) === 'function' &&
+                     \$('#TicketOverviewLarge > li:eq(0)').attr('id') === 'TicketID_$FirstTicketID' &&
+                      \$('#TicketOverviewLarge > li:eq($LastIndex)').attr('id') === 'TicketID_$LastTicketID'"
             );
 
             # wait for JavaScript to be executed completely (event bindings etc.)
@@ -208,7 +195,7 @@ $Selenium->RunTest(
                 $Self->Is(
                     $Selenium->execute_script("return \$('#TicketOverviewLarge > li:eq($Count)').attr('id');"),
                     "TicketID_$TicketID",
-                    "$Test->{Screen} - TicketID $TicketID is found in expected row",
+                    "$Test->{Screen} - Up - TicketID $TicketID is found in expected row",
                 );
                 $Count++;
             }
@@ -217,14 +204,13 @@ $Selenium->RunTest(
             $Selenium->execute_script(
                 "\$('#SortBy').val('Title|Down').trigger('change');"
             );
-            $Selenium->WaitFor(
-                JavaScript => 'return typeof($) === "function" && $("#SortBy").val() === "Title|Down"'
-            );
 
             # Wait until sorting is finished.
             $Selenium->WaitFor(
                 JavaScript =>
-                    "return typeof(\$) === 'function' && \$('#TicketOverviewLarge > li:eq(0)').attr('id') === 'TicketID_$LastTicketID'"
+                    "return typeof(\$) === 'function' &&
+                     \$('#TicketOverviewLarge > li:eq(0)').attr('id') === 'TicketID_$LastTicketID' &&
+                      \$('#TicketOverviewLarge > li:eq($LastIndex)').attr('id') === 'TicketID_$FirstTicketID'"
             );
 
             $Count = $TicketsLastIndex;
@@ -235,7 +221,7 @@ $Selenium->RunTest(
                 $Self->Is(
                     $Selenium->execute_script("return \$('#TicketOverviewLarge > li:eq($Count)').attr('id');"),
                     "TicketID_$TicketID",
-                    "$Test->{Screen} - TicketID $TicketID is found in expected row",
+                    "$Test->{Screen} - Down - TicketID $TicketID is found in expected row",
                 );
                 $Count--;
 

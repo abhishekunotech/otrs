@@ -33,7 +33,7 @@
 [% RenderBlockStart("InputField") %]
         <label></label>
         <div class="Field">
-            <input type="text" name="[% Data.Element | html %]" id="[% Data.Element| html %]" value="[% Data.SelectedValue | html %]" class="W50pc [% Data.Invalid | html %] [% Data.CSSClass | html %]"[% FOR DataAttribute IN Data.HTMLDataAttributes.keys.sort %] data-[% DataAttribute | html %]="[% Data.HTMLDataAttributes.$DataAttribute | html %]"[% END %]/>
+            <input type="text" name="[% Data.Element | html %]" id="[% Data.Element| html %]" value="[% Data.SelectedValue | html %]" class="W50pc [% Data.Invalid | html %]"/>
             <div id="[% Data.Element| html %]ServerError" class="TooltipErrorMessage">
                 <p>[% Data.InvalidTooltip | html %]</p>
             </div>
@@ -46,7 +46,7 @@
             [% Translate("Absolute period") | html %]:
         </label>
         <div class="Field">
-            [% Translate("Between %s and %s", Data.TimeStart, Data.TimeStop) %]
+            [% Translate("Between") | html %] [% Data.TimeStart %] [% Translate("and") | html %] [% Data.TimeStop %]
         </div>
         <div class="Clear"></div>
 
@@ -66,6 +66,13 @@
         </label>
         <div class="Clear"></div>
     </fieldset>
+[% IF Data.Checked %]
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">
+    Core.Agent.Statistics.ElementAdd('Restrictions', '[% Data.Element | html %]');
+</script>
+[% END %]
+[% END %]
 [% RenderBlockEnd("Attribute") %]
 
 </div>

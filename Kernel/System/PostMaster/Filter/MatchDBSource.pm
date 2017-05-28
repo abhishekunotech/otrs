@@ -53,8 +53,6 @@ sub Run {
 
     for ( sort keys %JobList ) {
 
-        my %NamedCaptures;
-
         # get config options
         my %Config = $PostMasterFilter->FilterGet( Name => $_ );
 
@@ -93,7 +91,6 @@ sub Run {
                         $LocalMatched = 1;
                         if ($SearchEmail) {
                             $MatchedResult = $SearchEmail;
-                            $NamedCaptures{email} = $SearchEmail;
                         }
                         if ( $Self->{Debug} > 1 ) {
                             $Kernel::OM->Get('Kernel::System::Log')->Log(
@@ -137,13 +134,6 @@ sub Run {
                     $MatchedResult = $1;
                 }
 
-                if (%+) {
-                    my @Keys   = keys %+;
-                    my @Values = values %+;
-
-                    @NamedCaptures{@Keys} = @Values;
-                }
-
                 if ( $Self->{Debug} > 1 ) {
                     my $Op = $Config{Not}->{$_} ? '!' : "=";
 
@@ -169,8 +159,6 @@ sub Run {
         if ( $Matched && !$MatchedNot ) {
             for ( sort keys %Set ) {
                 $Set{$_} =~ s/\[\*\*\*\]/$MatchedResult/;
-                $Set{$_} =~ s/\[\*\* \\(\w+) \*\*\]/$NamedCaptures{$1}/xmsg;
-
                 $Param{GetParam}->{$_} = $Set{$_};
                 $Kernel::OM->Get('Kernel::System::Log')->Log(
                     Priority => 'notice',

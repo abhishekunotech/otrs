@@ -107,7 +107,7 @@ $Selenium->RunTest(
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentCustomerInformationCenter");
         $Selenium->WaitFor(
             JavaScript =>
-                'return typeof($) === "function" && $("#AgentCustomerInformationCenterSearchCustomerID").length',
+                'return typeof($) === "function" && $("#AgentCustomerInformationCenterSearchCustomerID").length'
         );
 
         # input search parameters
@@ -140,12 +140,6 @@ $Selenium->RunTest(
         $Self->True(
             index( $Selenium->get_page_source(), "Settings" ) > -1,
             "Setting for toggle widgets found on page",
-        );
-
-        # check if there is link to CIC search modal dialog from heading (name of the company)
-        $Self->True(
-            $Selenium->find_element( "#CustomerInformationCenterHeading", 'css' ),
-            'There is link to customer information center search modal dialog.',
         );
 
         # test links in Company Status widget
@@ -184,20 +178,6 @@ $Selenium->RunTest(
             );
 
         }
-
-        # Click on the customer user link in the customer user list (go to the AgentCustomerUserInformationCenter).
-        $Selenium->find_element(
-            "//a[contains(\@href, \'Action=AgentCustomerUserInformationCenter;CustomerUserID=$TestCustomerUserLogin' )]"
-        )->VerifiedClick();
-
-        $Self->True(
-            index( $Selenium->get_page_source(), "Customer User Information Center" ) > -1,
-            "Found title value on page",
-        );
-        $Self->True(
-            index( $Selenium->get_page_source(), $TestCustomerUserLogin ) > -1,
-            "Found customer user login on page",
-        );
 
         # delete created test tickets
         for my $TicketState ( sort keys %TicketData ) {

@@ -29,7 +29,7 @@ our @ObjectDependencies = (
 
 Kernel::System::Registration - Registration lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All Registration functions.
 
@@ -54,10 +54,16 @@ UpdateID the Portal refuses the update and an updated registration is required.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $RegistrationObject = $Kernel::OM->Get('Kernel::System::Registration');
 
 
@@ -81,7 +87,7 @@ sub new {
     return $Self;
 }
 
-=head2 TokenGet()
+=item TokenGet()
 
 Get a token needed for system registration.
 To obtain this token, you need to pass a valid OTRS ID and password.
@@ -226,7 +232,7 @@ sub TokenGet {
     return %Result;
 }
 
-=head2 Register()
+=item Register()
 
 Register the system;
 
@@ -505,7 +511,7 @@ sub Register {
     return 1;
 }
 
-=head2 RegistrationDataGet()
+=item RegistrationDataGet()
 
 Get the registration data from the system.
 
@@ -550,7 +556,7 @@ sub RegistrationDataGet {
     return %RegistrationData;
 }
 
-=head2 RegistrationUpdateSend()
+=item RegistrationUpdateSend()
 
 Register the system as Active.
 This also updates any information on Database, OTRS Version and Perl version that
@@ -624,12 +630,8 @@ sub RegistrationUpdateSend {
     # send SupportData if sending is activated
     if ( $SupportDataSending eq 'Yes' ) {
 
-        my $SupportDataCollectorWebTimeout = $ConfigObject->Get('SupportDataCollector::WebUserAgent::Timeout');
-
         my %CollectResult = eval {
-            $Kernel::OM->Get('Kernel::System::SupportDataCollector')->Collect(
-                WebTimeout => $SupportDataCollectorWebTimeout,
-            );
+            $Kernel::OM->Get('Kernel::System::SupportDataCollector')->Collect();
         };
         if ( !$CollectResult{Success} ) {
             my $ErrorMessage = $CollectResult{ErrorMessage} || $@ || 'unknown error';
@@ -857,7 +859,7 @@ sub RegistrationUpdateSend {
     );
 }
 
-=head2 Deregister()
+=item Deregister()
 
 Deregister the system. Deregistering also stops any update jobs.
 
@@ -985,6 +987,8 @@ sub Deregister {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

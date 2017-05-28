@@ -84,6 +84,7 @@ my %UserData = $Kernel::OM->Get('Kernel::System::User')->GetUserData(
 
 my $UserID = $UserData{UserID};
 
+# get ticket object
 my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
 # create ticket
@@ -105,19 +106,19 @@ $Self->True(
     "TicketCreate() successful for Ticket ID $TicketID",
 );
 
-my $ArticleID = $Kernel::OM->Get('Kernel::System::Ticket::Article::Backend::Internal')->ArticleCreate(
-    TicketID             => $TicketID,
-    IsVisibleForCustomer => 1,
-    SenderType           => 'customer',
-    From                 => 'customerOne@example.com, customerTwo@example.com',
-    To                   => 'Some Agent A <agent-a@example.com>',
-    Subject              => 'some short description',
-    Body                 => 'the message text',
-    Charset              => 'utf8',
-    MimeType             => 'text/plain',
-    HistoryType          => 'OwnerUpdate',
-    HistoryComment       => 'Some free text!',
-    UserID               => 1,
+my $ArticleID = $TicketObject->ArticleCreate(
+    TicketID       => $TicketID,
+    ArticleType    => 'webrequest',
+    SenderType     => 'customer',
+    From           => 'customerOne@example.com, customerTwo@example.com',
+    To             => 'Some Agent A <agent-a@example.com>',
+    Subject        => 'some short description',
+    Body           => 'the message text',
+    Charset        => 'utf8',
+    MimeType       => 'text/plain',
+    HistoryType    => 'OwnerUpdate',
+    HistoryComment => 'Some free text!',
+    UserID         => 1,
 );
 
 # sanity check

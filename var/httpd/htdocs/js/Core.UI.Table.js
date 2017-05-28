@@ -33,8 +33,6 @@ Core.UI.Table = (function (TargetNS) {
     TargetNS.InitTableFilter = function ($FilterInput, $Container, ColumnNumber) {
         var Timeout;
 
-        $FilterInput.wrap('<span class="TableFilterContainer" />');
-
         $FilterInput.off('keydown.FilterInput').on('keydown.FilterInput', function () {
 
             window.clearTimeout(Timeout);
@@ -89,13 +87,6 @@ Core.UI.Table = (function (TargetNS) {
                 }
 
                 if (FilterText.length) {
-
-                    if (!$FilterInput.next('.FilterRemove').length) {
-                        $FilterInput.after('<a href="#" class="FilterRemove"><i class="fa fa-times"></i></a>').next('.FilterRemove').attr('title', Core.Language.Translate('Remove the filter')).off('click.RemoveFilter').on('click.RemoveFilter', function() {
-                            $(this).prev('input').val('').trigger('keydown').focus();
-                        }).fadeIn();
-                    }
-
                     $Elements.hide();
                     $Rows.each(function () {
                         if (CheckText($(this), FilterText)) {
@@ -104,30 +95,14 @@ Core.UI.Table = (function (TargetNS) {
                     });
                 }
                 else {
-                    $FilterInput.next('.FilterRemove').fadeOut(function() {
-                        $(this).remove();
-                    });
                     $Elements.show();
                 }
 
-                // handle multiple containers correctly
-                if ($Container.length > 1) {
-                    $Container.each(function() {
-                        if ($(this).find('tbody tr:visible:not(.FilterMessage), li:visible:not(.Header):not(.FilterMessage)').length) {
-                            $(this).find('.FilterMessage').hide();
-                        }
-                        else {
-                            $(this).find('.FilterMessage').show();
-                        }
-                    });
+                if ($Rows.filter(':visible').length) {
+                    $Container.find('.FilterMessage').hide();
                 }
                 else {
-                    if ($Rows.filter(':visible').length) {
-                        $Container.find('.FilterMessage').hide();
-                    }
-                    else {
-                        $Container.find('.FilterMessage').show();
-                    }
+                    $Container.find('.FilterMessage').show();
                 }
 
                 Core.App.Publish('Event.UI.Table.InitTableFilter.Change', [$FilterInput, $Container, ColumnNumber]);

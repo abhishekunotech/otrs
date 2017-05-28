@@ -13,7 +13,7 @@ use warnings;
 
 use Kernel::System::VariableCheck qw(IsArrayRefWithData);
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::Config',

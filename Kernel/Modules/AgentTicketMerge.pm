@@ -11,15 +11,17 @@ package Kernel::Modules::AgentTicketMerge;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
-use Kernel::Language qw(Translatable);
 use Mail::Address;
+
+use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
 sub new {
     my ( $Type, %Param ) = @_;
 
+    # allocate new hash for object
     my $Self = {%Param};
     bless( $Self, $Type );
 
@@ -33,8 +35,10 @@ sub Run {
     my %Error;
     my %GetParam;
 
+    # get needed objects
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
+    # check needed stuff
     if ( !$Self->{TicketID} ) {
         return $LayoutObject->ErrorScreen(
             Message => Translatable('No TicketID is given!'),
@@ -159,8 +163,8 @@ sub Run {
 
         # get all parameters
         for my $Parameter (qw( From To Subject Body InformSender MainTicketNumber )) {
-            $GetParam{$Parameter} = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => $Parameter )
-                || '';
+            $GetParam{$Parameter}
+                = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => $Parameter ) || '';
         }
 
         # rewrap body if no rich text is used
@@ -247,8 +251,8 @@ sub Run {
                 $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
                 $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-                # set up rich text editor
-                $LayoutObject->SetRichTextParameters(
+                $LayoutObject->Block(
+                    Name => 'RichText',
                     Data => \%Param,
                 );
 
@@ -291,7 +295,7 @@ sub Run {
             )
             )
         {
-            my $Output = $LayoutObject->Header(
+            my $Output .= $LayoutObject->Header(
                 Type      => 'Small',
                 BodyClass => 'Popup',
             );
@@ -303,10 +307,11 @@ sub Run {
                 $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
                 $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-                # set up rich text editor
-                $LayoutObject->SetRichTextParameters(
+                $LayoutObject->Block(
+                    Name => 'RichText',
                     Data => \%Param,
                 );
+
             }
 
             $Output .= $LayoutObject->Output(
@@ -335,25 +340,20 @@ sub Run {
                 $GetParam{Body} =~ s/(&lt;|<)OTRS_TICKET(&gt;|>)/$Ticket{TicketNumber}/g;
                 $GetParam{Body}
                     =~ s/(&lt;|<)OTRS_MERGE_TO_TICKET(&gt;|>)/$GetParam{'MainTicketNumber'}/g;
-
-                my $EmailArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-                    ChannelName => 'Email',
-                );
-
-                my $ArticleID = $EmailArticleBackendObject->ArticleSend(
-                    TicketID             => $Self->{TicketID},
-                    SenderType           => 'agent',
-                    IsVisibleForCustomer => 1,
-                    HistoryType          => 'SendAnswer',
-                    HistoryComment       => "Merge info to '$GetParam{To}'.",
-                    From                 => $GetParam{From},
-                    Email                => $GetParam{Email},
-                    To                   => $GetParam{To},
-                    Subject              => $GetParam{Subject},
-                    UserID               => $Self->{UserID},
-                    Body                 => $GetParam{Body},
-                    Charset              => $LayoutObject->{UserCharset},
-                    MimeType             => $MimeType,
+                my $ArticleID = $TicketObject->ArticleSend(
+                    ArticleType    => 'email-external',
+                    SenderType     => 'agent',
+                    TicketID       => $Self->{TicketID},
+                    HistoryType    => 'SendAnswer',
+                    HistoryComment => "Merge info to '$GetParam{To}'.",
+                    From           => $GetParam{From},
+                    Email          => $GetParam{Email},
+                    To             => $GetParam{To},
+                    Subject        => $GetParam{Subject},
+                    UserID         => $Self->{UserID},
+                    Body           => $GetParam{Body},
+                    Charset        => $LayoutObject->{UserCharset},
+                    MimeType       => $MimeType,
                 );
                 if ( !$ArticleID ) {
 
@@ -369,40 +369,12 @@ sub Run {
         }
     }
     else {
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
 
-        # Get last customer article.
-        my @Articles = $ArticleObject->ArticleList(
-            TicketID   => $Self->{TicketID},
-            SenderType => 'customer',
-            OnlyLast   => 1,
+        # get last article
+        my %Article = $TicketObject->ArticleLastCustomerArticle(
+            TicketID      => $Self->{TicketID},
+            DynamicFields => 1,
         );
-
-        # If the ticket has no customer article, get the last agent article.
-        if ( !@Articles ) {
-            @Articles = $ArticleObject->ArticleList(
-                TicketID   => $Self->{TicketID},
-                SenderType => 'agent',
-                OnlyLast   => 1,
-            );
-        }
-
-        # Finally, if everything failed, get latest article.
-        if ( !@Articles ) {
-            @Articles = $ArticleObject->ArticleList(
-                TicketID => $Self->{TicketID},
-                OnlyLast => 1,
-            );
-        }
-
-        my %Article;
-        for my $Article (@Articles) {
-            %Article = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-                %{$Article},
-                DynamicFields => 1,
-                UserID        => $Self->{UserID},
-            );
-        }
 
         # merge box
         my $Output = $LayoutObject->Header(
@@ -430,7 +402,7 @@ sub Run {
 
         # prepare subject ...
         $Article{Subject} = $TicketObject->TicketSubjectBuild(
-            TicketNumber => $Ticket{TicketNumber},
+            TicketNumber => $Article{TicketNumber},
             Subject      => $Article{Subject} || '',
         );
 
@@ -465,8 +437,8 @@ sub Run {
             $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
             $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-            # set up rich text editor
-            $LayoutObject->SetRichTextParameters(
+            $LayoutObject->Block(
+                Name => 'RichText',
                 Data => \%Param,
             );
         }

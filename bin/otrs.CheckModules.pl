@@ -206,24 +206,6 @@ my @NeededModules = (
         },
     },
     {
-        Module    => 'DateTime',
-        Required  => 1,
-        InstTypes => {
-            aptget => 'libdatetime-perl',
-            emerge => 'dev-perl/DateTime',
-            zypper => 'perl-DateTime',
-        },
-    },
-    {
-        Module    => 'DateTime::TimeZone',
-        Required  => 1,
-        InstTypes => {
-            aptget => 'libdatetime-perl',
-            emerge => 'dev-perl/DateTime',
-            zypper => 'perl-DateTime',
-        },
-    },
-    {
         Module    => 'DBI',
         Required  => 1,
         InstTypes => {
@@ -362,26 +344,6 @@ my @NeededModules = (
                     zypper => 'perl-IO-Socket-SSL',
                 },
             },
-            {
-                Module    => 'Authen::SASL',
-                Required  => 0,
-                Comment   => 'Required for MD5 authentication mechanisms in IMAP connections.',
-                InstTypes => {
-                    aptget => 'libauthen-sasl-perl',
-                    emerge => 'dev-perl/Authen-SASL',
-                    zypper => 'perl-Authen-SASL',
-                },
-            },
-            {
-                Module    => 'Authen::NTLM',
-                Required  => 0,
-                Comment   => 'Required for NTLM authentication mechanism in IMAP connections.',
-                InstTypes => {
-                    aptget => 'libauthen-ntlm-perl',
-                    emerge => 'dev-perl/Authen-NTLM',
-                    zypper => 'perl-Authen-NTLM',
-                },
-            },
         ],
     },
     {
@@ -459,6 +421,12 @@ my @NeededModules = (
             emerge => 'perl-core/Time-HiRes',
             zypper => 'perl-Time-HiRes',
         },
+    },
+    {
+        # perlcore
+        Module   => 'Time::Piece',
+        Required => 1,
+        Comment  => 'Required for statistics.',
     },
     {
         Module    => 'XML::LibXML',

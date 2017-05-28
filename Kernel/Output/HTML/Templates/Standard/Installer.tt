@@ -19,7 +19,7 @@
             </div>
             <div class="Content">
                 <p class="SpacingTop Center">
-                    [% Translate("In order to experience this software, you'll need to enable JavaScript in your browser.") | html %]
+                    [% Translate("In order to experience OTRS, you'll need to enable JavaScript in your browser.") | html %]
                 </p>
             </div>
         </div>
@@ -153,5 +153,13 @@
 [% InsertTemplate("InstallerConfigureMail.tt") %]
 
 [% InsertTemplate("InstallerFinish.tt") %]
+
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+    Core.Config.Set('Installer.CheckMailLabelOne', [% Translate("Mail check successful.") | JSON %]);
+    Core.Config.Set('Installer.CheckMailLabelTwo', [% Translate("Error in the mail settings. Please correct and try again.") | JSON %]);
+    $('#InstallerContinueWithJS').show();
+//]]></script>
+[% END %]
 
 </div>

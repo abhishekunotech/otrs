@@ -14,15 +14,6 @@ SET OTRSBusinessLinkLabel = '<strong><a href="#" class="OTRSBusinessRequired">OT
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Process Management") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Process Management'),
-            },
-        ]
-    %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="SidebarColumn">
         <div class="WidgetSimple">
             <div class="Header">
@@ -179,13 +170,16 @@ SET OTRSBusinessLinkLabel = '<strong><a href="#" class="OTRSBusinessRequired">OT
                             </td>
                         </tr>
 [% RenderBlockEnd("ProcessNoDataRow") %]
-                        <tr class="FilterMessage Hidden">
-                            <td colspan="4">[% Translate("No matches found.") | html %]</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
     <div class="Clear"></div>
 </div>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+Core.Agent.Admin.ProcessManagement.InitProcessOverview();
+//]]></script>
+[% END %]

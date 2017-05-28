@@ -12,8 +12,8 @@ var Core = Core || {};
 
 Core.JSON = (function (Namespace) {
     Namespace.RunUnitTests = function(){
-        QUnit.module('Core.JSON');
-        QUnit.test('Core.JSON.Parse()', function(Assert){
+        module('Core.JSON');
+        test('Core.JSON.Parse()', function(){
 
             var ValueTwo, StringOne, ObjectOne, ObjectTwo, ObjectThree, ObjectFour, ObjectFive, ObjectSix, ObjectSeven,
                 ReturnOne, ReturnTwo, ReturnThree, ReturnFour, ReturnSeven, StringCompanyTwo, ReturnCompanyTwo,
@@ -28,11 +28,11 @@ Core.JSON = (function (Namespace) {
             ObjectOne = Core.JSON.Parse(StringOne);
             ReturnOne = Core.JSON.Stringify(ObjectOne);
 
-            Assert.expect(20);
+            expect(16);
 
-            Assert.equal(StringOne, ReturnOne, 'okay');
-            Assert.equal(ObjectOne.ItemOne, '1234', 'okay');
-            Assert.equal(ObjectOne.ItemTwo, ValueTwo, 'okay');
+            equal(StringOne, ReturnOne, 'okay');
+            equal(ObjectOne.ItemOne, '1234', 'okay');
+            equal(ObjectOne.ItemTwo, ValueTwo, 'okay');
 
 
             /* Round 2*/
@@ -52,19 +52,19 @@ Core.JSON = (function (Namespace) {
             ObjectThree = Core.JSON.Parse(ReturnTwo);
             ReturnThree = Core.JSON.Stringify(ObjectThree);
 
-            Assert.equal(ObjectTwo.Consulting[0].Address, ObjectThree.Consulting[0].Address, 'okay');
-            Assert.equal(ObjectTwo.Sales[0].LastUpdate, ObjectThree.Sales[0].LastUpdate, 'okay');
-            Assert.equal(ReturnTwo, ReturnThree, 'okay');
+            equal(ObjectTwo.Consulting[0].Address, ObjectThree.Consulting[0].Address, 'okay');
+            equal(ObjectTwo.Sales[0].LastUpdate, ObjectThree.Sales[0].LastUpdate, 'okay');
+            equal(ReturnTwo, ReturnThree, 'okay');
             ResultCompare1 = Core.Data.CompareObject(ObjectTwo, ObjectThree);
-            Assert.equal(ResultCompare1, true, 'okay');
+            equal(ResultCompare1, true, 'okay');
 
             // Delete a element and compare
             ObjectTwo.Sales[0].LastUpdate = '10/12/2010';
             ResultCompare2 = Core.Data.CompareObject(ObjectTwo, ObjectThree);
-            Assert.notEqual(ResultCompare2, true, 'okay');
+            notEqual(ResultCompare2, true, 'okay');
 
             ReturnDiferent = Core.JSON.Stringify(ObjectTwo);
-            Assert.notEqual(ReturnTwo, ReturnDiferent, 'okay');
+            notEqual(ReturnTwo, ReturnDiferent, 'okay');
 
 
             /* Round 3*/
@@ -98,21 +98,21 @@ Core.JSON = (function (Namespace) {
             ObjectFour.CompanyThree.Areas = ObjectTwo;
 
             ReturnCompanyTwo = Core.JSON.Stringify(ObjectFive.Areas);
-            Assert.equal(StringCompanyTwo, ReturnCompanyTwo, 'okay');
+            equal(StringCompanyTwo, ReturnCompanyTwo, 'okay');
             ResultCompare3 = Core.Data.CompareObject(ObjectFour.CompanyTwo.Areas, ObjectSix);
-            Assert.equal(ResultCompare3, true, 'okay');
+            equal(ResultCompare3, true, 'okay');
 
             ReturnCompanyTwoAreas = Core.JSON.Stringify(ObjectFour.CompanyTwo.Areas);
-            Assert.equal(ReturnCompanyTwoAreas, StringCompanyTwo, 'okay');
+            equal(ReturnCompanyTwoAreas, StringCompanyTwo, 'okay');
 
 
             ResultCompare4 = Core.Data.CompareObject(ObjectFour.CompanyTwo, ObjectFour.CompanyThree);
-            Assert.notEqual(ResultCompare4, true, 'okay');
+            notEqual(ResultCompare4, true, 'okay');
 
             ReturnFour = Core.JSON.Stringify(ObjectFour);
             ObjectFourParse = Core.JSON.Parse(ReturnFour);
             ResultCompare5 = Core.Data.CompareObject(ObjectFourParse, ObjectFour);
-            Assert.equal(ResultCompare5, true, 'okay');
+            equal(ResultCompare5, true, 'okay');
 
 
             /* Round 4*/
@@ -124,20 +124,11 @@ Core.JSON = (function (Namespace) {
             ReturnSeven = Core.JSON.Stringify(ObjectSeven);
             ObjectSevenParse = Core.JSON.Parse(ReturnSeven);
             ResultCompare6 = Core.Data.CompareObject(ObjectSeven, ObjectSevenParse);
-            Assert.equal(ResultCompare6, true, 'okay');
+            equal(ResultCompare6, true, 'okay');
 
             ObjectSeven.five = ObjectTwo;
             ResultCompare7 = Core.Data.CompareObject(ObjectSevenParse, ObjectSeven);
-            Assert.notEqual(ResultCompare7, true, 'okay');
-
-            /* Round 5*/
-            // test undefined value
-            Assert.deepEqual(Core.JSON.Parse(undefined), {}, 'undefined is parsed to an empty object');
-            // test parsing of non-strings
-            Assert.deepEqual(Core.JSON.Parse({Key: 'Value'}), {Key: 'Value'}, 'objects are not parsed and returned unchanged');
-            Assert.equal(Core.JSON.Parse(42), 42, 'numbers are not parsed and returned unchanged');
-            // test string but not JSON
-            Assert.deepEqual(Core.JSON.Parse('Live long and prosper!'), {}, 'Non-JSON strings are ignored and converted to an empty object');
+            notEqual(ResultCompare7, true, 'okay');
 
         });
     };

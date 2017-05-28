@@ -19,9 +19,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Operation::Test - GenericInterface Operation Test backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Operation->new();
@@ -49,7 +55,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 perform the selected test Operation. This will return the data that
 was handed to the function or return a variable data if 'TestError' and
@@ -132,6 +138,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

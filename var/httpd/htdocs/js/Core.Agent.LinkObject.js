@@ -36,11 +36,9 @@ Core.Agent.LinkObject = (function (TargetNS) {
                 var URL = Core.Config.Get('Baselink') + Core.AJAX.SerializeForm($Form);
 
                 Core.AJAX.ContentUpdate($('#' + ElementID), URL, function () {
-                    var Regex = new RegExp('^Widget(.*?)$'),
-                        Name = ElementID.match(Regex)[1];
-
+                    Core.UI.ToggleTwoContainer($('#linkobject' + ElementID + '-setting'), $('#' + ElementID));
+                    Core.UI.InitWidgetActionToggle();
                     Core.Agent.TableFilters.SetAllocationList();
-                    RegisterActions(Name);
                 });
             });
         }
@@ -48,63 +46,7 @@ Core.Agent.LinkObject = (function (TargetNS) {
         Core.UI.InitWidgetActionToggle();
     };
 
-    /**
-     * @name Init
-     * @memberof Core.Agent.LinkObject
-     * @function
-     * @description
-     *      This function initializes module functionality.
-     */
-    TargetNS.Init = function () {
-
-        var Name = Core.Config.Get('LinkObjectName');
-        var Preferences = Core.Config.Get('LinkObjectPreferences');
-
-        // events for link object complex table
-        if (typeof Name !== 'undefined') {
-
-            // initialize allocation list
-            if (typeof Preferences !== 'undefined') {
-                Core.Agent.TableFilters.SetAllocationList();
-            }
-
-            RegisterActions(Core.App.EscapeSelector(Name));
-        }
-    };
-
-    /**
-     * @private
-     * @name RegisterActions
-     * @memberof Core.Agent.LinkObject
-     * @function
-     * @param {string} Name - Widget name (like Ticket, FAQ,...)
-     * @description
-     *      This function registers necesary events and initializes LinkedObject widget.
-     */
-    function RegisterActions(Name) {
-        // Update preferences and load linked table via AJAX
-        TargetNS.RegisterUpdatePreferences(
-            $('#linkobject-' + Name + '_submit'),
-            'Widget' + Name,
-            $('#linkobject-' + Name + '_setting_form')
-        );
-
-        // register click on settings button
-        Core.UI.RegisterToggleTwoContainer(
-            $('#linkobject-' + Name + '-toggle'),
-            $('#linkobject-' + Name + '-setting'),
-            $('#' + Name)
-        );
-
-        // toggle two containers when user press Cancel
-        Core.UI.RegisterToggleTwoContainer(
-            $('#linkobject-' + Name + '_cancel'),
-            $('#linkobject-' + Name + '-setting'),
-            $('#' + Name)
-        );
-    }
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
+    Core.Agent.TableFilters.SetAllocationList();
 
     return TargetNS;
 }(Core.Agent.LinkObject || {}));

@@ -8,8 +8,6 @@
 
 package Kernel::Output::HTML::ToolBar::TicketWatcher;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 
@@ -17,11 +15,23 @@ use Kernel::Language qw(Translatable);
 
 our @ObjectDependencies = (
     'Kernel::Config',
-    'Kernel::Output::HTML::Layout',
-    'Kernel::System::Group',
     'Kernel::System::Log',
+    'Kernel::Output::HTML::Layout',
     'Kernel::System::Ticket',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;
@@ -52,16 +62,11 @@ sub Run {
         @Groups = @{ $ConfigObject->Get('Ticket::WatcherGroup') };
     }
     if (@Groups) {
-        my $Access      = 0;
-        my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
+        my $Access = 0;
         GROUP:
         for my $Group (@Groups) {
-            my $HasPermission = $GroupObject->PermissionCheck(
-                UserID    => $Self->{UserID},
-                GroupName => $Group,
-                Type      => 'rw',
-            );
-            if ($HasPermission) {
+            next GROUP if !$LayoutObject->{"UserIsGroup[$Group]"};
+            if ( $LayoutObject->{"UserIsGroup[$Group]"} eq 'Yes' ) {
                 $Access = 1;
                 last GROUP;
             }
@@ -80,7 +85,7 @@ sub Run {
         WatchUserIDs => [ $Self->{UserID} ],
         UserID       => 1,
         Permission   => 'ro',
-    ) || 0;
+    );
     my $CountNew = $TicketObject->TicketSearch(
         Result       => 'COUNT',
         WatchUserIDs => [ $Self->{UserID} ],
@@ -90,7 +95,7 @@ sub Run {
         TicketFlagUserID => $Self->{UserID},
         UserID           => 1,
         Permission       => 'ro',
-    ) || 0;
+    );
     $CountNew = $Count - $CountNew;
 
     my $CountReached = $TicketObject->TicketSearch(
@@ -100,7 +105,7 @@ sub Run {
         TicketPendingTimeOlderMinutes => 1,
         UserID                        => 1,
         Permission                    => 'ro',
-    ) || 0;
+    );
 
     my $Class        = $Param{Config}->{CssClass};
     my $ClassNew     = $Param{Config}->{CssClassNew};

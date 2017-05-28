@@ -65,28 +65,43 @@ Core.Customer = (function (TargetNS) {
 
         if (TargetNS.IECompatibilityMode) {
             TargetNS.SupportedBrowser = false;
-            alert(Core.Language.Translate('Please turn off Compatibility Mode in Internet Explorer!'));
+            alert(Core.Config.Get('TurnOffCompatibilityModeMsg'));
         }
 
         if (!TargetNS.SupportedBrowser) {
             alert(
-                Core.Language.Translate('The browser you are using is too old.')
+                Core.Config.Get('BrowserTooOldMsg')
                 + ' '
-                + Core.Language.Translate('This software runs with a huge lists of browsers, please upgrade to one of these.')
+                + Core.Config.Get('BrowserListMsg')
                 + ' '
-                + Core.Language.Translate('Please see the documentation or ask your admin for further information.')
+                + Core.Config.Get('BrowserDocumentationMsg')
             );
         }
 
-        // check if we're on a touch device and on the regular resolution (non-mobile). If that's the case,
-        // don't allow triggering the link on "parent" elements directly, they should only expand the sub menu
-        Core.App.Responsive.CheckIfTouchDevice();
-        $('#Navigation > ul > li > a').on('click', function(Event) {
-            if (Core.App.Responsive.IsTouchDevice() && $(this).next('ul:visible').length && Core.App.Responsive.GetScreenSize() === 'ScreenXL') {
-                Event.preventDefault();
-                Event.stopPropagation();
-            }
-        });
+        Core.Exception.Init();
+
+        Core.Form.Validate.Init();
+        Core.UI.Popup.Init();
+
+        // late execution of accessibility code
+        Core.UI.Accessibility.Init();
+
+        // Modernize input fields
+        Core.UI.InputFields.Init();
+
+        // Init tree selection/tree view for dynamic fields
+        Core.UI.TreeSelection.InitTreeSelection();
+        Core.UI.TreeSelection.InitDynamicFieldTreeViewRestore();
+
+        // Initialize customer chat request checks in the background.
+        if (
+            typeof Core.Customer.Chat !== 'undefined'
+            && typeof Core.Customer.Chat.Toolbar !== 'undefined'
+            && typeof Core.Customer.Chat.Toolbar.Init !== 'undefined'
+            )
+        {
+            Core.Customer.Chat.Toolbar.Init();
+        }
 
         // unveil full error details only on click
         $('.TriggerFullErrorDetails').on('click', function() {
@@ -118,8 +133,6 @@ Core.Customer = (function (TargetNS) {
     TargetNS.Enhance = function(){
         $('body').removeClass('NoJavaScript').addClass('JavaScriptAvailable');
     };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_GLOBAL_EARLY');
 
     return TargetNS;
 }(Core.Customer || {}));

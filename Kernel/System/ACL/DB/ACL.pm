@@ -11,7 +11,6 @@ package Kernel::System::ACL::DB::ACL;
 use strict;
 use warnings;
 
-use Kernel::Language qw(Translatable);
 use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = (
@@ -29,16 +28,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ACL::DB::ACL.pm
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 ACL DB ACL backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a ACL object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ACLObject = $Kernel::OM->Get('Kernel::System::ACL::DB::ACL');
 
 =cut
@@ -62,7 +67,7 @@ sub new {
     return $Self;
 }
 
-=head2 ACLAdd()
+=item ACLAdd()
 
 add new ACL
 
@@ -202,7 +207,7 @@ sub ACLAdd {
     return $ID;
 }
 
-=head2 ACLDelete()
+=item ACLDelete()
 
 delete an ACL
 
@@ -261,7 +266,7 @@ sub ACLDelete {
     return 1;
 }
 
-=head2 ACLGet()
+=item ACLGet()
 
 get ACL attributes
 
@@ -409,7 +414,7 @@ sub ACLGet {
     return \%Data;
 }
 
-=head2 ACLUpdate()
+=item ACLUpdate()
 
 update ACL attributes
 
@@ -570,7 +575,7 @@ sub ACLUpdate {
     return 1;
 }
 
-=head2 ACLList()
+=item ACLList()
 
 get an ACL list
 
@@ -650,7 +655,7 @@ sub ACLList {
     return \%Data;
 }
 
-=head2 ACLListGet()
+=item ACLListGet()
 
 get an ACL list with all ACL details
 
@@ -765,7 +770,7 @@ sub ACLListGet {
     return \@Data;
 }
 
-=head2 ACLsNeedSync()
+=item ACLsNeedSync()
 
 Check if there are ACLs that are not yet deployed
 
@@ -797,7 +802,7 @@ sub ACLsNeedSync {
     return $NeedSync;
 }
 
-=head2 ACLsNeedSyncReset()
+=item ACLsNeedSyncReset()
 
 Reset synchronization information for ACLs.
 
@@ -811,7 +816,7 @@ sub ACLsNeedSyncReset {
     return 1;
 }
 
-=head2 ACLDump()
+=item ACLDump()
 
 gets a complete ACL information dump from the DB
 
@@ -962,7 +967,7 @@ EOF
     return $FileLocation;
 }
 
-=head2 ACLImport()
+=item ACLImport()
 
 import an ACL YAML file/content
 
@@ -1008,7 +1013,8 @@ sub ACLImport {
     if ( ref $ACLData ne 'ARRAY' ) {
         return {
             Success => 0,
-            Message => Translatable("Couldn't read ACL configuration file. Please make sure the file is valid."),
+            Message =>
+                "Couldn't read ACL configuration file. Please make sure the file is valid.",
         };
     }
 
@@ -1086,7 +1092,7 @@ sub ACLImport {
 
 =cut
 
-=head2 _ACLItemOutput()
+=item _ACLItemOutput()
 
 converts an ACL structure to perl code suitable to be saved on a perl file.
 
@@ -1174,7 +1180,7 @@ sub _ACLItemOutput {
     return $Output . "\n";
 }
 
-=head2 _ACLMigrateFrom33()
+=item _ACLMigrateFrom33()
 
 Updates ACLs structure my changing the Possible->Action hash ref to a PossibleNot->Action array ref
 with just the elements that where set to 0 in the original ACL:
@@ -1250,7 +1256,7 @@ sub _ACLMigrateFrom33 {
     return $ACL if ref $ACL->{ConfigChange}->{Possible}->{Action} ne 'HASH';
 
     # convert old hash into an array using only the keys set to 0, and skip those that are set
-    # to 1, set them as PossibleNot and delete the Possible->Action section from the ACL.
+    # to 1, set them as PossibleNot and delete the Possible->Action section form the ACL.
     my @NewAction = grep { $ACL->{ConfigChange}->{Possible}->{Action}->{$_} == 0 }
         sort keys %{ $ACL->{ConfigChange}->{Possible}->{Action} };
 
@@ -1263,6 +1269,8 @@ sub _ACLMigrateFrom33 {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

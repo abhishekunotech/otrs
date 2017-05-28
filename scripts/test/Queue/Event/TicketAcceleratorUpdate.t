@@ -35,8 +35,13 @@ $ConfigObject->Set(
 );
 
 my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
-my $QueueObject  = $Kernel::OM->Get('Kernel::System::Queue');
-my $DBObject     = $Kernel::OM->Get('Kernel::System::DB');
+$Self->True(
+    $TicketObject->isa("Kernel::System::Ticket::IndexAccelerator::$Module"),
+    "TicketObject loaded the correct backend",
+);
+
+my $QueueObject = $Kernel::OM->Get('Kernel::System::Queue');
+my $DBObject    = $Kernel::OM->Get('Kernel::System::DB');
 
 # test scenarios for Tickets
 my @Tests = (

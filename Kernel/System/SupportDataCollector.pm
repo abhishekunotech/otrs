@@ -29,16 +29,20 @@ our @ObjectDependencies = (
 
 Kernel::System::SupportDataCollector - system data collector
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All stats functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=item new()
 
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SupportDataCollectorObject = $Kernel::OM->Get('Kernel::System::SupportDataCollector');
 
 
@@ -54,7 +58,7 @@ sub new {
     return $Self;
 }
 
-=head2 Collect()
+=item Collect()
 
 collect system data
 
@@ -91,14 +95,6 @@ collect system data
                 Label       => 'mod_perl usage'
                 Value       => '0',
                 Message     => 'Please enable mod_perl to speed up OTRS.',
-            },
-            {
-                Identifier       => 'Some::Identifier',
-                DisplayPath      => 'SomePath',
-                Status           => $StatusOK,
-                Label            => 'Some Label'
-                Value            => '0',
-                MessageFormatted => 'Some \n Formatted \n\t Text.',
             },
         ],
     )
@@ -242,13 +238,11 @@ sub CollectByWebRequest {
         );
     }
 
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-
     my $Host = $Param{Hostname};
-    $Host ||= $ConfigObject->Get('SupportDataCollector::HTTPHostname');
+    $Host ||= $Kernel::OM->Get('Kernel::Config')->Get('SupportDataCollector::HTTPHostname');
 
     if ( !$Host ) {
-        my $FQDN = $ConfigObject->Get('FQDN');
+        my $FQDN = $Kernel::OM->Get('Kernel::Config')->Get('FQDN');
 
         if ( $FQDN ne 'yourhost.example.com' && gethostbyname($FQDN) ) {
             $Host = $FQDN;
@@ -265,20 +259,20 @@ sub CollectByWebRequest {
     #   we can specify the htaccess login data here,
     #   this is neccessary for the support data collector.
     my $AuthString   = '';
-    my $AuthUser     = $ConfigObject->Get('PublicFrontend::AuthUser');
-    my $AuthPassword = $ConfigObject->Get('PublicFrontend::AuthPassword');
+    my $AuthUser     = $Kernel::OM->Get('Kernel::Config')->Get('PublicFrontend::AuthUser');
+    my $AuthPassword = $Kernel::OM->Get('Kernel::Config')->Get('PublicFrontend::AuthPassword');
     if ( $AuthUser && $AuthPassword ) {
         $AuthString = $AuthUser . ':' . $AuthPassword . '@';
     }
 
     # Prepare web service config for the internal web request.
     my $URL =
-        $ConfigObject->Get('HttpType')
+        $Kernel::OM->Get('Kernel::Config')->Get('HttpType')
         . '://'
         . $AuthString
         . $Host
         . '/'
-        . $ConfigObject->Get('ScriptAlias')
+        . $Kernel::OM->Get('Kernel::Config')->Get('ScriptAlias')
         . 'public.pl';
 
     my $WebUserAgentObject = Kernel::System::WebUserAgent->new(
@@ -301,7 +295,6 @@ sub CollectByWebRequest {
             ChallengeToken => $ChallengeToken,
         },
         SkipSSLVerification => 1,
-        NoLog               => $Self->{Debug} ? 0 : 1,
     );
 
     if ( $Response{Status} ne '200 OK' ) {
@@ -362,7 +355,7 @@ sub CollectByWebRequest {
     return %{$ResponseData};
 }
 
-=head2 CollectAsynchronous()
+=item CollectAsynchronous()
 
 collect asynchronous data (the asynchronous plug-in decide at which place the data will be saved)
 
@@ -419,7 +412,7 @@ sub CollectAsynchronous {
     );
 }
 
-=head2 CleanupAsynchronous()
+=item CleanupAsynchronous()
 
 clean-up asynchronous data (the asynchronous plug-in decide for themselves)
 
@@ -460,6 +453,8 @@ sub CleanupAsynchronous {
 
     return 1;
 }
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

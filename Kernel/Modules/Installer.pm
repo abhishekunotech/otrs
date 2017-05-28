@@ -24,7 +24,7 @@ use vars qw(%INC);
 sub new {
     my ( $Type, %Param ) = @_;
 
-    # Allocate new hash for object.
+    # allocate new hash for object
     my $Self = {%Param};
     bless( $Self, $Type );
 
@@ -37,7 +37,7 @@ sub Run {
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
-    # Check environment directories.
+    # check env directories
     $Self->{Path} = $ConfigObject->Get('Home');
     if ( !-d $Self->{Path} ) {
         $LayoutObject->FatalError(
@@ -53,7 +53,7 @@ sub Run {
         );
     }
 
-    # Check/get SQL schema directory
+    # check/get sql schema dir
     my $DirOfSQLFiles = $Self->{Path} . '/scripts/database';
     if ( !-d $DirOfSQLFiles ) {
         $LayoutObject->FatalError(
@@ -64,9 +64,8 @@ sub Run {
 
     my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
-    # TODO: This seams to be deprecated now
-    # Read installer.json if it exists.
-    #   It contains options set by Windows Installer
+    # read installer.json if it exists
+    # it contains options set by Windows Installer
     if ( -f "$Self->{Path}/var/tmp/installer.json" ) {
         my $JSONString = $MainObject->FileRead(
             Location => "$Self->{Path}/var/tmp/installer.json",
@@ -76,27 +75,26 @@ sub Run {
         );
     }
 
-    # Check if License option needs to be skipped.
+    # check if License option needs to be skipped
     if ( $Self->{Subaction} eq 'License' && $Self->{Options}->{SkipLicense} ) {
         $Self->{Subaction} = 'Start';
     }
 
-    # Check if Database option needs to be skipped.
+    # check if Database option needs to be skipped
     if ( $Self->{Subaction} eq 'Start' && $Self->{Options}->{DBType} ) {
         $Self->{Subaction} = 'DBCreate';
     }
 
     $Self->{Subaction} = 'Intro' if !$Self->{Subaction};
 
-    # Build steps.
+    # build steps
     my @Steps = qw(License Database General Finish);
     my $StepCounter;
 
-    # TODO: This seams to be deprecated now
-    # No license step needed if defined in .json file.
+    # no license step needed if defined in .json file
     shift @Steps if $Self->{Options}->{SkipLicense};
 
-    # Build header - but only if we're not in AJAX mode.
+    # build header - but only if we're not in AJAX mode
     if ( $Self->{Subaction} ne 'CheckRequirements' ) {
         $LayoutObject->Block(
             Name => 'Steps',
@@ -105,7 +103,7 @@ sub Run {
             },
         );
 
-        # Mapping of sub-actions to steps.
+        # mapping of subactions to steps
         my %Steps = (
             Intro         => 'Intro',
             License       => 'License',
@@ -117,7 +115,7 @@ sub Run {
             Finish        => 'Finish',
         );
 
-        # On the intro screen no steps should be highlighted.
+        # on the intro screen no steps should be highlighted
         my $Highlight = ( $Self->{Subaction} eq 'Intro' ) ? '' : 'Highlighted NoLink';
 
         my $Counter;
@@ -125,7 +123,7 @@ sub Run {
         for my $Step (@Steps) {
             $Counter++;
 
-            # Is the current step active?
+            # is the current step active?
             my $Active = ( $Steps{ $Self->{Subaction} } eq $Step ) ? 'Active' : '';
             $LayoutObject->Block(
                 Name => 'Step' . $Step,
@@ -136,21 +134,22 @@ sub Run {
                 },
             );
 
-            # If this is the actual step.
+            # if this is the actual step
             if ( $Steps{ $Self->{Subaction} } eq $Step ) {
 
-                # No more highlights from now on.
-                $Highlight = '';
+                # no more highlights from now on
+                $Highlight = '',
 
-                # Step calculation: 2/5 etc.
-                $StepCounter = $Counter . "/" . scalar @Steps;
+                    # step calculation: 2/5 etc.
+                    $StepCounter = $Counter . "/" . scalar @Steps;
             }
         }
     }
 
-    my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $ParamObject     = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
 
-    # Print intro form.
+    # print intro form
     my $Title = $LayoutObject->{LanguageObject}->Translate('Install OTRS');
     if ( $Self->{Subaction} eq 'Intro' ) {
         my $Output =
@@ -170,7 +169,7 @@ sub Run {
         return $Output;
     }
 
-    # Print license from.
+    # print license from
     elsif ( $Self->{Subaction} eq 'License' ) {
         my $Output =
             $LayoutObject->Header(
@@ -196,7 +195,7 @@ sub Run {
         return $Output;
     }
 
-    # Database selection screen.
+    # database selection screen
     elsif ( $Self->{Subaction} eq 'Start' ) {
         if ( !-w "$Self->{Path}/Kernel/Config.pm" ) {
             my $Output =
@@ -217,10 +216,16 @@ sub Run {
         my %Databases = (
             mysql      => "MySQL",
             postgresql => "PostgreSQL",
+            mssql      => "SQL Server (Microsoft)",
             oracle     => "Oracle",
         );
 
-        # Build the select field for the InstallerDBStart.tt.
+        # OTRS can only run on SQL Server if OTRS is on Windows as well
+        if ( $^O ne 'MSWin32' ) {
+            delete $Databases{mssql};
+        }
+
+        # build the select field for the InstallerDBStart.dtl
         $Param{SelectDBType} = $LayoutObject->BuildSelection(
             Data       => \%Databases,
             Name       => 'DBType',
@@ -240,7 +245,7 @@ sub Run {
                 Item         => Translatable('Database Selection'),
                 Step         => $StepCounter,
                 SelectDBType => $Param{SelectDBType},
-            },
+                }
         );
         $Output .= $LayoutObject->Output(
             TemplateFile => 'Installer',
@@ -250,12 +255,12 @@ sub Run {
         return $Output;
     }
 
-    # Check different requirements (AJAX).
+    # check different requirements (AJAX)
     elsif ( $Self->{Subaction} eq 'CheckRequirements' ) {
         my $CheckMode = $ParamObject->GetParam( Param => 'CheckMode' );
         my %Result;
 
-        # Check DB requirements.
+        # check DB requirements
         if ( $CheckMode eq 'DB' ) {
             my %DBCredentials;
             for my $Param (
@@ -270,12 +275,12 @@ sub Run {
             );
         }
 
-        # Check mail configuration.
+        # check mail configuration
         elsif ( $CheckMode eq 'Mail' ) {
             %Result = $Self->CheckMailConfiguration();
         }
 
-        # No adequate check method found.
+        # no adequate check method found
         else {
             %Result = (
                 Successful => 0,
@@ -284,7 +289,7 @@ sub Run {
             );
         }
 
-        # Return JSON-String because of AJAX-Mode.
+        # return JSON-String because of AJAX-Mode
         my $OutputJSON = $LayoutObject->JSONEncode( Data => \%Result );
 
         return $LayoutObject->Attachment(
@@ -301,7 +306,7 @@ sub Run {
         my $DBType        = $ParamObject->GetParam( Param => 'DBType' );
         my $DBInstallType = $ParamObject->GetParam( Param => 'DBInstallType' );
 
-        # Use MainObject to generate a password.
+        # use MainObject to generate a password
         my $GeneratedPassword = $MainObject->GenerateRandomString();
 
         if ( $DBType eq 'mysql' ) {
@@ -344,7 +349,51 @@ sub Run {
                 Data         => {
                     Item => Translatable('Configure MySQL'),
                     Step => $StepCounter,
+                    }
+            );
+            $Output .= $LayoutObject->Footer();
+            return $Output;
+        }
+        elsif ( $DBType eq 'mssql' ) {
+            my $PasswordExplanation = $DBInstallType eq 'CreateDB'
+                ? $LayoutObject->{LanguageObject}->Translate('Enter the password for the administrative database user.')
+                : $LayoutObject->{LanguageObject}->Translate('Enter the password for the database user.');
+            my $Output =
+                $LayoutObject->Header(
+                Title => "$Title - "
+                    . $LayoutObject->{LanguageObject}->Translate( 'Database %s', 'Microsoft SQL Server' )
+                );
+            $LayoutObject->Block(
+                Name => 'DatabaseMSSQL',
+                Data => {
+                    Item          => 'Database',
+                    Step          => $StepCounter,
+                    InstallType   => $DBInstallType,
+                    DefaultDBUser => $DBInstallType eq 'CreateDB' ? 'sa' : 'otrs',
                 },
+            );
+
+            if ( $DBInstallType eq 'CreateDB' ) {
+                $LayoutObject->Block(
+                    Name => 'DatabaseMSSQLCreate',
+                    Data => {
+                        Password => $GeneratedPassword,
+                    },
+                );
+            }
+            else {
+                $LayoutObject->Block(
+                    Name => 'DatabaseMSSQLUseExisting',
+                );
+            }
+
+            $Output .= $LayoutObject->Output(
+                TemplateFile => 'Installer',
+                Data         => {
+                    Item        => 'Configure Microsoft SQL Server',
+                    Step        => $StepCounter,
+                    InstallType => $DBInstallType,
+                    }
             );
             $Output .= $LayoutObject->Footer();
             return $Output;
@@ -386,11 +435,12 @@ sub Run {
                 Data         => {
                     Item => Translatable('Configure PostgreSQL'),
                     Step => $StepCounter,
-                },
+                    }
             );
             $Output .= $LayoutObject->Footer();
             return $Output;
         }
+
         elsif ( $DBType eq 'oracle' ) {
             my $Output =
                 $LayoutObject->Header(
@@ -410,11 +460,12 @@ sub Run {
                 Data         => {
                     Item => Translatable('Configure Oracle'),
                     Step => $StepCounter,
-                },
+                    }
             );
             $Output .= $LayoutObject->Footer();
             return $Output;
         }
+
         else {
             $LayoutObject->FatalError(
                 Message => $LayoutObject->{LanguageObject}->Translate( 'Unknown database type "%s".', $DBType ),
@@ -423,7 +474,7 @@ sub Run {
         }
     }
 
-    # Do database settings.
+    # do database settings
     elsif ( $Self->{Subaction} eq 'DBCreate' ) {
 
         my %DBCredentials;
@@ -435,7 +486,7 @@ sub Run {
         }
         %DBCredentials = %{ $Self->{Options} } if $Self->{Options}->{DBType};
 
-        # Get and check params and connect to DB.
+        # get and check params and connect to DB
         my %Result = $Self->ConnectToDB(%DBCredentials);
 
         my %DB;
@@ -455,7 +506,7 @@ sub Run {
             Title => $Title . '-'
                 . $LayoutObject->{LanguageObject}->Translate(
                 'Create Database'
-                ),
+                )
         );
 
         $LayoutObject->Block(
@@ -468,12 +519,12 @@ sub Run {
 
         my @Statements;
 
-        # Create database, add user.
+        # create database, add user
         if ( $DB{DBType} eq 'mysql' ) {
 
             if ( $DB{InstallType} eq 'CreateDB' ) {
 
-                # Determine current host for MySQL account.
+                # determine current host for MySQL account
                 my $ConnectionID;
                 my $StatementHandle = $DBH->prepare("select connection_id()");
                 $StatementHandle->execute();
@@ -491,7 +542,7 @@ sub Run {
                     }
                 }
 
-                # Strip off port, i.e. 'localhost:14962' should become 'localhost'.
+                # strip off port, i.e. 'localhost:14962' should become 'localhost'
                 $DB{Host} =~ s{:\d*\z}{}xms;
 
                 @Statements = (
@@ -501,9 +552,26 @@ sub Run {
                 );
             }
 
-            # Set DSN for Config.pm.
+            # set DSN for Config.pm
             $DB{ConfigDSN} = 'DBI:mysql:database=$Self->{Database};host=$Self->{DatabaseHost}';
             $DB{DSN}       = "DBI:mysql:database=$DB{DBName};host=$DB{DBHost}";
+        }
+        elsif ( $DB{DBType} eq 'mssql' ) {
+
+            if ( $DB{InstallType} eq 'CreateDB' ) {
+                @Statements = (
+                    "CREATE DATABASE [$DB{DBName}]",
+                    "CREATE LOGIN [$DB{OTRSDBUser}] WITH PASSWORD = '$DB{OTRSDBPassword}'",
+                    "USE [$DB{DBName}]",
+                    "CREATE USER  [$DB{OTRSDBUser}] FOR LOGIN [$DB{OTRSDBUser}]",
+                    "exec sp_addrolemember 'db_owner', '$DB{OTRSDBUser}'",
+                    "exec sp_defaultdb '$DB{OTRSDBUser}', '$DB{DBName}'",
+                );
+            }
+
+            # set DSN for Config.pm
+            $DB{ConfigDSN} = 'DBI:ODBC:driver={SQL Server};Database=$Self->{Database};Server=$Self->{DatabaseHost}';
+            $DB{DSN}       = "DBI:ODBC:driver={SQL Server};Database=$DB{DBName};Server=$DB{DBHost}";
         }
         elsif ( $DB{DBType} eq 'postgresql' ) {
 
@@ -514,13 +582,13 @@ sub Run {
                 );
             }
 
-            # Set DSN for Config.pm.
+            # set DSN for Config.pm
             $DB{ConfigDSN} = 'DBI:Pg:dbname=$Self->{Database};host=$Self->{DatabaseHost}';
             $DB{DSN}       = "DBI:Pg:dbname=$DB{DBName};host=$DB{DBHost}";
         }
         elsif ( $DB{DBType} eq 'oracle' ) {
 
-            # Set DSN for Config.pm.
+            # set DSN for Config.pm
             $DB{ConfigDSN} = 'DBI:Oracle://$Self->{DatabaseHost}:' . $DB{DBPort} . '/$Self->{Database}';
             $DB{DSN}       = "DBI:Oracle://$DB{DBHost}:$DB{DBPort}/$DB{DBSID}";
             $ConfigObject->Set(
@@ -529,11 +597,11 @@ sub Run {
             );
         }
 
-        # Execute database statements.
+        # execute database statements
         for my $Statement (@Statements) {
             my @Description = split( ' ', $Statement );
 
-            # Prevent uninitialized variables.
+            # prevent unitilialized variables
             for my $Index ( 0 .. 2 ) {
                 $Description[$Index] //= '';
             }
@@ -572,7 +640,7 @@ sub Run {
             }
         }
 
-        # ReConfigure Config.pm.
+        # ReConfigure Config.pm
         my $ReConfigure;
         if ( $DB{DBType} eq 'oracle' ) {
             $ReConfigure = $Self->ReConfigure(
@@ -610,8 +678,8 @@ sub Run {
 
         $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::DB'] );
 
-        # We need a database object to be able to parse the XML
-        #   connect to database using given credentials.
+        # we need a database object to be able to parse the XML
+        # connect to database using given credentials
         $Kernel::OM->ObjectParamAdd(
             'Kernel::System::DB' => {
                 DatabaseDSN  => $DB{DSN},
@@ -622,7 +690,7 @@ sub Run {
         );
         my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
-        # Create database tables and insert initial values.
+        # create database tables and insert initial values
         my @SQLPost;
         for my $SchemaFile (qw(otrs-schema otrs-initial_insert)) {
             if ( !-f "$DirOfSQLFiles/$SchemaFile.xml" ) {
@@ -650,7 +718,7 @@ sub Run {
                 Database => \@XMLArray,
             );
 
-            # If we parsed the schema, catch post instructions.
+            # if we parsed the schema, catch post instructions
             @SQLPost = $DBObject->SQLProcessorPost() if $SchemaFile eq 'otrs-schema';
 
             for my $SQL (@SQL) {
@@ -660,9 +728,10 @@ sub Run {
             $LayoutObject->Block(
                 Name => 'DatabaseResultItemDone',
             );
+
         }
 
-        # Execute post SQL statements (indexes, constraints).
+        # execute post SQL statements (indexes, constraints)
 
         $LayoutObject->Block(
             Name => 'DatabaseResultItem',
@@ -677,7 +746,7 @@ sub Run {
             Name => 'DatabaseResultItemDone',
         );
 
-        # If running under PerlEx, reload the application (and thus the configuration).
+        # if running under PerlEx, reload the application (and thus the configuration)
         if (
             exists $ENV{'GATEWAY_INTERFACE'}
             && $ENV{'GATEWAY_INTERFACE'} eq "CGI-PerlEx"
@@ -699,19 +768,19 @@ sub Run {
         return $Output;
     }
 
-    # Show system settings page, pre-install packages.
+    # show system settings page, pre-install packages
     elsif ( $Self->{Subaction} eq 'System' ) {
 
         if ( !$Kernel::OM->Get('Kernel::System::DB') ) {
             $LayoutObject->FatalError();
         }
 
-        # Take care that default config is in the database.
-        if ( !$Self->_CheckConfig() ) {
+        # take care that default config file is existing
+        if ( !$SysConfigObject->WriteDefault() ) {
             return $LayoutObject->FatalError();
         }
 
-        # Install default files.
+        # install default files
         if ( $MainObject->Require('Kernel::System::Package') ) {
             my $PackageObject = Kernel::System::Package->new( %{$Self} );
             if ($PackageObject) {
@@ -735,7 +804,7 @@ sub Run {
             SelectedID => $LayoutObject->{UserLanguage},
         );
 
-        # Build the selection field for the MX check.
+        # build the selection field for the MX check
         $Param{SelectCheckMXRecord} = $LayoutObject->BuildSelection(
             Data => {
                 1 => Translatable('Yes'),
@@ -746,13 +815,13 @@ sub Run {
             SelectedID => '1',
         );
 
-        # Read FQDN using Net::Domain and pre-populate the field.
+        # read FQDN using Net::Domain and prepopulate the field
         $Param{FQDN} = hostfqdn();
 
         my $Output =
             $LayoutObject->Header(
             Title => "$Title - "
-                . $LayoutObject->{LanguageObject}->Translate('System Settings'),
+                . $LayoutObject->{LanguageObject}->Translate('System Settings')
             );
 
         $LayoutObject->Block(
@@ -789,48 +858,34 @@ sub Run {
         return $Output;
     }
 
-    # Do system settings action.
+    # do system settings action
     elsif ( $Self->{Subaction} eq 'ConfigureMail' ) {
 
         if ( !$Kernel::OM->Get('Kernel::System::DB') ) {
             $LayoutObject->FatalError();
         }
 
-        # Take care that default config is in the database.
-        if ( !$Self->_CheckConfig() ) {
+        # take care that default config file is existing
+        if ( !$SysConfigObject->WriteDefault() ) {
             return $LayoutObject->FatalError();
         }
 
-        my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
-
-        my $ExclusiveLockGUID = $SysConfigObject->SettingLock(
-            LockAll => 1,
-            Force   => 1,
-            UserID  => 1,
-        );
-
-        for my $SettingName (
+        for my $Key (
             qw(SystemID FQDN AdminEmail Organization LogModule LogModule::LogFile
             DefaultLanguage CheckMXRecord)
             )
         {
-            my $EffectiveValue = $ParamObject->GetParam( Param => $SettingName );
+            my $Value = $ParamObject->GetParam( Param => $Key );
 
-            # Update config item via sys config object.
-            $SysConfigObject->SettingUpdate(
-                Name              => $SettingName,
-                IsValid           => 1,
-                EffectiveValue    => $EffectiveValue,
-                ExclusiveLockGUID => $ExclusiveLockGUID,
-                UserID            => 1,
+            # update config item via sys config object
+            $SysConfigObject->ConfigItemUpdate(
+                Valid => 1,
+                Key   => $Key,
+                Value => $Value,
             );
         }
 
-        my $Success = $SysConfigObject->SettingUnlock(
-            UnlockAll => 1,
-        );
-
-        # Get mail account object and check available back-ends.
+        # get mail account object and check available backends
         my $MailAccount  = $Kernel::OM->Get('Kernel::System::MailAccount');
         my %MailBackends = $MailAccount->MailAccountBackendList();
 
@@ -886,47 +941,27 @@ sub Run {
 
     elsif ( $Self->{Subaction} eq 'Finish' ) {
 
-        # Take care that default config is in the database.
-        if ( !$Self->_CheckConfig() ) {
+        # make sure the default config file exists
+        if ( !$SysConfigObject->WriteDefault() ) {
             return $LayoutObject->FatalError();
         }
 
-        my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
-
-        my $SettingName = 'SecureMode';
-
-        my $ExclusiveLockGUID = $SysConfigObject->SettingLock(
-            Name   => $SettingName,
-            Force  => 1,
-            UserID => 1,
+        # update config item via sysconfig object
+        my $Result = $SysConfigObject->ConfigItemUpdate(
+            Valid => 1,
+            Key   => 'SecureMode',
+            Value => 1,
         );
-
-        # Update config item via SysConfig object.
-        my $Result = $SysConfigObject->SettingUpdate(
-            Name              => $SettingName,
-            IsValid           => 1,
-            EffectiveValue    => 1,
-            ExclusiveLockGUID => $ExclusiveLockGUID,
-            UserID            => 1,
-        );
-
         if ( !$Result ) {
             $LayoutObject->FatalError(
                 Message => Translatable('Can\'t write Config file!'),
             );
         }
 
-        # There is no need to unlock the setting as it was already unlocked in the update.
+        # 'rebuild' the configuration to prevent duplicate rows in ZZZAuto.pm
+        $SysConfigObject->WriteDefault();
 
-        # 'Rebuild' the configuration.
-        my $Success = $SysConfigObject->ConfigurationDeploy(
-            Comments    => "Installer deployment",
-            AllSettings => 1,
-            Force       => 1,
-            UserID      => 1,
-        );
-
-        # If running under PerlEx, reload the application (and thus the configuration).
+        # if running under PerlEx, reload the application (and thus the configuration)
         if (
             exists $ENV{'GATEWAY_INTERFACE'}
             && $ENV{'GATEWAY_INTERFACE'} eq "CGI-PerlEx"
@@ -935,7 +970,7 @@ sub Run {
             PerlEx::ReloadAll();
         }
 
-        # Set a generated password for the 'root@localhost' account.
+        # set a generated password for the 'root@localhost' account
         my $UserObject = $Kernel::OM->Get('Kernel::System::User');
         my $Password = $UserObject->GenerateRandomPassword( Size => 16 );
         $UserObject->SetPassword(
@@ -943,8 +978,7 @@ sub Run {
             PW        => $Password,
         );
 
-        # TODO: This seams to be deprecated now.
-        # Remove installer file with pre-configured options.
+        # remove installer file with preconfigured options
         if ( -f "$Self->{Path}/var/tmp/installer.json" ) {
             unlink "$Self->{Path}/var/tmp/installer.json";
         }
@@ -952,7 +986,7 @@ sub Run {
         # check web server - is a restart needed?
         my $Webserver;
 
-        # Only if we have mod_perl we have to restart.
+        # only if we have mod_perl we have to restart
         if ( exists $ENV{MOD_PERL} ) {
             eval 'require mod_perl';    ## no critic
             if ( defined $mod_perl::VERSION ) {    ## no critic
@@ -966,7 +1000,7 @@ sub Run {
             }
         }
 
-        # Check if Apache::Reload is loaded.
+        # check if Apache::Reload is loaded
         for my $Module ( sort keys %INC ) {
             $Module =~ s/\//::/g;
             $Module =~ s/\.pm$//g;
@@ -1010,8 +1044,8 @@ sub Run {
         return $Output;
     }
 
-    # Else error!
-    return $LayoutObject->FatalError(
+    # else error!
+    $LayoutObject->FatalError(
         Message => $LayoutObject->{LanguageObject}->Translate( 'Unknown Subaction %s!', $Self->{Subaction} ),
         Comment => Translatable('Please contact the administrator.'),
     );
@@ -1020,7 +1054,7 @@ sub Run {
 sub ReConfigure {
     my ( $Self, %Param ) = @_;
 
-    # Perl quote and set via ConfigObject.
+    # perl quote and set via ConfigObject
     for my $Key ( sort keys %Param ) {
         $Kernel::OM->Get('Kernel::Config')->Set(
             Key   => $Key,
@@ -1031,7 +1065,7 @@ sub ReConfigure {
         }
     }
 
-    # Read config file.
+    # read config file
     my $ConfigFile = "$Self->{Path}/Kernel/Config.pm";
     ## no critic
     open( my $In, '<', $ConfigFile )
@@ -1040,18 +1074,18 @@ sub ReConfigure {
     my $Config = '';
     while (<$In>) {
 
-        # Skip empty lines or comments.
+        # skip empty lines or comments
         if ( !$_ || $_ =~ /^\s*#/ || $_ =~ /^\s*$/ ) {
             $Config .= $_;
         }
         else {
             my $NewConfig = $_;
 
-            # Replace config with %Param.
+            # replace config with %Param
             for my $Key ( sort keys %Param ) {
 
-                # Database passwords can contain characters like '@' or '$' and should be single-quoted
-                #   same goes for database hosts which can be like 'myserver\instance name' for MS SQL.
+                # database passwords can contain characters like '@' or '$' and should be single-quoted
+                # same goes for database hosts which can be like 'myserver\instance name' for MS SQL
                 if ( $Key eq 'DatabasePw' || $Key eq 'DatabaseHost' ) {
                     $NewConfig =~
                         s/(\$Self->{("|'|)$Key("|'|)} =.+?('|"));/\$Self->{'$Key'} = '$Param{$Key}';/g;
@@ -1066,7 +1100,7 @@ sub ReConfigure {
     }
     close $In;
 
-    # Write new config file.
+    # write new config file
     ## no critic
     open( my $Out, '>:utf8', $ConfigFile )
         || return "Can't open $ConfigFile: $!";
@@ -1080,19 +1114,19 @@ sub ReConfigure {
 sub ConnectToDB {
     my ( $Self, %Param ) = @_;
 
-    # Check params.
+    # check params
     my @NeededKeys = qw(DBType DBHost DBUser DBPassword);
 
     if ( $Param{InstallType} eq 'CreateDB' ) {
         push @NeededKeys, qw(OTRSDBUser OTRSDBPassword);
     }
 
-    # For Oracle we require DBSID and DBPort.
+    # for Oracle we require DBSID and DBPort
     if ( $Param{DBType} eq 'oracle' ) {
         push @NeededKeys, qw(DBSID DBPort);
     }
 
-    # For existing databases we require the database name.
+    # for existing databases we require the database name
     if ( $Param{DBType} ne 'oracle' && $Param{InstallType} eq 'UseDB' ) {
         push @NeededKeys, 'DBName';
     }
@@ -1108,18 +1142,24 @@ sub ConnectToDB {
         }
     }
 
-    # If we do not need to create a database for OTRS OTRSDBuser equals DBUser.
+    # if we do not need to create a database for OTRS OTRSDBuser equals DBUser
     if ( $Param{InstallType} ne 'CreateDB' ) {
         $Param{OTRSDBUser}     = $Param{DBUser};
         $Param{OTRSDBPassword} = $Param{DBPassword};
     }
 
-    # Create DSN string for backend.
+    # create DSN string for backend
     if ( $Param{DBType} eq 'mysql' && $Param{InstallType} eq 'CreateDB' ) {
         $Param{DSN} = "DBI:mysql:database=;host=$Param{DBHost};";
     }
     elsif ( $Param{DBType} eq 'mysql' && $Param{InstallType} eq 'UseDB' ) {
         $Param{DSN} = "DBI:mysql:database=;host=$Param{DBHost};database=$Param{DBName}";
+    }
+    elsif ( $Param{DBType} eq 'mssql' && $Param{InstallType} eq 'CreateDB' ) {
+        $Param{DSN} = "DBI:ODBC:driver={SQL Server};Server=$Param{DBHost};";
+    }
+    elsif ( $Param{DBType} eq 'mssql' && $Param{InstallType} eq 'UseDB' ) {
+        $Param{DSN} = "DBI:ODBC:driver={SQL Server};Server=$Param{DBHost};Database=$Param{DBName}";
     }
     elsif ( $Param{DBType} eq 'postgresql' && $Param{InstallType} eq 'CreateDB' ) {
         $Param{DSN} = "DBI:Pg:host=$Param{DBHost};";
@@ -1131,7 +1171,7 @@ sub ConnectToDB {
         $Param{DSN} = "DBI:Oracle://$Param{DBHost}:$Param{DBPort}/$Param{DBSID}";
     }
 
-    # Extract driver to load for install test.
+    # extract driver to load for install test
     my ($Driver) = ( $Param{DSN} =~ /^DBI:(.*?):/ );
     if ( !$Kernel::OM->Get('Kernel::System::Main')->Require( 'DBD::' . $Driver ) ) {
         return (
@@ -1159,7 +1199,7 @@ sub ConnectToDB {
         );
     }
 
-    # If we use an existing database, check if it already contains tables.
+    # if we use an existing database, check if it already contains tables
     if ( $Param{InstallType} ne 'CreateDB' ) {
 
         my $Data = $DBH->selectall_arrayref('SELECT * FROM valid');
@@ -1193,10 +1233,10 @@ sub CheckDBRequirements {
 
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
-    # If mysql, check some more values.
+    # if mysql, check some more values
     if ( $Param{DBType} eq 'mysql' && $Result{Successful} == 1 ) {
 
-        # Set max_allowed_packet.
+        # max_allowed_packed
         my $MySQLMaxAllowedPacket            = 0;
         my $MySQLMaxAllowedPacketRecommended = 20;
 
@@ -1214,7 +1254,7 @@ sub CheckDBRequirements {
 
     if ( $Param{DBType} eq 'mysql' && $Result{Successful} == 1 ) {
 
-        # Set innodb_log_file_size.
+        # innodb_log_file_size
         my $MySQLInnoDBLogFileSize            = 0;
         my $MySQLInnoDBLogFileSizeMinimum     = 256;
         my $MySQLInnoDBLogFileSizeRecommended = 512;
@@ -1234,7 +1274,7 @@ sub CheckDBRequirements {
         }
     }
 
-    # Delete not necessary key/value pairs.
+    # delete not necessary key/value pairs
     delete $Result{DB};
     delete $Result{DBH};
 
@@ -1246,7 +1286,7 @@ sub CheckMailConfiguration {
 
     my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
 
-    # First check outbound mail config.
+    # first check outbound mail config
     my $OutboundMailType =
         $ParamObject->GetParam( Param => 'OutboundMailType' );
     my $SMTPHost = $ParamObject->GetParam( Param => 'SMTPHost' );
@@ -1258,7 +1298,7 @@ sub CheckMailConfiguration {
 
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
-    # If chosen config option is SMTP, set some Config params.
+    # if chosen config option is SMTP, set some Config params
     if ( $OutboundMailType && $OutboundMailType ne 'sendmail' ) {
         $ConfigObject->Set(
             Key   => 'SendmailModule',
@@ -1286,7 +1326,7 @@ sub CheckMailConfiguration {
         }
     }
 
-    # If sendmail, set config to sendmail.
+    # if sendmail, set config to sendmail
     else {
         $ConfigObject->Set(
             Key   => 'SendmailModule',
@@ -1294,7 +1334,7 @@ sub CheckMailConfiguration {
         );
     }
 
-    # If config option SMTP and no SMTP host given, return with error.
+    # if config option smtp and no smtp host given, return with error
     if ( $OutboundMailType ne 'sendmail' && !$SMTPHost ) {
         return (
             Successful => 0,
@@ -1302,19 +1342,13 @@ sub CheckMailConfiguration {
         );
     }
 
-    # Check outbound mail configuration.
+    # check outbound mail configuration
     my $SendObject = $Kernel::OM->Get('Kernel::System::Email');
     my %Result     = $SendObject->Check();
 
     my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
 
-    my $ExclusiveLockGUID = $SysConfigObject->SettingLock(
-        LockAll => 1,
-        Force   => 1,
-        UserID  => 1,
-    );
-
-    # If SMTP check was successful, write data into config.
+    # if smtp check was successful, write data into config
     my $SendmailModule = $ConfigObject->Get('SendmailModule');
     if (
         $Result{Successful}
@@ -1327,13 +1361,11 @@ sub CheckMailConfiguration {
             'SendmailModule::Port' => $SMTPPort,
         );
 
-        for my $SettingName ( sort keys %NewConfigs ) {
-            $SysConfigObject->SettingUpdate(
-                Name              => $SettingName,
-                IsValid           => 1,
-                EffectiveValue    => $NewConfigs{$SettingName},
-                ExclusiveLockGUID => $ExclusiveLockGUID,
-                UserID            => 1,
+        for my $Key ( sort keys %NewConfigs ) {
+            $SysConfigObject->ConfigItemUpdate(
+                Valid => 1,
+                Key   => $Key,
+                Value => $NewConfigs{$Key},
             );
         }
 
@@ -1343,39 +1375,35 @@ sub CheckMailConfiguration {
                 'SendmailModule::AuthPassword' => $SMTPAuthPassword,
             );
 
-            for my $SettingName ( sort keys %NewConfigs ) {
-                $SysConfigObject->SettingUpdate(
-                    Name              => $SettingName,
-                    IsValid           => 1,
-                    EffectiveValue    => $NewConfigs{$SettingName},
-                    ExclusiveLockGUID => $ExclusiveLockGUID,
-                    UserID            => 1,
+            for my $Key ( sort keys %NewConfigs ) {
+                $SysConfigObject->ConfigItemUpdate(
+                    Valid => 1,
+                    Key   => $Key,
+                    Value => $NewConfigs{$Key},
                 );
             }
         }
     }
 
-    # If sendmail check was successful, write data into config.
+    # if sendmail check was successful, write data into config
     elsif (
         $Result{Successful}
         && $SendmailModule eq 'Kernel::System::Email::Sendmail'
         )
     {
-        $SysConfigObject->SettingUpdate(
-            Name              => 'SendmailModule',
-            IsValid           => 1,
-            EffectiveValue    => $ConfigObject->Get('SendmailModule'),
-            ExclusiveLockGUID => $ExclusiveLockGUID,
-            UserID            => 1,
+        $SysConfigObject->ConfigItemUpdate(
+            Valid => 1,
+            Key   => 'SendmailModule',
+            Value => $ConfigObject->Get('SendmailModule'),
         );
     }
 
-    # Now check inbound mail config. return if the outbound config threw an error.
+    # now check inbound mail config. return if the outbound config threw an error
     if ( !$Result{Successful} ) {
         return %Result;
     }
 
-    # Check inbound mail config.
+    # check inbound mail config
     my $MailAccount = $Kernel::OM->Get('Kernel::System::MailAccount');
 
     for (qw(InboundUser InboundPassword InboundHost)) {
@@ -1403,7 +1431,7 @@ sub CheckMailConfiguration {
         Debug    => '0',
     );
 
-    # If successful, add mail account to DB.
+    # if successful, add mail account to DB
     if ( $Result{Successful} ) {
         my $ID = $MailAccount->MailAccountAdd(
             Login         => $InboundUser,
@@ -1426,27 +1454,6 @@ sub CheckMailConfiguration {
     }
 
     return %Result;
-}
-
-sub _CheckConfig {
-    my ( $Self, %Param ) = @_;
-
-    my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
-
-    my @Result = $SysConfigObject->ConfigurationSearch(
-        Search => 'ProductName',
-    );
-
-    return 1 if @Result;
-
-    my $Home = $Kernel::OM->Get('Kernel::Config')->Get('Home');
-
-    return $SysConfigObject->ConfigurationXML2DB(
-        UserID    => 1,
-        Directory => "$Home/Kernel/Config/Files/XML",
-        Force     => 1,
-        CleanUp   => 1,
-    );
 }
 
 1;

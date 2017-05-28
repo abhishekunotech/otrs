@@ -26,12 +26,23 @@ my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
 $ConfigObject->Set(
-    Key   => 'OTRSTimeZone',
-    Value => 'UTC',
+    Key   => 'TimeZone',
+    Value => 0,
+);
+$ConfigObject->Set(
+    Key   => 'TimeZoneUser',
+    Value => 0,
+);
+$ConfigObject->Set(
+    Key   => 'TimeZoneUserBrowserAutoOffset',
+    Value => 0,
 );
 
 # set fixed time to have predetermined verifiable results
 $Helper->FixedTimeSet(0);
+
+# get time object
+my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
 # configure auth backend to db
 $ConfigObject->Set(
@@ -87,7 +98,7 @@ my %CurrentConfig = (
     'SecretPreferencesKey' => 'UnitTestUserGoogleAuthenticatorSecretKey',
     'AllowEmptySecret'     => 0,
     'AllowPreviousToken'   => 0,
-    'TimeZone'             => 'UTC',
+    'TimeZone'             => 0,
     'Secret'               => '',
     'Time'                 => 0,
 );
@@ -177,12 +188,12 @@ my @Tests = (
         FixedTimeSet       => 60,
     },
     {
-        Name               => 'Valid token for different time zone (time zone actually must not matter)',
+        Name               => 'Valid token for different time zone',
         ExpectedAuthResult => 1,
         Secret             => 'UNITTESTUNITTEST',
-        TwoFactorToken     => '761321',
+        TwoFactorToken     => '281099',
         FixedTimeSet       => 0,
-        TimeZone           => 'Europe/Berlin',
+        TimeZone           => 1,
     },
 );
 
@@ -204,10 +215,10 @@ for my $Test (@Tests) {
     }
 
     # update time zone if necessary
-    if ( ( $Test->{TimeZone} || 'UTC' ) ne $CurrentConfig{TimeZone} ) {
-        $CurrentConfig{TimeZone} = $Test->{TimeZone} || 'UTC';
+    if ( ( $Test->{TimeZone} || '0' ) ne $CurrentConfig{TimeZone} ) {
+        $CurrentConfig{TimeZone} = $Test->{TimeZone} || '0';
         $ConfigObject->Set(
-            Key   => 'OTRSTimeZone',
+            Key   => 'TimeZone',
             Value => $CurrentConfig{TimeZone},
         );
 

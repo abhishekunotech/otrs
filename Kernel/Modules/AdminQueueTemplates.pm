@@ -138,23 +138,6 @@ sub Run {
                 UserID             => $Self->{UserID},
             );
         }
-
-        # if the user would like to continue editing the templates - queue relation just redirect to the edit screen
-        # otherwise return to relations overview
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect(
-                OP => "Action=$Self->{Action};Subaction=Queue;ID=$QueueID"
-            );
-        }
-        else {
-            return $LayoutObject->Redirect(
-                OP => "Action=$Self->{Action}"
-            );
-        }
     }
 
     # ------------------------------------------------------------ #
@@ -187,22 +170,7 @@ sub Run {
             );
         }
 
-        # if the user would like to continue editing the queue - templates relation just redirect to the edit screen
-        # otherwise return to relations overview
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
-            return $LayoutObject->Redirect(
-                OP => "Action=$Self->{Action};Subaction=Template;ID=$TemplateID"
-            );
-        }
-        else {
-            return $LayoutObject->Redirect(
-                OP => "Action=$Self->{Action}"
-            );
-        }
+        return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
     }
 
     # ------------------------------------------------------------ #
@@ -229,20 +197,7 @@ sub _Change {
 
     my $MyType       = $VisibleType{$Type};
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
-
-    my $BreadcrumbTitle = $LayoutObject->{LanguageObject}->Translate('Change Queue Relations for Template');
-
-    if ( $VisibleType{$Type} eq 'Queue' ) {
-        $BreadcrumbTitle = $LayoutObject->{LanguageObject}->Translate('Change Template Relations for Queue');
-    }
-
-    $LayoutObject->Block(
-        Name => 'Overview',
-        Data => {
-            Name            => $Param{Name},
-            BreadcrumbTitle => $BreadcrumbTitle,
-        },
-    );
+    $LayoutObject->Block( Name => 'Overview' );
     $LayoutObject->Block( Name => 'ActionList' );
     $LayoutObject->Block( Name => 'ActionOverview' );
     $LayoutObject->Block( Name => 'Filter' );
@@ -256,14 +211,16 @@ sub _Change {
         Name => 'Change',
         Data => {
             %Param,
-            ActionHome      => 'Admin' . $Type,
-            NeType          => $NeType,
-            VisibleType     => $VisibleType{$Type},
-            VisibleNeType   => $VisibleType{$NeType},
-            Queue           => $QueueTag,
-            BreadcrumbTitle => $BreadcrumbTitle,
+            ActionHome    => 'Admin' . $Type,
+            NeType        => $NeType,
+            VisibleType   => $VisibleType{$Type},
+            VisibleNeType => $VisibleType{$NeType},
+            Queue         => $QueueTag,
+
         },
     );
+
+    $LayoutObject->Block( Name => "ChangeHeader$VisibleType{$NeType}" );
 
     # check if there are queue/template
     if ( !%Data ) {

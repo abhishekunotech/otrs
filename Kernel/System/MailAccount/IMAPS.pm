@@ -13,7 +13,7 @@ use warnings;
 
 use IO::Socket::SSL;
 
-use parent qw(Kernel::System::MailAccount::IMAP);
+use base qw(Kernel::System::MailAccount::IMAP);
 
 our @ObjectDependencies = (
     'Kernel::System::Log',

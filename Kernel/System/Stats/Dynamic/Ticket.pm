@@ -212,7 +212,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_From',
+            Element          => 'From',
             Block            => 'InputField',
         },
         {
@@ -220,7 +220,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_To',
+            Element          => 'To',
             Block            => 'InputField',
         },
         {
@@ -228,7 +228,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Cc',
+            Element          => 'Cc',
             Block            => 'InputField',
         },
         {
@@ -236,7 +236,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Subject',
+            Element          => 'Subject',
             Block            => 'InputField',
         },
         {
@@ -244,7 +244,7 @@ sub GetObjectAttributes {
             UseAsXvalue      => 0,
             UseAsValueSeries => 0,
             UseAsRestriction => 1,
-            Element          => 'MIMEBase_Body',
+            Element          => 'Body',
             Block            => 'InputField',
         },
         {
@@ -287,20 +287,6 @@ sub GetObjectAttributes {
             Values           => {
                 TimeStart => 'TicketChangeTimeNewerDate',
                 TimeStop  => 'TicketChangeTimeOlderDate',
-            },
-        },
-        {
-            Name             => Translatable('Pending until time'),
-            UseAsXvalue      => 1,
-            UseAsValueSeries => 1,
-            UseAsRestriction => 1,
-            Element          => 'PendingUntilTime',
-            TimePeriodFormat => 'DateInputFormat',                    # 'DateInputFormatLong',
-            Block            => 'Time',
-            TimeStop         => $Today,
-            Values           => {
-                TimeStart => 'TicketPendingTimeNewerDate',
-                TimeStop  => 'TicketPendingTimeOlderDate',
             },
         },
         {
@@ -541,7 +527,7 @@ sub GetObjectAttributes {
         }
 
         my %ObjectAttribute = (
-            Name             => Translatable('Assigned to Customer User Login'),
+            Name             => Translatable('CustomerUserLogin'),
             UseAsXvalue      => 1,
             UseAsValueSeries => 1,
             UseAsRestriction => 1,
@@ -554,9 +540,9 @@ sub GetObjectAttributes {
     }
     else {
 
-        my @CustomerUserAttributes = (
+        my @CustomerIDAttributes = (
             {
-                Name             => Translatable('Assigned to Customer User Login (complex search)'),
+                Name             => Translatable('CustomerUserLogin (complex search)'),
                 UseAsXvalue      => 0,
                 UseAsValueSeries => 0,
                 UseAsRestriction => 1,
@@ -564,36 +550,17 @@ sub GetObjectAttributes {
                 Block            => 'InputField',
             },
             {
-                Name               => Translatable('Assigned to Customer User Login (exact match)'),
-                UseAsXvalue        => 0,
-                UseAsValueSeries   => 0,
-                UseAsRestriction   => 1,
-                Element            => 'CustomerUserLoginRaw',
-                Block              => 'InputField',
-                CSSClass           => 'CustomerAutoCompleteSimple',
-                HTMLDataAttributes => {
-                    'customer-search-type' => 'CustomerUser',
-                },
+                Name             => Translatable('CustomerUserLogin (exact match)'),
+                UseAsXvalue      => 0,
+                UseAsValueSeries => 0,
+                UseAsRestriction => 1,
+                Element          => 'CustomerUserLoginRaw',
+                Block            => 'InputField',
             },
         );
 
-        push @ObjectAttributes, @CustomerUserAttributes;
+        push @ObjectAttributes, @CustomerIDAttributes;
     }
-
-    # Add always the field for the customer user login accessible tickets as auto complete field.
-    my %ObjectAttribute = (
-        Name               => Translatable('Accessible to Customer User Login (exact match)'),
-        UseAsXvalue        => 0,
-        UseAsValueSeries   => 0,
-        UseAsRestriction   => 1,
-        Element            => 'CustomerUserID',
-        Block              => 'InputField',
-        CSSClass           => 'CustomerAutoCompleteSimple',
-        HTMLDataAttributes => {
-            'customer-search-type' => 'CustomerUser',
-        },
-    );
-    push @ObjectAttributes, \%ObjectAttribute;
 
     if ( $ConfigObject->Get('Ticket::ArchiveSystem') ) {
 
@@ -852,7 +819,7 @@ sub GetStatElement {
         Permission => 'ro',
         Limit      => 100_000_000,
         %Param,
-    ) || 0;
+    );
 }
 
 sub ExportWrapper {

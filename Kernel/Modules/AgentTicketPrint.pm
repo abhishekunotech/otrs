@@ -11,9 +11,8 @@ package Kernel::Modules::AgentTicketPrint;
 use strict;
 use warnings;
 
-use Kernel::System::DateTime;
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -114,38 +113,26 @@ sub Run {
         TicketID => $Self->{TicketID},
         UserID   => $Self->{UserID},
     );
-
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
-    my @MetaArticles = $ArticleObject->ArticleList(
-        TicketID => $Self->{TicketID},
-        UserID   => $Self->{UserID},
+    my @ArticleBox = $TicketObject->ArticleContentIndex(
+        TicketID                   => $Self->{TicketID},
+        StripPlainBodyAsAttachment => 1,
+        UserID                     => $Self->{UserID},
+        DynamicFields              => 0,
     );
 
-    # Check if only one article should be printed.
+    # check if only one article need printed
     if ($ArticleID) {
-        @MetaArticles = grep { $_->{ArticleID} == $ArticleID } @MetaArticles;
+
+        ARTICLE:
+        for my $Article (@ArticleBox) {
+            if ( $Article->{ArticleID} == $ArticleID ) {
+                @ArticleBox = ($Article);
+                last ARTICLE;
+            }
+        }
     }
 
-    my @ArticleBox;
-
-    for my $MetaArticle (@MetaArticles) {
-        my $ArticleBackendObject = $ArticleObject->BackendForArticle( %{$MetaArticle} );
-        my %Article              = $ArticleBackendObject->ArticleGet(
-            %{$MetaArticle},
-            DynamicFields => 0,
-            UserID        => $Self->{UserID},
-        );
-        $Article{Atms} = $ArticleBackendObject->ArticleAttachmentIndex(
-            %{$MetaArticle},
-            UserID           => $Self->{UserID},
-            ExcludePlainText => 1,
-            ExcludeHTMLBody  => 1,
-            ExcludeInline    => 1,
-        );
-        push @ArticleBox, \%Article;
-    }
-
+    # get config object
     my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
 
     # show total accounted time if feature is active:
@@ -192,14 +179,13 @@ sub Run {
         );
     }
 
-    # get PDF object
-    my $PDFObject = $Kernel::OM->Get('Kernel::System::PDF');
+    # get needed objects
+    my $PDFObject  = $Kernel::OM->Get('Kernel::System::PDF');
+    my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
 
     my $PrintedBy = $LayoutObject->{LanguageObject}->Translate('printed by');
-
-    my $DateTimeString = $Kernel::OM->Create('Kernel::System::DateTime')->ToString();
-    my $Time           = $LayoutObject->{LanguageObject}->FormatTimeString(
-        $DateTimeString,
+    my $Time      = $LayoutObject->{LanguageObject}->FormatTimeString(
+        $TimeObject->CurrentTimestamp(),
         'DateFormat',
     );
 
@@ -320,19 +306,29 @@ sub Run {
         ArticleNumber => $ParamObject->GetParam( Param => 'ArticleNumber' ),
     );
 
-    # assemble file name
-    my $DateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
-    if ( $Self->{UserTimeZone} ) {
-        $DateTimeObject->ToTimeZone( TimeZone => $Self->{UserTimeZone} );
+    # get time object and use the UserTimeObject, if the system use UTC as
+    # system time and the TimeZoneUser feature is active
+    if (
+        !$Kernel::OM->Get('Kernel::System::Time')->ServerLocalTimeOffsetSeconds()
+        && $Kernel::OM->Get('Kernel::Config')->Get('TimeZoneUser')
+        && $Self->{UserTimeZone}
+        )
+    {
+        $TimeObject = $LayoutObject->{UserTimeObject};
     }
-    my $Filename = 'Ticket_' . $Ticket{TicketNumber} . '_';
-    $Filename .= $DateTimeObject->Format( Format => '%Y-%m-%d_%H:%M' );
-    $Filename .= '.pdf';
 
     # return the pdf document
+    my $Filename = 'Ticket_' . $Ticket{TicketNumber};
+    my ( $s, $m, $h, $D, $M, $Y ) = $TimeObject->SystemTime2Date(
+        SystemTime => $TimeObject->SystemTime(),
+    );
+    $M = sprintf( "%02d", $M );
+    $D = sprintf( "%02d", $D );
+    $h = sprintf( "%02d", $h );
+    $m = sprintf( "%02d", $m );
     my $PDFString = $PDFObject->DocumentOutput();
     return $LayoutObject->Attachment(
-        Filename    => $Filename,
+        Filename    => $Filename . "_" . "$Y-$M-$D" . "_" . "$h-$m.pdf",
         ContentType => "application/pdf",
         Content     => $PDFString,
         Type        => 'inline',
@@ -946,9 +942,8 @@ sub _PDFOutputArticles {
     my %Page = %{ $Param{PageData} };
 
     # get needed objects
-    my $PDFObject     = $Kernel::OM->Get('Kernel::System::PDF');
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-    my $LayoutObject  = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+    my $PDFObject    = $Kernel::OM->Get('Kernel::System::PDF');
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     my @ArticleData  = @{ $Param{ArticleData} };
     my $ArticleCount = scalar @ArticleData;
@@ -974,8 +969,7 @@ sub _PDFOutputArticles {
         my $Attachments;
         for my $FileID ( sort keys %AtmIndex ) {
             my %File = %{ $AtmIndex{$FileID} };
-            my $Filesize = $LayoutObject->HumanReadableDataSize( Size => $File{Filesize} );
-            $Attachments .= $File{Filename} . ' (' . $Filesize . ")\n";
+            $Attachments .= $File{Filename} . ' (' . $File{Filesize} . ")\n";
         }
 
         # get config object
@@ -983,7 +977,7 @@ sub _PDFOutputArticles {
 
         # show total accounted time if feature is active:
         if ( $ConfigObject->Get('Ticket::Frontend::AccountTime') ) {
-            $Article{'Accounted time'} = $ArticleObject->ArticleAccountedTimeGet(
+            $Article{'Accounted time'} = $Kernel::OM->Get('Kernel::System::Ticket')->ArticleAccountedTimeGet(
                 ArticleID => $Article{ArticleID},
             );
         }
@@ -1032,7 +1026,7 @@ sub _PDFOutputArticles {
         $TableParam1{CellData}[$Row][0]{Content} = $LayoutObject->{LanguageObject}->Translate('Created') . ':';
         $TableParam1{CellData}[$Row][0]{Font}    = 'ProportionalBold';
         $TableParam1{CellData}[$Row][1]{Content} = $LayoutObject->{LanguageObject}->FormatTimeString(
-            $Article{CreateTime},
+            $Article{Created},
             'DateFormat',
         );
         $TableParam1{CellData}[$Row][1]{Content}
@@ -1082,6 +1076,11 @@ sub _PDFOutputArticles {
             $TableParam1{CellData}[$Row][1]{Content} = $ValueStrg->{Value};
             $Row++;
         }
+
+        $TableParam1{CellData}[$Row][0]{Content} = $LayoutObject->{LanguageObject}->Translate('Type') . ':';
+        $TableParam1{CellData}[$Row][0]{Font}    = 'ProportionalBold';
+        $TableParam1{CellData}[$Row][1]{Content} = $LayoutObject->{LanguageObject}->Translate( $Article{ArticleType} );
+        $Row++;
 
         if ($Attachments) {
             $TableParam1{CellData}[$Row][0]{Content} = $LayoutObject->{LanguageObject}->Translate('Attachment') . ':';
@@ -1135,14 +1134,14 @@ sub _PDFOutputArticles {
             }
         }
 
-        my %CommunicationChannel = $Kernel::OM->Get('Kernel::System::CommunicationChannel')->ChannelGet(
-            ChannelID => $Article{CommunicationChannelID},
-        );
-
-        if ( $CommunicationChannel{ChannelName} eq 'Chat' ) {
-            my $Lines = '';
-            if ( IsArrayRefWithData( $Article{ChatMessageList} ) ) {
-                for my $Line ( @{ $Article{ChatMessageList} } ) {
+        if ( $Article{ArticleType} eq 'chat-external' || $Article{ArticleType} eq 'chat-internal' )
+        {
+            $Article{Body} = $Kernel::OM->Get('Kernel::System::JSON')->Decode(
+                Data => $Article{Body}
+            );
+            my $Lines;
+            if ( IsArrayRefWithData( $Article{Body} ) ) {
+                for my $Line ( @{ $Article{Body} } ) {
                     my $CreateTime
                         = $LayoutObject->{LanguageObject}->FormatTimeString( $Line->{CreateTime}, 'DateFormat' );
                     if ( $Line->{SystemGenerated} ) {

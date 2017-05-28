@@ -15,24 +15,6 @@ use vars (qw($Self));
 # get selenium object
 my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 
-my $CheckBredcrumb = sub {
-
-    my %Param = @_;
-
-    my $BreadcrumbText = $Param{BreadcrumbText} || '';
-    my $Count = 1;
-
-    for my $BreadcrumbText ( 'Web Service Management', $BreadcrumbText ) {
-        $Self->Is(
-            $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-            $BreadcrumbText,
-            "Breadcrumb text '$BreadcrumbText' is found on screen"
-        );
-
-        $Count++;
-    }
-};
-
 $Selenium->RunTest(
     sub {
 
@@ -64,12 +46,6 @@ $Selenium->RunTest(
         # navigate to AdminGenericInterfaceWebservice screen
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AdminGenericInterfaceWebservice");
 
-        # check breadcrumb on Overview screen
-        $Self->True(
-            $Selenium->find_element( '.BreadCrumb', 'css' ),
-            "Breadcrumb is found on Overview screen.",
-        );
-
         # click 'Add web service' button
         $Selenium->find_element("//button[\@type='submit']")->VerifiedClick();
 
@@ -82,10 +58,6 @@ $Selenium->RunTest(
             $Element->is_enabled();
             $Element->is_displayed();
         }
-
-        # check breadcrumb on Add screen
-        $CheckBredcrumb->( BreadcrumbText => 'Add Web Service' );
-
         $Selenium->find_element( 'Cancel', 'link_text' )->VerifiedClick();
 
         # set test values
@@ -120,9 +92,6 @@ $Selenium->RunTest(
             $Selenium->find_element( $Webservice, 'link_text' )->VerifiedClick();
             $Selenium->execute_script("\$('#ValidID').val('2').trigger('redraw.InputField').trigger('change');");
             $Selenium->find_element( "#RemoteSystem", 'css' )->send_keys('Test remote system');
-
-            # check breadcrumb on Edit screen
-            $CheckBredcrumb->( BreadcrumbText => 'Edit Web Service: ' . $Webservice );
 
             # save edited value
             $Selenium->find_element( "#SaveAndFinishButton", 'css' )->VerifiedClick();

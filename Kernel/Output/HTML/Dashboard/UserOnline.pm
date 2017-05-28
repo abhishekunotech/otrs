@@ -242,15 +242,15 @@ sub Run {
     my $Total    = $Online->{UserCount}->{ $Self->{Filter} } || 0;
     my $LinkPage = 'Subaction=Element;Name=' . $Self->{Name} . ';Filter=' . $Self->{Filter} . ';';
     my %PageNav  = $LayoutObject->PageNavBar(
-        StartHit    => $Self->{StartHit},
-        PageShown   => $Self->{PageShown},
-        AllHits     => $Total || 1,
-        Action      => 'Action=' . $LayoutObject->{Action},
-        Link        => $LinkPage,
-        WindowSize  => 5,
-        AJAXReplace => 'Dashboard' . $Self->{Name},
-        IDPrefix    => 'Dashboard' . $Self->{Name},
-        AJAX        => $Param{AJAX},
+        StartHit       => $Self->{StartHit},
+        PageShown      => $Self->{PageShown},
+        AllHits        => $Total || 1,
+        Action         => 'Action=' . $LayoutObject->{Action},
+        Link           => $LinkPage,
+        WindowSize     => 5,
+        AJAXReplace    => 'Dashboard' . $Self->{Name},
+        IDPrefix       => 'Dashboard' . $Self->{Name},
+        KeepScriptTags => $Param{AJAX},
     );
 
     $LayoutObject->Block(
@@ -276,13 +276,12 @@ sub Run {
     my $ChatStartingAgentsGroup  = $ConfigObject->Get('ChatEngine::PermissionGroup::ChatStartingAgents') || 'users';
     my $ChatReceivingAgentsGroup = $ConfigObject->Get('ChatEngine::PermissionGroup::ChatReceivingAgents') || 'users';
 
-    my $ChatStartingAgentsGroupPermission = $Kernel::OM->Get('Kernel::System::Group')->PermissionCheck(
-        UserID    => $Self->{UserID},
-        GroupName => $ChatStartingAgentsGroup,
-        Type      => 'rw',
-    );
-
-    if ( !$ConfigObject->Get('ChatEngine::Active') || !$ChatStartingAgentsGroupPermission ) {
+    if (
+        !$ConfigObject->Get('ChatEngine::Active')
+        || !defined $LayoutObject->{"UserIsGroup[$ChatStartingAgentsGroup]"}
+        || $LayoutObject->{"UserIsGroup[$ChatStartingAgentsGroup]"} ne 'Yes'
+        )
+    {
         $EnableChat = 0;
     }
     if (
@@ -302,16 +301,16 @@ sub Run {
         $EnableChat = 0;
     }
 
-    my $VideoChatEnabled               = 0;
-    my $VideoChatAgentsGroup           = $ConfigObject->Get('ChatEngine::PermissionGroup::VideoChatAgents') || 'users';
-    my $VideoChatAgentsGroupPermission = $Kernel::OM->Get('Kernel::System::Group')->PermissionCheck(
-        UserID    => $Self->{UserID},
-        GroupName => $VideoChatAgentsGroup,
-        Type      => 'rw',
-    );
+    my $VideoChatEnabled = 0;
+    my $VideoChatAgentsGroup = $ConfigObject->Get('ChatEngine::PermissionGroup::VideoChatAgents') || 'users';
 
     # Enable the video chat feature if system is entitled and agent is a member of configured group.
-    if ( $ConfigObject->Get('ChatEngine::Active') && $VideoChatAgentsGroupPermission ) {
+    if (
+        $ConfigObject->Get('ChatEngine::Active')
+        && defined $LayoutObject->{"UserIsGroup[$VideoChatAgentsGroup]"}
+        && $LayoutObject->{"UserIsGroup[$VideoChatAgentsGroup]"} eq 'Yes'
+        )
+    {
         if ( $Kernel::OM->Get('Kernel::System::Main')->Require( 'Kernel::System::VideoChat', Silent => 1 ) ) {
             $VideoChatEnabled = $Kernel::OM->Get('Kernel::System::VideoChat')->IsEnabled();
         }
@@ -472,17 +471,7 @@ sub Run {
             NameHTML    => $NameHTML,
             RefreshTime => $Refresh,
         },
-        AJAX => $Param{AJAX},
-    );
-
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'UserOnline',
-        Value => {
-            Name        => $Self->{Name},
-            NameHTML    => $NameHTML,
-            RefreshTime => $Refresh,
-        },
+        KeepScriptTags => $Param{AJAX},
     );
 
     return $Content;

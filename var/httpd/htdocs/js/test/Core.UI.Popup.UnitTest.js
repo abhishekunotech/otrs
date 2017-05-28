@@ -14,9 +14,9 @@ Core.UI = Core.UI || {};
 Core.UI.Popup = (function (Namespace) {
     Namespace.RunUnitTests = function(){
 
-        QUnit.module('Core.UI.Popup');
+        module('Core.UI.Popup');
 
-        QUnit.test('PopupProfiles', function(Assert){
+        test('PopupProfiles', 2, function(){
 
             var ExpectedProfiles = {
                 'Default': {
@@ -28,15 +28,13 @@ Core.UI.Popup = (function (Namespace) {
                 }
             };
 
-            Assert.expect(2);
-
-            Assert.deepEqual(Core.UI.Popup.ProfileList(), ExpectedProfiles, 'Default profile list');
+            deepEqual(Core.UI.Popup.ProfileList(), ExpectedProfiles, 'Default profile list');
 
             ExpectedProfiles.CustomLarge = "dependent=yes,height=700,left=100,top=100,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no,width=1000";
 
             Core.UI.Popup.ProfileAdd('CustomLarge', ExpectedProfiles.CustomLarge);
 
-            Assert.deepEqual(Core.UI.Popup.ProfileList(), ExpectedProfiles, 'Modified profile list');
+            deepEqual(Core.UI.Popup.ProfileList(), ExpectedProfiles, 'Modified profile list');
         });
     };
 

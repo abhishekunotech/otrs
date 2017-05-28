@@ -66,7 +66,7 @@ Core.Agent.Search = (function (TargetNS) {
             $Label.next().clone().appendTo('#SearchInsert')
 
                 // bind click function to remove button now
-                .find('.RemoveButton').on('click', function () {
+                .find('.RemoveButton').bind('click', function () {
                     var $Element = $(this).parent();
                     TargetNS.SearchAttributeRemove($Element);
 
@@ -75,10 +75,6 @@ Core.Agent.Search = (function (TargetNS) {
 
                     return false;
                 });
-
-            $('.CustomerAutoCompleteSimple').each(function() {
-                Core.Agent.CustomerSearch.InitSimple($(this));
-            });
 
             // Register event for tree selection dialog
             Core.UI.TreeSelection.InitTreeSelection();
@@ -181,7 +177,7 @@ Core.Agent.Search = (function (TargetNS) {
             }
         });
         if (!SearchValueFlag) {
-           alert(Core.Language.Translate('Please enter at least one search value or * to find anything.'));
+           alert(Core.Config.Get('EmptySearchMsg'));
         }
         return SearchValueFlag;
     }
@@ -195,7 +191,7 @@ Core.Agent.Search = (function (TargetNS) {
      *      Shows waiting dialog until search screen is ready.
      */
     function ShowWaitingDialog(){
-        Core.UI.Dialog.ShowContentDialog('<div class="Spacing Center"><span class="AJAXLoader" title="' + Core.Language.Translate('Loading...') + '"></span></div>', Core.Language.Translate('Loading...'), '10px', 'Center', true);
+        Core.UI.Dialog.ShowContentDialog('<div class="Spacing Center"><span class="AJAXLoader" title="' + Core.Config.Get('LoadingMsg') + '"></span></div>', Core.Config.Get('LoadingMsg'), '10px', 'Center', true);
     }
 
     /**
@@ -317,7 +313,7 @@ Core.Agent.Search = (function (TargetNS) {
         AJAXStopWordCheck(
             SearchStrings,
             function (FoundStopWords) {
-                alert(Core.Language.Translate('Please remove the following words from your search as they cannot be searched for:') + "\n" + FoundStopWords);
+                alert(Core.Config.Get('SearchStringsContainStopWordsMsg') + "\n" + FoundStopWords);
             },
             Callback
         );
@@ -362,7 +358,7 @@ Core.Agent.Search = (function (TargetNS) {
                     return;
                 }
 
-                Core.UI.Dialog.ShowContentDialog(HTML, Core.Language.Translate('Search'), '10px', 'Center', true, undefined, true);
+                Core.UI.Dialog.ShowContentDialog(HTML, Core.Config.Get('SearchMsg'), '10px', 'Center', true, undefined, true);
 
                 // hide add template block
                 $('#SearchProfileAddBlock').hide();
@@ -389,13 +385,13 @@ Core.Agent.Search = (function (TargetNS) {
                 Core.UI.InputFields.Activate($('.Dialog:visible'));
 
                 // register add of attribute
-                $('.AddButton').on('click', function () {
+                $('.AddButton').bind('click', function () {
                     var Attribute = $('#Attribute').val();
                     TargetNS.SearchAttributeAdd(Attribute);
                     TargetNS.AdditionalAttributeSelectionRebuild();
 
                     // Register event for tree selection dialog
-                    $('.ShowTreeSelection').off('click').on('click', function () {
+                    $('.ShowTreeSelection').unbind('click').bind('click', function () {
                         Core.UI.TreeSelection.ShowTreeSelection($(this));
                         return false;
                     });
@@ -404,7 +400,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // register return key
-                $('#SearchForm').off('keypress.FilterInput').on('keypress.FilterInput', function (Event) {
+                $('#SearchForm').unbind('keypress.FilterInput').bind('keypress.FilterInput', function (Event) {
                     if ((Event.charCode || Event.keyCode) === 13) {
                         if (!CheckForSearchedValues()) {
                             return false;
@@ -417,7 +413,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // register submit
-                $('#SearchFormSubmit').on('click', function () {
+                $('#SearchFormSubmit').bind('click', function () {
 
                     var ShownAttributes = [];
 
@@ -442,7 +438,7 @@ Core.Agent.Search = (function (TargetNS) {
                         else {
                             CheckSearchStringsForStopWords(function () {
                                 $('#SearchForm').submit();
-                                return false;
+                                ShowWaitingDialog();
                            });
                         }
                     }
@@ -461,14 +457,8 @@ Core.Agent.Search = (function (TargetNS) {
                     return false;
                 });
 
-                Core.Form.Validate.Init();
-                Core.Form.Validate.SetSubmitFunction($('#SearchForm'), function (Form) {
-                    Form.submit();
-                    ShowWaitingDialog();
-                });
-
                 // load profile
-                $('#SearchProfile').on('change', function () {
+                $('#SearchProfile').bind('change', function () {
                     var SearchProfile = $('#SearchProfile').val(),
                         SearchProfileEmptySearch = $('#EmptySearch').val(),
                         SearchProfileAction = $('#SearchAction').val();
@@ -478,7 +468,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // show add profile block or not
-                $('#SearchProfileNew').on('click', function (Event) {
+                $('#SearchProfileNew').bind('click', function (Event) {
                     $('#SearchProfileAddBlock').toggle();
                     $('#SearchProfileAddName').focus();
                     Event.preventDefault();
@@ -486,7 +476,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // add new profile
-                $('#SearchProfileAddAction').on('click', function () {
+                $('#SearchProfileAddAction').bind('click', function () {
                     var ProfileName, $Element1;
 
                     // get name
@@ -524,7 +514,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // direct link to profile
-                $('#SearchProfileAsLink').on('click', function () {
+                $('#SearchProfileAsLink').bind('click', function () {
                     var SearchProfile = $('#SearchProfile').val(),
                         SearchProfileAction = $('#SearchAction').val();
 
@@ -534,7 +524,7 @@ Core.Agent.Search = (function (TargetNS) {
                 });
 
                 // delete profile
-                $('#SearchProfileDelete').on('click', function (Event) {
+                $('#SearchProfileDelete').bind('click', function (Event) {
 
                     // strip all already used attributes
                     $('#SearchProfile').find('option:selected').each(function () {
@@ -572,11 +562,6 @@ Core.Agent.Search = (function (TargetNS) {
                     return false;
                 });
 
-                window.setTimeout(function (){
-                    TargetNS.AddSearchAttributes();
-                    TargetNS.AdditionalAttributeSelectionRebuild();
-                }, 0);
-
             }, 'html'
         );
     };
@@ -590,7 +575,7 @@ Core.Agent.Search = (function (TargetNS) {
     TargetNS.InitToolbarFulltextSearch = function () {
 
         // register return key
-        $('#ToolBar li.Extended.SearchFulltext form[name="SearchFulltext"]').off('keypress.FilterInput').on('keypress.FilterInput', function (Event) {
+        $('#ToolBar li.Extended.SearchFulltext form[name="SearchFulltext"]').unbind('keypress.FilterInput').bind('keypress.FilterInput', function (Event) {
             var SearchString;
 
             if ((Event.charCode || Event.keyCode) === 13) {
@@ -603,7 +588,7 @@ Core.Agent.Search = (function (TargetNS) {
                 AJAXStopWordCheck(
                     { Fulltext: SearchString },
                     function (FoundStopWords) {
-                        alert(Core.Language.Translate('Please remove the following words from your search as they cannot be searched for:') + "\n" + FoundStopWords);
+                        alert(Core.Config.Get('SearchStringsContainStopWordsMsg') + "\n" + FoundStopWords);
                     },
                     function () {
                         $('#ToolBar li.Extended.SearchFulltext form[name="SearchFulltext"]').submit();
@@ -614,42 +599,6 @@ Core.Agent.Search = (function (TargetNS) {
             }
         });
     };
-
-    /**
-     * @name AddSearchAttributes
-     * @memberof Core.Agent.Search
-     * @function
-     * @description
-     *      This function determines and adds attributes for using in filter.
-     */
-    TargetNS.AddSearchAttributes = function () {
-        var i,
-            SearchAttributes = Core.Config.Get('SearchAttributes');
-
-        if (typeof SearchAttributes !== 'undefined' && SearchAttributes.length > 0) {
-            for (i = 0; i < SearchAttributes.length; i++) {
-                Core.Agent.Search.SearchAttributeAdd(SearchAttributes[i]);
-            }
-        }
-    };
-
-    /**
-     * @name Init
-     * @memberof Core.Agent.Search
-     * @function
-     * @description
-     *      This function opens search dialog only on empty page
-     *      (when it opens via '...Action=AgentTicketSearch' from location bar).
-     */
-    TargetNS.Init = function () {
-        var NonAJAXSearch = Core.Config.Get('NonAJAXSearch');
-
-        if (typeof NonAJAXSearch !== 'undefined' && parseInt(NonAJAXSearch, 10) === 1) {
-            Core.Agent.Search.OpenSearchDialog(Core.Config.Get('Action'), Core.Config.Get('Profile'));
-        }
-    };
-
-    Core.Init.RegisterNamespace(TargetNS, 'APP_MODULE');
 
     return TargetNS;
 }(Core.Agent.Search || {}));

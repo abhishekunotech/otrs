@@ -18,10 +18,9 @@ my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 $Selenium->RunTest(
     sub {
 
-        my $Helper               = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-        my $TicketObject         = $Kernel::OM->Get('Kernel::System::Ticket');
-        my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-        my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article::Backend::Email');
+        # Get needed objects.
+        my $Helper       = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
+        my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         # Set zoom sort to reverse.
         $Helper->ConfigSettingChange(
@@ -76,17 +75,17 @@ $Selenium->RunTest(
         # Create ticket articles.
         my @ArticleIDs;
         for my $Count ( 1 .. 15 ) {
-            my $ArticleID = $ArticleBackendObject->ArticleCreate(
-                TicketID             => $TicketID,
-                IsVisibleForCustomer => 1,
-                SenderType           => 'customer',
-                Subject              => 'Selenium subject test',
-                Body                 => "Article $Count",
-                ContentType          => 'text/plain; charset=ISO-8859-15',
-                HistoryType          => 'OwnerUpdate',
-                HistoryComment       => 'Some free text!',
-                UserID               => 1,
-                NoAgentNotify        => 1,
+            my $ArticleID = $TicketObject->ArticleCreate(
+                TicketID       => $TicketID,
+                ArticleType    => 'email-external',
+                SenderType     => 'customer',
+                Subject        => 'Selenium subject test',
+                Body           => "Article $Count",
+                ContentType    => 'text/plain; charset=ISO-8859-15',
+                HistoryType    => 'OwnerUpdate',
+                HistoryComment => 'Some free text!',
+                UserID         => 1,
+                NoAgentNotify  => 1,
             );
             $Self->True(
                 $ArticleID,
@@ -96,8 +95,7 @@ $Selenium->RunTest(
 
             # Set first page articles to 'seen'.
             if ( $Count > 5 ) {
-                my $Set = $ArticleObject->ArticleFlagSet(
-                    TicketID  => $TicketID,
+                my $Set = $TicketObject->ArticleFlagSet(
                     ArticleID => $ArticleID,
                     Key       => 'Seen',
                     Value     => 1,

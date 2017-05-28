@@ -74,10 +74,6 @@ div.InputField_InputContainer {
     color: #aaa;
 }
 
-.InputField_Search[readonly=readonly]:focus {
-    box-shadow: none;
-}
-
 a.InputField_Action {
     position: absolute;
     display: block;

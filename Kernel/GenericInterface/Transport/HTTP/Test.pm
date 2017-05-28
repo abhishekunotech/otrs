@@ -24,9 +24,13 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Transport::Test - GenericInterface network transport interface for testing purposes
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Transport->new();
@@ -66,7 +70,7 @@ sub new {
     return $Self;
 }
 
-=head2 ProviderProcessRequest()
+=item ProviderProcessRequest()
 
 this will read the incoming HTTP request via CGI and
 return the HTTP parameters in the data hash.
@@ -111,7 +115,7 @@ sub ProviderProcessRequest {
     };
 }
 
-=head2 ProviderGenerateResponse()
+=item ProviderGenerateResponse()
 
 this will generate a query string from the passed data hash
 and generate an HTTP response with this string as the body.
@@ -164,7 +168,7 @@ sub ProviderGenerateResponse {
     };
 }
 
-=head2 RequesterPerformRequest()
+=item RequesterPerformRequest()
 
 in Fail mode, returns error status. Otherwise, returns the
 query string generated out of the data for the HTTP response.
@@ -214,6 +218,8 @@ sub RequesterPerformRequest {
     };
 }
 
+=back
+
 =begin Internal:
 
 =cut
@@ -222,7 +228,7 @@ sub RequesterPerformRequest {
 
 Kernel::GenericInterface::Transport::HTTP::Test::CustomHTTPProtocol
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This package is used to handle the custom HTTP requests of
 Kernel::GenericInterface::Transport::HTTP::Test.
@@ -233,7 +239,7 @@ sending them out to the network.
 
 package Kernel::GenericInterface::Transport::HTTP::Test::CustomHTTPProtocol;
 
-use parent qw(LWP::Protocol);
+use base qw(LWP::Protocol);
 
 sub new {
     my $Class = shift;

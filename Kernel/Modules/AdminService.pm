@@ -70,23 +70,6 @@ sub Run {
             $Error{'NameInvalid'} = 'ServerError';
         }
 
-        my $ServiceName = '';
-        if ( $GetParam{ParentID} ) {
-            my $Prefix = $ServiceObject->ServiceLookup(
-                ServiceID => $GetParam{ParentID},
-            );
-
-            if ($Prefix) {
-                $ServiceName = $Prefix . "::";
-            }
-        }
-        $ServiceName .= $GetParam{Name};
-
-        if ( length $ServiceName > 200 ) {
-            $Error{'NameInvalid'} = 'ServerError';
-            $Error{LongName} = 1;
-        }
-
         if ( !%Error ) {
 
             my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
@@ -162,22 +145,8 @@ sub Run {
                     }
                 }
 
-                # if the user would like to continue editing the service, just redirect to the edit screen
-                if (
-                    defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-                    && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-                    )
-                {
-                    my $ID = $ParamObject->GetParam( Param => 'ServiceID' ) || '';
-                    return $LayoutObject->Redirect(
-                        OP => "Action=$Self->{Action};Subaction=ServiceEdit;ServiceID=$ID"
-                    );
-                }
-                else {
-
-                    # otherwise return to overview
-                    return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
-                }
+                # redirect to overview
+                return $LayoutObject->Redirect( OP => "Action=$Self->{Action}" );
             }
         }
 
@@ -217,7 +186,7 @@ sub Run {
                 Data     => $LayoutObject->{LanguageObject}->Translate( "Please activate %s first!", "Service" ),
                 Link =>
                     $LayoutObject->{Baselink}
-                    . 'Action=AdminSystemConfiguration;Subaction=Edit;SysConfigGroup=Ticket;SysConfigSubGroup=Core::Ticket#Ticket::Service',
+                    . 'Action=AdminSysConfig;Subaction=Edit;SysConfigGroup=Ticket;SysConfigSubGroup=Core::Ticket#Ticket::Service',
             );
         }
 
@@ -229,7 +198,6 @@ sub Run {
 
         $LayoutObject->Block( Name => 'ActionList' );
         $LayoutObject->Block( Name => 'ActionAdd' );
-        $LayoutObject->Block( Name => 'Filter' );
 
         # output overview result
         $LayoutObject->Block(
@@ -305,11 +273,7 @@ sub _MaskNew {
     # output overview
     $LayoutObject->Block(
         Name => 'Overview',
-        Data => {
-            ServiceID   => $ServiceData{ServiceID},
-            ServiceName => $ServiceData{Name},
-            %Param,
-        },
+        Data => { %Param, },
     );
 
     $LayoutObject->Block( Name => 'ActionList' );
@@ -352,6 +316,17 @@ sub _MaskNew {
         Name => 'ServiceEdit',
         Data => { %Param, %ServiceData, },
     );
+
+    # shows header
+    if ( $ServiceData{ServiceID} ne 'NEW' ) {
+        $LayoutObject->Block(
+            Name => 'HeaderEdit',
+            Data => {%ServiceData},
+        );
+    }
+    else {
+        $LayoutObject->Block( Name => 'HeaderAdd' );
+    }
 
     # show each preferences setting
     my %Preferences = ();

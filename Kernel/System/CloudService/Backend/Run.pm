@@ -27,16 +27,22 @@ our @ObjectDependencies = (
 
 Kernel::System::CloudService::Backend::Run - cloud service lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All functions for cloud service communication.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a CloudService object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $CloudServiceObject = $Kernel::OM->Get('Kernel::System::CloudService::Backend::Run');
 
 =cut
@@ -61,7 +67,7 @@ sub new {
     return $Self;
 }
 
-=head2 Request()
+=item Request()
 
 perform a cloud service communication and return result data
 
@@ -401,7 +407,7 @@ sub Request {
     return;
 }
 
-=head2 OperationResultGet()
+=item OperationResultGet()
 
     my $OperationResult = $CloudServiceObject->OperationResultGet(
         CloudService => 'Test',
@@ -543,6 +549,8 @@ sub OperationResultGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

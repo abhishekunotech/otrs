@@ -122,10 +122,11 @@ for my $Test (@Tests) {
 
     # update data
     my $Update = $PriorityObject->PriorityUpdate(
-        PriorityID => $PriorityID,
-        Name       => $NewName,
-        ValidID    => $NewValidID,
-        UserID     => 1,
+        PriorityID     => $PriorityID,
+        Name           => $NewName,
+        ValidID        => $NewValidID,
+        CheckSysConfig => 0,             # (optional) default 1
+        UserID         => 1,
     );
 
     $Self->Is(

@@ -13,7 +13,7 @@ use warnings;
 
 use Kernel::System::ObjectManager;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginBase);
+use base qw(Kernel::System::SupportDataCollector::PluginBase);
 
 use Kernel::Language qw(Translatable);
 

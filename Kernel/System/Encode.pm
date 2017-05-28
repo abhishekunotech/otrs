@@ -15,25 +15,28 @@ use Encode;
 use Encode::Locale;
 use IO::Interactive qw(is_interactive);
 
-our %ObjectManagerFlags = (
-    IsSingleton => 1,
-);
 our @ObjectDependencies = ();
 
 =head1 NAME
 
 Kernel::System::Encode - character encodings
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This module will use Perl's Encode module (Perl 5.8.0 or higher is required).
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $EncodeObject = $Kernel::OM->Get('Kernel::System::Encode');
 
 =cut
@@ -56,8 +59,7 @@ sub new {
     if ( !is_interactive() ) {
 
         # encode STDOUT and STDERR
-        $Self->ConfigureOutputFileHandle( FileHandle => \*STDOUT );
-        $Self->ConfigureOutputFileHandle( FileHandle => \*STDERR );
+        $Self->SetIO( \*STDOUT, \*STDERR );
     }
     else {
 
@@ -72,7 +74,7 @@ sub new {
     return $Self;
 }
 
-=head2 Convert()
+=item Convert()
 
 Convert a string from one charset to another charset.
 
@@ -128,6 +130,14 @@ sub Convert {
         # check if string is valid utf-8
         if ( $Param{Check} && !eval { Encode::is_utf8( $Param{Text}, 1 ) } ) {
             Encode::_utf8_off( $Param{Text} );
+
+            # truncate text for error messages
+            my $TruncatedText = $Param{Text};
+            if ( length($TruncatedText) > 65 ) {
+                $TruncatedText = substr( $TruncatedText, 0, 65 ) . '[...]';
+            }
+
+            print STDERR "No valid '$Param{To}' string: '$TruncatedText'!\n";
 
             # strip invalid chars / 0 = will put a substitution character in
             # place of a malformed character
@@ -226,7 +236,7 @@ sub Convert {
     return $Param{Text};
 }
 
-=head2 Convert2CharsetInternal()
+=item Convert2CharsetInternal()
 
 Convert given charset into the internal used charset (utf-8).
 Should be used on all I/O interfaces.
@@ -252,7 +262,7 @@ sub Convert2CharsetInternal {
     return $Self->Convert( %Param, To => 'utf-8' );
 }
 
-=head2 EncodeInput()
+=item EncodeInput()
 
 Convert internal used charset (e. g. utf-8) into given charset (utf-8).
 
@@ -290,7 +300,7 @@ sub EncodeInput {
     return $What;
 }
 
-=head2 EncodeOutput()
+=item EncodeOutput()
 
 Convert utf-8 to a sequence of bytes. All possible characters have
 a UTF-8 representation so this function cannot fail.
@@ -329,28 +339,31 @@ sub EncodeOutput {
     return $What;
 }
 
-=head2 ConfigureOutputFileHandle()
+=item SetIO()
 
-switch output file handle to utf-8 output.
+Set array of file handles to utf-8 output.
 
-    $EncodeObject->ConfigureOutputFileHandle( FileHandle => \*STDOUT );
+    $EncodeObject->SetIO( \*STDOUT, \*STDERR );
 
 =cut
 
-sub ConfigureOutputFileHandle {
-    my ( $Self, %Param ) = @_;
+sub SetIO {
+    my ( $Self, @Array ) = @_;
 
-    return if !defined $Param{FileHandle};
-    return if ref $Param{FileHandle} ne 'GLOB';
+    ROW:
+    for my $Row (@Array) {
+        next ROW if !defined $Row;
+        next ROW if ref $Row ne 'GLOB';
 
-    # http://www.perlmonks.org/?node_id=644786
-    # http://bugs.otrs.org/show_bug.cgi?id=12100
-    binmode( $Param{FileHandle}, ':utf8' );    ## no critic
+        # http://www.perlmonks.org/?node_id=644786
+        # http://bugs.otrs.org/show_bug.cgi?id=12100
+        binmode( $Row, ':utf8' );    ## no critic
+    }
 
-    return 1;
+    return;
 }
 
-=head2 EncodingIsAsciiSuperset()
+=item EncodingIsAsciiSuperset()
 
 Checks if an encoding is a super-set of ASCII, that is, encodes the
 codepoints from 0 to 127 the same way as ASCII.
@@ -376,7 +389,7 @@ sub EncodingIsAsciiSuperset {
         eq Encode::encode( 'ASCII',          $Test );
 }
 
-=head2 FindAsciiSupersetEncoding()
+=item FindAsciiSupersetEncoding()
 
 From a list of character encodings, returns the first that
 is a super-set of ASCII. If none matches, C<ASCII> is returned.
@@ -404,6 +417,8 @@ sub FindAsciiSupersetEncoding {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

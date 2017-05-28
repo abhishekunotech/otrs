@@ -26,16 +26,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::Activity
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB Activity backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ActivityObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::Activity');
 
 =cut
@@ -59,7 +65,7 @@ sub new {
     return $Self;
 }
 
-=head2 ActivityAdd()
+=item ActivityAdd()
 
 add new Activity
 
@@ -166,7 +172,7 @@ sub ActivityAdd {
     return $ID;
 }
 
-=head2 ActivityDelete()
+=item ActivityDelete()
 
 delete an Activity
 
@@ -214,7 +220,7 @@ sub ActivityDelete {
     return 1;
 }
 
-=head2 ActivityGet()
+=item ActivityGet()
 
 get Activity attributes
 
@@ -388,7 +394,7 @@ sub ActivityGet {
     return \%Data;
 }
 
-=head2 ActivityUpdate()
+=item ActivityUpdate()
 
 update Activity attributes
 
@@ -507,7 +513,7 @@ sub ActivityUpdate {
     return 1;
 }
 
-=head2 ActivityList()
+=item ActivityList()
 
 get an Activity list
 
@@ -589,7 +595,7 @@ sub ActivityList {
     return \%Data;
 }
 
-=head2 ActivityListGet()
+=item ActivityListGet()
 
 get an Activity list with all activity details
 
@@ -684,6 +690,8 @@ sub ActivityListGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -11,8 +11,8 @@ package Kernel::Modules::AgentTicketMove;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 our $ObjectManagerDisabled = 1;
 
@@ -181,7 +181,7 @@ sub Run {
     for my $DynamicFieldConfig ( @{$DynamicField} ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-        # extract the dynamic field value from the web request
+        # extract the dynamic field value form the web request
         $DynamicFieldValues{ $DynamicFieldConfig->{Name} } =
             $DynamicFieldBackendObject->EditFieldValueGet(
             DynamicFieldConfig => $DynamicFieldConfig,
@@ -640,13 +640,6 @@ sub Run {
                     $Error{'BodyInvalid'} = 'ServerError';
                 }
             }
-
-            # check mandatory state
-            if ( $Config->{State} && $Config->{StateMandatory} ) {
-                if ( !$GetParam{NewStateID} ) {
-                    $Error{'NewStateInvalid'} = 'ServerError';
-                }
-            }
         }
 
         # clear DynamicFieldHTML
@@ -990,8 +983,6 @@ sub Run {
     # add note (send no notification)
     my $ArticleID;
 
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
     if (
         $GetParam{CreateArticle}
         && $Config->{Note}
@@ -1045,19 +1036,19 @@ sub Run {
             );
         }
 
-        $ArticleID = $ArticleObject->ArticleCreate(
-            TicketID             => $Self->{TicketID},
-            IsVisibleForCustomer => 0,
-            SenderType           => 'agent',
-            From                 => "$Self->{UserFirstname} $Self->{UserLastname} <$Self->{UserEmail}>",
-            Subject              => $GetParam{Subject},
-            Body                 => $GetParam{Body},
-            MimeType             => $MimeType,
-            Charset              => $LayoutObject->{UserCharset},
-            UserID               => $Self->{UserID},
-            HistoryType          => 'AddNote',
-            HistoryComment       => '%%Move',
-            NoAgentNotify        => 1,
+        $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $Self->{TicketID},
+            ArticleType    => 'note-internal',
+            SenderType     => 'agent',
+            From           => "$Self->{UserFirstname} $Self->{UserLastname} <$Self->{UserEmail}>",
+            Subject        => $GetParam{Subject},
+            Body           => $GetParam{Body},
+            MimeType       => $MimeType,
+            Charset        => $LayoutObject->{UserCharset},
+            UserID         => $Self->{UserID},
+            HistoryType    => 'AddNote',
+            HistoryComment => '%%Move',
+            NoAgentNotify  => 1,
         );
         if ( !$ArticleID ) {
             return $LayoutObject->ErrorScreen();
@@ -1065,7 +1056,7 @@ sub Run {
 
         # write attachments
         for my $Attachment (@AttachmentData) {
-            $ArticleObject->ArticleWriteAttachment(
+            $TicketObject->ArticleWriteAttachment(
                 %{$Attachment},
                 ArticleID => $ArticleID,
                 UserID    => $Self->{UserID},
@@ -1180,11 +1171,12 @@ sub AgentMove {
         OnlyDynamicFields => 1
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'DynamicFieldNames',
-        Value => $DynamicFieldNames
-    );
+    # create a string with the quoted dynamic field names separated by commas
+    if ( IsArrayRefWithData($DynamicFieldNames) ) {
+        for my $Field ( @{$DynamicFieldNames} ) {
+            $Param{DynamicFieldNamesStrg} .= ", '" . $Field . "'";
+        }
+    }
 
     # build next states string
     $Param{NextStatesStrg} = $LayoutObject->BuildSelection(
@@ -1193,9 +1185,7 @@ sub AgentMove {
         SelectedID   => $Param{NewStateID},
         Translation  => 1,
         PossibleNone => 1,
-        Class        => 'Modernize '
-            . ( $Config->{StateMandatory} ? 'Validate_Required ' : '' )
-            . ( $Param{NewStateInvalid} || '' ),
+        Class        => 'Modernize',
     );
 
     # build next priority string
@@ -1239,10 +1229,7 @@ sub AgentMove {
     if ( $Config->{State} ) {
         $LayoutObject->Block(
             Name => 'State',
-            Data => {
-                StateMandatory => $Config->{StateMandatory} || 0,
-                %Param
-            },
+            Data => {%Param},
         );
     }
 
@@ -1464,6 +1451,18 @@ sub AgentMove {
             );
         }
 
+        # show spell check
+        if ( $LayoutObject->{BrowserSpellChecker} ) {
+            $LayoutObject->Block(
+                Name => 'TicketOptions',
+                Data => {},
+            );
+            $LayoutObject->Block(
+                Name => 'SpellCheck',
+                Data => {},
+            );
+        }
+
         # show attachments
         ATTACHMENT:
         for my $Attachment ( @{ $Param{Attachments} } ) {
@@ -1489,8 +1488,8 @@ sub AgentMove {
             $Param{RichTextHeight} = $Config->{RichTextHeight} || 0;
             $Param{RichTextWidth}  = $Config->{RichTextWidth}  || 0;
 
-            # set up rich text editor
-            $LayoutObject->SetRichTextParameters(
+            $LayoutObject->Block(
+                Name => 'RichText',
                 Data => \%Param,
             );
         }

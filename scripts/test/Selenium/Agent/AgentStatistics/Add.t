@@ -111,19 +111,6 @@ $Selenium->RunTest(
         # check add statistics screen
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentStatistics;Subaction=Add");
 
-        # check breadcrumb on Add screen
-        my $Count = 1;
-        for my $BreadcrumbText ( 'Statistics Overview', 'Add Statistics' )
-        {
-            $Self->Is(
-                $Selenium->execute_script("return \$('.BreadCrumb li:eq($Count)').text().trim()"),
-                $BreadcrumbText,
-                "Breadcrumb text '$BreadcrumbText' is found on screen"
-            );
-
-            $Count++;
-        }
-
         # check link 'DynamicMatrix'
         $Self->True(
             $Selenium->find_element("//a[contains(\@data-statistic-preselection, \'DynamicMatrix\' )]"),
@@ -145,12 +132,6 @@ $Selenium->RunTest(
         # check "Go to overview" button
         $Selenium->find_element("//a[contains(\@href, \'Action=AgentStatistics;Subaction=Overview\' )]")
             ->VerifiedClick();
-
-        # check breadcrumb on Overview screen
-        $Self->True(
-            $Selenium->find_element( '.BreadCrumb', 'css' ),
-            "Breadcrumb is found on Overview screen.",
-        );
 
         my @Tests = (
             {
@@ -175,20 +156,20 @@ $Selenium->RunTest(
             {
                 Title            => 'Statistic - TicketAccountedTime' . $Helper->GetRandomID(),
                 Object           => 'Kernel::System::Stats::Dynamic::TicketAccountedTime',
-                Type             => 'DynamicMatrix',
-                XAxis            => 'XAxisKindsOfReporting',
+                Type             => 'DynamicList',
+                XAxis            => 'XAxisServiceIDs',
                 YAxis            => 'YAxisSLAIDs',
-                RestrictionID    => 'RestrictionsServiceIDs',
-                Restrictionvalue => $ServiceIDs[0],
+                RestrictionID    => 'RestrictionsKindsOfReporting',
+                Restrictionvalue => 'TotalTime',
             },
             {
                 Title            => 'Statistic - TicketSolutionResponseTime' . $Helper->GetRandomID(),
                 Object           => 'Kernel::System::Stats::Dynamic::TicketSolutionResponseTime',
-                Type             => 'DynamicMatrix',
-                XAxis            => 'XAxisKindsOfReporting',
+                Type             => 'DynamicList',
+                XAxis            => 'XAxisServiceIDs',
                 YAxis            => 'YAxisSLAIDs',
-                RestrictionID    => 'RestrictionsServiceIDs',
-                Restrictionvalue => $ServiceIDs[0],
+                RestrictionID    => 'RestrictionsKindsOfReporting',
+                Restrictionvalue => 'SolutionAverageAllOver',
             },
             {
                 Title            => 'Statistic - TicketList' . $Helper->GetRandomID(),
@@ -383,6 +364,7 @@ JAVASCRIPT
                     == -1,
                 "StatsData statistic is deleted - $StatsData->{Title} "
             );
+
         }
 
         # get DB object

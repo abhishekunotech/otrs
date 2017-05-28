@@ -17,23 +17,28 @@ our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Log',
     'Kernel::System::Ticket',
-    'Kernel::System::SysConfig',
 );
 
 =head1 NAME
 
 Kernel::System::LinkObject::Ticket
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Ticket backend for the ticket link object.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $LinkObjectTicketObject = $Kernel::OM->Get('Kernel::System::LinkObject::Ticket');
 
 =cut
@@ -48,7 +53,7 @@ sub new {
     return $Self;
 }
 
-=head2 LinkListWithData()
+=item LinkListWithData()
 
 fill up the link list with data
 
@@ -134,7 +139,7 @@ sub LinkListWithData {
     return 1;
 }
 
-=head2 ObjectPermission()
+=item ObjectPermission()
 
 checks read permission for a given object and UserID.
 
@@ -167,7 +172,7 @@ sub ObjectPermission {
     );
 }
 
-=head2 ObjectDescriptionGet()
+=item ObjectDescriptionGet()
 
 return a hash of object descriptions
 
@@ -228,7 +233,7 @@ sub ObjectDescriptionGet {
     return %Description;
 }
 
-=head2 ObjectSearch()
+=item ObjectSearch()
 
 return a hash list of the search results
 
@@ -270,7 +275,14 @@ sub ObjectSearch {
     # set focus
     my %Search;
     if ( $Param{SearchParams}->{TicketFulltext} ) {
-        $Search{Fulltext} = '*' . $Param{SearchParams}->{TicketFulltext} . '*';
+        %Search = (
+            From          => '*' . $Param{SearchParams}->{TicketFulltext} . '*',
+            To            => '*' . $Param{SearchParams}->{TicketFulltext} . '*',
+            Cc            => '*' . $Param{SearchParams}->{TicketFulltext} . '*',
+            Subject       => '*' . $Param{SearchParams}->{TicketFulltext} . '*',
+            Body          => '*' . $Param{SearchParams}->{TicketFulltext} . '*',
+            ContentSearch => 'OR',
+        );
     }
     if ( $Param{SearchParams}->{TicketTitle} ) {
         $Search{Title} = '*' . $Param{SearchParams}->{TicketTitle} . '*';
@@ -326,7 +338,7 @@ sub ObjectSearch {
     return \%SearchList;
 }
 
-=head2 LinkAddPre()
+=item LinkAddPre()
 
 link add pre event module
 
@@ -371,7 +383,7 @@ sub LinkAddPre {
     return 1;
 }
 
-=head2 LinkAddPost()
+=item LinkAddPost()
 
 link add pre event module
 
@@ -434,7 +446,7 @@ sub LinkAddPost {
 
         # ticket event
         $TicketObject->EventHandler(
-            Event => 'TicketSourceLinkAdd' . $Param{Type},
+            Event => 'TicketSlaveLinkAdd' . $Param{Type},
             Data  => {
                 TicketID => $Param{Key},
             },
@@ -462,7 +474,7 @@ sub LinkAddPost {
 
         # ticket event
         $TicketObject->EventHandler(
-            Event  => 'TicketTargetLinkAdd' . $Param{Type},
+            Event  => 'TicketMasterLinkAdd' . $Param{Type},
             UserID => $Param{UserID},
             Data   => {
                 TicketID => $Param{Key},
@@ -475,7 +487,7 @@ sub LinkAddPost {
     return 1;
 }
 
-=head2 LinkDeletePre()
+=item LinkDeletePre()
 
 link delete pre event module
 
@@ -520,7 +532,7 @@ sub LinkDeletePre {
     return 1;
 }
 
-=head2 LinkDeletePost()
+=item LinkDeletePost()
 
 link delete post event module
 
@@ -583,7 +595,7 @@ sub LinkDeletePost {
 
         # ticket event
         $TicketObject->EventHandler(
-            Event => 'TicketSourceLinkDelete' . $Param{Type},
+            Event => 'TicketSlaveLinkDelete' . $Param{Type},
             Data  => {
                 TicketID => $Param{Key},
             },
@@ -611,7 +623,7 @@ sub LinkDeletePost {
 
         # ticket event
         $TicketObject->EventHandler(
-            Event => 'TicketTargetLinkDelete' . $Param{Type},
+            Event => 'TicketMasterLinkDelete' . $Param{Type},
             Data  => {
                 TicketID => $Param{Key},
             },
@@ -624,90 +636,9 @@ sub LinkDeletePost {
     return 1;
 }
 
-=head2 EventTypeConfigUpdate()
-
-Updates the ticket event configuration based on configured link types.
-
-    my $Success = $LinkObjectTicketObject->EventTypeConfigUpdate();
-
-Returns true if successful.
-
-=cut
-
-sub EventTypeConfigUpdate {
-    my ( $Self, %Param ) = @_;
-
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-
-    my $LinkTypes    = $ConfigObject->Get('LinkObject::Type') || {};
-    my $TicketEvents = $ConfigObject->Get('Events')->{Ticket} || [];
-
-    # Add missing ticket events for all configured link object types.
-    my $TicketEventsAdded;
-    for my $LinkType ( sort keys %{$LinkTypes} ) {
-        for my $ObjectType (qw(Source Target)) {
-            for my $EventType (qw(Add Delete)) {
-                my $Event = "Ticket${ObjectType}Link${EventType}$LinkType";
-                if ( !grep { $_ eq $Event } @{$TicketEvents} ) {
-                    push @{$TicketEvents}, $Event;
-                    $TicketEventsAdded = 1;
-                }
-            }
-        }
-    }
-    return if !$TicketEventsAdded;
-
-    my $SettingName = 'Events###Ticket';
-
-    my $SysConfigObject = $Kernel::OM->Get('Kernel::System::SysConfig');
-
-    # Retrieve the effective setting value from SysConfig.
-    my %Setting = $SysConfigObject->SettingGet(
-        Name     => $SettingName,
-        Deployed => 1,
-    );
-    return if !IsHashRefWithData( \%Setting );
-
-    $Setting{EffectiveValue} = $TicketEvents;
-
-    # Lock the setting to admin user.
-    my $ExclusiveLockGUID = $SysConfigObject->SettingLock(
-        Name   => $SettingName,
-        Force  => 1,
-        UserID => 1,
-    );
-    $Setting{ExclusiveLockGUID} = $ExclusiveLockGUID;
-
-    # Update the setting.
-    my %UpdateSuccess = $SysConfigObject->SettingUpdate(
-        %Setting,
-        UserID => 1,
-    );
-
-    if ( !$UpdateSuccess{Success} ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            Priority => 'error',
-            Message  => $UpdateSuccess{Error} // "Error while updating $SettingName!",
-        );
-
-        # Unlock the setting.
-        $SysConfigObject->SettingUnlock(
-            Name => $SettingName,
-        );
-
-        return;
-    }
-
-    # Deploy the configuration.
-    return $SysConfigObject->ConfigurationDeploy(
-        Comments      => "$SettingName Configuration Updated",
-        DirtySettings => [$SettingName],
-        UserID        => 1,
-        Force         => 1,
-    );
-}
-
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

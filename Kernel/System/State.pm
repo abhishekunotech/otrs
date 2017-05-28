@@ -24,16 +24,22 @@ our @ObjectDependencies = (
 
 Kernel::System::State - state lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All ticket state functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $StateObject = $Kernel::OM->Get('Kernel::System::State');
 
 =cut
@@ -49,19 +55,14 @@ sub new {
     $Self->{CacheTTL}  = 60 * 60 * 24 * 20;
 
     # check needed config options
-    for my $Needed (qw(Ticket::ViewableStateType Ticket::UnlockStateType)) {
-        if ( !$Kernel::OM->Get('Kernel::Config')->Get($Needed) ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "$Needed is missing in the configuration!",
-            );
-        }
+    for (qw(Ticket::ViewableStateType Ticket::UnlockStateType)) {
+        $Kernel::OM->Get('Kernel::Config')->Get($_) || die "Need $_ in Kernel/Config.pm!\n";
     }
 
     return $Self;
 }
 
-=head2 StateAdd()
+=item StateAdd()
 
 add new states
 
@@ -126,7 +127,7 @@ sub StateAdd {
     return $ID;
 }
 
-=head2 StateGet()
+=item StateGet()
 
 get state attributes
 
@@ -237,7 +238,7 @@ sub StateGet {
     return %Data;
 }
 
-=head2 StateUpdate()
+=item StateUpdate()
 
 update state attributes
 
@@ -247,6 +248,7 @@ update state attributes
         Comment        => 'some comment',
         ValidID        => 1,
         TypeID         => 1,
+        CheckSysConfig => 0,   # (optional) default 1
         UserID         => 123,
     );
 
@@ -265,6 +267,9 @@ sub StateUpdate {
             return;
         }
     }
+
+    # check CheckSysConfig param
+    $Param{CheckSysConfig} //= 1;
 
     # get database object
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
@@ -285,10 +290,16 @@ sub StateUpdate {
         Type => $Self->{CacheType},
     );
 
+    # check all sysconfig options
+    return 1 if !$Param{CheckSysConfig};
+
+    # check all sysconfig options and correct them automatically if neccessary
+    $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemCheckAll();
+
     return 1;
 }
 
-=head2 StateGetStatesByType()
+=item StateGetStatesByType()
 
 get list of states for a type or a list of state types.
 
@@ -438,7 +449,7 @@ sub StateGetStatesByType {
     return @ID;
 }
 
-=head2 StateList()
+=item StateList()
 
 get state list as a hash of ID, Name pairs
 
@@ -526,7 +537,7 @@ sub StateList {
     return %Data;
 }
 
-=head2 StateLookup()
+=item StateLookup()
 
 returns the id or the name of a state
 
@@ -585,7 +596,7 @@ sub StateLookup {
     return $ReturnData;
 }
 
-=head2 StateTypeList()
+=item StateTypeList()
 
 get state type list as a hash of ID, Name pairs
 
@@ -652,7 +663,7 @@ sub StateTypeList {
     return %Data;
 }
 
-=head2 StateTypeLookup()
+=item StateTypeLookup()
 
 returns the id or the name of a state type
 
@@ -713,6 +724,8 @@ sub StateTypeLookup {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

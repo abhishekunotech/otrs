@@ -70,21 +70,17 @@ $Selenium->RunTest(
         );
         my $Content = ${$ContentRef};
 
-        my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-            ChannelName => 'Internal',
-        );
-
-        my $ArticleID = $ArticleBackendObject->ArticleCreate(
-            TicketID             => $TicketID,
-            IsVisibleForCustomer => 0,
-            SenderType           => 'agent',
-            Subject              => 'some short description',
-            Body                 => 'the message text',
-            ContentType          => 'text/html; charset=ISO-8859-15',
-            HistoryType          => 'AddNote',
-            HistoryComment       => 'Some free text!',
-            UserID               => $TestUserID,
-            Attachment           => [
+        my $ArticleID = $TicketObject->ArticleCreate(
+            TicketID       => $TicketID,
+            ArticleType    => 'note-internal',
+            SenderType     => 'agent',
+            Subject        => 'some short description',
+            Body           => 'the message text',
+            ContentType    => 'text/html; charset=ISO-8859-15',
+            HistoryType    => 'AddNote',
+            HistoryComment => 'Some free text!',
+            UserID         => $TestUserID,
+            Attachment     => [
                 {
                     Content     => $Content,
                     ContentType => 'application/pdf',

@@ -21,16 +21,19 @@ $Selenium->RunTest(
         # get helper object
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
-        my %DynamicFieldsOverviewPageShownSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %DynamicFieldsOverviewPageShownSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name => 'PreferencesGroups###DynamicFieldsOverviewPageShown',
         );
+
+        %DynamicFieldsOverviewPageShownSysConfig = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $DynamicFieldsOverviewPageShownSysConfig{Setting}->[1]->{Hash}->[1]->{Item} };
 
         # show more dynamic fields per page as the default value
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'PreferencesGroups###DynamicFieldsOverviewPageShown',
             Value => {
-                %{ $DynamicFieldsOverviewPageShownSysConfig{EffectiveValue} },
+                %DynamicFieldsOverviewPageShownSysConfig,
                 DataSelected => 999,
             },
         );
@@ -106,47 +109,13 @@ $Selenium->RunTest(
             $Selenium->find_element( "#Key_2",    'css' )->send_keys("Key2");
             $Selenium->find_element( "#Value_2",  'css' )->send_keys("Value2");
 
-            # add another possible value
-            $Selenium->find_element( "#AddValue", 'css' )->VerifiedClick();
-
-            # submit form, expecting validation check
-            $Selenium->find_element("//button[\@value='Save'][\@type='submit']")->VerifiedClick();
-
+            # check default value
             $Self->Is(
-                $Selenium->execute_script(
-                    "return \$('#Key_3').hasClass('Error')"
-                ),
-                '1',
-                'Client side validation correctly detected missing input value for added possible value',
+                $Selenium->find_element( "#DefaultValue option[value='Key2']", 'css' )->is_enabled(),
+                1,
+                "Key2 is possible #DefaultValue",
             );
 
-            # input possible value
-            $Selenium->find_element( "#Key_3",   'css' )->send_keys("Key3");
-            $Selenium->find_element( "#Value_3", 'css' )->send_keys("Value3");
-
-            # select default value
-            $Selenium->execute_script(
-                "\$('#DefaultValue').val('Key3').trigger('redraw.InputField').trigger('change');"
-            );
-
-            # verify default value
-            $Self->Is(
-                $Selenium->find_element( "#DefaultValue", 'css' )->get_value(),
-                'Key3',
-                "Key3 is possible #DefaultValue",
-            );
-
-            # remove added possible value
-            $Selenium->find_element( "#RemoveValue__3", 'css' )->VerifiedClick();
-
-            # verify default value is changed
-            $Self->Is(
-                $Selenium->find_element( "#DefaultValue", 'css' )->get_value(),
-                '',
-                "DefaultValue is removed",
-            );
-
-            # submit form
             $Selenium->find_element( "#Name", 'css' )->VerifiedSubmit();
 
             # check for test DynamicFieldDropdown on AdminDynamicField screen

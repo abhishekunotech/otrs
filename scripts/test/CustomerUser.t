@@ -183,16 +183,6 @@ for my $Key ( 1 .. 3, 'ä', 'カス', '_', '&' ) {
         "CustomerUserGet() - uc() - $UserID",
     );
 
-    # check customer ids
-    my @CustomerIDs = $CustomerUserObject->CustomerIDs(
-        User => $UserID,
-    );
-    $Self->IsDeeply(
-        \@CustomerIDs,
-        [ $UserRand . '-Customer-Update-Id' ],
-        'CustomerIDs() - User',
-    );
-
     # search by CustomerID
     my %List = $CustomerUserObject->CustomerSearch(
         CustomerID => $UserRand . '-Customer-Update-Id',

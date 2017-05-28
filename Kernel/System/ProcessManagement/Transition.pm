@@ -23,16 +23,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::Transition - Transition lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All Process Management Transition functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TransitionObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::Transition');
 
 =cut
@@ -66,7 +72,7 @@ sub new {
     return $Self;
 }
 
-=head2 TransitionGet()
+=item TransitionGet()
 
     Get Transition info
 
@@ -154,7 +160,7 @@ sub TransitionGet {
     return $Transition->{ $Param{TransitionEntityID} };
 }
 
-=head2 TransitionCheck()
+=item TransitionCheck()
 
     Checks if one or more Transition Conditions are true
 
@@ -1102,6 +1108,8 @@ sub DebugLog {
     return 1;
 }
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

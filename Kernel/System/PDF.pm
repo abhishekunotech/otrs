@@ -25,16 +25,20 @@ our @ObjectDependencies = (
 
 Kernel::System::PDF - pdf lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions for generating PDF files.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=item new()
 
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $PDFObject = $Kernel::OM->Get('Kernel::System::PDF');
 
 Please note that currently you should only create one PDF object per instance of
@@ -58,7 +62,7 @@ sub new {
     return $Self;
 }
 
-=head2 DocumentNew()
+=item DocumentNew()
 
 Create a new PDF Document
 
@@ -191,7 +195,7 @@ sub DocumentNew {
     return 1;
 }
 
-=head2 PageBlankNew()
+=item PageBlankNew()
 
 Create a new, blank Page
 
@@ -278,7 +282,7 @@ sub PageBlankNew {
     return;
 }
 
-=head2 PageNew()
+=item PageNew()
 
 Create a new Page
 
@@ -551,7 +555,7 @@ sub PageNew {
     return 1;
 }
 
-=head2 DocumentOutput()
+=item DocumentOutput()
 
 Return the PDF as string
 
@@ -584,7 +588,7 @@ sub DocumentOutput {
     return $DocumentString;
 }
 
-=head2 Table()
+=item Table()
 
 Add a table.
 
@@ -1049,7 +1053,7 @@ sub Table {
     return %Param;
 }
 
-=head2 Text()
+=item Text()
 
 Output a text line
 
@@ -1232,7 +1236,7 @@ sub Text {
     return %Return;
 }
 
-=head2 Image()
+=item Image()
 
 Output a image
 
@@ -1313,7 +1317,7 @@ sub Image {
         else {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Imagetype of File $Param{File} not supported",
+                Message  => "Imagetype of File $Param{File} not supported"
             );
             return;
         }
@@ -1366,7 +1370,7 @@ sub Image {
     return $Return;
 }
 
-=head2 HLine()
+=item HLine()
 
 Output a horizontal line
 
@@ -1385,14 +1389,14 @@ sub HLine {
     if ( !$Self->{PDF} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a PDF Document!",
+            Message  => "Need a PDF Document!"
         );
         return;
     }
     if ( !$Self->{Page} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a Page!",
+            Message  => "Need a Page!"
         );
         return;
     }
@@ -1493,7 +1497,7 @@ sub HLine {
     return $Output;
 }
 
-=head2 PositionSet()
+=item PositionSet()
 
 Set new position on current page
 
@@ -1511,14 +1515,14 @@ sub PositionSet {
     if ( !$Self->{PDF} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a PDF Document!",
+            Message  => "Need a PDF Document!"
         );
         return;
     }
     if ( !$Self->{Page} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a Page!",
+            Message  => "Need a Page!"
         );
         return;
     }
@@ -1624,7 +1628,7 @@ sub PositionSet {
     return 1;
 }
 
-=head2 PositionGet()
+=item PositionGet()
 
 Get position on current page
 
@@ -1642,14 +1646,14 @@ sub PositionGet {
     if ( !$Self->{PDF} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a PDF Document!",
+            Message  => "Need a PDF Document!"
         );
         return;
     }
     if ( !$Self->{Page} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a Page!",
+            Message  => "Need a Page!"
         );
         return;
     }
@@ -1659,7 +1663,7 @@ sub PositionGet {
     return %Position;
 }
 
-=head2 DimSet()
+=item DimSet()
 
 Set active dimension
 
@@ -1675,14 +1679,14 @@ sub DimSet {
     if ( !$Self->{PDF} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a PDF Document!",
+            Message  => "Need a PDF Document!"
         );
         return;
     }
     if ( !$Self->{Page} ) {
         $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
-            Message  => "Need a Page!",
+            Message  => "Need a Page!"
         );
         return;
     }
@@ -1697,7 +1701,7 @@ sub DimSet {
     return $Self->{Current}->{Dim};
 }
 
-=head2 DimGet()
+=item DimGet()
 
 Get active dimension (printable or content)
 
@@ -1732,7 +1736,7 @@ sub DimGet {
 
 =begin Internal:
 
-=head2 _TableCalculate()
+=item _TableCalculate()
 
 calculate params of table.
 
@@ -2156,7 +2160,7 @@ sub _TableCalculate {
     return %Param;
 }
 
-=head2 _TableBlockNextCalculate()
+=item _TableBlockNextCalculate()
 
 calculate what block can output next
 
@@ -2280,7 +2284,7 @@ sub _TableBlockNextCalculate {
     return %Return;
 }
 
-=head2 _TableRowCalculate()
+=item _TableRowCalculate()
 
 calculate row of table
 
@@ -2377,7 +2381,7 @@ sub _TableRowCalculate {
     return %Param;
 }
 
-=head2 _TableCellOutput()
+=item _TableCellOutput()
 
 output a cell of a table
 
@@ -2534,7 +2538,7 @@ sub _TableCellOutput {
     return %Return;
 }
 
-=head2 _TableCellOnCount()
+=item _TableCellOnCount()
 
 count all active cells
 
@@ -2594,7 +2598,7 @@ sub _TableCellOnCount {
     return $Return;
 }
 
-=head2 _TextCalculate()
+=item _TextCalculate()
 
 calculate required values of given text
 
@@ -2852,7 +2856,7 @@ sub _TextCalculate {
     return %Return;
 }
 
-=head2 _StringWidth()
+=item _StringWidth()
 
 calculate width of given text
 
@@ -2916,7 +2920,7 @@ sub _StringWidth {
     return $StringWidth;
 }
 
-=head2 _PrepareText()
+=item _PrepareText()
 
 prepare given text for output
 
@@ -2967,7 +2971,7 @@ sub _PrepareText {
     return $Param{Text};
 }
 
-=head2 _CurPageNumberSet()
+=item _CurPageNumberSet()
 
 set number of current page
 
@@ -3020,7 +3024,7 @@ sub _CurPageNumberSet {
     return 1;
 }
 
-=head2 _CurPageDimSet()
+=item _CurPageDimSet()
 
 Set current Page Dimension
 
@@ -3115,7 +3119,7 @@ sub _CurPageDimSet {
     return 1;
 }
 
-=head2 _CurPageDimGet()
+=item _CurPageDimGet()
 
 Get current Page Dimension (Width, Height)
 
@@ -3158,7 +3162,7 @@ sub _CurPageDimGet {
     return %Data;
 }
 
-=head2 _CurPageDimCheck()
+=item _CurPageDimCheck()
 
 Check given X an/or Y if inside the page dimension
 
@@ -3205,7 +3209,7 @@ sub _CurPageDimCheck {
     return $Return;
 }
 
-=head2 _CurPrintableDimSet()
+=item _CurPrintableDimSet()
 
 Set current Printable Dimension
 
@@ -3310,7 +3314,7 @@ sub _CurPrintableDimSet {
     return 1;
 }
 
-=head2 _CurPrintableDimGet()
+=item _CurPrintableDimGet()
 
 Get current Printable Dimension
 
@@ -3357,7 +3361,7 @@ sub _CurPrintableDimGet {
     return %Data;
 }
 
-=head2 _CurPrintableDimCheck()
+=item _CurPrintableDimCheck()
 
 Check given X an/or Y if inside the printable dimension
 
@@ -3412,7 +3416,7 @@ sub _CurPrintableDimCheck {
     return $Return;
 }
 
-=head2 _CurContentDimSet()
+=item _CurContentDimSet()
 
 Set current Content Dimension
 
@@ -3509,7 +3513,7 @@ sub _CurContentDimSet {
     return 1;
 }
 
-=head2 _CurContentDimGet()
+=item _CurContentDimGet()
 
 Get current Content Dimension
 
@@ -3556,7 +3560,7 @@ sub _CurContentDimGet {
     return %Data;
 }
 
-=head2 _CurContentDimCheck()
+=item _CurContentDimCheck()
 
 Check given X an/or Y if inside the content dimension
 
@@ -3604,7 +3608,7 @@ sub _CurContentDimCheck {
     return $Return;
 }
 
-=head2 _CurPositionSet()
+=item _CurPositionSet()
 
 Set current Position
 
@@ -3675,7 +3679,7 @@ sub _CurPositionSet {
     return 1;
 }
 
-=head2 _CurPositionGet()
+=item _CurPositionGet()
 
 Get current Position
 
@@ -3731,6 +3735,8 @@ sub DESTROY {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

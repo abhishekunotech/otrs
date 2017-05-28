@@ -212,13 +212,13 @@ $Selenium->RunTest(
 
         # check if NavBarAgentTicketProcess button is available
         # when NavBarAgentTicketProcess module is disabled and no process is available
-        my %NavBarAgentTicketProcess = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %NavBarAgentTicketProcess = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name => 'Frontend::NavBarModule###1-TicketProcesses',
         );
         $Helper->ConfigSettingChange(
             Valid => 0,
             Key   => 'Frontend::NavBarModule###1-TicketProcesses',
-            Value => $NavBarAgentTicketProcess{EffectiveValue},
+            Value => \%NavBarAgentTicketProcess,
         );
 
         $Selenium->VerifiedRefresh();

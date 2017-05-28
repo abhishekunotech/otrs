@@ -29,13 +29,17 @@ our $SuppressANSI = 0;
 
 Kernel::System::Console::BaseCommand - command base class
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Base class for console commands.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 constructor for new objects. You should not need to reimplement this in your command,
 override L</Configure()> instead if you need to.
@@ -94,7 +98,7 @@ sub new {
     return $Self;
 }
 
-=head2 Configure()
+=item Configure()
 
 initializes this object. Override this method in your commands.
 
@@ -106,7 +110,7 @@ sub Configure {
     return;
 }
 
-=head2 Name()
+=item Name()
 
 get the Name of the current Command, e. g. 'Admin::User::SetPassword'.
 
@@ -118,7 +122,7 @@ sub Name {
     return $Self->{Name};
 }
 
-=head2 Description()
+=item Description()
 
 get/set description for the current command. Call this in your Configure() method.
 
@@ -132,7 +136,7 @@ sub Description {
     return $Self->{Description};
 }
 
-=head2 AdditionalHelp()
+=item AdditionalHelp()
 
 get/set additional help text for the current command. Call this in your Configure() method.
 
@@ -148,7 +152,7 @@ sub AdditionalHelp {
     return $Self->{AdditionalHelp};
 }
 
-=head2 AddArgument()
+=item AddArgument()
 
 adds an argument that can/must be specified on the command line.
 This function must be called during Configure() by the command to
@@ -199,7 +203,7 @@ sub AddArgument {
     push @{ $Self->{_Arguments} }, \%Param;
 }
 
-=head2 GetArgument()
+=item GetArgument()
 
 fetch an argument value as provided by the user on the command line.
 
@@ -218,7 +222,7 @@ sub GetArgument {
     return $Self->{_ParsedARGV}->{Arguments}->{$Argument};
 }
 
-=head2 AddOption()
+=item AddOption()
 
 adds an option that can/must be specified on the command line.
 This function must be called during L</Configure()> by the command to
@@ -290,7 +294,7 @@ sub AddOption {
 
 }
 
-=head2 GetOption()
+=item GetOption()
 
 fetch an option as provided by the user on the command line.
 
@@ -316,7 +320,7 @@ sub GetOption {
 
 }
 
-=head2 PreRun()
+=item PreRun()
 
 perform additional validations/preparations before Run(). Override this method in your commands.
 
@@ -328,7 +332,7 @@ sub PreRun {
     return 1;
 }
 
-=head2 Run()
+=item Run()
 
 runs the command. Override this method in your commands.
 
@@ -345,7 +349,7 @@ sub Run {
     return $Self->ExitCodeOk();
 }
 
-=head2 PostRun()
+=item PostRun()
 
 perform additional cleanups after Run(). Override this method in your commands.
 
@@ -361,7 +365,7 @@ sub PostRun {
     return;
 }
 
-=head2 Execute()
+=item Execute()
 
 this method will parse/validate the command line arguments supplied by the user.
 If that was ok, the Run() method of the command will be called.
@@ -474,7 +478,7 @@ sub Execute {
     return $ExitCode;
 }
 
-=head2 ExitCodeError()
+=item ExitCodeError()
 
 returns an exit code to signal something went wrong (mostly for better
 code readability).
@@ -493,7 +497,7 @@ sub ExitCodeError {
     return $CustomExitCode // 1;
 }
 
-=head2 ExitCodeOk()
+=item ExitCodeOk()
 
 returns 0 as exit code to indicate everything went fine in the command
 (mostly for better code readability).
@@ -504,7 +508,7 @@ sub ExitCodeOk {
     return 0;
 }
 
-=head2 GetUsageHelp()
+=item GetUsageHelp()
 
 generates usage / help screen for this command.
 
@@ -576,7 +580,7 @@ sub GetUsageHelp {
     return $Self->_ReplaceColorTags($UsageText);
 }
 
-=head2 ANSI()
+=item ANSI()
 
 get/set support for colored text.
 
@@ -589,7 +593,7 @@ sub ANSI {
     return $Self->{ANSI};
 }
 
-=head2 PrintError()
+=item PrintError()
 
 shorthand method to print an error message to STDERR.
 
@@ -606,7 +610,7 @@ sub PrintError {
     return;
 }
 
-=head2 Print()
+=item Print()
 
 this method will print the given text to STDOUT.
 
@@ -625,9 +629,7 @@ sub Print {
     return;
 }
 
-=begin Internal:
-
-=head2 _ParseGlobalOptions()
+=item _ParseGlobalOptions()
 
 parses any global options possibly provided by the user.
 
@@ -659,7 +661,7 @@ sub _ParseGlobalOptions {
     return \%OptionValues;
 }
 
-=head2 _ParseCommandlineArguments()
+=item _ParseCommandlineArguments()
 
 parses and validates the command line arguments provided by the user according to
 the configured arguments and options of the command.
@@ -782,7 +784,7 @@ sub _ParseCommandlineArguments {
     };
 }
 
-=head2 _Color()
+=item _Color()
 
 this will color the given text (see Term::ANSIColor::color()) if
 ANSI output is available and active, otherwise the text stays unchanged.
@@ -807,7 +809,7 @@ sub _ReplaceColorTags {
 
 1;
 
-=end Internal:
+=back
 
 =head1 TERMS AND CONDITIONS
 

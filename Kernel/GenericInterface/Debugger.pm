@@ -19,7 +19,7 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Debugger
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 GenericInterface data debugger interface.
 
@@ -30,7 +30,11 @@ based on the configured debug level.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create an object.
 
@@ -127,7 +131,7 @@ sub new {
     return $Self;
 }
 
-=head2 DebugLog()
+=item DebugLog()
 
 add one piece of data to the logging of this communication process.
 
@@ -224,7 +228,7 @@ EOF
     return 1;
 }
 
-=head2 Debug()
+=item Debug()
 
 passes data to DebugLog with debug level 'debug'
 
@@ -246,7 +250,7 @@ sub Debug {
     return 1;
 }
 
-=head2 Info()
+=item Info()
 
 passes data to DebugLog with debug level 'info'
 
@@ -268,7 +272,7 @@ sub Info {
     return 1;
 }
 
-=head2 Notice()
+=item Notice()
 
 passes data to DebugLog with debug level 'notice'
 
@@ -290,7 +294,7 @@ sub Notice {
     return 1;
 }
 
-=head2 Error()
+=item Error()
 
 passes data to DebugLog with debug level 'error'
 then returns data structure to be used as return value in calling function
@@ -320,7 +324,7 @@ sub Error {
 
 =cut
 
-=head2 DESTROY()
+=item DESTROY()
 
 destructor, this will write the log entries to the database.
 
@@ -336,6 +340,8 @@ sub DESTROY {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

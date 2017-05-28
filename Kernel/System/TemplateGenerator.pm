@@ -7,6 +7,7 @@
 # --
 
 package Kernel::System::TemplateGenerator;
+## nofilter(TidyAll::Plugin::OTRS::Perl::Time)
 
 use strict;
 use warnings;
@@ -30,7 +31,6 @@ our @ObjectDependencies = (
     'Kernel::System::StandardTemplate',
     'Kernel::System::SystemAddress',
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
     'Kernel::System::User',
     'Kernel::Output::HTML::Layout',
     'Kernel::System::JSON',
@@ -41,16 +41,22 @@ our @ObjectDependencies = (
 
 Kernel::System::TemplateGenerator - signature lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All signature functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $TemplateGeneratorObject = $Kernel::OM->Get('Kernel::System::TemplateGenerator');
 
 =cut
@@ -67,7 +73,7 @@ sub new {
     return $Self;
 }
 
-=head2 Salutation()
+=item Salutation()
 
 generate salutation
 
@@ -128,7 +134,7 @@ sub Salutation {
     }
 
     # get list unsupported tags for standard template
-    my @ListOfUnSupportedTag = qw(OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT);
+    my @ListOfUnSupportedTag = qw/OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT/;
 
     my $SalutationText = $Self->_RemoveUnSupportedTag(
         Text => $Salutation{Text} || '',
@@ -154,7 +160,7 @@ sub Salutation {
     return $SalutationText;
 }
 
-=head2 Signature()
+=item Signature()
 
 generate salutation
 
@@ -247,7 +253,7 @@ sub Signature {
     }
 
     # get list unsupported tags for standard template
-    my @ListOfUnSupportedTag = qw(OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT);
+    my @ListOfUnSupportedTag = qw/OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT/;
 
     my $SignatureText = $Self->_RemoveUnSupportedTag(
         Text => $Signature{Text} || '',
@@ -274,7 +280,7 @@ sub Signature {
     return $SignatureText;
 }
 
-=head2 Sender()
+=item Sender()
 
 generate sender address (FROM string) for emails
 
@@ -361,7 +367,7 @@ sub Sender {
     return $Sender;
 }
 
-=head2 Template()
+=item Template()
 
 generate template
 
@@ -442,7 +448,7 @@ sub Template {
     $Language //= $Kernel::OM->Get('Kernel::Config')->Get('DefaultLanguage') || 'en';
 
     # get list unsupported tags for standard template
-    my @ListOfUnSupportedTag = qw(OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT);
+    my @ListOfUnSupportedTag = qw/OTRS_AGENT_SUBJECT OTRS_AGENT_BODY OTRS_CUSTOMER_BODY OTRS_CUSTOMER_SUBJECT/;
 
     my $TemplateText = $Self->_RemoveUnSupportedTag(
         Text => $Template{Template} || '',
@@ -462,106 +468,7 @@ sub Template {
     return $TemplateText;
 }
 
-=head2 GenericAgentArticle()
-
-generate internal or external notes
-
-    my $GenericAgentArticle = $TemplateGeneratorObject->GenericAgentArticle(
-        Notification    => $NotificationDataHashRef,
-        TicketID        => 123,
-        UserID          => 123,
-        Data            => $ArticleHashRef,             # Optional
-    );
-
-=cut
-
-sub GenericAgentArticle {
-    my ( $Self, %Param ) = @_;
-
-    # check needed stuff
-    for (qw(TicketID Notification UserID)) {
-        if ( !$Param{$_} ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "Need $_!"
-            );
-            return;
-        }
-    }
-
-    my %Template = %{ $Param{Notification} };
-
-    # get ticket object
-    my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
-
-    # get ticket
-    my %Ticket = $TicketObject->TicketGet(
-        TicketID      => $Param{TicketID},
-        DynamicFields => 0,
-    );
-
-    # do text/plain to text/html convert
-    if (
-        $Self->{RichText}
-        && $Template{ContentType} =~ /text\/plain/i
-        && $Template{Body}
-        )
-    {
-        $Template{ContentType} = 'text/html';
-        $Template{Body}        = $Kernel::OM->Get('Kernel::System::HTMLUtils')->ToHTML(
-            String => $Template{Body},
-        );
-    }
-
-    # do text/html to text/plain convert
-    if (
-        !$Self->{RichText}
-        && $Template{ContentType} =~ /text\/html/i
-        && $Template{Body}
-        )
-    {
-        $Template{ContentType} = 'text/plain';
-        $Template{Body}        = $Kernel::OM->Get('Kernel::System::HTMLUtils')->ToAscii(
-            String => $Template{Body},
-        );
-    }
-
-    # replace place holder stuff
-    $Template{Body} = $Self->_Replace(
-        RichText  => $Self->{RichText},
-        Text      => $Template{Body},
-        Recipient => $Param{Recipient},
-        Data      => $Param{Data} || {},
-        TicketID  => $Param{TicketID},
-        UserID    => $Param{UserID},
-    );
-    $Template{Subject} = $Self->_Replace(
-        RichText  => 0,
-        Text      => $Template{Subject},
-        Recipient => $Param{Recipient},
-        Data      => $Param{Data} || {},
-        TicketID  => $Param{TicketID},
-        UserID    => $Param{UserID},
-    );
-
-    $Template{Subject} = $TicketObject->TicketSubjectBuild(
-        TicketNumber => $Ticket{TicketNumber},
-        Subject      => $Template{Subject} || '',
-        Type         => 'New',
-    );
-
-    # add URLs and verify to be full HTML document
-    if ( $Self->{RichText} ) {
-
-        $Template{Body} = $Kernel::OM->Get('Kernel::System::HTMLUtils')->LinkQuote(
-            String => $Template{Body},
-        );
-    }
-
-    return %Template;
-}
-
-=head2 Attributes()
+=item Attributes()
 
 generate attributes
 
@@ -619,7 +526,7 @@ sub Attributes {
     return %{ $Param{Data} };
 }
 
-=head2 AutoResponse()
+=item AutoResponse()
 
 generate response
 
@@ -681,31 +588,16 @@ sub AutoResponse {
     return if !%AutoResponse;
 
     # get old article for quoting
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-    my @ArticleList   = $ArticleObject->ArticleList(
-        TicketID   => $Param{TicketID},
-        SenderType => 'customer',
-        OnlyLast   => 1,
+    my %Article = $TicketObject->ArticleLastCustomerArticle(
+        TicketID      => $Param{TicketID},
+        DynamicFields => 0,
     );
 
-    if ( !@ArticleList ) {
-        @ArticleList = $ArticleObject->ArticleList(
-            TicketID             => $Param{TicketID},
-            IsVisibleForCustomer => 1,
-            OnlyLast             => 1,
-        );
-    }
-
-    if (@ArticleList) {
-        my %Article = $ArticleObject->BackendForArticle( %{ $ArticleList[0] } )
-            ->ArticleGet( %{ $ArticleList[0] }, UserID => $Param{UserID} );
-
-        for (qw(From To Cc Subject Body)) {
-            if ( !$Param{OrigHeader}->{$_} ) {
-                $Param{OrigHeader}->{$_} = $Article{$_} || '';
-            }
-            chomp $Param{OrigHeader}->{$_};
+    for (qw(From To Cc Subject Body)) {
+        if ( !$Param{OrigHeader}->{$_} ) {
+            $Param{OrigHeader}->{$_} = $Article{$_} || '';
         }
+        chomp $Param{OrigHeader}->{$_};
     }
 
     # format body (only if longer than 86 chars)
@@ -830,7 +722,7 @@ sub AutoResponse {
     return %AutoResponse;
 }
 
-=head2 NotificationEvent()
+=item NotificationEvent()
 
 replace all OTRS smart tags in the notification body and subject
 
@@ -874,6 +766,7 @@ sub NotificationEvent {
         $Param{CustomerMessageParams} = \%LocalCustomerMessageParams;
     }
 
+    # get ticket object
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
     # get ticket
@@ -882,58 +775,42 @@ sub NotificationEvent {
         DynamicFields => 0,
     );
 
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
-    # Get last article from customer.
-    my @CustomerArticles = $ArticleObject->ArticleList(
-        TicketID   => $Param{TicketID},
-        SenderType => 'customer',
-        OnlyLast   => 1,
+    # get last article from customer
+    my %Article = $TicketObject->ArticleLastCustomerArticle(
+        TicketID      => $Param{TicketID},
+        DynamicFields => 0,
     );
 
-    my %CustomerArticle;
-
-    ARTICLE:
-    for my $Article (@CustomerArticles) {
-        next ARTICLE if !$Article->{ArticleID};
-
-        %CustomerArticle = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-            %{$Article},
-            DynamicFields => 0,
-            UserID        => $Param{UserID},
-        );
-    }
-
-    # Get last article from agent.
-    my @AgentArticles = $ArticleObject->ArticleList(
-        TicketID   => $Param{TicketID},
-        SenderType => 'agent',
-        OnlyLast   => 1,
+    # get last article from agent
+    my @ArticleBoxAgent = $TicketObject->ArticleGet(
+        TicketID      => $Param{TicketID},
+        UserID        => $Param{UserID},
+        DynamicFields => 0,
     );
 
-    my %AgentArticle;
+    my %ArticleAgent;
 
     ARTICLE:
-    for my $Article (@AgentArticles) {
-        next ARTICLE if !$Article->{ArticleID};
+    for my $Article ( reverse @ArticleBoxAgent ) {
 
-        %AgentArticle = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-            %{$Article},
-            DynamicFields => 0,
-            UserID        => $Param{UserID},
-        );
+        next ARTICLE if $Article->{SenderType} ne 'agent';
+
+        %ArticleAgent = %{$Article};
+
+        last ARTICLE;
     }
 
+    # get  HTMLUtils object
     my $HTMLUtilsObject = $Kernel::OM->Get('Kernel::System::HTMLUtils');
 
     # set the accounted time as part of the articles information
     ARTICLE:
-    for my $ArticleData ( \%CustomerArticle, \%AgentArticle ) {
+    for my $ArticleData ( \%Article, \%ArticleAgent ) {
 
         next ARTICLE if !$ArticleData->{ArticleID};
 
         # get accounted time
-        my $AccountedTime = $ArticleObject->ArticleAccountedTimeGet(
+        my $AccountedTime = $TicketObject->ArticleAccountedTimeGet(
             ArticleID => $ArticleData->{ArticleID},
         );
 
@@ -967,9 +844,9 @@ sub NotificationEvent {
         $Notification{$Attribute} = $Notification{Message}->{$Language}->{$Attribute};
     }
 
-    for my $Key (qw(From To Cc Subject Body ContentType)) {
+    for my $Key (qw(From To Cc Subject Body ContentType ArticleType)) {
         if ( !$Param{CustomerMessageParams}->{$Key} ) {
-            $Param{CustomerMessageParams}->{$Key} = $CustomerArticle{$Key} || '';
+            $Param{CustomerMessageParams}->{$Key} = $Article{$Key} || '';
         }
         chomp $Param{CustomerMessageParams}->{$Key};
     }
@@ -1016,7 +893,7 @@ sub NotificationEvent {
         next KEY if !$Param{CustomerMessageParams}->{$Key};
 
         $Notification{Body} =~ s/${Start}OTRS_CUSTOMER_DATA_$Key${End}/$Param{CustomerMessageParams}->{$Key}/gi;
-        $Notification{Subject} =~ s/<OTRS_CUSTOMER_DATA_$Key>/$Param{CustomerMessageParams}->{$Key}{$Key}/gi;
+        $Notification{Subject} =~ s/<OTRS_CUSTOMER_DATA_$Key>/$Param{CustomerMessageParams}->{$Key}{$_}/gi;
     }
 
     # do text/plain to text/html convert
@@ -1048,7 +925,7 @@ sub NotificationEvent {
         Text      => $Notification{Body},
         Recipient => $Param{Recipient},
         Data      => $Param{CustomerMessageParams},
-        DataAgent => \%AgentArticle,
+        DataAgent => \%ArticleAgent,
         TicketID  => $Param{TicketID},
         UserID    => $Param{UserID},
         Language  => $Language,
@@ -1058,7 +935,7 @@ sub NotificationEvent {
         Text      => $Notification{Subject},
         Recipient => $Param{Recipient},
         Data      => $Param{CustomerMessageParams},
-        DataAgent => \%AgentArticle,
+        DataAgent => \%ArticleAgent,
         TicketID  => $Param{TicketID},
         UserID    => $Param{UserID},
         Language  => $Language,
@@ -1152,29 +1029,11 @@ sub _Replace {
 
     # translate ticket values if needed
     if ( $Param{Language} ) {
-
         my $LanguageObject = Kernel::Language->new(
             UserLanguage => $Param{Language},
         );
-
-        # Translate the diffrent values.
         for my $Field (qw(Type State StateType Lock Priority)) {
             $Ticket{$Field} = $LanguageObject->Translate( $Ticket{$Field} );
-        }
-
-        # Transform the date values from the ticket data (but not the dynamic field values).
-        ATTRIBUTE:
-        for my $Attribute ( sort keys %Ticket ) {
-            next ATTRIBUTE if $Attribute =~ m{ \A DynamicField_ }xms;
-            next ATTRIBUTE if !$Ticket{$Attribute};
-
-            if ( $Ticket{$Attribute} =~ m{\A(\d\d\d\d)-(\d\d)-(\d\d)\s(\d\d):(\d\d):(\d\d)\z}xi ) {
-                $Ticket{$Attribute} = $LanguageObject->FormatTimeString(
-                    $Ticket{$Attribute},
-                    'DateFormat',
-                    'NoSeconds',
-                );
-            }
         }
     }
 
@@ -1592,9 +1451,8 @@ sub _Replace {
 
                 if ( $Param{Text} =~ /$Tag\[(.+?)\]$End/g ) {
 
-                    my $TimeZone       = $1;
-                    my $DateTimeObject = $Kernel::OM->Create('Kernel::System::DateTime');
-                    my $EmailDate      = $DateTimeObject->Format( Format => '%A, %B %e, %Y at %T ' );
+                    my $TimeZone = $1;
+                    my $EmailDate = strftime( '%A, %B %e, %Y at %T ', localtime );    ## no critic
                     $EmailDate .= "($TimeZone)";
                     $Param{Text} =~ s/$Tag\[.+?\]$End/$EmailDate/g;
                 }
@@ -1703,11 +1561,11 @@ sub _RemoveUnSupportedTag {
     my ( $Self, %Param ) = @_;
 
     # check needed stuff
-    for my $Item (qw(Text ListOfUnSupportedTag)) {
-        if ( !defined $Param{$Item} ) {
+    for (qw(Text ListOfUnSupportedTag)) {
+        if ( !defined $Param{$_} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $Item!"
+                Message  => "Need $_!"
             );
             return;
         }
@@ -1732,6 +1590,8 @@ sub _RemoveUnSupportedTag {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

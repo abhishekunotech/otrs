@@ -222,6 +222,9 @@ for my $Test (@Tests) {
         $Kernel::OM->ObjectsDiscard( Objects => [ 'Kernel::System::PostMaster', 'Kernel::System::Ticket' ] );
     }
 
+    # get ticket object
+    my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
+
     # get test ticket ID
     my ($TicketID) = $Result =~ m{TicketID:\s+(\d+)};
     $Self->True(
@@ -229,16 +232,13 @@ for my $Test (@Tests) {
         "TicketID $TicketID - created from email",
     );
 
-    my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
     # get auto repsonse article data
-    my @MetaArticles = $ArticleObject->ArticleList(
+    my @ArticleIDs = $TicketObject->ArticleIndex(
         TicketID => $TicketID,
     );
-
-    my %ArticleAutoResponse = $ArticleObject->BackendForArticle( %{ $MetaArticles[0] } )->ArticleGet(
-        %{ $MetaArticles[1] },
-        UserID => 1,
+    my %ArticleAutoResponse = $TicketObject->ArticleGet(
+        ArticleID => $ArticleIDs[1],
+        UserID    => 1,
     );
 
     # check auto response article values
@@ -252,9 +252,9 @@ for my $Test (@Tests) {
     }
 
     # get notification article data
-    my %ArticleNotification = $ArticleObject->BackendForArticle( %{ $MetaArticles[0] } )->ArticleGet(
-        %{ $MetaArticles[2] },
-        UserID => 1,
+    my %ArticleNotification = $TicketObject->ArticleGet(
+        ArticleID => $ArticleIDs[2],
+        UserID    => 1,
     );
 
     for my $NotificationKey ( sort keys %{ $Test->{ResultNotification} } ) {

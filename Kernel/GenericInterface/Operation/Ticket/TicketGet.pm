@@ -15,7 +15,7 @@ use MIME::Base64;
 
 use Kernel::System::VariableCheck qw(IsArrayRefWithData IsHashRefWithData IsStringWithData);
 
-use parent qw(
+use base qw(
     Kernel::GenericInterface::Operation::Common
     Kernel::GenericInterface::Operation::Ticket::Common
 );
@@ -26,9 +26,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Operation::Ticket::TicketGet - GenericInterface Ticket Get Operation backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Operation->new();
@@ -56,7 +62,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 perform TicketGet Operation. This function is able to return
 one or more ticket entries in one call.
@@ -79,9 +85,8 @@ one or more ticket entries in one call.
             ArticleSenderType    => [ $ArticleSenderType1, $ArticleSenderType2 ],  # Optional, only requested article sender types
             ArticleOrder         => 'DESC',                                        # Optional, DESC,ASC - default is ASC
             ArticleLimit         => 5,                                             # Optional
-            Attachments          => 1,                                             # Optional, 0 as default. If it's set with the value 1,
+            Attachments          => 1,                                             # Optional, 1 as default. If it's set with the value 1,
                                                                                    # attachments for articles will be included on ticket data
-            GetAttachmentContents = 1                                              # Optional, 1 as default. 0|1,
             HTMLBodyAsAttachment => 1                                              # Optional, If enabled the HTML body version of each article
                                                                                    #    is added to the attachments list
         },
@@ -172,6 +177,7 @@ one or more ticket entries in one call.
                     FirstResponseInMin              (minutes till first response)
                     FirstResponseDiffInMin          (minutes till or over first response)
 
+                    SolutionTime                    (timestamp of solution time, also close time)
                     SolutionInMin                   (minutes till solution time)
                     SolutionDiffInMin               (minutes till or over solution time)
 
@@ -191,7 +197,8 @@ one or more ticket entries in one call.
                             References
                             SenderType
                             SenderTypeID
-                            IsVisibleForCustomer
+                            ArticleType
+                            ArticleTypeID
                             ContentType
                             Charset
                             MimeType
@@ -211,8 +218,8 @@ one or more ticket entries in one call.
                                     ContentAlternative => "",
                                     ContentID          => "",
                                     ContentType        => "application/pdf",
-                                    FileID             => 34,
                                     Filename           => "StdAttachment-Test1.pdf",
+                                    Filesize           => "4.6 KBytes",
                                     FilesizeRaw        => 4722,
                                 },
                                 {
@@ -283,7 +290,7 @@ sub Run {
         );
     }
 
-    # Get the list of article dynamic fields
+    # Get the list of dynamic fields for object article.
     my $ArticleDynamicFieldList = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldList(
         ObjectType => 'Article',
         ResultType => 'HASH',
@@ -315,9 +322,7 @@ sub Run {
     my $ArticleOrder  = $Param{Data}->{ArticleOrder}  || 'ASC';
     my $ArticleLimit  = $Param{Data}->{ArticleLimit}  || 0;
     my $Attachments   = $Param{Data}->{Attachments}   || 0;
-    my $GetAttachmentContents = $Param{Data}->{GetAttachmentContents} // 1;
-
-    my $ReturnData = {
+    my $ReturnData    = {
         Success => 1,
     };
     my @Item;
@@ -330,16 +335,14 @@ sub Run {
         $ArticleSenderType = [ $Param{Data}->{ArticleSenderType} ]
     }
 
-    # By default, do not include HTML body as attachment, unless it is explicitly requested.
-    my %ExcludeAttachments = (
-        ExcludePlainText => 1,
-        ExcludeHTMLBody  => $Param{Data}->{HTMLBodyAsAttachment} ? 0 : 1,
-    );
+    # By default does not include HYML body as attachment (3) unless is explicitly requested (2).
+    my $StripPlainBodyAsAttachment = $Param{Data}->{HTMLBodyAsAttachment} ? 2 : 3;
 
     # start ticket loop
     TICKET:
     for my $TicketID (@TicketIDs) {
 
+        # get ticket object
         my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
         # get the Ticket entry
@@ -364,7 +367,7 @@ sub Run {
         my %TicketEntry;
         my @DynamicFields;
 
-        # remove all dynamic fields from main ticket hash and set them into an array.
+        # remove all dynamic fields form main ticket hash and set them into an array.
         ATTRIBUTE:
         for my $Attribute ( sort keys %TicketEntryRaw ) {
 
@@ -394,54 +397,35 @@ sub Run {
             next TICKET;
         }
 
-        my %ArticleListFilters;
+        my $ArticleTypes;
         if ( $UserType eq 'Customer' ) {
-            %ArticleListFilters = (
-                IsVisibleForCustomer => 1,
-            );
+            $ArticleTypes = [ $TicketObject->ArticleTypeList( Type => 'Customer' ) ];
         }
 
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-
-        my @Articles;
-        if ($ArticleSenderType) {
-            for my $SenderType ( @{ $ArticleSenderType || [] } ) {
-                my @ArticlesFiltered = $ArticleObject->ArticleList(
-                    TicketID   => $TicketID,
-                    SenderType => $SenderType,
-                    %ArticleListFilters,
-                );
-                push @Articles, @ArticlesFiltered;
-            }
-        }
-        else {
-            @Articles = $ArticleObject->ArticleList(
-                TicketID => $TicketID,
-                %ArticleListFilters,
-            );
-        }
+        my @ArticleBoxRaw = $TicketObject->ArticleGet(
+            TicketID          => $TicketID,
+            ArticleSenderType => $ArticleSenderType,
+            ArticleType       => $ArticleTypes,
+            DynamicFields     => $DynamicFields,
+            Extended          => $Extended,
+            Order             => $ArticleOrder,
+            Limit             => $ArticleLimit,
+            UserID            => $UserID,
+        );
 
         # start article loop
         ARTICLE:
-        for my $Article (@Articles) {
-
-            my $ArticleBackendObject = $ArticleObject->BackendForArticle( %{$Article} );
-
-            my %ArticleData = $ArticleBackendObject->ArticleGet(
-                TicketID      => $TicketID,
-                ArticleID     => $Article->{ArticleID},
-                DynamicFields => $DynamicFields,
-                UserID        => 1,
-            );
-            $Article = \%ArticleData;
+        for my $Article (@ArticleBoxRaw) {
 
             next ARTICLE if !$Attachments;
 
             # get attachment index (without attachments)
-            my %AtmIndex = $ArticleBackendObject->ArticleAttachmentIndex(
-                ArticleID => $Article->{ArticleID},
-                UserID    => $UserID,
-                %ExcludeAttachments,
+            my %AtmIndex = $TicketObject->ArticleAttachmentIndex(
+                ContentPath                => $Article->{ContentPath},
+                ArticleID                  => $Article->{ArticleID},
+                StripPlainBodyAsAttachment => $StripPlainBodyAsAttachment,
+                Article                    => $Article,
+                UserID                     => $UserID,
             );
 
             next ARTICLE if !IsHashRefWithData( \%AtmIndex );
@@ -450,7 +434,7 @@ sub Run {
             ATTACHMENT:
             for my $FileID ( sort keys %AtmIndex ) {
                 next ATTACHMENT if !$FileID;
-                my %Attachment = $ArticleBackendObject->ArticleAttachment(
+                my %Attachment = $TicketObject->ArticleAttachment(
                     ArticleID => $Article->{ArticleID},
                     FileID    => $FileID,                 # as returned by ArticleAttachmentIndex
                     UserID    => $UserID,
@@ -458,17 +442,8 @@ sub Run {
 
                 next ATTACHMENT if !IsHashRefWithData( \%Attachment );
 
-                $Attachment{FileID} = $FileID;
-                if ($GetAttachmentContents)
-                {
-                    # convert content to base64
-                    $Attachment{Content} = encode_base64( $Attachment{Content} );
-                }
-                else {
-                    # unset content
-                    $Attachment{Content}            = '';
-                    $Attachment{ContentAlternative} = '';
-                }
+                # convert content to base64
+                $Attachment{Content} = encode_base64( $Attachment{Content} );
                 push @Attachments, {%Attachment};
             }
 
@@ -478,22 +453,21 @@ sub Run {
         }    # finish article loop
 
         # set Ticket entry data
-        if (@Articles) {
+        if (@ArticleBoxRaw) {
 
             my @ArticleBox;
 
-            for my $ArticleRaw (@Articles) {
+            for my $ArticleRaw (@ArticleBoxRaw) {
                 my %Article;
                 my @ArticleDynamicFields;
 
-                # remove all dynamic fields from main article hash and set them into an array.
+                # remove all dynamic fields form main article hash and set them into an array.
                 ATTRIBUTE:
                 for my $Attribute ( sort keys %{$ArticleRaw} ) {
 
                     if ( $Attribute =~ m{\A DynamicField_(.*) \z}msx ) {
 
-                        # skip dynamic fields that are not article related
-                        # this is needed because ArticleGet() also returns ticket dynamic fields
+                        # Skip dynamic fields that are not for article object
                         next ATTRIBUTE if ( !$ArticleDynamicFieldLookup{$1} );
 
                         push @ArticleDynamicFields, {
@@ -539,6 +513,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

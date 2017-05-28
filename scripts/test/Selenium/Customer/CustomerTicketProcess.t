@@ -279,9 +279,6 @@ $Selenium->RunTest(
 
         $Selenium->find_element( "#Subject", 'css' )->VerifiedSubmit();
 
-        sleep 1;
-        $Selenium->WaitFor( JavaScript => 'return typeof($) === "function" && $("div#MainBox").length;' );
-
         # check for inputed values for first step in test process ticket
         $Self->True(
             index( $Selenium->get_page_source(), $SubjectRandom ) > -1,

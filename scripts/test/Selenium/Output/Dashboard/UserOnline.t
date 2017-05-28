@@ -25,17 +25,20 @@ $Selenium->RunTest(
         my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
         # get UserOnline config
-        my %UserOnlineSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %UserOnlineSysConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name    => 'DashboardBackend###0400-UserOnline',
             Default => 1,
         );
+
+        %UserOnlineSysConfig = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $UserOnlineSysConfig{Setting}->[1]->{Hash}->[1]->{Item} };
 
         # enable UserOnline and set it to load as default plugin
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'DashboardBackend###0400-UserOnline',
             Value => {
-                %{ $UserOnlineSysConfig{EffectiveValue} },
+                %UserOnlineSysConfig,
                 Default => 1,
                 }
         );

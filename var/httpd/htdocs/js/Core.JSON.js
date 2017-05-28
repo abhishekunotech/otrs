@@ -38,10 +38,6 @@ Core.JSON = (function (TargetNS) {
     TargetNS.Parse = function (JSONString) {
         var JSONObject;
 
-        if (typeof JSONString !== 'string' && typeof JSONString !== 'undefined') {
-            return JSONString;
-        }
-
         try {
             JSONObject = JSON.parse(JSONString);
         }

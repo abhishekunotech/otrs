@@ -21,16 +21,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Valid - valid lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All valid functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ValidObject = $Kernel::OM->Get('Kernel::System::Valid');
 
 =cut
@@ -48,7 +54,7 @@ sub new {
     return $Self;
 }
 
-=head2 ValidList()
+=item ValidList()
 
 return a valid list as hash
 
@@ -90,7 +96,7 @@ sub ValidList {
     return %Data;
 }
 
-=head2 ValidLookup()
+=item ValidLookup()
 
 returns the id or the name of a valid
 
@@ -146,7 +152,7 @@ sub ValidLookup {
     return $ReturnData;
 }
 
-=head2 ValidIDsGet()
+=item ValidIDsGet()
 
 return all valid ids as array
 
@@ -166,6 +172,8 @@ sub ValidIDsGet {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

@@ -20,12 +20,12 @@ $Kernel::OM->ObjectParamAdd(
 );
 my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 
-# get signature object
+# get needed objects
 my $SignatureObject = $Kernel::OM->Get('Kernel::System::Signature');
 
 # add signature
-my $SignatureName = $Helper->GetRandomID();
-my $SignatureText = "Your OTRS-Team
+my $SignatureNameRand0 = $Helper->GetRandomID();
+my $Signature          = "Your OTRS-Team
 
 <OTRS_CURRENT_UserFirstname> <OTRS_CURRENT_UserLastname>
 
@@ -36,8 +36,8 @@ Email: hot\@florida.com - Web: http://hot.florida.com/
 --";
 
 my $SignatureID = $SignatureObject->SignatureAdd(
-    Name        => $SignatureName,
-    Text        => $SignatureText,
+    Name        => $SignatureNameRand0,
+    Text        => $Signature,
     ContentType => 'text/plain; charset=iso-8859-1',
     Comment     => 'some comment',
     ValidID     => 1,
@@ -53,12 +53,12 @@ my %Signature = $SignatureObject->SignatureGet( ID => $SignatureID );
 
 $Self->Is(
     $Signature{Name} || '',
-    $SignatureName,
+    $SignatureNameRand0,
     'SignatureGet() - Name',
 );
 $Self->True(
-    $Signature{Text} eq $SignatureText,
-    'SignatureGet() - Signature text',
+    $Signature{Text} eq $Signature,
+    'SignatureGet() - Signature',
 );
 $Self->Is(
     $Signature{ContentType} || '',
@@ -77,17 +77,21 @@ $Self->Is(
 );
 
 my %SignatureList = $SignatureObject->SignatureList( Valid => 0 );
+my $Hit = 0;
+for ( sort keys %SignatureList ) {
+    if ( $_ eq $SignatureID ) {
+        $Hit = 1;
+    }
+}
 $Self->True(
-    exists $SignatureList{$SignatureID} && $SignatureList{$SignatureID} eq $SignatureName,
-    "SignatureList() contains the signature $SignatureName",
+    $Hit eq 1,
+    'SignatureList()',
 );
 
-my $SignatureNameUpdate = $SignatureName . ' - Update';
-my $SignatureTextUpdate = $SignatureText . ' - Update';
-my $SignatureUpdate     = $SignatureObject->SignatureUpdate(
+my $SignatureUpdate = $SignatureObject->SignatureUpdate(
     ID          => $SignatureID,
-    Name        => $SignatureNameUpdate,
-    Text        => $SignatureTextUpdate,
+    Name        => $SignatureNameRand0 . '1',
+    Text        => $Signature . '1',
     ContentType => 'text/plain; charset=utf-8',
     Comment     => 'some comment 1',
     ValidID     => 2,
@@ -103,11 +107,11 @@ $Self->True(
 
 $Self->Is(
     $Signature{Name} || '',
-    $SignatureNameUpdate,
+    $SignatureNameRand0 . '1',
     'SignatureGet() - Name',
 );
 $Self->True(
-    $Signature{Text} eq $SignatureTextUpdate,
+    $Signature{Text} eq $Signature . '1',
     'SignatureGet() - Signature',
 );
 $Self->Is(
@@ -125,13 +129,5 @@ $Self->Is(
     2,
     'SignatureGet() - ValidID',
 );
-
-%SignatureList = $SignatureObject->SignatureList( Valid => 1 );
-$Self->False(
-    exists $SignatureList{$SignatureID},
-    "SignatureList() does not contain invalid signature $SignatureNameUpdate",
-);
-
-# cleanup is done by RestoreDatabase
 
 1;

@@ -17,7 +17,6 @@ our @ObjectDependencies = (
     'Kernel::System::DynamicField::Backend',
     'Kernel::System::Log',
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
     'Kernel::System::Time',
     'Kernel::System::User',
 );
@@ -54,42 +53,6 @@ sub Run {
 
     # get ticket object
     my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
-
-    my $OwnerID = $GetParam{'X-OTRS-FollowUp-OwnerID'};
-    if ( $GetParam{'X-OTRS-FollowUp-Owner'} ) {
-
-        my $TmpOwnerID = $Kernel::OM->Get('Kernel::System::User')->UserLookup(
-            UserLogin => $GetParam{'X-OTRS-FollowUp-Owner'},
-        );
-
-        $OwnerID = $TmpOwnerID || $OwnerID;
-    }
-
-    if ($OwnerID) {
-        my $Success = $TicketObject->TicketOwnerSet(
-            TicketID  => $Param{TicketID},
-            NewUserID => $OwnerID,
-            UserID    => $Param{InmailUserID},
-        );
-    }
-
-    my $ResponsibleID = $GetParam{'X-OTRS-FollowUp-ResponsibleID'};
-    if ( $GetParam{'X-OTRS-FollowUp-Responsible'} ) {
-
-        my $TmpResponsibleID = $Kernel::OM->Get('Kernel::System::User')->UserLookup(
-            UserLogin => $GetParam{'X-OTRS-FollowUp-Responsible'},
-        );
-
-        $ResponsibleID = $TmpResponsibleID || $ResponsibleID;
-    }
-
-    if ($ResponsibleID) {
-        my $Success = $TicketObject->TicketResponsibleSet(
-            TicketID  => $Param{TicketID},
-            NewUserID => $ResponsibleID,
-            UserID    => $Param{InmailUserID},
-        );
-    }
 
     # get ticket data
     my %Ticket = $TicketObject->TicketGet(
@@ -168,12 +131,7 @@ sub Run {
         $State = $GetParam{'X-OTRS-FollowUp-State'};
     }
 
-    my $KeepStateHeader = $ConfigObject->Get('KeepStateHeader') || 'X-OTRS-FollowUp-State-Keep';
-    if (
-        ( $Ticket{StateType} !~ /^new/ || $GetParam{'X-OTRS-FollowUp-State'} )
-        && !$GetParam{$KeepStateHeader}
-        )
-    {
+    if ( $Ticket{StateType} !~ /^new/ || $GetParam{'X-OTRS-FollowUp-State'} ) {
         $TicketObject->TicketStateSet(
             State => $GetParam{'X-OTRS-FollowUp-State'} || $State,
             TicketID => $Param{TicketID},
@@ -418,35 +376,26 @@ sub Run {
         }
     }
 
-    my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-        ChannelName => 'Email',
-    );
-
-    my $IsVisibleForCustomer = 1;
-    if ( length $GetParam{'X-OTRS-FollowUp-IsVisibleForCustomer'} ) {
-        $IsVisibleForCustomer = $GetParam{'X-OTRS-FollowUp-IsVisibleForCustomer'};
-    }
-
     # do db insert
-    my $ArticleID = $ArticleBackendObject->ArticleCreate(
-        TicketID             => $Param{TicketID},
-        SenderType           => $GetParam{'X-OTRS-FollowUp-SenderType'},
-        IsVisibleForCustomer => $IsVisibleForCustomer,
-        From                 => $GetParam{From},
-        ReplyTo              => $GetParam{ReplyTo},
-        To                   => $GetParam{To},
-        Cc                   => $GetParam{Cc},
-        Subject              => $GetParam{Subject},
-        MessageID            => $GetParam{'Message-ID'},
-        InReplyTo            => $GetParam{'In-Reply-To'},
-        References           => $GetParam{'References'},
-        ContentType          => $GetParam{'Content-Type'},
-        Body                 => $GetParam{Body},
-        UserID               => $Param{InmailUserID},
-        HistoryType          => 'FollowUp',
-        HistoryComment       => "\%\%$Param{Tn}\%\%$Comment",
-        AutoResponseType     => $AutoResponseType,
-        OrigHeader           => \%GetParam,
+    my $ArticleID = $TicketObject->ArticleCreate(
+        TicketID         => $Param{TicketID},
+        ArticleType      => $GetParam{'X-OTRS-FollowUp-ArticleType'},
+        SenderType       => $GetParam{'X-OTRS-FollowUp-SenderType'},
+        From             => $GetParam{From},
+        ReplyTo          => $GetParam{ReplyTo},
+        To               => $GetParam{To},
+        Cc               => $GetParam{Cc},
+        Subject          => $GetParam{Subject},
+        MessageID        => $GetParam{'Message-ID'},
+        InReplyTo        => $GetParam{'In-Reply-To'},
+        References       => $GetParam{'References'},
+        ContentType      => $GetParam{'Content-Type'},
+        Body             => $GetParam{Body},
+        UserID           => $Param{InmailUserID},
+        HistoryType      => 'FollowUp',
+        HistoryComment   => "\%\%$Param{Tn}\%\%$Comment",
+        AutoResponseType => $AutoResponseType,
+        OrigHeader       => \%GetParam,
     );
     return if !$ArticleID;
 
@@ -461,7 +410,7 @@ sub Run {
     }
 
     # write plain email to the storage
-    $ArticleBackendObject->ArticleWritePlain(
+    $TicketObject->ArticleWritePlain(
         ArticleID => $ArticleID,
         Email     => $Self->{ParserObject}->GetPlainEmail(),
         UserID    => $Param{InmailUserID},
@@ -469,7 +418,7 @@ sub Run {
 
     # write attachments to the storage
     for my $Attachment ( $Self->{ParserObject}->GetAttachments() ) {
-        $ArticleBackendObject->ArticleWriteAttachment(
+        $TicketObject->ArticleWriteAttachment(
             Filename           => $Attachment->{Filename},
             Content            => $Attachment->{Content},
             ContentType        => $Attachment->{ContentType},
@@ -550,19 +499,6 @@ sub Run {
                     print "TicketKey$Count: " . $GetParam{$Key} . "\n";
                 }
             }
-        }
-    }
-
-    # set ticket title
-    if ( $GetParam{'X-OTRS-FollowUp-Title'} ) {
-        $TicketObject->TicketTitleUpdate(
-            Title    => $GetParam{'X-OTRS-FollowUp-Title'},
-            TicketID => $Param{TicketID},
-            UserID   => $Param{InmailUserID},
-        );
-
-        if ( $Self->{Debug} > 0 ) {
-            print "Title: $GetParam{'X-OTRS-FollowUp-Title'}\n";
         }
     }
 

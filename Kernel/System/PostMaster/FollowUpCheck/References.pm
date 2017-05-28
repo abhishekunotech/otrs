@@ -11,11 +11,9 @@ package Kernel::System::PostMaster::FollowUpCheck::References;
 use strict;
 use warnings;
 
-use Kernel::System::ObjectManager;    # prevent used once warning
-
 our @ObjectDependencies = (
     'Kernel::Config',
-    'Kernel::System::Ticket::Article',
+    'Kernel::System::Ticket',
 );
 
 sub new {
@@ -36,19 +34,17 @@ sub Run {
     my @References = $Self->{ParserObject}->GetReferences();
     return if !@References;
 
-    my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-        ChannelName => 'Email',
-    );
+    my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
 
     for my $Reference (@References) {
 
-        my %Article = $ArticleBackendObject->ArticleGetByMessageID(
+        # get ticket id of message id
+        my $TicketID = $TicketObject->ArticleGetTicketIDOfMessageID(
             MessageID => "<$Reference>",
-            UserID    => $Param{UserID},
         );
 
-        if (%Article) {
-            return $Article{TicketID};
+        if ($TicketID) {
+            return $TicketID;
         }
     }
 

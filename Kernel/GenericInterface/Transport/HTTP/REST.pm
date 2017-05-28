@@ -25,9 +25,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Transport::REST - GenericInterface network transport interface for HTTP::REST
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Transport->new();
@@ -49,7 +55,7 @@ sub new {
     return $Self;
 }
 
-=head2 ProviderProcessRequest()
+=item ProviderProcessRequest()
 
 Process an incoming web service request. This function has to read the request data
 from from the web server process.
@@ -107,7 +113,7 @@ sub ProviderProcessRequest {
     my $RequestURI = $ENV{REQUEST_URI} || $ENV{PATH_INFO};
     $RequestURI =~ s{.*Webservice(?:ID)?\/[^\/]+(\/.*)$}{$1}xms;
 
-    # remove any query parameter from the URL
+    # remove any query parameter form the URL
     # e.g. from /Ticket/1/2?UserLogin=user&Password=secret
     # to /Ticket/1/2?
     $RequestURI =~ s{([^?]+)(.+)?}{$1};
@@ -127,7 +133,7 @@ sub ProviderProcessRequest {
         #       UserLogin => 'user',
         #       Password  => 'secret',
         #    );
-        for my $QueryParam ( split /[;&]/, $QueryParamsStr ) {
+        for my $QueryParam ( split '&', $QueryParamsStr ) {
             my ( $Key, $Value ) = split '=', $QueryParam;
 
             # Convert + characters to its encoded representation, see bug#11917
@@ -243,15 +249,6 @@ sub ProviderProcessRequest {
     my $Content;
     read STDIN, $Content, $Length;
 
-    # If there is no STDIN data it might be caused by fastcgi already having read the request.
-    # In this case we need to get the data from CGI.
-    if ( !IsStringWithData($Content) && $RequestMethod ne 'GET' ) {
-        my $ParamName = $RequestMethod . 'DATA';
-        $Content = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam(
-            Param => $ParamName,
-        );
-    }
-
     # check if we have content
     if ( !IsStringWithData($Content) ) {
         return $Self->_Error(
@@ -325,7 +322,7 @@ sub ProviderProcessRequest {
     };
 }
 
-=head2 ProviderGenerateResponse()
+=item ProviderGenerateResponse()
 
 Generates response for an incoming web service request.
 
@@ -404,7 +401,7 @@ sub ProviderGenerateResponse {
     );
 }
 
-=head2 RequesterPerformRequest()
+=item RequesterPerformRequest()
 
 Prepare data payload as XML structure, generate an outgoing web service request,
 receive the response and return its data.
@@ -746,8 +743,8 @@ sub RequesterPerformRequest {
 
     my $SizeExeeded = 0;
     {
-        my $MaxSize = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::ResponseLoggingMaxSize')
-            || 200;
+        my $MaxSize
+            = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::ResponseLoggingMaxSize') || 200;
         $MaxSize = $MaxSize * 1024;
         use bytes;
 
@@ -808,7 +805,7 @@ sub RequesterPerformRequest {
 
 =begin Internal:
 
-=head2 _Output()
+=item _Output()
 
 Generate http response for provider and send it back to remote system.
 Environment variables are checked for potential error messages.
@@ -885,16 +882,6 @@ sub _Output {
     # set keep-alive
     my $Connection = $Self->{KeepAlive} ? 'Keep-Alive' : 'close';
 
-    # prepare additional headers
-    my $AdditionalHeaderStrg = '';
-    if ( IsHashRefWithData( $Self->{TransportConfig}->{Config}->{AdditionalHeaders} ) ) {
-        my %AdditionalHeaders = %{ $Self->{TransportConfig}->{Config}->{AdditionalHeaders} };
-        for my $AdditionalHeader ( sort keys %AdditionalHeaders ) {
-            $AdditionalHeaderStrg
-                .= $AdditionalHeader . ': ' . ( $AdditionalHeaders{$AdditionalHeader} || '' ) . "\r\n";
-        }
-    }
-
     # in the constructor of this module STDIN and STDOUT are set to binmode without any additional
     # layer (according to the documentation this is the same as set :raw). Previous solutions for
     # binary responses requires the set of :raw or :utf8 according to IO layers.
@@ -913,7 +900,6 @@ sub _Output {
     print STDOUT "Content-Type: $ContentType; charset=UTF-8\r\n";
     print STDOUT "Content-Length: $ContentLength\r\n";
     print STDOUT "Connection: $Connection\r\n";
-    print STDOUT $AdditionalHeaderStrg;
     print STDOUT "\r\n";
     print STDOUT $Param{Content};
 
@@ -923,7 +909,7 @@ sub _Output {
     };
 }
 
-=head2 _Error()
+=item _Error()
 
 Take error parameters from request processing.
 Error message is written to debugger, written to environment for response.
@@ -973,6 +959,8 @@ sub _Error {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

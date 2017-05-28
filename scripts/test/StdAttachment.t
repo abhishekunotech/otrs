@@ -15,24 +15,16 @@ use vars (qw($Self));
 use Kernel::System::VariableCheck qw(:all);
 
 # get needed objects
+my $ConfigObject           = $Kernel::OM->Get('Kernel::Config');
+my $HelperObject           = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 my $MainObject             = $Kernel::OM->Get('Kernel::System::Main');
 my $StdAttachmentObject    = $Kernel::OM->Get('Kernel::System::StdAttachment');
 my $StandardTemplateObject = $Kernel::OM->Get('Kernel::System::StandardTemplate');
 
-# get helper object
-$Kernel::OM->ObjectParamAdd(
-    'Kernel::System::UnitTest::Helper' => {
-        RestoreDatabase => 1,
-    },
-);
-my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-
-my $Home = $Kernel::OM->Get('Kernel::Config')->Get('Home');
-my $Location;
-
 # file checks
 for my $File (qw(xls txt doc png pdf)) {
-    $Location = $Home . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.$File";
+    my $Location = $ConfigObject->Get('Home')
+        . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.$File";
 
     my $ContentRef = $MainObject->FileRead(
         Location => $Location,
@@ -168,10 +160,11 @@ for my $File (qw(xls txt doc png pdf)) {
 
 # attachment -> templates tests
 my $UserID   = 1;
-my $RandomID = $Helper->GetRandomID();
+my $RandomID = $HelperObject->GetRandomID();
 
 # create a new attachment
-$Location = $Home . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.png";
+my $Location = $ConfigObject->Get('Home')
+    . "/scripts/test/sample/StdAttachment/StdAttachment-Test1.png";
 
 my $ContentRef = $MainObject->FileRead(
     Location => $Location,
@@ -180,14 +173,12 @@ my $ContentRef = $MainObject->FileRead(
 
 my $Content = ${$ContentRef};
 
-my $AttachmentName = 'Standard Attachment' . $RandomID;
-my $Filename       = 'StdAttachment-Test1.xml';
-my $AttachmentID   = $StdAttachmentObject->StdAttachmentAdd(
-    Name        => $AttachmentName,
+my $AttachmentID = $StdAttachmentObject->StdAttachmentAdd(
+    Name        => 'Standard Attachment' . $RandomID,
     ValidID     => 1,
     Content     => $Content,
     ContentType => 'text/xml',
-    Filename    => $Filename,
+    Filename    => 'StdAttachment-Test1.xml',
     Comment     => 'Some Comment',
     UserID      => $UserID,
 );
@@ -377,7 +368,7 @@ $Self->True(
             UserID             => $UserID,
         },
         ExpectedResults => {
-            $AttachmentID => $AttachmentName,
+            $AttachmentID => 'Standard Attachment' . $RandomID,
         },
         Success => 1,
     },
@@ -408,33 +399,33 @@ for my $Test (@Tests) {
     }
 }
 
-my %StdAttachmentList = $StdAttachmentObject->StdAttachmentList(
-    Valid => 0,
+# cleanup
+
+# delete relation
+$Success = $StdAttachmentObject->StdAttachmentStandardTemplateMemberAdd(
+    AttachmentID       => $AttachmentID,
+    StandardTemplateID => $TemplateID,
+    Active             => 0,
+    UserID             => $UserID
 );
 $Self->True(
-    exists $StdAttachmentList{$AttachmentID} && $StdAttachmentList{$AttachmentID} eq "$AttachmentName ( $Filename )",
-    "StdAttachmentList() contains the StdAttachment $AttachmentName",
+    $Success,
+    "StdAttachmentStandardTemplateMemberAdd() removal for Attachment -> Template tests | with True",
 );
 
-my $Update = $StdAttachmentObject->StdAttachmentUpdate(
-    ID      => $AttachmentID,
-    Name    => $AttachmentName,
-    ValidID => 2,
-    UserID  => $UserID,
-);
+$Success = $StdAttachmentObject->StdAttachmentDelete( ID => $AttachmentID );
 $Self->True(
-    $Update,
-    'StdAttachmentUpdate() - StdAttachment is set to invalid',
+    $Success,
+    "StdAttachemntDelete() for Attachment -> Template tests | with True",
 );
 
-%StdAttachmentList = $StdAttachmentObject->StdAttachmentList(
-    Valid => 1,
-);
-$Self->False(
-    exists $StdAttachmentList{$AttachmentID},
-    "StdAttachmentList() does not contain the StdAttachment $AttachmentName",
+$Success = $StandardTemplateObject->StandardTemplateDelete(
+    ID => $TemplateID,
 );
 
-# cleanup is done by RestoreDatabase
+$Self->True(
+    $Success,
+    "StandardTemplateDelete() for Attachment -> Template tests | with True",
+);
 
 1;

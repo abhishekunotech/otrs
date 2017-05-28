@@ -10,22 +10,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1 class="Header">[% Translate("Session Management") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Session Management'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% IF Data.Action == 'Detail' %]
-        [% USE DetailView = String(Translate("Detail Session View for")) %]
-        [% BreadcrumbPath.push({ Name => DetailView.append( ' ', Data.UserType, ': ', Data.UserFirstname, ' ', Data.UserLastname ) })%]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
-    <div class="Clear"></div>
     <div class="SidebarColumn">
 
 [% RenderBlockStart("ActionList") %]
@@ -80,16 +64,7 @@
             </div>
         </div>
 [% RenderBlockEnd("ActionList") %]
-[% RenderBlockStart("Filter") %]
-        <div class="WidgetSimple">
-            <div class="Header">
-                <h2><label for="FilterSessions">[% Translate("Filter for Sessions") | html %]</label></h2>
-            </div>
-            <div class="Content">
-                <input type="text" id="FilterSessions" class="FilterBox" placeholder="[% Translate("Just start typing to filter...") | html %]" name="FilterSessions" value="" title="[% Translate("Filter for sessions") | html %]">
-            </div>
-        </div>
-[% RenderBlockEnd("Filter") %]
+
     </div>
 
     <div class="ContentColumn">
@@ -100,7 +75,7 @@
                 <h2>[% Translate("List") | html %]</h2>
             </div>
             <div class="Content">
-                <table class="DataTable" id="Sessions">
+                <table class="DataTable">
                     <thead>
                         <tr>
                             <th>[% Translate("Session") | html %]</th>
@@ -122,9 +97,6 @@
                             </td>
                         </tr>
 [% RenderBlockEnd("Session") %]
-                        <tr class="FilterMessage Hidden">
-                            <td colspan="4">[% Translate("No matches found.") | html %]</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>

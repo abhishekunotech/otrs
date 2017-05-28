@@ -11,6 +11,6 @@ package Kernel::Modules::AgentDashboard;
 use strict;
 use warnings;
 
-use parent qw( Kernel::Modules::AgentDashboardCommon );
+use base qw( Kernel::Modules::AgentDashboardCommon );
 
 1;

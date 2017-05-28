@@ -21,16 +21,22 @@ our @ObjectDependencies = (
 
 Kernel::System::SystemData - key/value store for system data
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Provides key/value store for system data
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $SystemDataObject = $Kernel::OM->Get('Kernel::System::SystemData');
 
 =cut
@@ -42,6 +48,8 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
+    $Self->{DBObject} = $Kernel::OM->Get('Kernel::System::DB');
+
     # create additional objects
     $Self->{CacheType} = 'SystemData';
     $Self->{CacheTTL}  = 60 * 60 * 24 * 20;
@@ -49,7 +57,7 @@ sub new {
     return $Self;
 }
 
-=head2 SystemDataAdd()
+=item SystemDataAdd()
 
 add a new C<SystemData> value.
 
@@ -106,7 +114,7 @@ sub SystemDataAdd {
     }
 
     # store data
-    return if !$Kernel::OM->Get('Kernel::System::DB')->Do(
+    return if !$Self->{DBObject}->Do(
         SQL => '
             INSERT INTO system_data
                 (data_key, data_value, create_time, create_by, change_time, change_by)
@@ -123,7 +131,7 @@ sub SystemDataAdd {
     return 1;
 }
 
-=head2 SystemDataGet()
+=item SystemDataGet()
 
 get system data for key
 
@@ -156,10 +164,7 @@ sub SystemDataGet {
     );
     return $Cache if $Cache;
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
-    return if !$DBObject->Prepare(
+    return if !$Self->{DBObject}->Prepare(
         SQL => '
             SELECT data_value
             FROM system_data
@@ -170,7 +175,7 @@ sub SystemDataGet {
     );
 
     my $Value;
-    while ( my @Data = $DBObject->FetchrowArray() ) {
+    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
         $Value = $Data[0] // '';
     }
 
@@ -185,7 +190,7 @@ sub SystemDataGet {
     return $Value;
 }
 
-=head2 SystemDataGroupGet()
+=item SystemDataGroupGet()
 
 returns a hash of all keys starting with the Group.
 For instance the code below would return values for
@@ -226,18 +231,15 @@ sub SystemDataGroupGet {
     );
     return %{$Cache} if $Cache;
 
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
     # get like escape string needed for some databases (e.g. oracle)
-    my $LikeEscapeString = $DBObject->GetDatabaseFunction('LikeEscapeString');
+    my $LikeEscapeString = $Self->{DBObject}->GetDatabaseFunction('LikeEscapeString');
 
     # prepare group name search
     my $Group = $Param{Group};
     $Group =~ s/\*/%/g;
-    $Group = $DBObject->Quote( $Group, 'Like' );
+    $Group = $Self->{DBObject}->Quote( $Group, 'Like' );
 
-    return if !$DBObject->Prepare(
+    return if !$Self->{DBObject}->Prepare(
         SQL => "
             SELECT data_key, data_value
             FROM system_data
@@ -246,10 +248,10 @@ sub SystemDataGroupGet {
     );
 
     my %Result;
-    while ( my @Data = $DBObject->FetchrowArray() ) {
+    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
         $Data[0] =~ s/^${Group}:://;
 
-        $Result{ $Data[0] } = $Data[1] // '';
+        $Result{ $Data[0] } = $Data[1];
     }
 
     # set cache
@@ -263,7 +265,7 @@ sub SystemDataGroupGet {
     return %Result;
 }
 
-=head2 SystemDataUpdate()
+=item SystemDataUpdate()
 
 update system data
 
@@ -271,9 +273,9 @@ Returns true if update was successful or false if otherwise - for instance
 if key did not exist.
 
     my $Result = $SystemDataObject->SystemDataUpdate(
-        Key    => 'OTRS Version',
-        Value  => 'Some New Value',
-        UserID => 123,
+        Key     => 'OTRS Version',
+        Value   => 'Some New Value',
+        UserID  => 123,
     );
 
 =cut
@@ -309,8 +311,8 @@ sub SystemDataUpdate {
         return;
     }
 
-    # update system data table
-    return if !$Kernel::OM->Get('Kernel::System::DB')->Do(
+    # sql
+    return if !$Self->{DBObject}->Do(
         SQL => '
             UPDATE system_data
             SET data_value = ?, change_time = current_timestamp, change_by = ?
@@ -330,7 +332,7 @@ sub SystemDataUpdate {
     return 1;
 }
 
-=head2 SystemDataDelete()
+=item SystemDataDelete()
 
 update system data
 
@@ -368,8 +370,8 @@ sub SystemDataDelete {
         return;
     }
 
-    # remove system data
-    return if !$Kernel::OM->Get('Kernel::System::DB')->Do(
+    # sql
+    return if !$Self->{DBObject}->Do(
         SQL => '
             DELETE FROM system_data
             WHERE data_key = ?
@@ -389,7 +391,7 @@ sub SystemDataDelete {
 
 =cut
 
-=head2 _SystemDataCacheKeyDelete()
+=item _SystemDataCacheKeyDelete()
 
 This will delete the cache for the given key and for all groups, if needed.
 
@@ -421,30 +423,31 @@ sub _SystemDataCacheKeyDelete {
     );
 
     # delete cache for groups if needed
-    my @Parts = split '::', $Param{Key};
+    my @Parts = split( '::', $Param{Key} );
 
-    return 1 if scalar @Parts <= 1;
+    if ( scalar @Parts > 1 ) {
 
-    # remove last value, delete cache
-    PART:
-    for my $Part (@Parts) {
+        # remove last value, delete cache
+        PART:
+        for my $Part (@Parts) {
+            pop @Parts;
+            my $CacheKey = join( '::', @Parts );
+            $Kernel::OM->Get('Kernel::System::Cache')->Delete(
+                Type => $Self->{CacheType},
+                Key  => 'SystemDataGetGroup::' . join( '::', @Parts ),
+            );
 
-        pop @Parts;
-        my $CacheKey = join '::', @Parts;
-
-        $Kernel::OM->Get('Kernel::System::Cache')->Delete(
-            Type => $Self->{CacheType},
-            Key  => 'SystemDataGetGroup::' . join( '::', @Parts ),
-        );
-
-        # stop if there is just one value left
-        last PART if scalar @Parts == 1;
+            # stop if there is just one value left
+            last PART if scalar @Parts == 1;
+        }
     }
 
     return 1;
 }
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

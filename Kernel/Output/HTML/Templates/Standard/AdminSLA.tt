@@ -10,24 +10,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("SLA Management") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('SLA Management'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% IF Data.SLAID %]
-        [% USE EditTitle = String(Translate("Edit SLA")) %]
-        [% BreadcrumbPath.push({ Name => EditTitle.append( ': ', Data.SLAName ) }) %]
-    [% ELSIF Data.Subaction == "SLAEdit"  %]
-        [% BreadcrumbPath.push({ Name => Translate("Add SLA"),}) %]
-    [% END %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
-    <div class="Clear"></div>
     <div class="SidebarColumn">
 
 [% RenderBlockStart("ActionList") %]
@@ -56,16 +38,7 @@
             </div>
         </div>
 [% RenderBlockEnd("ActionList") %]
-[% RenderBlockStart("Filter") %]
-        <div class="WidgetSimple">
-            <div class="Header">
-                <h2><label for="FilterSLAs">[% Translate("Filter for SLAs") | html %]</label></h2>
-            </div>
-            <div class="Content">
-                <input type="text" id="FilterSLAs" class="FilterBox" placeholder="[% Translate("Just start typing to filter...") | html %]" name="FilterSLAs" value="" title="[% Translate("Filter for SLAs") | html %]">
-            </div>
-        </div>
-[% RenderBlockEnd("Filter") %]
+
     </div>
 
     <div class="ContentColumn">
@@ -76,7 +49,7 @@
             </div>
             <div class="Content">
 
-                <table class="DataTable" id="SLAs">
+                <table class="DataTable">
                     <thead>
                         <tr>
                             <th>[% Translate("SLA") | html %]</th>
@@ -105,9 +78,6 @@
                             <td>[% Data.CreateTime | Localize("TimeShort") %]</td>
                         </tr>
 [% RenderBlockEnd("OverviewListRow") %]
-                        <tr class="FilterMessage Hidden">
-                            <td colspan="6">[% Translate("No matches found.") | html %]</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -115,11 +85,12 @@
 
 [% RenderBlockStart("SLAEdit") %]
             <div class="Header">
-            [% IF !Data.SLAID %]
+[% RenderBlockStart("HeaderAdd") %]
                 <h2>[% Translate("Add SLA") | html %]</h2>
-            [% ELSE %]
-                <h2>[% Translate("Edit SLA") | html %] : [% Data.Name | html %]</h2>
-            [% END %]
+[% RenderBlockEnd("HeaderAdd") %]
+[% RenderBlockStart("HeaderEdit") %]
+                <h2>[% Translate("Edit SLA") | html %]</h2>
+[% RenderBlockEnd("HeaderEdit") %]
             </div>
             <div class="Content">
 
@@ -127,9 +98,6 @@
                     <input type="hidden" name="Action" value="[% Env("Action") %]"/>
                     <input type="hidden" name="Subaction" value="SLASave"/>
                     <input type="hidden" name="SLAID" value="[% Data.SLAID | html %]"/>
-                    [% IF Data.SLAID %]
-                        <input type="hidden" name="ContinueAfterSave" id="ContinueAfterSave" value=""/>
-                    [% END %]
                     <fieldset class="TableLike">
 
                         <label for="Name">[% Translate("SLA") | html %]:</label>
@@ -252,13 +220,7 @@
 [% RenderBlockEnd("Password") %]
 [% RenderBlockEnd("SLAItem") %]
                         <div class="Field SpacingTop">
-                            [% IF Data.SLAID %]
-                                <button class="CallForAction Primary" id="SubmitAndContinue" type="button" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                                [% Translate("or") | html %]
-                                <button class="CallForAction Primary" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
-                            [% ELSE %]
-                                <button class="CallForAction Primary" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
-                            [% END %]
+                            <button class="Primary CallForAction" type="submit" value="[% Translate("Submit") | html %]"><span>[% Translate("Submit") | html %]</span></button>
                             [% Translate("or") | html %]
                             <a href="[% Env("Baselink") %]Action=[% Env("Action") %]">[% Translate("Cancel") | html %]</a>
                         </div>

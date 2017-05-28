@@ -20,7 +20,7 @@ our @ObjectDependencies = (
 
 Kernel::System::Cache - Key/value based data cache for OTRS
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 This is a simple data cache. It can store key/value data both
 in memory and in a configured cache backend for persistent caching.
@@ -31,10 +31,16 @@ C<Cache::Module> and defaults to file system based storage for permanent caching
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $CacheObject = $Kernel::OM->Get('Kernel::System::Cache');
 
 =cut
@@ -61,7 +67,7 @@ sub new {
     return $Self;
 }
 
-=head2 Configure()
+=item Configure()
 
 change cache configuration settings at runtime. You can use this to disable the cache in
 environments where it is not desired, such as in long running scripts.
@@ -87,7 +93,7 @@ sub Configure {
     return;
 }
 
-=head2 Set()
+=item Set()
 
 store a value in the cache.
 
@@ -182,7 +188,7 @@ sub Set {
     return 1;
 }
 
-=head2 Get()
+=item Get()
 
 fetch a value from the cache.
 
@@ -242,7 +248,7 @@ sub Get {
     return $Value;
 }
 
-=head2 Delete()
+=item Delete()
 
 deletes a single value from the cache.
 
@@ -279,7 +285,7 @@ sub Delete {
     return $Self->{CacheObject}->Delete(%Param);
 }
 
-=head2 CleanUp()
+=item CleanUp()
 
 delete parts of the cache or the full cache data.
 
@@ -339,6 +345,8 @@ sub CleanUp {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

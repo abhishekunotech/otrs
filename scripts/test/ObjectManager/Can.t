@@ -13,7 +13,11 @@ use vars (qw($Self));
 
 use Kernel::System::ObjectManager;
 
-local $Kernel::OM = Kernel::System::ObjectManager->new();
+local $Kernel::OM = Kernel::System::ObjectManager->new(
+    'Kernel::System::PostMaster' => {
+        Email => [],
+    },
+);
 
 $Self->True( $Kernel::OM, 'Could build object manager' );
 

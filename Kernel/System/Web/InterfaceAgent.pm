@@ -12,7 +12,6 @@ use strict;
 use warnings;
 
 use Kernel::Language qw(Translatable);
-use Kernel::System::DateTime qw(:all);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -35,13 +34,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Web::InterfaceAgent - the agent web interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 the global agent web interface (authentication, session handling, ...)
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create agent web interface object. Do not use it directly, instead use:
 
@@ -89,7 +92,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 execute the object
 
@@ -288,6 +291,7 @@ sub Run {
         );
 
         # check if the browser supports cookies
+
         if ( $ParamObject->GetCookie( Key => 'OTRSBrowserHasCookie' ) ) {
             $Kernel::OM->ObjectParamAdd(
                 'Kernel::Output::HTML::Layout' => {
@@ -322,6 +326,25 @@ sub Run {
                 ),
             );
             return;
+        }
+
+        # get groups rw/ro
+        for my $Type (qw(rw ro)) {
+
+            my %GroupData = $Kernel::OM->Get('Kernel::System::Group')->PermissionUserGet(
+                UserID => $UserData{UserID},
+                Type   => $Type,
+            );
+
+            for ( sort keys %GroupData ) {
+
+                if ( $Type eq 'rw' ) {
+                    $UserData{"UserIsGroup[$GroupData{$_}]"} = 'Yes';
+                }
+                else {
+                    $UserData{"UserIsGroupRo[$GroupData{$_}]"} = 'Yes';
+                }
+            }
         }
 
         # create new session id
@@ -370,35 +393,32 @@ sub Run {
             },
         );
 
-        # get time zone
-        my $UserTimeZone = $UserData{UserTimeZone} || UserDefaultTimeZoneGet();
-        $SessionObject->UpdateSessionID(
-            SessionID => $NewSessionID,
-            Key       => 'UserTimeZone',
-            Value     => $UserTimeZone,
-        );
+        # set time zone offset if TimeZoneFeature is active
+        if (
+            $ConfigObject->Get('TimeZoneUser')
+            && $ConfigObject->Get('TimeZoneUserBrowserAutoOffset')
+            )
+        {
+            my $TimeOffset = $ParamObject->GetParam( Param => 'TimeOffset' ) || 0;
+            if ( $TimeOffset > 0 ) {
+                $TimeOffset = '-' . ( $TimeOffset / 60 );
+            }
+            else {
+                $TimeOffset = $TimeOffset / 60;
+                $TimeOffset =~ s/-/+/;
+            }
 
-        # check if the time zone offset reported by the user's browser differs from that
-        # of the OTRS user's time zone offset
-        my $DateTimeObject = $Kernel::OM->Create(
-            'Kernel::System::DateTime',
-            ObjectParams => {
-                TimeZone => $UserTimeZone,
-            },
-        );
-        my $OTRSUserTimeZoneOffset = $DateTimeObject->Format( Format => '%{offset}' ) / 60;
-        my $BrowserTimeZoneOffset = ( $ParamObject->GetParam( Param => 'TimeZoneOffset' ) || 0 ) * -1;
-
-        # TimeZoneOffsetDifference contains the difference of the time zone offset between
-        # the user's OTRS time zone setting and the one reported by the user's browser.
-        # If there is a difference it can be evaluated later to e. g. show a message
-        # for the user to check his OTRS time zone setting.
-        my $UserTimeZoneOffsetDifference = abs( $OTRSUserTimeZoneOffset - $BrowserTimeZoneOffset );
-        $SessionObject->UpdateSessionID(
-            SessionID => $NewSessionID,
-            Key       => 'UserTimeZoneOffsetDifference',
-            Value     => $UserTimeZoneOffsetDifference,
-        );
+            $UserObject->SetPreferences(
+                UserID => $UserData{UserID},
+                Key    => 'UserTimeZone',
+                Value  => $TimeOffset,
+            );
+            $SessionObject->UpdateSessionID(
+                SessionID => $NewSessionID,
+                Key       => 'UserTimeZone',
+                Value     => $TimeOffset,
+            );
+        }
 
         # create a new LayoutObject with SessionIDCookie
         my $Expires = '+' . $ConfigObject->Get('SessionMaxTime') . 's';
@@ -442,17 +462,10 @@ sub Run {
         if ( $Kernel::OM->Get('Kernel::Config')->Get('ChatEngine::Active') ) {
             my $ChatReceivingAgentsGroup
                 = $Kernel::OM->Get('Kernel::Config')->Get('ChatEngine::PermissionGroup::ChatReceivingAgents');
-
-            my $ChatReceivingAgentsGroupPermission = $Kernel::OM->Get('Kernel::System::Group')->PermissionCheck(
-                UserID    => $UserData{UserID},
-                GroupName => $ChatReceivingAgentsGroup,
-                Type      => 'rw',
-            );
-
             if (
                 $UserData{UserID} != -1
                 && $ChatReceivingAgentsGroup
-                && $ChatReceivingAgentsGroupPermission
+                && $UserData{"UserIsGroup[$ChatReceivingAgentsGroup]"}
                 && $Kernel::OM->Get('Kernel::Config')->Get('Ticket::Agent::UnavailableForExternalChatsOnLogin')
                 )
             {
@@ -575,7 +588,7 @@ sub Run {
             Output => \$LayoutObject->Login(
                 Title       => 'Logout',
                 Message     => $LogoutMessage,
-                MessageType => 'Success',
+                MessageType => 'Logout',
                 %Param,
             ),
         );
@@ -747,10 +760,9 @@ sub Run {
         );
         $LayoutObject->Print(
             Output => \$LayoutObject->Login(
-                Title       => 'Login',
-                Message     => $Message,
-                User        => $User,
-                MessageType => 'Success',
+                Title   => 'Login',
+                Message => $Message,
+                User    => $User,
                 %Param,
             ),
         );
@@ -900,46 +912,30 @@ sub Run {
         }
 
         # module permisson check
-        if (
-            ref $ModuleReg->{GroupRo} eq 'ARRAY'
-            && !scalar @{ $ModuleReg->{GroupRo} }
-            && ref $ModuleReg->{Group} eq 'ARRAY'
-            && !scalar @{ $ModuleReg->{Group} }
-            )
-        {
+        if ( !$ModuleReg->{GroupRo} && !$ModuleReg->{Group} ) {
             $Param{AccessRo} = 1;
             $Param{AccessRw} = 1;
         }
         else {
-            my $GroupObject = $Kernel::OM->Get('Kernel::System::Group');
-
             PERMISSION:
             for my $Permission (qw(GroupRo Group)) {
                 my $AccessOk = 0;
                 my $Group    = $ModuleReg->{$Permission};
+                my $Key      = "UserIs$Permission";
                 next PERMISSION if !$Group;
                 if ( ref $Group eq 'ARRAY' ) {
                     INNER:
-                    for my $GroupName ( @{$Group} ) {
-                        next INNER if !$GroupName;
-                        next INNER if !$GroupObject->PermissionCheck(
-                            UserID    => $UserData{UserID},
-                            GroupName => $GroupName,
-                            Type      => $Permission eq 'GroupRo' ? 'ro' : 'rw',
-
-                        );
+                    for ( @{$Group} ) {
+                        next INNER if !$_;
+                        next INNER if !$UserData{ $Key . "[$_]" };
+                        next INNER if $UserData{ $Key . "[$_]" } ne 'Yes';
                         $AccessOk = 1;
                         last INNER;
                     }
                 }
                 else {
-                    my $HasPermission = $GroupObject->PermissionCheck(
-                        UserID    => $UserData{UserID},
-                        GroupName => $Group,
-                        Type      => $Permission eq 'GroupRo' ? 'ro' : 'rw',
-
-                    );
-                    if ($HasPermission) {
+                    if ( $UserData{ $Key . "[$Group]" } && $UserData{ $Key . "[$Group]" } eq 'Yes' )
+                    {
                         $AccessOk = 1;
                     }
                 }
@@ -988,23 +984,6 @@ sub Run {
                 Key       => 'UserLastRequest',
                 Value     => $Kernel::OM->Get('Kernel::System::Time')->SystemTime(),
             );
-        }
-
-        # Override user settings.
-        my $Home = $ConfigObject->Get('Home');
-        my $File = "$Home/Kernel/Config/Files/User/$UserData{UserID}.pm";
-        if ( -e $File ) {
-            if ( !require $File ) {
-                die "ERROR: $!\n";
-            }
-
-            # prepare file
-            $File =~ s/\Q$Home\E//g;
-            $File =~ s/^\///g;
-            $File =~ s/\/\//\//g;
-            $File =~ s/\//::/g;
-            $File =~ s/\.pm$//g;
-            $File->Load($ConfigObject);
         }
 
         # pre application module
@@ -1090,7 +1069,7 @@ sub Run {
                 close $Out;
 
                 $Kernel::OM->Get('Kernel::System::Log')->Log(
-                    Priority => 'debug',
+                    Priority => 'notice',
                     Message  => "Response::Agent: "
                         . ( time() - $Self->{PerformanceLogStart} )
                         . "s taken (URL:$QueryString:$UserData{UserLogin})",
@@ -1137,6 +1116,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

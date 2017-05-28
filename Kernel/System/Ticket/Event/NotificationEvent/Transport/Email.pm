@@ -16,40 +16,46 @@ use warnings;
 use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
 
-use parent qw(Kernel::System::Ticket::Event::NotificationEvent::Transport::Base);
+use base qw(Kernel::System::Ticket::Event::NotificationEvent::Transport::Base);
 
 our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::Output::HTML::Layout',
     'Kernel::System::CustomerUser',
-    'Kernel::System::Crypt::PGP',
-    'Kernel::System::Crypt::SMIME',
     'Kernel::System::Email',
     'Kernel::System::Log',
     'Kernel::System::Main',
     'Kernel::System::Queue',
     'Kernel::System::SystemAddress',
     'Kernel::System::Ticket',
-    'Kernel::System::Ticket::Article',
-    'Kernel::System::Ticket::Article::Backend::Email',
     'Kernel::System::User',
     'Kernel::System::Web::Request',
+    'Kernel::System::Crypt::PGP',
+    'Kernel::System::Crypt::SMIME',
+    'Kernel::System::DynamicField',
+    'Kernel::System::DynamicField::Backend',
 );
 
 =head1 NAME
 
 Kernel::System::Ticket::Event::NotificationEvent::Transport::Email - email transport layer
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Notification event transport layer.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create a notification transport object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new('');
     my $TransportObject = $Kernel::OM->Get('Kernel::System::Ticket::Event::NotificationEvent::Transport::Email');
 
 =cut
@@ -72,7 +78,7 @@ sub SendNotification {
         if ( !$Param{$Needed} ) {
             $Kernel::OM->Get('Kernel::System::Log')->Log(
                 Priority => 'error',
-                Message  => "Need $Needed!",
+                Message  => 'Need $Needed!',
             );
             return;
         }
@@ -168,16 +174,16 @@ sub SendNotification {
         my $EmailObject = $Kernel::OM->Get('Kernel::System::Email');
 
         my $Sent = $EmailObject->Send(
-            From          => $From,
-            To            => $Recipient{UserEmail},
-            Subject       => $Notification{Subject},
-            MimeType      => $Notification{ContentType},
-            Type          => $Notification{ContentType},
-            Charset       => 'utf-8',
-            Body          => $Notification{Body},
-            Loop          => 1,
-            Attachment    => $Param{Attachments},
-            EmailSecurity => $SecurityOptions || {},
+            From       => $From,
+            To         => $Recipient{UserEmail},
+            Subject    => $Notification{Subject},
+            MimeType   => $Notification{ContentType},
+            Type       => $Notification{ContentType},
+            Charset    => 'utf-8',
+            Body       => $Notification{Body},
+            Loop       => 1,
+            Attachment => $Param{Attachments},
+            %{$SecurityOptions},
         );
 
         if ( !$Sent ) {
@@ -206,68 +212,35 @@ sub SendNotification {
     }
     else {
 
-        my $QueueObject   = $Kernel::OM->Get('Kernel::System::Queue');
-        my $ArticleObject = $Kernel::OM->Get('Kernel::System::Ticket::Article');
+        # get queue object
+        my $QueueObject = $Kernel::OM->Get('Kernel::System::Queue');
 
-        # Get last article from customer.
-        my @CustomerArticles = $ArticleObject->ArticleList(
-            TicketID   => $Param{TicketID},
-            SenderType => 'customer',
-            OnlyLast   => 1,
-        );
+        my $QueueID;
 
-        my %CustomerArticle;
-
-        ARTICLE:
-        for my $Article (@CustomerArticles) {
-            next ARTICLE if !$Article->{ArticleID};
-
-            %CustomerArticle = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-                %{$Article},
-                DynamicFields => 0,
-                UserID        => $Param{UserID},
-            );
-        }
-
-        my %Article = %CustomerArticle;
-
-        # If the ticket has no customer article, get the last agent article.
-        if ( !%CustomerArticle ) {
-
-            # Get last article from agent.
-            my @AgentArticles = $ArticleObject->ArticleList(
-                TicketID   => $Param{TicketID},
-                SenderType => 'agent',
-                OnlyLast   => 1,
-            );
-
-            my %AgentArticle;
-
-            ARTICLE:
-            for my $Article (@AgentArticles) {
-                next ARTICLE if !$Article->{ArticleID};
-
-                %AgentArticle = $ArticleObject->BackendForArticle( %{$Article} )->ArticleGet(
-                    %{$Article},
-                    DynamicFields => 0,
-                    UserID        => $Param{UserID},
-                );
-            }
-
-            %Article = %AgentArticle;
-        }
-
-        # Get raw ticket data.
-        my %Ticket = $TicketObject->TicketGet(
+        # get article
+        my %Article = $TicketObject->ArticleLastCustomerArticle(
             TicketID      => $Param{TicketID},
             DynamicFields => 0,
         );
 
-        my %Address = $QueueObject->GetSystemAddress( QueueID => $Ticket{QueueID} );
+        # set "From" address from Article if exist, otherwise use ticket information, see bug# 9035
+        if (%Article) {
+            $QueueID = $Article{QueueID};
+        }
+        else {
+
+            # get ticket data
+            my %Ticket = $TicketObject->TicketGet(
+                TicketID => $Param{TicketID},
+            );
+            $QueueID = $Ticket{QueueID};
+        }
+
+        my %Address = $QueueObject->GetSystemAddress( QueueID => $QueueID );
 
         # get queue
         my %Queue = $QueueObject->QueueGet(
-            ID => $Ticket{QueueID},
+            ID => $QueueID,
         );
 
         # security part
@@ -278,28 +251,33 @@ sub SendNotification {
         );
         return if !$SecurityOptions;
 
-        my $IsVisibleForCustomer = 1;
-        if ( defined $Notification{Data}->{IsVisibleForCustomer} ) {
-            $IsVisibleForCustomer = $Notification{Data}->{IsVisibleForCustomer}->[0];
+        my $ArticleType = 'email-notification-ext';
+
+        if ( IsArrayRefWithData( $Param{Notification}->{Data}->{NotificationArticleTypeID} ) ) {
+
+            # get notification article type
+            $ArticleType = $TicketObject->ArticleTypeLookup(
+                ArticleTypeID => $Param{Notification}->{Data}->{NotificationArticleTypeID}->[0],
+            );
         }
 
-        my $ArticleID = $ArticleObject->BackendForChannel( ChannelName => 'Email' )->ArticleSend(
-            TicketID             => $Param{TicketID},
-            SenderType           => 'system',
-            IsVisibleForCustomer => $IsVisibleForCustomer,
-            HistoryType          => 'SendCustomerNotification',
-            HistoryComment       => "\%\%$Recipient{UserEmail}",
-            From                 => "$Address{RealName} <$Address{Email}>",
-            To                   => $Recipient{UserEmail},
-            Subject              => $Notification{Subject},
-            Body                 => $Notification{Body},
-            MimeType             => $Notification{ContentType},
-            Type                 => $Notification{ContentType},
-            Charset              => 'utf-8',
-            UserID               => $Param{UserID},
-            Loop                 => 1,
-            Attachment           => $Param{Attachments},
-            EmailSecurity        => $SecurityOptions || {},
+        my $ArticleID = $TicketObject->ArticleSend(
+            ArticleType    => $ArticleType,
+            SenderType     => 'system',
+            TicketID       => $Param{TicketID},
+            HistoryType    => 'SendCustomerNotification',
+            HistoryComment => "\%\%$Recipient{UserEmail}",
+            From           => "$Address{RealName} <$Address{Email}>",
+            To             => $Recipient{UserEmail},
+            Subject        => $Notification{Subject},
+            Body           => $Notification{Body},
+            MimeType       => $Notification{ContentType},
+            Type           => $Notification{ContentType},
+            Charset        => 'utf-8',
+            UserID         => $Param{UserID},
+            Loop           => 1,
+            Attachment     => $Param{Attachments},
+            %{$SecurityOptions},
         );
 
         if ( !$ArticleID ) {
@@ -362,8 +340,10 @@ sub GetTransportRecipients {
             $Recipient{UserEmail} = $RecipientEmail;
 
             # check if we have a specified article type
-            if ( $Param{Notification}->{Data}->{IsVisibleForCustomer} ) {
-                $Recipient{IsVisibleForCustomer} = 1;
+            if ( $Param{Notification}->{Data}->{NotificationArticleTypeID} ) {
+                $Recipient{NotificationArticleType} = $Kernel::OM->Get('Kernel::System::Ticket')->ArticleTypeLookup(
+                    ArticleTypeID => $Param{Notification}->{Data}->{NotificationArticleTypeID}->[0]
+                ) || 'email-notification-ext';
             }
 
             # check recipients
@@ -411,6 +391,22 @@ sub TransportSettingsDisplayGet {
 
     # get layout object
     my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
+    # Display article types for article creation if notification is sent
+    # only use 'email-notification-*'-type articles
+    my %NotificationArticleTypes = $Kernel::OM->Get('Kernel::System::Ticket')->ArticleTypeList( Result => 'HASH' );
+    for my $NotifArticleTypeID ( sort keys %NotificationArticleTypes ) {
+        if ( $NotificationArticleTypes{$NotifArticleTypeID} !~ /^email-notification-/ ) {
+            delete $NotificationArticleTypes{$NotifArticleTypeID};
+        }
+    }
+    $Param{NotificationArticleTypesStrg} = $LayoutObject->BuildSelection(
+        Data        => \%NotificationArticleTypes,
+        Name        => 'NotificationArticleTypeID',
+        Translation => 1,
+        SelectedID  => $Param{Data}->{NotificationArticleTypeID},
+        Class       => 'Modernize W50pc',
+    );
 
     $Param{TransportEmailTemplateStrg} = $LayoutObject->BuildSelection(
         Data        => \%Templates,
@@ -577,28 +573,16 @@ sub SecurityOptionsGet {
     my $NotificationSenderEmail = $Param{FromEmail};
 
     # Define security options container
-    my %SecurityOptions = (
-        Method => 'Detached',
-    );
-
+    my %SecurityOptions;
     my @SignKeys;
     my @EncryptKeys;
     my $KeyField;
+    my $Method;
+    my $Subtype = 'Detached';
 
     # Get private and public keys for the given backend (PGP or SMIME)
     if ( $SignEncryptNotification =~ /^PGP/i ) {
-
-        my $PGPObject = $Kernel::OM->Get('Kernel::System::Crypt::PGP');
-
-        if ( !$PGPObject ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "No PGP support!",
-            );
-            return;
-        }
-
-        @SignKeys = $PGPObject->PrivateKeySearch(
+        @SignKeys = $Kernel::OM->Get('Kernel::System::Crypt::PGP')->PrivateKeySearch(
             Search => $NotificationSenderEmail,
         );
 
@@ -606,30 +590,18 @@ sub SecurityOptionsGet {
         @SignKeys = grep { $_->{Status} eq 'good' } @SignKeys;
 
         # get public keys
-        @EncryptKeys = $PGPObject->PublicKeySearch(
+        @EncryptKeys = $Kernel::OM->Get('Kernel::System::Crypt::PGP')->PublicKeySearch(
             Search => $Param{Recipient}->{UserEmail},
         );
 
         # Get PGP method (Detached or In-line).
         if ( !$Kernel::OM->Get('Kernel::Output::HTML::Layout')->{BrowserRichText} ) {
-            $SecurityOptions{Method} = $Kernel::OM->Get('Kernel::Config')->Get('PGP::Method') || 'Detached';
+            $Subtype = $Kernel::OM->Get('Kernel::Config')->Get('PGP::Method') || 'Detached';
         }
-
-        $SecurityOptions{Backend} = 'PGP';
+        $Method   = 'PGP';
         $KeyField = 'Key';
     }
     elsif ( $SignEncryptNotification =~ /^SMIME/i ) {
-
-        my $SMIMEObject = $Kernel::OM->Get('Kernel::System::Crypt::SMIME');
-
-        if ( !$SMIMEObject ) {
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
-                Priority => 'error',
-                Message  => "No SMIME support!",
-            );
-            return;
-        }
-
         @SignKeys = $Kernel::OM->Get('Kernel::System::Crypt::SMIME')->PrivateSearch(
             Search => $NotificationSenderEmail,
         );
@@ -638,7 +610,7 @@ sub SecurityOptionsGet {
             Search => $Param{Recipient}->{UserEmail},
         );
 
-        $SecurityOptions{Backend} = 'SMIME';
+        $Method   = 'SMIME';
         $KeyField = 'Filename';
     }
 
@@ -693,7 +665,7 @@ sub SecurityOptionsGet {
         if ( !IsHashRefWithData( \%SignKey ) ) {
 
             my $Message
-                = "Could not sign notification '$Param{Notification}->{Name}' due to missing $SecurityOptions{Backend} sign key for '$NotificationSenderEmail'";
+                = "Could not sign notification '$Param{Notification}->{Name}' due to missing $Method sign key for '$NotificationSenderEmail'";
 
             if ( $OnMissingSigningKeys eq 'Skip' ) {
 
@@ -715,7 +687,11 @@ sub SecurityOptionsGet {
 
         # Add signature option if a sign key is available
         else {
-            $SecurityOptions{SignKey} = $SignKey{$KeyField};
+            $SecurityOptions{Sign} = {
+                Type    => $Method,
+                SubType => $Subtype,
+                Key     => $SignKey{$KeyField},
+            };
         }
     }
 
@@ -728,7 +704,7 @@ sub SecurityOptionsGet {
         if ( !IsHashRefWithData( \%EncryptKey ) ) {
 
             my $Message
-                = "Could not encrypt notification '$Param{Notification}->{Name}' due to missing $SecurityOptions{Backend} encryption key for '$Param{Recipient}->{UserEmail}'";
+                = "Could not encrypt notification '$Param{Notification}->{Name}' due to missing $Method encryption key for '$Param{Recipient}->{UserEmail}'";
 
             if ( $OnMissingEncryptionKeys eq 'Skip' ) {
 
@@ -750,7 +726,11 @@ sub SecurityOptionsGet {
 
         # Add encrypt option if a encrypt key is available
         else {
-            $SecurityOptions{EncryptKeys} = [ $EncryptKey{$KeyField}, ];
+            $SecurityOptions{Crypt} = {
+                Type    => $Method,
+                SubType => $Subtype,
+                Key     => $EncryptKey{$KeyField},
+            };
         }
     }
 
@@ -758,7 +738,70 @@ sub SecurityOptionsGet {
 
 }
 
+sub _ReplaceTicketAttributes {
+    my ( $Self, %Param ) = @_;
+
+    return if !$Param{Field};
+
+    # get needed objects
+    my $DynamicFieldObject        = $Kernel::OM->Get('Kernel::System::DynamicField');
+    my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
+
+    # replace ticket attributes such as <OTRS_Ticket_DynamicField_Name1> or
+    # <OTRS_TICKET_DynamicField_Name1>
+    # <OTRS_Ticket_*> is deprecated and should be removed in further versions of OTRS
+    my $Count = 0;
+    REPLACEMENT:
+    while (
+        $Param{Field}
+        && $Param{Field} =~ m{<OTRS_TICKET_([A-Za-z0-9_]+)>}msxi
+        && $Count++ < 1000
+        )
+    {
+        my $TicketAttribute = $1;
+
+        if ( $TicketAttribute =~ m{DynamicField_(\S+?)_Value} ) {
+            my $DynamicFieldName = $1;
+
+            my $DynamicFieldConfig = $DynamicFieldObject->DynamicFieldGet(
+                Name => $DynamicFieldName,
+            );
+            next REPLACEMENT if !$DynamicFieldConfig;
+
+            # get the display value for each dynamic field
+            my $DisplayValue = $DynamicFieldBackendObject->ValueLookup(
+                DynamicFieldConfig => $DynamicFieldConfig,
+                Key                => $Param{Ticket}->{"DynamicField_$DynamicFieldName"},
+            );
+
+            my $DisplayValueStrg = $DynamicFieldBackendObject->ReadableValueRender(
+                DynamicFieldConfig => $DynamicFieldConfig,
+                Value              => $DisplayValue,
+            );
+
+            $Param{Field} =~ s{<OTRS_TICKET_$TicketAttribute>}{$DisplayValueStrg->{Value} // ''}ige;
+
+            next REPLACEMENT;
+        }
+
+        # if ticket value is scalar substitute all instances (as strings)
+        # this will allow replacements for "<OTRS_TICKET_Title> <OTRS_TICKET_Queue"
+        if ( !ref $Param{Ticket}->{$TicketAttribute} ) {
+            $Param{Field} =~ s{<OTRS_TICKET_$TicketAttribute>}{$Param{Ticket}->{$TicketAttribute} // ''}ige;
+        }
+        else {
+            # if the value is an array (e.g. a multiselect dynamic field) set the value directly
+            # this unfortunately will not let a combination of values to be replaced
+            $Param{Field} = $Param{Ticket}->{$TicketAttribute};
+        }
+    }
+
+    return $Param{Field};
+}
+
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

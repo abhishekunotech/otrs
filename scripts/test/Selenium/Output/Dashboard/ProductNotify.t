@@ -12,6 +12,8 @@ use utf8;
 
 use vars (qw($Self));
 
+use Linux::Distribution;
+
 my $Selenium = $Kernel::OM->Get('Kernel::System::UnitTest::Selenium');
 
 $Selenium->RunTest(
@@ -30,15 +32,19 @@ $Selenium->RunTest(
         );
 
         # Get dashboard ProductNotify plugin default sysconfig.
-        my %ProductNotifyConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->SettingGet(
+        my %ProductNotifyConfig = $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemGet(
             Name    => 'DashboardBackend###0000-ProductNotify',
             Default => 1,
         );
 
+        # Set dashboard ProductNotify plugin to valid.
+        %ProductNotifyConfig = map { $_->{Key} => $_->{Content} }
+            grep { defined $_->{Key} } @{ $ProductNotifyConfig{Setting}->[1]->{Hash}->[1]->{Item} };
+
         $Helper->ConfigSettingChange(
             Valid => 1,
             Key   => 'DashboardBackend###0000-ProductNotify',
-            Value => $ProductNotifyConfig{EffectiveValue},
+            Value => \%ProductNotifyConfig,
         );
 
         # Get current properties and set next version.

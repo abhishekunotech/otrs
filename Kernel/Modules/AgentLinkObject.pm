@@ -42,10 +42,9 @@ sub Run {
         # challenge token check for write action
         $LayoutObject->ChallengeTokenCheck();
 
-        my $SourceObject                   = $ParamObject->GetParam( Param => 'SourceObject' )                   || '';
-        my $SourceObjectID                 = $ParamObject->GetParam( Param => 'SourceObjectID' )                 || '';
-        my $DestinationObject              = $ParamObject->GetParam( Param => 'DestinationObject' )              || '';
-        my $AdditionalLinkListWithDataJSON = $ParamObject->GetParam( Param => 'AdditionalLinkListWithDataJSON' ) || '';
+        my $SourceObject      = $ParamObject->GetParam( Param => 'SourceObject' )      || '';
+        my $SourceObjectID    = $ParamObject->GetParam( Param => 'SourceObjectID' )    || '';
+        my $DestinationObject = $ParamObject->GetParam( Param => 'DestinationObject' ) || '';
 
         my $Success = $LayoutObject->ComplexTablePreferencesSet(
             DestinationObject => $DestinationObject,
@@ -73,27 +72,13 @@ sub Run {
             },
         );
 
-        if ($AdditionalLinkListWithDataJSON) {
-
-            # decode JSON string
-            my $AdditionalLinkListWithData = $Kernel::OM->Get('Kernel::System::JSON')->Decode(
-                Data => $AdditionalLinkListWithDataJSON,
-            );
-
-            $LinkListWithData = {
-                %{$LinkListWithData},
-                %{$AdditionalLinkListWithData},
-            };
-        }
-
         # create the link table
         my $LinkTableStrg = $LayoutObject->LinkObjectTableCreate(
-            LinkListWithData               => $LinkListWithData,
-            ViewMode                       => 'Complex',                         # only make sense for complex
-            Object                         => $SourceObject,
-            Key                            => $SourceObjectID,
-            AJAX                           => 1,
-            AdditionalLinkListWithDataJSON => $AdditionalLinkListWithDataJSON,
+            LinkListWithData => $LinkListWithData,
+            ViewMode         => 'Complex',           # only make sense for complex
+            Object           => $SourceObject,
+            Key              => $SourceObjectID,
+            AJAX             => 1,
         );
 
         return $LayoutObject->Attachment(
@@ -288,9 +273,9 @@ sub Run {
         # to close the popup without reloading the parent window
         if ( $Form{Mode} eq 'Temporary' ) {
 
-            $LayoutObject->AddJSData(
-                Name => 'TemporaryLink',
-                Data => 1,
+            $LayoutObject->Block(
+                Name => 'LinkDeleteTemporaryLink',
+                Data => {},
             );
         }
 
@@ -537,9 +522,9 @@ sub Run {
         # to close the popup without reloading the parent window
         if ( $Form{Mode} eq 'Temporary' ) {
 
-            $LayoutObject->AddJSData(
-                Key   => 'TemporaryLink',
-                Value => 1,
+            $LayoutObject->Block(
+                Name => 'LinkAddTemporaryLink',
+                Data => {},
             );
         }
 

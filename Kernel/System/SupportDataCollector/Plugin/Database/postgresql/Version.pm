@@ -11,7 +11,7 @@ package Kernel::System::SupportDataCollector::Plugin::Database::postgresql::Vers
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginBase);
+use base qw(Kernel::System::SupportDataCollector::PluginBase);
 
 use Kernel::Language qw(Translatable);
 
@@ -34,9 +34,8 @@ sub Run {
     }
 
     my $Version = $DBObject->Version();
-    my ( $VersionMajor, $VersionMinor ) = $Version =~ m/^PostgreSQL \s+ (\d{1,3}) \. (\d{1,3})/ismx;
-    if ($VersionMajor) {
-        if ( sprintf( '%03d%03d', $VersionMajor, $VersionMinor ) >= 9_002 ) {
+    if ( $Version =~ /^PostgreSQL (\d{1,3}).*$/ ) {
+        if ( $1 > 7 ) {
             $Self->AddResultOk(
                 Label => Translatable('Database Version'),
                 Value => $Version,
@@ -46,7 +45,7 @@ sub Run {
             $Self->AddResultProblem(
                 Label   => Translatable('Database Version'),
                 Value   => $Version,
-                Message => Translatable('PostgreSQL 9.2 or higher is required.')
+                Message => Translatable('PostgreSQL 8.x or higher is required.')
             );
         }
     }

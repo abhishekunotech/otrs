@@ -35,17 +35,6 @@ $Selenium->RunTest(
             Value => 0
         );
 
-        $Helper->ConfigSettingChange(
-            Valid => 1,
-            Key   => 'Ticket::Frontend::AgentTicketPhoneOutbound###RequiredLock',
-            Value => 1
-        );
-        $Helper->ConfigSettingChange(
-            Valid => 1,
-            Key   => 'Ticket::Frontend::AgentTicketPhoneInbound###RequiredLock',
-            Value => 1
-        );
-
         # do not check service and type
         $Helper->ConfigSettingChange(
             Valid => 1,
@@ -79,12 +68,12 @@ $Selenium->RunTest(
         my $TicketID     = $TicketObject->TicketCreate(
             Title         => 'Selenium Test Ticket',
             QueueID       => 2,
-            Lock          => 'unlock',
+            Lock          => 'lock',
             Priority      => '3 normal',
             State         => 'open',
             CustomerID    => 'SeleniumCustomer',
             CustomerUser  => "SeleniumCustomer\@localhost.com",
-            OwnerID       => 1,
+            OwnerID       => $TestUserID,
             UserID        => $TestUserID,
             ResponsibleID => $TestUserID,
         );
@@ -96,9 +85,8 @@ $Selenium->RunTest(
         # get test data
         my @Test = (
             {
-                Name            => 'AgentTicketPhoneOutbound',
-                HistoryText     => 'PhoneCallAgent',
-                UndoLinkPresent => 1,
+                Name        => 'AgentTicketPhoneOutbound',
+                HistoryText => 'PhoneCallAgent',
             },
             {
                 Name        => 'AgentTicketPhoneInbound',
@@ -117,25 +105,12 @@ $Selenium->RunTest(
             # navigate to test action
             $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=$Action->{Name};TicketID=$TicketID");
 
-            # if RequiredLock => 1, we want to make sure that the "undo" link is present if UndoLinkPresent is enabled.
-            # for the second test (PhoneInbound), owner and lock will already be changed, so the undo link will not be
-            # present anyway.
-            my @Selectors = ( '#Subject', '#RichText', '#FileUpload', '#NextStateID', '#submitRichText' );
-            if ( $Action->{UndoLinkPresent} ) {
-                push @Selectors, '.UndoClosePopup';
-            }
-            else {
-
-                # otherwise we want to make sure the link is *not* there
-                $Self->False(
-                    index( $Selenium->get_page_source(), 'UndoClosePopup' ) > -1,
-                    'Undo link is not shown',
-                );
-            }
-
             # check page
-            for my $Selector (@Selectors) {
-                my $Element = $Selenium->find_element( "$Selector", 'css' );
+            for my $ID (
+                qw(Subject RichText FileUpload NextStateID submitRichText)
+                )
+            {
+                my $Element = $Selenium->find_element( "#$ID", 'css' );
                 $Element->is_enabled();
                 $Element->is_displayed();
             }

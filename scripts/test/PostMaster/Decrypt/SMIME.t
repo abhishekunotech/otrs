@@ -45,7 +45,7 @@ $ConfigObject->Set(
     Value => $PrivatePath,
 );
 
-my $OpenSSLBin = $ConfigObject->Get('SMIME::Bin') || '/usr/bin/openssl';
+my $OpenSSLBin = $ConfigObject->Get('SMIME::Bin');
 
 # Get the OpenSSL version string, e.g. OpenSSL 0.9.8e 23 Feb 2007.
 my $OpenSSLVersionString = qx{$OpenSSLBin version};
@@ -91,7 +91,7 @@ $Self->IsDeeply(
 );
 
 # Check if OpenSSL is located there.
-if ( !-e $OpenSSLBin ) {
+if ( !-e $ConfigObject->Get('SMIME::Bin') ) {
 
     # maybe it's a mac with mac ports
     if ( -e '/opt/local/bin/openssl' ) {
@@ -300,16 +300,9 @@ my %Ticket = $TicketObject->TicketGet(
     TicketID => $Return[1],
 );
 
-my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
-my @ArticleIndex         = $ArticleObject->ArticleList(
+my @ArticleIndex = $TicketObject->ArticleGet(
     TicketID => $Return[1],
     UserID   => 1,
-);
-
-my %FirstArticle = $ArticleBackendObject->ArticleGet(
-    %{ $ArticleIndex[0] },
-    UserID => 1,
 );
 
 $Self->Is(
@@ -318,13 +311,13 @@ $Self->Is(
     "Ticket created in $Ticket{Queue}",
 );
 
-my $GetBody = $FirstArticle{Body};
+my $GetBody = $ArticleIndex[0]{Body};
 chomp($GetBody);
 
 $Self->Is(
     $GetBody,
     'Hi',
-    "Body decrypted $FirstArticle{Body}",
+    "Body decrypted $ArticleIndex[0]{Body}",
 );
 
 # Delete needed test directories.

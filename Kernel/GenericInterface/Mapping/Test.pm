@@ -19,9 +19,15 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::GenericInterface::Mapping::Test - GenericInterface test data mapping backend
 
+=head1 SYNOPSIS
+
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Mapping->new();
@@ -70,7 +76,7 @@ sub new {
     return $Self;
 }
 
-=head2 Map()
+=item Map()
 
 perform data mapping
 
@@ -162,7 +168,7 @@ sub Map {
 
 =begin Internal:
 
-=head2 _ToUpper()
+=item _ToUpper()
 
 change all characters in values to upper case
 
@@ -191,7 +197,7 @@ sub _ToUpper {
     return $ReturnData;
 }
 
-=head2 _ToLower()
+=item _ToLower()
 
 change all characters in values to lower case
 
@@ -220,7 +226,7 @@ sub _ToLower {
     return $ReturnData;
 }
 
-=head2 _Empty()
+=item _Empty()
 
 set all values to empty string
 
@@ -252,6 +258,8 @@ sub _Empty {
 1;
 
 =end Internal:
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

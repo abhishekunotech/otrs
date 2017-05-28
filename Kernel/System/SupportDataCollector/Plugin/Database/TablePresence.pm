@@ -11,7 +11,7 @@ package Kernel::System::SupportDataCollector::Plugin::Database::TablePresence;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::SupportDataCollector::PluginBase);
+use base qw(Kernel::System::SupportDataCollector::PluginBase);
 
 use Kernel::Language qw(Translatable);
 
@@ -53,14 +53,26 @@ sub Run {
 
     my @XMLHash = $Kernel::OM->Get('Kernel::System::XML')->XMLParse2XMLHash( String => ${$ContentRef} );
 
-    my %ExistingTables = map { lc($_) => 1 } $Kernel::OM->Get('Kernel::System::DB')->ListTables();
+    # get database object
+    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
     my @MissingTables;
     TABLE:
     for my $Table ( @{ $XMLHash[1]->{database}->[1]->{Table} } ) {
         next TABLE if !$Table;
 
-        if ( !$ExistingTables{ lc( $Table->{Name} ) } ) {
+        my $TableExists = $DBObject->Prepare(
+            SQL   => "SELECT 1 FROM $Table->{Name}",
+            Limit => 1,
+        );
+
+        if ($TableExists) {
+            while ( my @Row = $DBObject->FetchrowArray() ) {
+
+                # noop
+            }
+        }
+        else {
             push( @MissingTables, $Table->{Name} );
         }
     }

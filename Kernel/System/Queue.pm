@@ -11,7 +11,7 @@ package Kernel::System::Queue;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::EventHandler);
+use base qw(Kernel::System::EventHandler);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -30,16 +30,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Queue - queue lib
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All queue functions. E. g. to add queue or other functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $QueueObject = $Kernel::OM->Get('Kernel::System::Queue');
 
 =cut
@@ -91,7 +97,7 @@ sub new {
     return $Self;
 }
 
-=head2 GetSystemAddress()
+=item GetSystemAddress()
 
 get a queue system email address as hash (Email, RealName)
 
@@ -131,7 +137,7 @@ sub GetSystemAddress {
     return %Address;
 }
 
-=head2 GetSignature()
+=item GetSignature()
 
 get a queue signature
 
@@ -170,7 +176,7 @@ sub GetSignature {
     return $String;
 }
 
-=head2 QueueStandardTemplateMemberAdd()
+=item QueueStandardTemplateMemberAdd()
 
 to add a template to a queue
 
@@ -231,7 +237,7 @@ sub QueueStandardTemplateMemberAdd {
     return $Success;
 }
 
-=head2 QueueStandardTemplateMemberList()
+=item QueueStandardTemplateMemberList()
 
 get standard responses of a queue
 
@@ -372,7 +378,7 @@ sub QueueStandardTemplateMemberList {
     }
 }
 
-=head2 GetAllQueues()
+=item GetAllQueues()
 
 get all valid system queues
 
@@ -481,7 +487,7 @@ sub GetAllQueues {
     return %MoveQueues;
 }
 
-=head2 GetAllCustomQueues()
+=item GetAllCustomQueues()
 
 get all custom queues of one user
 
@@ -535,7 +541,7 @@ sub GetAllCustomQueues {
     return @QueueIDs;
 }
 
-=head2 QueueLookup()
+=item QueueLookup()
 
 get id or name for queue
 
@@ -589,7 +595,7 @@ sub QueueLookup {
     return $ReturnData;
 }
 
-=head2 GetFollowUpOption()
+=item GetFollowUpOption()
 
 get FollowUpOption for the given QueueID
 
@@ -630,59 +636,7 @@ sub GetFollowUpOption {
     return $Return;
 }
 
-=head2 GetFollowUpOptionList()
-
-get Follow-Up Option list
-
-    my %FollowUpOptionList = $QueueObject->GetFollowUpOptionList(
-        Valid => 0,             # (optional) default 1
-    );
-
-Return:
-
-    %FollowUpOptionList = (
-              '1' => 'possible',
-              '3' => 'new ticket',
-              '2' => 'reject'
-            )
-
-=cut
-
-sub GetFollowUpOptionList {
-    my ( $Self, %Param ) = @_;
-
-    # set default value
-    my $Valid = $Param{Valid} ? 1 : 0;
-
-    # create the valid list
-    my $ValidIDs = join ', ', $Kernel::OM->Get('Kernel::System::Valid')->ValidIDsGet();
-
-    # build SQL
-    my $SQL = 'SELECT id, name FROM follow_up_possible';
-
-    # add WHERE statement
-    if ($Valid) {
-        $SQL .= ' WHERE valid_id IN (' . $ValidIDs . ')';
-    }
-
-    # get database object
-    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-
-    # get data from database
-    return if !$DBObject->Prepare(
-        SQL => $SQL,
-    );
-
-    # fetch the result
-    my %FollowUpOptionList;
-    while ( my @Row = $DBObject->FetchrowArray() ) {
-        $FollowUpOptionList{ $Row[0] } = $Row[1];
-    }
-
-    return %FollowUpOptionList;
-}
-
-=head2 GetFollowUpLockOption()
+=item GetFollowUpLockOption()
 
 get FollowUpLockOption for the given QueueID
 
@@ -713,7 +667,7 @@ sub GetFollowUpLockOption {
     return $Queue{FollowUpLock};
 }
 
-=head2 GetQueueGroupID()
+=item GetQueueGroupID()
 
 get GroupID defined for the given QueueID.
 
@@ -742,11 +696,11 @@ sub GetQueueGroupID {
     return $Queue{GroupID};
 }
 
-=head2 QueueAdd()
+=item QueueAdd()
 
 add queue with attributes
 
-    my $QueueID = $QueueObject->QueueAdd(
+    $QueueObject->QueueAdd(
         Name                => 'Some::Queue',
         ValidID             => 1,
         GroupID             => 1,
@@ -926,7 +880,7 @@ sub QueueAdd {
     return $QueueID;
 }
 
-=head2 QueueGet()
+=item QueueGet()
 
 get queue attributes
 
@@ -1060,11 +1014,11 @@ sub QueueGet {
     return %Data;
 }
 
-=head2 QueueUpdate()
+=item QueueUpdate()
 
 update queue attributes
 
-    my $Success = $QueueObject->QueueUpdate(
+    $QueueObject->QueueUpdate(
         QueueID             => 123,
         Name                => 'Some::Queue',
         ValidID             => 1,
@@ -1086,6 +1040,7 @@ update queue attributes
         UnlockTimeOut       => ''
         FollowUpLock        => 1,
         ParentQueueID       => '',
+        CheckSysConfig      => 0,   # (optional) default 1
     );
 
 =cut
@@ -1105,6 +1060,11 @@ sub QueueUpdate {
             );
             return;
         }
+    }
+
+    # check CheckSysConfig param
+    if ( !defined $Param{CheckSysConfig} ) {
+        $Param{CheckSysConfig} = 1;
     }
 
     # FollowUpLock 0 | 1
@@ -1248,10 +1208,16 @@ sub QueueUpdate {
         }
     }
 
+    # check all SysConfig options
+    return 1 if !$Param{CheckSysConfig};
+
+    # check all SysConfig options and correct them automatically if necessary
+    $Kernel::OM->Get('Kernel::System::SysConfig')->ConfigItemCheckAll();
+
     return 1;
 }
 
-=head2 QueueList()
+=item QueueList()
 
 get all queues
 
@@ -1314,7 +1280,7 @@ sub QueueList {
     return %Queues;
 }
 
-=head2 QueuePreferencesSet()
+=item QueuePreferencesSet()
 
 set queue preferences
 
@@ -1346,7 +1312,7 @@ sub QueuePreferencesSet {
     return $Self->{PreferencesObject}->QueuePreferencesSet(%Param);
 }
 
-=head2 QueuePreferencesGet()
+=item QueuePreferencesGet()
 
 get queue preferences
 
@@ -1372,7 +1338,7 @@ sub DESTROY {
     return 1;
 }
 
-=head2 NameExistsCheck()
+=item NameExistsCheck()
 
 return 1 if another queue with this name already exists
 
@@ -1409,6 +1375,8 @@ sub NameExistsCheck {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

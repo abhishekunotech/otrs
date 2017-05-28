@@ -13,8 +13,8 @@ use warnings;
 
 our $ObjectManagerDisabled = 1;
 
-use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -328,11 +328,7 @@ sub Run {
             );
         }
 
-        if (
-            defined $ParamObject->GetParam( Param => 'ContinueAfterSave' )
-            && ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' )
-            )
-        {
+        if ( $ParamObject->GetParam( Param => 'ContinueAfterSave' ) eq '1' ) {
 
             # if the user would like to continue editing the ACL, just redirect to the edit screen
             return $LayoutObject->Redirect(
@@ -557,18 +553,6 @@ sub _ShowOverview {
     my $ACLObject    = $Kernel::OM->Get('Kernel::System::ACL::DB::ACL');
     my $Output       = $LayoutObject->Header();
     $Output .= $LayoutObject->NavigationBar();
-
-    if ( $Self->{UserID} == 1 ) {
-
-        # show error notfy, don't work with user id 1
-        $Output .= $LayoutObject->Notify(
-            Priority => 'Error',
-            Data =>
-                Translatable(
-                "Please note that ACL restrictions will be ignored for the Superuser account (UserID 1)."
-                ),
-        );
-    }
 
     # show notifications if any
     if ( $Param{NotifyData} ) {
@@ -799,22 +783,6 @@ sub _ShowEdit {
         }
     }
 
-    # create data for JS
-    my @ACLEditPossibleActionsList;
-    for my $Item (@PossibleActionsList) {
-        my %ACLEdit = (
-            label => $Item,
-            value => $Item
-        );
-        push @ACLEditPossibleActionsList, \%ACLEdit;
-    }
-
-    # set ACL data
-    $LayoutObject->AddJSData(
-        Key   => 'PossibleActionsList',
-        Value => \@ACLEditPossibleActionsList,
-    );
-
     $Output .= $LayoutObject->Output(
         TemplateFile => "AdminACL$Param{Action}",
         Data         => {
@@ -839,8 +807,8 @@ sub _GetParams {
         qw( Name EntityID Comment Description StopAfterMatch ValidID ConfigMatch ConfigChange )
         )
     {
-        $GetParam->{$ParamName} = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => $ParamName )
-            || '';
+        $GetParam->{$ParamName}
+            = $Kernel::OM->Get('Kernel::System::Web::Request')->GetParam( Param => $ParamName ) || '';
     }
 
     if ( $GetParam->{ConfigMatch} ) {

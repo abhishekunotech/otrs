@@ -8,8 +8,6 @@
 
 package Kernel::Output::HTML::ToolBar::TicketLocked;
 
-use parent 'Kernel::Output::HTML::Base';
-
 use strict;
 use warnings;
 
@@ -20,6 +18,19 @@ our @ObjectDependencies = (
     'Kernel::System::Ticket',
     'Kernel::Output::HTML::Layout',
 );
+
+sub new {
+    my ( $Type, %Param ) = @_;
+
+    # allocate new hash for object
+    my $Self = {};
+    bless( $Self, $Type );
+
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
+
+    return $Self;
+}
 
 sub Run {
     my ( $Self, %Param ) = @_;
@@ -45,7 +56,7 @@ sub Run {
         OwnerIDs   => [ $Self->{UserID} ],
         UserID     => 1,
         Permission => 'ro',
-    ) || 0;
+    );
     my $CountNew = $TicketObject->TicketSearch(
         Result     => 'COUNT',
         Locks      => [ 'lock', 'tmp_lock' ],
@@ -56,7 +67,7 @@ sub Run {
         TicketFlagUserID => $Self->{UserID},
         UserID           => 1,
         Permission       => 'ro',
-    ) || 0;
+    );
     $CountNew = $Count - $CountNew;
     my $CountReached = $TicketObject->TicketSearch(
         Result                        => 'COUNT',
@@ -66,7 +77,7 @@ sub Run {
         OwnerIDs                      => [ $Self->{UserID} ],
         UserID                        => 1,
         Permission                    => 'ro',
-    ) || 0;
+    );
 
     my $Class        = $Param{Config}->{CssClass};
     my $ClassNew     = $Param{Config}->{CssClassNew};

@@ -11,7 +11,7 @@ package Kernel::System::Console::Command::Maint::Stats::Generate;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -88,7 +88,7 @@ sub Configure {
     $Self->AddOption(
         Name => 'timezone',
         Description =>
-            "Target time zone (e.g. Europe/Berlin) for which the file should be generated.",
+            "Target time zone (e.g. +2) for which the file should be generated (only provided, if the system use UTC as system time, the TimeZoneUser feature is active and for dynamic statistics).",
         Required   => 0,
         HasValue   => 1,
         ValueRegex => qr/.*/smx,
@@ -166,6 +166,18 @@ sub PreRun {
     $Self->{TargetDirectory} = $Self->GetOption('target-directory');
     if ( $Self->{TargetDirectory} && !-e $Self->{TargetDirectory} ) {
         die "The target directory '$Self->{TargetDirectory}' does not exist.\n";
+    }
+
+    if (
+        $Self->GetOption('timezone')
+        && (
+            $Kernel::OM->Get('Kernel::System::Time')->ServerLocalTimeOffsetSeconds()
+            || !$Kernel::OM->Get('Kernel::Config')->Get('TimeZoneUser')
+        )
+        )
+    {
+        die
+            "You defined a timzone but this is only provided, if the system use UTC as system time and the time zone user support is active.\n";
     }
 
     # set up used language

@@ -171,17 +171,10 @@ sub Auth {
         elsif ( $GetPw =~ m{\A .{64} \z}xms ) {
 
             my $SHAObject = Digest::SHA->new('sha256');
-            $EncodeObject->EncodeOutput( \$Pw );
-            $SHAObject->add($Pw);
-            $CryptedPw = $SHAObject->hexdigest();
-            $EncodeObject->EncodeInput( \$CryptedPw );
-        }
 
-        # sha512 pw
-        elsif ( $GetPw =~ m{\A .{128} \z}xms ) {
-
-            my $SHAObject = Digest::SHA->new('sha512');
+            # encode output, needed by sha256_hex() only non utf8 signs
             $EncodeObject->EncodeOutput( \$Pw );
+
             $SHAObject->add($Pw);
             $CryptedPw = $SHAObject->hexdigest();
             $EncodeObject->EncodeInput( \$CryptedPw );

@@ -11,10 +11,10 @@ package Kernel::Modules::AgentTicketLockedView;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
-use Kernel::Language qw(Translatable);
-
 our $ObjectManagerDisabled = 1;
+
+use Kernel::Language qw(Translatable);
+use Kernel::System::VariableCheck qw(:all);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -330,7 +330,7 @@ sub Run {
             %{ $Filters{$Filter}->{Search} },
             %ColumnFilter,
             Result => 'COUNT',
-        ) || 0;
+        );
 
         $NavBarFilter{ $Filters{$Filter}->{Prio} } = {
             Count  => $Count,

@@ -18,6 +18,7 @@ our @ObjectDependencies = (
     'Kernel::System::Cache',
     'Kernel::System::DB',
     'Kernel::System::GenericInterface::DebugLog',
+    'Kernel::System::GenericInterface::ObjectLockState',
     'Kernel::System::GenericInterface::WebserviceHistory',
     'Kernel::System::Log',
     'Kernel::System::Main',
@@ -30,16 +31,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Webservice
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Web service configuration backend.
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $WebserviceObject = $Kernel::OM->Get('Kernel::System::GenericInterface::Webservice');
 
 =cut
@@ -54,7 +61,7 @@ sub new {
     return $Self;
 }
 
-=head2 WebserviceAdd()
+=item WebserviceAdd()
 
 add new Webservices
 
@@ -138,24 +145,29 @@ sub WebserviceAdd {
     # dump config as string
     my $Config = $Kernel::OM->Get('Kernel::System::YAML')->Dump( Data => $Param{Config} );
 
+    # md5 of content
+    my $MD5 = $Kernel::OM->Get('Kernel::System::Main')->MD5sum(
+        String => $Param{Name},
+    );
+
     # get database object
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
 
     # sql
     return if !$DBObject->Do(
         SQL =>
-            'INSERT INTO gi_webservice_config (name, config, valid_id, '
+            'INSERT INTO gi_webservice_config (name, config, config_md5, valid_id, '
             . ' create_time, create_by, change_time, change_by)'
-            . ' VALUES (?, ?, ?, current_timestamp, ?, current_timestamp, ?)',
+            . ' VALUES (?, ?, ?, ?, current_timestamp, ?, current_timestamp, ?)',
         Bind => [
-            \$Param{Name}, \$Config, \$Param{ValidID},
+            \$Param{Name}, \$Config, \$MD5, \$Param{ValidID},
             \$Param{UserID}, \$Param{UserID},
         ],
     );
 
     return if !$DBObject->Prepare(
-        SQL  => 'SELECT id FROM gi_webservice_config WHERE name = ?',
-        Bind => [ \$Param{Name} ],
+        SQL  => 'SELECT id FROM gi_webservice_config WHERE config_md5 = ?',
+        Bind => [ \$MD5 ],
     );
 
     my $ID;
@@ -181,7 +193,7 @@ sub WebserviceAdd {
     return $ID;
 }
 
-=head2 WebserviceGet()
+=item WebserviceGet()
 
 get Webservices attributes
 
@@ -289,7 +301,7 @@ sub WebserviceGet {
     return \%Data;
 }
 
-=head2 WebserviceUpdate()
+=item WebserviceUpdate()
 
 update web service attributes
 
@@ -426,7 +438,7 @@ sub WebserviceUpdate {
     return 1;
 }
 
-=head2 WebserviceDelete()
+=item WebserviceDelete()
 
 delete a Webservice
 
@@ -468,6 +480,14 @@ sub WebserviceDelete {
         UserID       => $Param{UserID},
     );
 
+    # get object lock state object
+    my $ObjectLockStateObject = $Kernel::OM->Get('Kernel::System::GenericInterface::ObjectLockState');
+
+    # delete remaining entries in ObjectLockState
+    return if !$ObjectLockStateObject->ObjectLockStatePurge(
+        WebserviceID => $Param{ID},
+    );
+
     # get debug log object
     my $DebugLogObject = $Kernel::OM->Get('Kernel::System::GenericInterface::DebugLog');
 
@@ -491,7 +511,7 @@ sub WebserviceDelete {
     return 1;
 }
 
-=head2 WebserviceList()
+=item WebserviceList()
 
 get web service list
 
@@ -561,6 +581,8 @@ sub WebserviceList {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

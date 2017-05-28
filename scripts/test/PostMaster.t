@@ -6,7 +6,6 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-## no critic (Modules::RequireExplicitPackage)
 use strict;
 use warnings;
 use utf8;
@@ -143,7 +142,7 @@ my $XHeaders          = $ConfigObject->Get('PostmasterX-Header');
 my @PostmasterXHeader = @{$XHeaders};
 HEADER:
 for my $Header ( sort keys %NeededXHeaders ) {
-    next HEADER if ( grep { $_ eq $Header } @PostmasterXHeader );
+    next HEADER if ( grep $_ eq $Header, @PostmasterXHeader );
     push @PostmasterXHeader, $Header;
 }
 $ConfigObject->Set(
@@ -153,7 +152,7 @@ $ConfigObject->Set(
 
 # disable not needed event module
 $ConfigObject->Set(
-    Key => 'Ticket::EventModulePost###9600-TicketDynamicFieldDefault',
+    Key => 'Ticket::EventModulePost###TicketDynamicFieldDefault',
 );
 
 # use different subject format
@@ -164,7 +163,7 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
     );
 
     # use different ticket number generators
-    for my $NumberModule (qw(AutoIncrement DateChecksum Date)) {
+    for my $NumberModule (qw(AutoIncrement DateChecksum Date Random)) {
 
         $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::PostMaster::Filter'] );
         my $PostMasterFilter = $Kernel::OM->Get('Kernel::System::PostMaster::Filter');
@@ -174,11 +173,11 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
             Value => "Kernel::System::Ticket::Number::$NumberModule",
         );
 
-        # use different storage back-ends
+        # use different storage backends
         for my $StorageModule (qw(ArticleStorageDB ArticleStorageFS)) {
             $ConfigObject->Set(
-                Key   => 'Ticket::Article::Backend::MIMEBase###ArticleStorage',
-                Value => "Kernel::System::Ticket::Article::Backend::MIMEBase::$StorageModule",
+                Key   => 'Ticket::StorageModule',
+                Value => "Kernel::System::Ticket::$StorageModule",
             );
 
             # Recreate Ticket object for every loop.
@@ -312,18 +311,14 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                     next FILE;
                 }
 
-                # new/clear ticket and article objects
-                $Kernel::OM->ObjectsDiscard(
-                    Objects => [ 'Kernel::System::Ticket', 'Kernel::System::Ticket::Article' ]
-                );
+                # new/clear ticket object
+                $Kernel::OM->ObjectsDiscard( Objects => ['Kernel::System::Ticket'] );
                 my $TicketObject = $Kernel::OM->Get('Kernel::System::Ticket');
                 my %Ticket       = $TicketObject->TicketGet(
                     TicketID      => $Return[1],
                     DynamicFields => 1,
                 );
-                my $ArticleObject        = $Kernel::OM->Get('Kernel::System::Ticket::Article');
-                my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
-                my @ArticleIDs           = map { $_->{ArticleID} } $ArticleObject->ArticleList(
+                my @ArticleIDs = $TicketObject->ArticleIndex(
                     TicketID => $Return[1],
                 );
 
@@ -370,11 +365,9 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                 if ( $File == 3 ) {
 
                     # check body
-                    my %Article = $ArticleBackendObject->ArticleGet(
-                        TicketID      => $Ticket{TicketID},
+                    my %Article = $TicketObject->ArticleGet(
                         ArticleID     => $ArticleIDs[0],
                         DynamicFields => 1,
-                        UserID        => 1,
                     );
                     my $MD5 = $MainObject->MD5sum( String => $Article{Body} ) || '';
                     $Self->Is(
@@ -384,11 +377,11 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                     );
 
                     # check attachments
-                    my %Index = $ArticleBackendObject->ArticleAttachmentIndex(
+                    my %Index = $TicketObject->ArticleAttachmentIndex(
                         ArticleID => $ArticleIDs[0],
                         UserID    => 1,
                     );
-                    my %Attachment = $ArticleBackendObject->ArticleAttachment(
+                    my %Attachment = $TicketObject->ArticleAttachment(
                         ArticleID => $ArticleIDs[0],
                         FileID    => 2,
                         UserID    => 1,
@@ -404,6 +397,11 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
 
                 if ( $File == 5 ) {
 
+                    # check body
+                    my %Article = $TicketObject->ArticleGet(
+                        ArticleID     => $ArticleIDs[0],
+                        DynamicFields => 1,
+                    );
                     my @Tests = (
                         {
                             Key    => 'DynamicField_TicketFreeKey1',
@@ -448,7 +446,7 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                     );
                     for my $Test (@Tests) {
                         $Self->Is(
-                            $Ticket{ $Test->{Key} } || '',
+                            $Article{ $Test->{Key} } || '',
                             $Test->{Result} || '-',
                             $NamePrefix . " $Test->{Key} check",
                         );
@@ -458,11 +456,9 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                 if ( $File == 6 ) {
 
                     # check body
-                    my %Article = $ArticleBackendObject->ArticleGet(
-                        TicketID      => $Ticket{TicketID},
+                    my %Article = $TicketObject->ArticleGet(
                         ArticleID     => $ArticleIDs[0],
                         DynamicFields => 1,
-                        UserID        => 1,
                     );
                     my $MD5 = $MainObject->MD5sum( String => $Article{Body} ) || '';
                     $Self->Is(
@@ -472,11 +468,11 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                     );
 
                     # check attachments
-                    my %Index = $ArticleBackendObject->ArticleAttachmentIndex(
+                    my %Index = $TicketObject->ArticleAttachmentIndex(
                         ArticleID => $ArticleIDs[0],
                         UserID    => 1,
                     );
-                    my %Attachment = $ArticleBackendObject->ArticleAttachment(
+                    my %Attachment = $TicketObject->ArticleAttachment(
                         ArticleID => $ArticleIDs[0],
                         FileID    => 2,
                         UserID    => 1,
@@ -492,11 +488,9 @@ for my $TicketSubjectConfig ( 'Right', 'Left' ) {
                 if ( $File == 11 ) {
 
                     # check body
-                    my %Article = $ArticleBackendObject->ArticleGet(
-                        TicketID      => $Ticket{TicketID},
+                    my %Article = $TicketObject->ArticleGet(
                         ArticleID     => $ArticleIDs[0],
                         DynamicFields => 1,
-                        UserID        => 1,
                     );
                     my $MD5 = $MainObject->MD5sum( String => $Article{Body} ) || '';
 

@@ -7,7 +7,7 @@
 # --
 
 # Default configuration for OTRS. All changes to this file will be lost after an
-#   update, please use AdminSystemConfiguration to configure your system.
+#   update, please use AdminSysConfig to configure your system.
 
 ## nofilter(TidyAll::Plugin::OTRS::Perl::LayoutObject)
 
@@ -17,8 +17,8 @@ use strict;
 use warnings;
 use utf8;
 
-# Perl 5.16.0 is the required minimum version to use OTRS.
-use 5.016_000;
+# Perl 5.10.0 is the required minimum version to use OTRS.
+use 5.010_000;
 
 # prepend '../Custom', '../Kernel/cpan-lib' and '../' to the module search path @INC
 use File::Basename;
@@ -105,7 +105,7 @@ sub LoadDefaults {
 
     # ProductName
     # (Application name displayed in frontend.)
-    $Self->{ProductName} = 'OTRS 6';
+    $Self->{ProductName} = 'OTRS 5s';
 
     # --------------------------------------------------- #
     # database settings                                   #
@@ -167,103 +167,103 @@ sub LoadDefaults {
     # used languages
     # (short name = long name and file)
     $Self->{DefaultUsedLanguages} = {
-        'ar_SA'   => 'Arabic (Saudi Arabia)',
-        'bg'      => 'Bulgarian',
-        'ca'      => 'Catalan',
-        'cs'      => 'Czech',
-        'da'      => 'Danish',
-        'de'      => 'German',
-        'en'      => 'English (United States)',
-        'en_CA'   => 'English (Canada)',
-        'en_GB'   => 'English (United Kingdom)',
-        'es'      => 'Spanish',
-        'es_CO'   => 'Spanish (Colombia)',
-        'es_MX'   => 'Spanish (Mexico)',
-        'et'      => 'Estonian',
-        'el'      => 'Greek',
-        'fa'      => 'Persian',
-        'fi'      => 'Finnish',
-        'fr'      => 'French',
-        'fr_CA'   => 'French (Canada)',
-        'gl'      => 'Galician',
-        'he'      => 'Hebrew',
-        'hi'      => 'Hindi',
-        'hr'      => 'Croatian',
-        'hu'      => 'Hungarian',
-        'id'      => 'Indonesian',
-        'it'      => 'Italian',
-        'ja'      => 'Japanese',
-        'lt'      => 'Lithuanian',
-        'lv'      => 'Latvian',
-        'ms'      => 'Malay',
-        'nl'      => 'Nederlands',
-        'nb_NO'   => 'Norwegian',
-        'pt_BR'   => 'Portuguese (Brasil)',
-        'pt'      => 'Portuguese',
-        'pl'      => 'Polish',
-        'ru'      => 'Russian',
-        'sl'      => 'Slovenian',
+        'ar_SA' => 'Arabic (Saudi Arabia)',
+        'bg' => 'Bulgarian',
+        'ca' => 'Catalan',
+        'cs' => 'Czech',
+        'da' => 'Danish',
+        'de' => 'German',
+        'en' => 'English (United States)',
+        'en_CA' => 'English (Canada)',
+        'en_GB' => 'English (United Kingdom)',
+        'es' => 'Spanish',
+        'es_CO' => 'Spanish (Colombia)',
+        'es_MX' => 'Spanish (Mexico)',
+        'et' => 'Estonian',
+        'el' => 'Greek',
+        'fa' => 'Persian',
+        'fi' => 'Finnish',
+        'fr' => 'French',
+        'fr_CA' => 'French (Canada)',
+        'gl' => 'Galician',
+        'he' => 'Hebrew',
+        'hi' => 'Hindi',
+        'hr' => 'Croatian',
+        'hu' => 'Hungarian',
+        'id' => 'Indonesian',
+        'it' => 'Italian',
+        'ja' => 'Japanese',
+        'lt' => 'Lithuanian',
+        'lv' => 'Latvian',
+        'ms' => 'Malay',
+        'nl' => 'Nederlands',
+        'nb_NO' => 'Norwegian',
+        'pt_BR' => 'Portuguese (Brasil)',
+        'pt' => 'Portuguese',
+        'pl' => 'Polish',
+        'ru' => 'Russian',
+        'sl' => 'Slovenian',
         'sr_Latn' => 'Serbian Latin',
         'sr_Cyrl' => 'Serbian Cyrillic',
-        'sk_SK'   => 'Slovak',
-        'sv'      => 'Swedish',
-        'sw'      => 'Swahili',
-        'th_TH'   => 'Thai',
-        'tr'      => 'Turkish',
-        'uk'      => 'Ukrainian',
-        'vi_VN'   => 'Vietnam',
-        'zh_CN'   => 'Chinese (Simplified)',
-        'zh_TW'   => 'Chinese (Traditional)',
+        'sk_SK' => 'Slovak',
+        'sv' => 'Swedish',
+        'sw' => 'Swahili',
+        'th_TH' => 'Thai',
+        'tr' => 'Turkish',
+        'uk' => 'Ukrainian',
+        'vi_VN' => 'Vietnam',
+        'zh_CN' => 'Chinese (Simplified)',
+        'zh_TW' => 'Chinese (Traditional)',
     };
 
     $Self->{DefaultUsedLanguagesNative} = {
-        'ar_SA'   => 'العَرَبِية‎',
-        'bg'      => 'Български',
-        'ca'      => 'Català',
-        'cs'      => 'Česky',
-        'da'      => 'Dansk',
-        'de'      => 'Deutsch',
-        'en'      => 'English (United States)',
-        'en_CA'   => 'English (Canada)',
-        'en_GB'   => 'English (United Kingdom)',
-        'es'      => 'Español',
-        'es_CO'   => 'Español (Colombia)',
-        'es_MX'   => 'Español (México)',
-        'et'      => 'Eesti',
-        'el'      => 'Ελληνικά',
-        'fa'      => 'فارسى',
-        'fi'      => 'Suomi',
-        'fr'      => 'Français',
-        'fr_CA'   => 'Français (Canada)',
-        'gl'      => 'Galego',
-        'he'      => 'עברית',
-        'hi'      => 'हिन्दी',
-        'hr'      => 'Hrvatski',
-        'hu'      => 'Magyar',
-        'id'      => 'Bahasa Indonesia',
-        'it'      => 'Italiano',
-        'ja'      => '日本語',
-        'lt'      => 'Lietuvių kalba',
-        'lv'      => 'Latvijas',
-        'ms'      => 'Melayu',
-        'nl'      => 'Nederlandse',
-        'nb_NO'   => 'Norsk bokmål',
-        'pt_BR'   => 'Português Brasileiro',
-        'pt'      => 'Português',
-        'pl'      => 'Polski',
-        'ru'      => 'Русский',
-        'sl'      => 'Slovenščina',
+        'ar_SA' => 'العَرَبِية‎',
+        'bg' => 'Български',
+        'ca' => 'Català',
+        'cs' => 'Česky',
+        'da' => 'Dansk',
+        'de' => 'Deutsch',
+        'en' => 'English (United States)',
+        'en_CA' => 'English (Canada)',
+        'en_GB' => 'English (United Kingdom)',
+        'es' => 'Español',
+        'es_CO' => 'Español (Colombia)',
+        'es_MX' => 'Español (México)',
+        'et' => 'Eesti',
+        'el' => 'Ελληνικά',
+        'fa' => 'فارسى',
+        'fi' => 'Suomi',
+        'fr' => 'Français',
+        'fr_CA' => 'Français (Canada)',
+        'gl' => 'Galego',
+        'he' => 'עברית',
+        'hi' => 'हिन्दी',
+        'hr' => 'Hrvatski',
+        'hu' => 'Magyar',
+        'id' => 'Bahasa Indonesia',
+        'it' => 'Italiano',
+        'ja' => '日本語',
+        'lt' => 'Lietuvių kalba',
+        'lv' => 'Latvijas',
+        'ms' => 'Melayu',
+        'nl' => 'Nederlandse',
+        'nb_NO' => 'Norsk bokmål',
+        'pt_BR' => 'Português Brasileiro',
+        'pt' => 'Português',
+        'pl' => 'Polski',
+        'ru' => 'Русский',
+        'sl' => 'Slovenščina',
         'sr_Latn' => 'Srpski',
         'sr_Cyrl' => 'Српски',
-        'sk_SK'   => 'Slovenčina',
-        'sv'      => 'Svenska',
-        'sw'      => 'Kiswahili',
-        'th_TH'   => 'ภาษาไทย',
-        'tr'      => 'Türkçe',
-        'uk'      => 'Українська',
-        'vi_VN'   => 'ViɆt Nam',
-        'zh_CN'   => '简体中文',
-        'zh_TW'   => '正體中文',
+        'sk_SK' => 'Slovenčina',
+        'sv' => 'Svenska',
+        'sw' => 'Kiswahili',
+        'th_TH' => 'ภาษาไทย',
+        'tr' => 'Türkçe',
+        'uk' => 'Українська',
+        'vi_VN' => 'ViɆt Nam',
+        'zh_CN' => '简体中文',
+        'zh_TW' => '正體中文',
     };
 
     # default theme
@@ -283,11 +283,11 @@ sub LoadDefaults {
 
     # Frontend::JavaScriptPath
     # (URL JavaScript path.)
-    $Self->{'Frontend::JavaScriptPath'} = '<OTRS_CONFIG_Frontend::WebPath>js/';
+    $Self->{'Frontend::JavaScriptPath'} =  '<OTRS_CONFIG_Frontend::WebPath>js/';
 
     # Frontend::CSSPath
     # (URL CSS path.)
-    $Self->{'Frontend::CSSPath'} = '<OTRS_CONFIG_Frontend::WebPath>css/';
+    $Self->{'Frontend::CSSPath'} =  '<OTRS_CONFIG_Frontend::WebPath>css/';
 
     # Frontend::ImagePath
     # (URL image path of icons for navigation.)
@@ -312,10 +312,6 @@ sub LoadDefaults {
     # TimeInputFormat
     # (default date input format) [Option|Input]
     $Self->{TimeInputFormat} = 'Option';
-
-    # TimeInputMinutesStep
-    # (default minute step in minutes dropdown) [1,2,5,10,15,30]
-    $Self->{TimeInputMinutesStep} = 1;
 
     # AttachmentDownloadType
     # (if the tickets attachments will be opened in browser or just to
@@ -354,6 +350,11 @@ sub LoadDefaults {
     $Self->{'LogModule::SysLog::Facility'} = 'user';
 
     # param for LogModule Kernel::System::Log::SysLog
+    # (Depends on you sys log system environment. 'unix' is default, on
+    # solaris you may need to use 'stream'.)
+    $Self->{'LogModule::SysLog::LogSock'} = 'unix';
+
+    # param for LogModule Kernel::System::Log::SysLog
     # (if syslog can't work with utf-8, force the log
     # charset with this option, on other chars will be
     # replaces with ?)
@@ -376,7 +377,7 @@ sub LoadDefaults {
     # --------------------------------------------------- #
     # (Where is sendmail located and some options.
     # See 'man sendmail' for details. Or use the SMTP backend.)
-    $Self->{'SendmailModule'}      = 'Kernel::System::Email::Sendmail';
+    $Self->{SendmailModule}      = 'Kernel::System::Email::Sendmail';
     $Self->{'SendmailModule::CMD'} = '/usr/sbin/sendmail -i -f';
 
 #    $Self->{'SendmailModule'} = 'Kernel::System::Email::SMTP';
@@ -705,43 +706,29 @@ sub LoadDefaults {
     # agent interface notification module to check the admin user id
     # (don't work with user id 1 notification)
     $Self->{'Frontend::NotifyModule'} = {
-        '1000-CloudServicesDisabled' => {
-            Group  => 'admin',
-            Module => 'Kernel::Output::HTML::Notification::AgentCloudServicesDisabled',
+        '100-CloudServicesDisabled' => {
+          'Group' => 'admin',
+          'Module' => 'Kernel::Output::HTML::Notification::AgentCloudServicesDisabled'
         },
-        '1100-OTRSBusiness' => {
-            Group  => 'admin',
-            Module => 'Kernel::Output::HTML::Notification::AgentOTRSBusiness',
+        '100-OTRSBusiness' => {
+            'Group' => 'admin',
+            'Module' => 'Kernel::Output::HTML::Notification::AgentOTRSBusiness'
         },
-        '2000-UID-Check' => {
-            Module => 'Kernel::Output::HTML::Notification::UIDCheck',
+        '200-UID-Check' => {
+          'Module' => 'Kernel::Output::HTML::Notification::UIDCheck',
         },
-        '2500-AgentSessionLimit' => {
+        '250-AgentSessionLimit' => {
           'Module' => 'Kernel::Output::HTML::Notification::AgentSessionLimit',
         },
-        '5000-SystemConfigurationIsDirty-Check' => {
-            Group  => 'admin',
-            Module => 'Kernel::Output::HTML::Notification::SystemConfigurationIsDirtyCheck',
+        '500-OutofOffice-Check' => {
+          'Module' => 'Kernel::Output::HTML::Notification::OutofOfficeCheck',
         },
-        '5200-SystemConfigurationInvalid-Check' => {
-            Group  => 'admin',
-            Module => 'Kernel::Output::HTML::Notification::SystemConfigurationInvalidCheck',
+        '600-SystemMaintenance-Check' => {
+            'Module' => 'Kernel::Output::HTML::Notification::SystemMaintenanceCheck',
         },
-        '5500-OutofOffice-Check' => {
-            Module => 'Kernel::Output::HTML::Notification::OutofOfficeCheck',
-        },
-        '6000-SystemMaintenance-Check' => {
-            Module => 'Kernel::Output::HTML::Notification::SystemMaintenanceCheck',
-        },
-        '6050-SystemConfiguration-OutOfSync-Check' =>  {
-            Module => 'Kernel::Output::HTML::Notification::SystemConfigurationOutOfSyncCheck',
-            AllowedDelayMinutes => '5',
-        },
-        '7000-AgentTimeZone-Check' => {
-            Module => 'Kernel::Output::HTML::Notification::AgentTimeZoneCheck',
-        },
-        '8000-Daemon-Check' => {
-            Module => 'Kernel::Output::HTML::Notification::DaemonCheck',
+
+        '800-Daemon-Check' => {
+          'Module' => 'Kernel::Output::HTML::Notification::DaemonCheck',
         },
     };
 
@@ -816,8 +803,8 @@ sub LoadDefaults {
     # Time Settings
     # --------------------------------------------------- #
     # TimeZone
-    # (set the OTRS time zone, default is UTC)
-#    $Self->{'OTRSTimeZone'} = 'UTC';
+    # (set the system time zone, default is local time)
+#    $Self->{'TimeZone'} = 0;
 
     # Time*
     # (Used for ticket age, escalation and system unlock calculation)
@@ -835,12 +822,8 @@ sub LoadDefaults {
     };
 
     $Self->{TimeVacationDays} = {
-        1 => {
-            1 => 'New Year\'s Day',
-        },
-        5 => {
-            1 => 'International Workers\' Day',
-        },
+        1  => { 1 => 'New Year\'s Day', },
+        5  => { 1 => 'International Workers\' Day', },
         12 => {
             24 => 'Christmas Eve',
             25 => 'First Christmas Day',
@@ -854,7 +837,7 @@ sub LoadDefaults {
             1 => {
                 1 => 'test',
             },
-        },
+            },
     };
 
     # --------------------------------------------------- #
@@ -908,6 +891,20 @@ sub LoadDefaults {
 #    $Self->{'MIME-Viewer'}->{'text/xml'} = $Self->{Home}.'/scripts/tools/xml2html.pl';
 
     # --------------------------------------------------- #
+    # SpellChecker
+    # --------------------------------------------------- #
+    # (If ispell or aspell is available, then we will provide a spelling
+    # checker.)
+    #    $Self->{SpellChecker} = 0;
+    $Self->{SpellChecker}            = 0;
+    $Self->{SpellCheckerBin}         = '/usr/bin/ispell';
+    $Self->{SpellCheckerDictDefault} = 'english';
+
+    # SpellCheckerIgnore
+    # (A list of ignored words.)
+    $Self->{SpellCheckerIgnore} = [ 'www', 'webmail', 'https', 'http', 'html', 'rfc' ];
+
+    # --------------------------------------------------- #
     # directories                                         #
     # --------------------------------------------------- #
     # root directory
@@ -915,9 +912,8 @@ sub LoadDefaults {
 
     # tmp dir
     $Self->{TempDir} = '<OTRS_CONFIG_Home>/var/tmp';
-
     # article dir
-    $Self->{'Ticket::Article::Backend::MIMEBase'}->{'ArticleDataDir'} = '<OTRS_CONFIG_Home>/var/article';
+    $Self->{ArticleDir} = '<OTRS_CONFIG_Home>/var/article';
 
     # html template dirs
     $Self->{TemplateDir}       = '<OTRS_CONFIG_Home>/Kernel/Output';
@@ -928,7 +924,7 @@ sub LoadDefaults {
     # --------------------------------------------------- #
 
     # Customer Common CSS
-    $Self->{'Loader::Customer::CommonCSS'}->{'000-Framework'} = [
+    $Self->{'Loader::Customer::CommonCSS'}->{'000-Framework'} =  [
         'Core.Reset.css',
         'Core.Default.css',
         'Core.Form.css',
@@ -940,11 +936,11 @@ sub LoadDefaults {
         'Core.TicketZoom.css',
         'Core.InputFields.css',
         'Core.Print.css',
-        'Core.Animations.css',
+        'thirdparty/fontawesome/font-awesome.css'
     ];
 
     # Agent Common CSS
-    $Self->{'Loader::Agent::CommonCSS'}->{'000-Framework'} = [
+    $Self->{'Loader::Agent::CommonCSS'}->{'000-Framework'} =  [
         'Core.Reset.css',
         'Core.Default.css',
         'Core.Header.css',
@@ -956,7 +952,6 @@ sub LoadDefaults {
         'Core.PageLayout.css',
         'Core.Form.css',
         'Core.Table.css',
-        'Core.Login.css',
         'Core.Widget.css',
         'Core.WidgetMenu.css',
         'Core.TicketDetail.css',
@@ -964,7 +959,7 @@ sub LoadDefaults {
         'Core.Dialog.css',
         'Core.InputFields.css',
         'Core.Print.css',
-        'Core.Animations.css',
+        'thirdparty/fontawesome/font-awesome.css',
     ];
 
     # --------------------------------------------------- #
@@ -972,23 +967,20 @@ sub LoadDefaults {
     # --------------------------------------------------- #
 
     # Customer Common JS
-    $Self->{'Loader::Customer::CommonJS'}->{'000-Framework'} = [
-        'thirdparty/jquery-3.1.1/jquery.js',
+    $Self->{'Loader::Customer::CommonJS'}->{'000-Framework'} =  [
+        'thirdparty/jquery-2.1.4/jquery.js',
         'thirdparty/jquery-browser-detection/jquery-browser-detection.js',
-        'thirdparty/jquery-validate-1.15.0/jquery.validate.js',
-        'thirdparty/jquery-ui-1.12.1/jquery-ui.js',
+        'thirdparty/jquery-validate-1.14.0/jquery.validate.js',
+        'thirdparty/jquery-ui-1.11.4/jquery-ui.js',
+        'thirdparty/stacktrace-0.6.4/stacktrace.js',
         'thirdparty/jquery-pubsub/pubsub.js',
-        'thirdparty/jquery-jstree-3.3.3/jquery.jstree.js',
-        'thirdparty/nunjucks-3.0.0/nunjucks.js',
-        'Core.Init.js',
+        'thirdparty/jquery-jstree-3.1.1/jquery.jstree.js',
         'Core.Debug.js',
         'Core.Exception.js',
         'Core.Data.js',
         'Core.JSON.js',
         'Core.JavaScriptEnhancements.js',
         'Core.Config.js',
-        'Core.Language.js',
-        'Core.Template.js',
         'Core.App.js',
         'Core.App.Responsive.js',
         'Core.AJAX.js',
@@ -996,7 +988,6 @@ sub LoadDefaults {
         'Core.UI.InputFields.js',
         'Core.UI.Accessibility.js',
         'Core.UI.Dialog.js',
-        'Core.UI.Floater.js',
         'Core.UI.RichTextEditor.js',
         'Core.UI.Datepicker.js',
         'Core.UI.Popup.js',
@@ -1006,27 +997,24 @@ sub LoadDefaults {
         'Core.Form.ErrorTooltips.js',
         'Core.Form.Validate.js',
         'Core.Customer.js',
-        'Core.Customer.Responsive.js',
+        'Core.Customer.Responsive.js'
     ];
 
     # Agent Common JS
-    $Self->{'Loader::Agent::CommonJS'}->{'000-Framework'} = [
-        'thirdparty/jquery-3.1.1/jquery.js',
+    $Self->{'Loader::Agent::CommonJS'}->{'000-Framework'} =  [
+        'thirdparty/jquery-2.1.4/jquery.js',
         'thirdparty/jquery-browser-detection/jquery-browser-detection.js',
-        'thirdparty/jquery-ui-1.12.1/jquery-ui.js',
+        'thirdparty/jquery-ui-1.11.4/jquery-ui.js',
         'thirdparty/jquery-ui-touch-punch-0.2.3/jquery.ui.touch-punch.js',
-        'thirdparty/jquery-validate-1.15.0/jquery.validate.js',
+        'thirdparty/jquery-validate-1.14.0/jquery.validate.js',
+        'thirdparty/stacktrace-0.6.4/stacktrace.js',
         'thirdparty/jquery-pubsub/pubsub.js',
-        'thirdparty/jquery-jstree-3.3.3/jquery.jstree.js',
-        'thirdparty/nunjucks-3.0.0/nunjucks.js',
-        'Core.Init.js',
+        'thirdparty/jquery-jstree-3.1.1/jquery.jstree.js',
         'Core.JavaScriptEnhancements.js',
         'Core.Debug.js',
         'Core.Exception.js',
         'Core.Data.js',
         'Core.Config.js',
-        'Core.Language.js',
-        'Core.Template.js',
         'Core.JSON.js',
         'Core.App.js',
         'Core.App.Responsive.js',
@@ -1052,9 +1040,6 @@ sub LoadDefaults {
         'Core.Agent.js',
         'Core.Agent.Search.js',
         'Core.Agent.CustomerInformationCenterSearch.js',
-        'Core.Agent.CustomerSearch.js',
-        'Core.Agent.CustomerUserInformationCenterSearch.js',
-        'Core.Agent.Header.js',
         'Core.UI.Notification.js',
         'Core.Agent.Responsive.js',
     ];
@@ -1088,7 +1073,7 @@ sub LoadDefaults {
     # --------------------------------------------------- #
     # PGP settings (supports gpg)                         #
     # --------------------------------------------------- #
-    $Self->{PGP}            = 0;
+    $Self->{PGP}          = 0;
     $Self->{'PGP::Bin'}     = '/usr/bin/gpg';
     $Self->{'PGP::Options'} = '--homedir /opt/otrs/.gnupg/ --batch --no-tty --yes';
 
@@ -1111,7 +1096,7 @@ sub LoadDefaults {
     # --------------------------------------------------- #
     # system permissions
     # --------------------------------------------------- #
-    $Self->{'System::Permission'} = [
+    $Self->{'System::Permission'}           = [
         'ro',
         'move_into',
         'create',
@@ -1141,50 +1126,70 @@ sub LoadDefaults {
     $Self->{PreferencesView} = [ 'User Profile', 'Notification Settings', 'Other Settings' ];
 
     $Self->{PreferencesGroups}->{Password} = {
-        'Active'                            => '1',
-        'Area'                              => 'Agent',
-        'PreferenceGroup'                   => 'UserProfile',
-        'Label'                             => 'Change password',
-        'Module'                            => 'Kernel::Output::HTML::Preferences::Password',
-        'PasswordMaxLoginFailed'            => '0',
-        'PasswordMin2Characters'            => '0',
+        'Active' => '1',
+        'Area' => 'Agent',
+        'Column' => 'User Profile',
+        'Desc' => 'Set a new password by filling in your current password and a new one.',
+        'Label' => 'Change password',
+        'Module' => 'Kernel::Output::HTML::Preferences::Password',
+        'PasswordMaxLoginFailed' => '0',
+        'PasswordMin2Characters' => '0',
         'PasswordMin2Lower2UpperCharacters' => '0',
-        'PasswordMinSize'                   => '0',
-        'PasswordNeedDigit'                 => '0',
-        'PasswordRegExp'                    => '',
-        'Prio'                              => '0500',
-        'Desc'                              => 'Set a new password by filling in your current password and a new one.',
+        'PasswordMinSize' => '0',
+        'PasswordNeedDigit' => '0',
+        'PasswordRegExp' => '',
+        'Prio' => '0500'
+    };
+    $Self->{PreferencesGroups}->{SpellDict} = {
+        Module => 'Kernel::Output::HTML::Preferences::Generic',
+        Column => 'Other Options',
+        Label  => 'Spelling Dictionary',
+        Desc   => 'Select your default spelling dictionary.',
+        Data   => {
+
+            # installed dict catalog (check your insalled catalogues, e. g. deutsch -=> german!)
+            # dict => frontend (ispell)
+            'english' => 'English',
+            'deutsch' => 'Deutsch',
+
+            # dict => frontend (aspell)
+#            'english' => 'English',
+#            'german'  => 'Deutsch',
+        },
+        PrefKey => 'UserSpellDict',
+        Prio    => 5000,
+        Active   => 1,
     };
     $Self->{PreferencesGroups}->{Comment} = {
-        'Active'  => '0',
-        'Block'   => 'Input',
-        'PreferenceGroup' => 'Miscellaneous',
-        'Data'    => '[% Env("UserComment") %]',
-        'Key'     => 'Comment',
-        'Label'   => 'Comment',
-        'Module'  => 'Kernel::Output::HTML::Preferences::Generic',
+        'Active' => '0',
+        'Block' => 'Input',
+        'Column' => 'Other Settings',
+        'Data' => '[% Env("UserComment") %]',
+        'Key' => 'Comment',
+        'Label' => 'Comment',
+        'Module' => 'Kernel::Output::HTML::Preferences::Generic',
         'PrefKey' => 'UserComment',
-        'Prio'    => '6000',
+        'Prio' => '6000'
     };
 
     $Self->{PreferencesGroups}->{Language} = {
-        'Active'  => '1',
-        'PreferenceGroup'  => 'UserProfile',
-        'Key'     => '',
-        'Label'   => 'Language',
-        'Desc'    => 'Select the main interface language.',
-        'Module'  => 'Kernel::Output::HTML::Preferences::Language',
+        'Active' => '1',
+        'Column' => 'User Profile',
+        'Key' => 'Language',
+        'Label' => 'Language',
+        'Desc' => 'Select the main interface language.',
+        'Module' => 'Kernel::Output::HTML::Preferences::Language',
         'PrefKey' => 'UserLanguage',
-        'Prio'    => '1000',
+        'Prio' => '1000'
     };
     $Self->{PreferencesGroups}->{Theme} = {
-        'Active'  => '1',
-        'PreferenceGroup'  => 'UserProfile',
-        'Key'     => 'Frontend theme',
-        'Label'   => 'Theme',
-        'Module'  => 'Kernel::Output::HTML::Preferences::Theme',
+        'Active' => '1',
+        'Column' => 'User Profile',
+        'Key' => 'Frontend theme',
+        'Label' => 'Theme',
+        'Module' => 'Kernel::Output::HTML::Preferences::Theme',
         'PrefKey' => 'UserTheme',
-        'Prio'    => '3000',
+        'Prio' => '3000'
     };
 
     # --------------------------------------------------- #
@@ -1276,7 +1281,7 @@ You can log in via the following URL:
 #    $Self->{'CustomerPanel::InfoFile'} = 'CustomerAccept';
 
     # CustomerPanelLostPassword
-    # (use lost password feature)
+    # (use lost passowrd feature)
     $Self->{CustomerPanelLostPassword} = 1;
 
     # CustomerPanelCreateAccount
@@ -1432,7 +1437,6 @@ via the Preferences button after logging in.
         Name   => 'Database Backend',
         Module => 'Kernel::System::CustomerUser::DB',
         Params => {
-
             # if you want to use an external database, add the
             # required settings
 #            DSN  => 'DBI:odbc:yourdsn',
@@ -1461,8 +1465,8 @@ via the Preferences button after logging in.
         CustomerKey => 'login',
 
         # customer #
-        CustomerID    => 'customer_id',
-        CustomerValid => 'valid_id',
+        CustomerID             => 'customer_id',
+        CustomerValid          => 'valid_id',
 
         # The last field must always be the email address so that a valid
         #   email address like "John Doe" <john.doe@domain.com> can be constructed from the fields.
@@ -1493,14 +1497,6 @@ via the Preferences button after logging in.
 #        ReadOnly => 1,
         Map => [
 
-            # Info about dynamic fields:
-            #
-            # Dynamic Fields of type CustomerUser can be used within the mapping (see example below).
-            # The given storage (third column) then can also be used within the following configurations (see above):
-            # CustomerUserSearchFields, CustomerUserPostMasterSearchFields, CustomerUserListFields, CustomerUserNameFields
-            #
-            # Note that the columns 'frontend' and 'readonly' will be ignored for dynamic fields.
-
             # note: Login, Email and CustomerID needed!
             # var, frontend, storage, shown (1=always,2=lite), required, storage-type, http-link, readonly, http-link-target, link class(es)
             [ 'UserTitle',      Translatable('Title or salutation'), 'title',  1, 0, 'var', '', 0 ],
@@ -1521,9 +1517,6 @@ via the Preferences button after logging in.
             [ 'UserCountry',      Translatable('Country'),     'country',      1, 0, 'var', '', 0 ],
             [ 'UserComment',      Translatable('Comment'),     'comments',     1, 0, 'var', '', 0 ],
             [ 'ValidID',          Translatable('Valid'),       'valid_id',     0, 1, 'int', '', 0 ],
-
-            # Dynamic field example
-#            [ 'DynamicField_Name_X', undef, 'Name_X', 0, 0, 'dynamic_field', undef, 0, undef, undef, ],
         ],
 
         # default selections
@@ -1586,23 +1579,21 @@ via the Preferences button after logging in.
 #        AdminSetPreferences => 0,
 #        # cache time to live in sec. - cache any ldap queries
 #        CacheTTL => 0,
-#        # just a read only source
-#        ReadOnly => 1,
 #        Map => [
 #            # note: Login, Email and CustomerID needed!
 #            # var, frontend, storage, shown (1=always,2=lite), required, storage-type, http-link, readonly, http-link-target, link class(es)
-#            [ 'UserTitle',       'Title',       'title',               1, 0, 'var', '', 1 ],
-#            [ 'UserFirstname',   'Firstname',   'givenname',           1, 1, 'var', '', 1 ],
-#            [ 'UserLastname',    'Lastname',    'sn',                  1, 1, 'var', '', 1 ],
-#            [ 'UserLogin',       'Username',    'uid',                 1, 1, 'var', '', 1 ],
-#            [ 'UserEmail',       'Email',       'mail',                1, 1, 'var', '', 1 ],
-#            [ 'UserCustomerID',  'CustomerID',  'mail',                0, 1, 'var', '', 1 ],
-#            # [ 'UserCustomerIDs', 'CustomerIDs', 'second_customer_ids', 1, 0, 'var', '', 1 ],
-#            [ 'UserPhone',       'Phone',       'telephonenumber',     1, 0, 'var', '', 1 ],
-#            [ 'UserAddress',     'Address',     'postaladdress',       1, 0, 'var', '', 1 ],
-#            [ 'UserComment',     'Comment',     'description',         1, 0, 'var', '', 1 ],
+#            [ 'UserTitle',      'Title',      'title',           1, 0, 'var', '', 0 ],
+#            [ 'UserFirstname',  'Firstname',  'givenname',       1, 1, 'var', '', 0 ],
+#            [ 'UserLastname',   'Lastname',   'sn',              1, 1, 'var', '', 0 ],
+#            [ 'UserLogin',      'Username',   'uid',             1, 1, 'var', '', 0 ],
+#            [ 'UserEmail',      'Email',      'mail',            1, 1, 'var', '', 0 ],
+#            [ 'UserCustomerID', 'CustomerID', 'mail',            0, 1, 'var', '', 0 ],
+#            # [ 'UserCustomerIDs', 'CustomerIDs', 'second_customer_ids', 1, 0, 'var', '', 0 ],
+#            [ 'UserPhone',      'Phone',      'telephonenumber', 1, 0, 'var', '', 0 ],
+#            [ 'UserAddress',    'Address',    'postaladdress',   1, 0, 'var', '', 0 ],
+#            [ 'UserComment',    'Comment',    'description',     1, 0, 'var', '', 0 ],
 #            # this is needed, if "SMIME::FetchFromCustomer" is active
-#            # [ 'UserSMIMECertificate', 'SMIMECertificate', 'userSMIMECertificate', 0, 1, 'var', '', 1 ],
+#            # [ 'UserSMIMECertificate', 'SMIMECertificate', 'userSMIMECertificate',      0, 1, 'var', '', 0 ],
 #        ],
 #    };
 
@@ -1638,21 +1629,13 @@ via the Preferences button after logging in.
         CustomerCompanyKey             => 'customer_id',
         CustomerCompanyValid           => 'valid_id',
         CustomerCompanyListFields      => [ 'customer_id', 'name' ],
-        CustomerCompanySearchFields    => [ 'customer_id', 'name' ],
+        CustomerCompanySearchFields    => ['customer_id', 'name'],
         CustomerCompanySearchPrefix    => '*',
         CustomerCompanySearchSuffix    => '*',
         CustomerCompanySearchListLimit => 250,
         CacheTTL                       => 60 * 60 * 24, # use 0 to turn off cache
 
         Map => [
-            # Info about dynamic fields:
-            #
-            # Dynamic Fields of type CustomerCompany can be used within the mapping (see example below).
-            # The given storage (third column) then can also be used within the following configurations (see above):
-            # CustomerCompanySearchFields, CustomerCompanyListFields
-            #
-            # Note that the columns 'frontend' and 'readonly' will be ignored for dynamic fields.
-
             # var, frontend, storage, shown (1=always,2=lite), required, storage-type, http-link, readonly
             [ 'CustomerID',             'CustomerID', 'customer_id', 0, 1, 'var', '', 0 ],
             [ 'CustomerCompanyName',    'Customer',   'name',        1, 1, 'var', '', 0 ],
@@ -1663,9 +1646,6 @@ via the Preferences button after logging in.
             [ 'CustomerCompanyURL',     'URL',        'url',         1, 0, 'var', '[% Data.CustomerCompanyURL | html %]', 0 ],
             [ 'CustomerCompanyComment', 'Comment',    'comments',    1, 0, 'var', '', 0 ],
             [ 'ValidID',                'Valid',      'valid_id',    0, 1, 'int', '', 0 ],
-
-            # Dynamic field example
-#            [ 'DynamicField_Name_Y', undef, 'Name_Y', 0, 0, 'dynamic_field', undef, 0,],
         ],
     };
 
@@ -1710,165 +1690,122 @@ via the Preferences button after logging in.
 
     # admin interface
     $Self->{'Frontend::Module'}->{Admin} = {
-        Description => 'Admin Area.',
-        Group       => [
-            'admin',
+        'Description' => 'Admin Area.',
+        'Group' => [
+            'admin'
         ],
-        GroupRo     => [],
-        NavBarName => 'Admin',
-        Title      => '',
+        'Loader' => {
+            'CSS' => [
+                'Core.Agent.Admin.css'
+            ],
+                'JavaScript' => [
+                'Core.Agent.Admin.SysConfig.js'
+            ]
+        },
+        'NavBar' => [
+            {
+                'AccessKey' => 'a',
+                'Block' => 'ItemArea',
+                'Description' => '',
+                'Link' => 'Action=Admin',
+                'LinkOption' => '',
+                'Name' => 'Admin',
+                'NavBar' => 'Admin',
+                'Prio' => '10000',
+                'Type' => 'Menu'
+            }
+        ],
+        'NavBarModule' => {
+            'Module' => 'Kernel::Output::HTML::NavBar::ModuleAdmin'
+        },
+        'NavBarName' => 'Admin',
+        'Title' => ''
     };
-    $Self->{'Loader::Module::Admin'}->{'000-Defaults'} = {
-        CSS => [
-            'Core.Agent.Admin.css',
-        ],
-        JavaScript => [
-            'Core.Agent.Admin.js',
-            'Core.UI.AllocationList.js',
-            'Core.Agent.TableFilters.js',
-        ],
-    };
-    $Self->{'Frontend::Navigation'}->{Admin}->{1} = {
-        Group       => [
-            'admin',
-        ],
-        GroupRo     => [],
-        AccessKey   => 'a',
-        Block       => 'ItemArea',
-        Description => '',
-        Link        => 'Action=Admin',
-        LinkOption  => '',
-        Name        => 'Admin',
-        NavBar      => 'Admin',
-        Prio        => '10000',
-        Type        => 'Menu',
-    };
-    $Self->{'Frontend::NavigationModule'}->{Admin} = {
-        Group       => [
-            'admin',
-        ],
-        GroupRo     => [],
-        Module => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
-        Description => '',
-        IconBig => '',
-        IconSmall => '',
-        Name => '',
-        Prio => '',
-        Block => '',
-    };
-
     $Self->{'Frontend::Module'}->{AdminInit} = {
-        Description => 'Admin',
-        Group       => [
-            'admin',
+        'Description' => 'Admin',
+        'Group' => [
+            'admin'
         ],
-        GroupRo     => [],
-        NavBarName => '',
-        Title      => 'Init',
+        'NavBarName' => '',
+        'Title' => 'Init'
     };
     $Self->{'Frontend::Module'}->{AdminLog} = {
-        Description => 'Admin',
-        Group       => [
-            'admin',
+        'Description' => 'Admin',
+        'Group' => [
+            'admin'
         ],
-        GroupRo     => [],
-        NavBarName => 'Admin',
-        Title      => 'System Log',
+        'NavBarModule' => {
+            'Block' => 'System',
+            'Description' => Translatable('View system log messages.'),
+            'Module' => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
+            'Name' => Translatable('System Log'),
+            'Prio' => '600'
+        },
+        'NavBarName' => 'Admin',
+        'Title' => 'System Log'
     };
-    $Self->{'Loader::Module::AdminLog'}->{'000-Defaults'} = {
-        JavaScript => [
-          'Core.Agent.Admin.Log.js'
-        ],
-    };
-    $Self->{'Frontend::NavigationModule'}->{AdminLog} = {
-        GroupRo     => [],
-        Group       => [
-            'admin',
-        ],
-        Description => Translatable('View system log messages.'),
-        IconBig     => 'fa-file-text-o',
-        IconSmall   => '',
-        Module      => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
-        Name        => Translatable('System Log'),
-        Prio        => '600',
-        Block => '',
-    };
-
-    $Self->{'Frontend::Module'}->{AdminSystemConfiguration} = {
+    $Self->{'Frontend::Module'}->{AdminSysConfig} = {
         Group        => ['admin'],
-        GroupRo     => [],
-        Description  => 'Admin.',
-        Title        => 'System Configuration',
+        Description  => 'Admin',
+        Title        => 'SysConfig',
         NavBarName   => 'Admin',
+        NavBarModule => {
+            Module      => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
+            Name        => Translatable('SysConfig'),
+            Description => Translatable('Edit the system configuration settings.'),
+            Block       => 'System',
+            Prio        => 800,
+        },
+        Loader       => {
+            CSS => [
+                'Core.Agent.Admin.SysConfig.css',
+            ],
+            JavaScript => [
+                'Core.Agent.Admin.SysConfig.js',
+            ],
+        },
     };
-    $Self->{'Loader::Module::AdminSystemConfiguration'}->{'000-Defaults'} = {
-        CSS => [
-            'Core.Agent.Admin.SystemConfiguration.css',
-        ],
-        JavaScript => [
-            'thirdparty/clipboardjs-1.5.16/clipboard.min.js',
-            'Core.SystemConfiguration.js',
-            'Core.SystemConfiguration.Date.js',
-            'Core.Agent.Admin.SystemConfiguration.js',
-        ],
-    };
-    $Self->{'Frontend::NavigationModule'}->{AdminSystemConfiguration} = {
-        Group        => ['admin'],
-        GroupRo      => [],
-        Module      => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
-        Name        => Translatable('System Configuration'),
-        Description => Translatable('Edit the system configuration settings.'),
-        Block       => 'System',
-        Prio        => 800,
-        IconBig     => '',
-        IconSmall    => '',
-        Block => '',
-    };
-
     $Self->{'Frontend::Module'}->{AdminPackageManager} = {
-        Description => 'Software Package Manager.',
-        Group       => [
-            'admin',
+        'Description' => 'Software Package Manager.',
+        'Group' => [
+            'admin'
         ],
-        GroupRo     => [],
-        NavBarName => 'Admin',
-        Title      => 'Package Manager',
+        'NavBarModule' => {
+            'Block' => 'System',
+            'Description' => Translatable('Update and extend your system with software packages.'),
+            'Module' => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
+            'Name' => Translatable('Package Manager'),
+            'Prio' => '1000'
+        },
+        'NavBarName' => 'Admin',
+        'Title' => 'Package Manager'
     };
-    $Self->{'Frontend::NavigationModule'}->{AdminPackageManager} = {
-        Group       => [
-            'admin',
-        ],
-        GroupRo      => [],
-        IconBig     => 'fa-plug',
-        IconSmall => '',
-        Description => Translatable('Update and extend your system with software packages.'),
-        Module      => 'Kernel::Output::HTML::NavBar::ModuleAdmin',
-        Name        => Translatable('Package Manager'),
-        Prio        => '1000',
-        Block => '',
-    };
-
     # specify Loader settings for Login screens
-    $Self->{'Loader::Module::Login'}->{'000-Defaults'} = {
-        JavaScript => [
-            'Core.Agent.Login.js',
-        ],
+    $Self->{'Frontend::Module'}->{Login} = {
+        Loader       => {
+            JavaScript => [
+                'Core.Agent.Login.js',
+            ],
+        },
     };
-
-    $Self->{'Loader::Module::CustomerLogin'}->{'000-Defaults'} = {
-        JavaScript => [
-            'Core.Customer.Login.js',
-        ],
+    $Self->{'CustomerFrontend::Module'}->{CustomerLogin} = {
+        Loader       => {
+            JavaScript => [
+                'Core.Customer.Login.js',
+            ],
+        },
     };
 
     # specify Loader settings for the installer
-    $Self->{'Loader::Module::Installer'}->{'000-Defaults'} = {
-        JavaScript => [
-            'Core.Installer.js',
-        ],
-        CSS => [
-            'Core.Installer.css',
-        ],
+    $Self->{'Frontend::Module'}->{Installer} = {
+        Loader       => {
+            JavaScript => [
+                'Core.Installer.js',
+            ],
+            CSS => [
+                'Core.Installer.css'
+            ],
+        },
     };
 
     return;
@@ -1933,18 +1870,14 @@ sub new {
             my $ConfigFile = '';
             ## no critic
             if ( open( my $In, '<', $File ) ) {
-                ## use critic
+            ## use critic
 
                 # only try to find # VERSION:1.1 in the first 8 lines
                 my $TryCount = 0;
                 LINE:
                 while ( my $Line = <$In> ) {
-                    if ( $Line =~ /^\Q# VERSION:1.1\E/ ) {
+                    if ($Line =~ /^\Q# VERSION:1.1\E/) {
                         $FileFormat = 1.1;
-                        last LINE;
-                    }
-                    elsif ($Line =~ /^\Q# VERSION:2.0\E/) {
-                        $FileFormat = 2.0;
                         last LINE;
                     }
 
@@ -1958,7 +1891,7 @@ sub new {
                 # read file format 1.0 - file as string
                 if ( $FileFormat == 1 ) {
                     open( my $In, '<', $File );
-                    $ConfigFile = do { local $/; <$In> };
+                    $ConfigFile = do {local $/; <$In>};
                     close $In;
                 }
             }
@@ -1967,7 +1900,7 @@ sub new {
             }
 
             # use file format of config file
-            if ( $FileFormat == 1.1 || $FileFormat == 2.0 ) {
+            if ( $FileFormat == 1.1 ) {
 
                 # check if mod_perl is used
                 my $Require = 1;
@@ -1977,8 +1910,8 @@ sub new {
                     # on win32 Apache::Reload is not working correctly, so do also use "do"
                     my $OS = $^O;
                     ## no critic
-                    if ( $mod_perl::VERSION >= 1.99 && $OS ne 'MSWin32' ) {
-                        ## use critic
+                    if ( $mod_perl::VERSION >= 1.99 && $OS ne 'MSWin32') {
+                    ## use critic
                         my $ApacheReload = 0;
                         MODULE:
                         for my $Module ( sort keys %INC ) {
@@ -2003,13 +1936,13 @@ sub new {
                 # if require is usable, use it (because of better performance,
                 # if not, use do to do it on runtime)
                 ## no critic
-                if ($Require) {
-                    if ( !require $File ) {
+                if ( $Require ) {
+                    if (! require $File ) {
                         die "ERROR: $!\n";
                     }
                 }
                 else {
-                    if ( !do $File ) {
+                    if (! do $File ) {
                         die "ERROR: $!\n";
                     }
                 }
@@ -2027,7 +1960,7 @@ sub new {
 
                 # use eval for old file format
                 if ($ConfigFile) {
-                    if ( !eval $ConfigFile ) {    ## no critic
+                    if ( !eval $ConfigFile ) { ## no critic
                         print STDERR "ERROR: Syntax error in $File: $@\n";
                     }
 
@@ -2038,13 +1971,12 @@ sub new {
     }
 
     # load RELEASE file
-    if ( -e !"$Self->{Home}/RELEASE" ) {
-        print STDERR
-            "ERROR: $Self->{Home}/RELEASE does not exist! This file is needed by central system parts of OTRS, the system will not work without this file.\n";
+    if ( -e ! "$Self->{Home}/RELEASE" ) {
+        print STDERR "ERROR: $Self->{Home}/RELEASE does not exist! This file is needed by central system parts of OTRS, the system will not work without this file.\n";
         die;
     }
-    if ( open( my $Product, '<', "$Self->{Home}/RELEASE" ) ) {    ## no critic
-        while ( my $Line = <$Product> ) {
+    if ( open( my $Product, '<', "$Self->{Home}/RELEASE" ) ) { ## no critic
+        while (my $Line = <$Product>) {
 
             # filtering of comment lines
             if ( $Line !~ /^#/ ) {
@@ -2059,8 +1991,7 @@ sub new {
         close($Product);
     }
     else {
-        print STDERR
-            "ERROR: Can't read $Self->{Home}/RELEASE: $! This file is needed by central system parts of OTRS, the system will not work without this file.\n";
+        print STDERR "ERROR: Can't read $Self->{Home}/RELEASE: $! This file is needed by central system parts of OTRS, the system will not work without this file.\n";
         die;
     }
 
@@ -2148,14 +2079,14 @@ sub Translatable {
 sub ConfigChecksum {
     my $Self = shift;
 
-    my @Files = glob( $Self->{Home} . "/Kernel/Config/Files/*.pm" );
+    my @Files = glob( $Self->{Home} . "/Kernel/Config/Files/*.pm");
 
     # Ignore ZZZAAuto.pm, because this is only a cached version of the XML files which
     # will be in the checksum. Otherwise the SysConfig cannot use its cache files.
-    @Files = grep { $_ !~ m/ZZZAAuto\.pm$/smx } @Files;
+    @Files = grep { $_!~ m/ZZZAAuto\.pm$/smx } @Files;
 
-    push @Files, glob( $Self->{Home} . "/Kernel/Config/Files/*.xml" );
-    push @Files, $Self->{Home} . "/Kernel/Config/Defaults.pm";
+    push @Files, glob( $Self->{Home} . "/Kernel/Config/Files/*.xml");
+    push @Files, $Self->{Home} . "/Kernel/Config/Defaults.pm" ;
     push @Files, $Self->{Home} . "/Kernel/Config.pm";
 
     # Create a string with filenames and file mtimes of the config files
@@ -2163,7 +2094,7 @@ sub ConfigChecksum {
     for my $File (@Files) {
 
         # get file metadata
-        my $Stat = stat($File);
+        my $Stat = stat( $File );
 
         if ( !$Stat ) {
             print STDERR "Error: cannot stat file '$File': $!";
@@ -2173,7 +2104,7 @@ sub ConfigChecksum {
         $ConfigString .= $File . $Stat->mtime();
     }
 
-    return Digest::MD5::md5_hex($ConfigString);
+    return Digest::MD5::md5_hex( $ConfigString );
 }
 
 1;

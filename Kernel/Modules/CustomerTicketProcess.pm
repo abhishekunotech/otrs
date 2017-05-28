@@ -436,7 +436,7 @@ sub _RenderAjax {
     for my $DynamicFieldConfig ( @{$DynamicField} ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
-        # extract the dynamic field value from the web request
+        # extract the dynamic field value form the web request
         $DynamicFieldValues{ $DynamicFieldConfig->{Name} } = $BackendObject->EditFieldValueGet(
             DynamicFieldConfig => $DynamicFieldConfig,
             ParamObject        => $ParamObject,
@@ -1063,7 +1063,7 @@ sub _OutputActivityDialog {
     my %Error        = ();
     my %ErrorMessage = ();
 
-    # If we had Errors, we got an Error hash
+    # If we had Errors, we got an Errorhash
     %Error        = %{ $Param{Error} }        if ( IsHashRefWithData( $Param{Error} ) );
     %ErrorMessage = %{ $Param{ErrorMessage} } if ( IsHashRefWithData( $Param{ErrorMessage} ) );
 
@@ -1181,7 +1181,7 @@ sub _OutputActivityDialog {
             && IsHashRefWithData( $Activity->{ActivityDialog}{$_}{Overwrite} )
     } keys %{ $Activity->{ActivityDialog} };
 
-    # let the Overwrites Overwrite the ActivityDialog's Hash values
+    # let the Overwrites Overwrite the ActivityDialog's Hashvalues
     if ( $OverwriteActivityDialogNumber[0] ) {
         %{$ActivityDialog} = (
             %{$ActivityDialog},
@@ -1199,11 +1199,13 @@ sub _OutputActivityDialog {
             Value => $Ticket{Number},
         );
 
-        # display given notify messages if this is not an AJAX request
+        # display given notify messages if this is not an ajax request
         if ( IsArrayRefWithData( $Param{Notify} ) ) {
 
-            for my $NotifyData ( @{ $Param{Notify} } ) {
-                $Output .= $LayoutObject->Notify( %{$NotifyData} );
+            for my $NotifyString ( @{ $Param{Notify} } ) {
+                $Output .= $LayoutObject->Notify(
+                    Data => $NotifyString,
+                );
             }
         }
 
@@ -1213,32 +1215,8 @@ sub _OutputActivityDialog {
                 Name =>
                     $LayoutObject->{LanguageObject}->Translate( $ActivityDialog->{Name} )
                     || '',
-            },
+                }
         );
-
-        # show descriptions
-        if ( $ActivityDialog->{DescriptionShort} ) {
-            $LayoutObject->Block(
-                Name => 'DescriptionShort',
-                Data => {
-                    DescriptionShort
-                        => $LayoutObject->{LanguageObject}->Translate(
-                        $ActivityDialog->{DescriptionShort},
-                        ),
-                },
-            );
-        }
-        if ( $ActivityDialog->{DescriptionLong} ) {
-            $LayoutObject->Block(
-                Name => 'DescriptionLong',
-                Data => {
-                    DescriptionLong
-                        => $LayoutObject->{LanguageObject}->Translate(
-                        $ActivityDialog->{DescriptionLong},
-                        ),
-                },
-            );
-        }
     }
     elsif ( $Self->{IsMainWindow} && IsHashRefWithData( \%Error ) ) {
 
@@ -1249,8 +1227,8 @@ sub _OutputActivityDialog {
             $Param{RichTextHeight} = $Self->{Config}->{RichTextHeight} || 0;
             $Param{RichTextWidth}  = $Self->{Config}->{RichTextWidth}  || 0;
 
-            # set up customer rich text editor
-            $LayoutObject->CustomerSetRichTextParameters(
+            $LayoutObject->Block(
+                Name => 'RichText',
                 Data => \%Param,
             );
         }
@@ -1269,33 +1247,64 @@ sub _OutputActivityDialog {
         $MainBoxClass = 'MainBox';
     }
 
-    # Show descriptions if activity is a first screen. See bug#12649 for more information.
+    # display process iformation
     if ( $Self->{IsMainWindow} ) {
-        if ( $ActivityDialog->{DescriptionShort} ) {
+
+        # get process data
+        my $Process = $ProcessObject->ProcessGet(
+            ProcessEntityID => $Param{ProcessEntityID},
+        );
+
+        # output main process information
+        $LayoutObject->Block(
+            Name => 'ProcessInfoSidebar',
+            Data => {
+                Process        => $Process->{Name}        || '',
+                Activity       => $Activity->{Name}       || '',
+                ActivityDialog => $ActivityDialog->{Name} || '',
+            },
+        );
+
+        # output activity dilalog short description (if any)
+        if (
+            defined $ActivityDialog->{DescriptionShort}
+            && $ActivityDialog->{DescriptionShort} ne ''
+            )
+        {
             $LayoutObject->Block(
-                Name => 'DescriptionShortAlt',
+                Name => 'ProcessInfoSidebarActivityDialogDesc',
                 Data => {
-                    DescriptionShort
-                        => $LayoutObject->{LanguageObject}->Translate(
-                        $ActivityDialog->{DescriptionShort},
-                        ),
-                },
-            );
-        }
-        if ( $ActivityDialog->{DescriptionLong} ) {
-            $LayoutObject->Block(
-                Name => 'DescriptionLongAlt',
-                Data => {
-                    DescriptionLong
-                        => $LayoutObject->{LanguageObject}->Translate(
-                        $ActivityDialog->{DescriptionLong},
-                        ),
+                    ActivityDialogDescription => $ActivityDialog->{DescriptionShort} || '',
                 },
             );
         }
     }
 
-    # show close & cancel link if necessary
+    # show descriptions
+    if ( $ActivityDialog->{DescriptionShort} ) {
+        $LayoutObject->Block(
+            Name => 'DescriptionShort',
+            Data => {
+                DescriptionShort
+                    => $LayoutObject->{LanguageObject}->Translate(
+                    $ActivityDialog->{DescriptionShort},
+                    ),
+            },
+        );
+    }
+    if ( $ActivityDialog->{DescriptionLong} ) {
+        $LayoutObject->Block(
+            Name => 'DescriptionLong',
+            Data => {
+                DescriptionLong
+                    => $LayoutObject->{LanguageObject}->Translate(
+                    $ActivityDialog->{DescriptionLong},
+                    ),
+            },
+        );
+    }
+
+    # show close & cancel link if neccessary
     if ( !$Self->{IsMainWindow} ) {
         if ( $Param{RenderLocked} ) {
             $LayoutObject->Block(
@@ -1752,6 +1761,13 @@ sub _OutputActivityDialog {
         );
     }
 
+    # reload parent window
+    if ( $Param{ParentReload} ) {
+        $LayoutObject->Block(
+            Name => 'ParentReload',
+        );
+    }
+
     # Add the FormFooter
     $Output .= $LayoutObject->Output(
         TemplateFile => 'ProcessManagement/CustomerActivityDialogFooter',
@@ -2094,8 +2110,8 @@ sub _RenderArticle {
         $Param{RichTextHeight} = $Self->{Config}->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Self->{Config}->{RichTextWidth}  || 0;
 
-        # set up customer rich text editor
-        $LayoutObject->CustomerSetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }
@@ -2421,10 +2437,10 @@ sub _RenderSLA {
         Max           => 200,
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'SLAFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    # set fields that will get an AJAX loader icon when this field changes
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'SLAID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -2581,10 +2597,10 @@ sub _RenderService {
         Max           => 200,
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'ServiceFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    # set fields that will get an AJAX loader icon when this field changes
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'ServiceID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -2720,10 +2736,10 @@ sub _RenderPriority {
         Class         => "Modernize $ServerError",
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'PriorityFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    # set fields that will get an AJAX loader icon when this field changes
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'PriorityID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -2867,10 +2883,9 @@ sub _RenderQueue {
         PossibleNone  => 1,
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'QueueFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'QueueID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -3000,10 +3015,10 @@ sub _RenderState {
         Class         => "Modernize $ServerError",
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'StateFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    # set fields that will get an AJAX loader icon when this field changes
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'StateID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -3153,10 +3168,10 @@ sub _RenderType {
         Max           => 200,
     );
 
-    # send data to JS
-    $LayoutObject->AddJSData(
-        Key   => 'TypeFieldsToUpdate',
-        Value => $Param{AJAXUpdatableFields}
+    # set fields that will get an AJAX loader icon when this field changes
+    $Data{FieldsToUpdate} = $Self->_GetFieldsToUpdateStrg(
+        TriggerField        => 'TypeID',
+        AJAXUpdatableFields => $Param{AJAXUpdatableFields},
     );
 
     $LayoutObject->Block(
@@ -3448,8 +3463,6 @@ sub _StoreActivityDialog {
     my $ConfigObject  = $Kernel::OM->Get('Kernel::Config');
     my $TicketObject  = $Kernel::OM->Get('Kernel::System::Ticket');
 
-    my @Notify;
-
     my $NewTicketID;
     if ( !$TicketID ) {
 
@@ -3661,19 +3674,16 @@ sub _StoreActivityDialog {
         );
         my %ActivityDialogs = reverse %{ $Activity->{ActivityDialog} // {} };
         if ( !$ActivityDialogs{$ActivityDialogEntityID} ) {
-            my $TicketHook        = $ConfigObject->Get('Ticket::Hook');
-            my $TicketHookDivider = $ConfigObject->Get('Ticket::HookDivider');
 
-            $Error{WrongActivity} = 1;
-            push @Notify, {
-                Priority => 'Error',
-                Data     => $LayoutObject->{LanguageObject}->Translate(
-                    'This step does not belong anymore the current activity in process for ticket \'%s%s%s\'! Another user changed this ticket in the meantime.',
-                    $TicketHook,
-                    $TicketHookDivider,
-                    $Ticket{TicketNumber},
+            return $Self->_ShowDialogError(
+                Message => $LayoutObject->{LanguageObject}->Translate(
+                    'This step does not belong anymore the current activity in process for Ticket %s!',
+                    $Ticket{TicketID},
                 ),
-            };
+                Comment => Translatable(
+                    'Another user changed this ticket in the meantime. Please close this window and reload the ticket.'
+                ),
+            );
         }
 
         $ProcessEntityID = $Ticket{
@@ -3702,7 +3712,6 @@ sub _StoreActivityDialog {
             Error                  => \%Error,
             ErrorMessage           => \%ErrorMessage,
             GetParam               => $Param{GetParam},
-            Notify                 => \@Notify,
         );
     }
 
@@ -3763,9 +3772,6 @@ sub _StoreActivityDialog {
             }
         }
         elsif ( $CurrentField eq 'Article' && ( $UpdateTicketID || $NewTicketID ) ) {
-            my $ArticleBackendObject = $Kernel::OM->Get('Kernel::System::Ticket::Article')->BackendForChannel(
-                ChannelName => 'Internal',
-            );
 
             my $TicketID = $UpdateTicketID || $NewTicketID;
 
@@ -3784,10 +3790,9 @@ sub _StoreActivityDialog {
                 }
 
                 my $From = "$Self->{UserFirstname} $Self->{UserLastname} <$Self->{UserEmail}>";
-                $ArticleID = $ArticleBackendObject->ArticleCreate(
+                $ArticleID = $TicketObject->ArticleCreate(
                     TicketID                  => $TicketID,
                     SenderType                => 'customer',
-                    IsVisibleForCustomer      => $ActivityDialog->{Fields}->{Article}->{Config}->{IsVisibleForCustomer},
                     From                      => $From,
                     MimeType                  => $MimeType,
                     Charset                   => $LayoutObject->{UserCharset},
@@ -3796,6 +3801,7 @@ sub _StoreActivityDialog {
                     HistoryComment            => '%%Note',
                     Body                      => $Param{GetParam}->{Body},
                     Subject                   => $Param{GetParam}->{Subject},
+                    ArticleType               => $ActivityDialog->{Fields}->{Article}->{Config}->{ArticleType},
                     ForceNotificationToUserID => $ActivityDialog->{Fields}->{Article}->{Config}->{InformAgents}
                     ? $Param{GetParam}{InformUserID}
                     : [],
@@ -3845,7 +3851,7 @@ sub _StoreActivityDialog {
                     }
 
                     # write existing file to backend
-                    $ArticleBackendObject->ArticleWriteAttachment(
+                    $TicketObject->ArticleWriteAttachment(
                         %{$Attachment},
                         ArticleID => $ArticleID,
                         UserID    => $ConfigObject->Get('CustomerPanelUserID'),
@@ -4044,18 +4050,18 @@ sub _DisplayProcessList {
         $Param{RichTextHeight} = $Self->{Config}->{RichTextHeight} || 0;
         $Param{RichTextWidth}  = $Self->{Config}->{RichTextWidth}  || 0;
 
-        # set up customer rich text editor
-        $LayoutObject->CustomerSetRichTextParameters(
+        $LayoutObject->Block(
+            Name => 'RichText',
             Data => \%Param,
         );
     }
 
     if ( $Param{PreSelectProcess} && $Param{ProcessID} ) {
-
-        # send data to JS
-        $LayoutObject->AddJSData(
-            Key   => 'PreSelectedProcessID',
-            Value => $Param{ProcessID},
+        $LayoutObject->Block(
+            Name => 'PreSelectProcess',
+            Data => {
+                ProcessID => $Param{ProcessID},
+            },
         );
     }
 
@@ -4452,7 +4458,12 @@ sub _GetQueues {
             );
         }
         else {
-            %Queues = $Kernel::OM->Get('Kernel::System::SystemAddress')->SystemAddressQueueList();
+            %Queues = $Kernel::OM->Get('Kernel::System::DB')->GetTableData(
+                Table => 'system_address',
+                What  => 'queue_id, id',
+                Valid => 1,
+                Clamp => 1,
+            );
         }
 
         # get create permission queues
@@ -4474,10 +4485,6 @@ sub _GetQueues {
                 || '<Realname> <<Email>> - Queue: <Queue>';
             $String =~ s/<Queue>/$QueueData{Name}/g;
             $String =~ s/<QueueComment>/$QueueData{Comment}/g;
-
-            # remove trailing spaces
-            $String =~ s{\s+\z}{} if !$QueueData{Comment};
-
             if ( $ConfigObject->Get('Ticket::Frontend::NewQueueSelectionType') ne 'Queue' )
             {
                 my %SystemAddressData = $Self->{SystemAddress}->SystemAddressGet(

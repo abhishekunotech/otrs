@@ -11,7 +11,7 @@ package Kernel::System::Console::Command::Maint::Ticket::PendingCheck;
 use strict;
 use warnings;
 
-use parent qw(Kernel::System::Console::BaseCommand);
+use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -51,8 +51,6 @@ sub Run {
         @TicketIDs = $TicketObject->TicketSearch(
             Result   => 'ARRAY',
             StateIDs => [@PendingAutoStateIDs],
-            SortBy   => ['PendingTime'],
-            OrderBy  => ['Up'],
             UserID   => 1,
         );
 

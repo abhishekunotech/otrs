@@ -12,6 +12,8 @@ package Kernel::System::Stats::Static::StateAction;
 use strict;
 use warnings;
 
+use Time::Piece;
+
 our @ObjectDependencies = (
     'Kernel::Language',
     'Kernel::System::DB',
@@ -97,28 +99,27 @@ sub Run {
     # build x axis
 
     # first take epoch for 12:00 on the 1st of given month
-    my $DateTimeObject = $Kernel::OM->Create(
-        'Kernel::System::DateTime',
-        ObjectParams => {
-            Year   => $Param{Year},
-            Month  => $Param{Month},
-            Day    => 1,
-            Hour   => 12,
-            Minute => 0,
-            Second => 0,
-        },
+    # create Time::Piece object for this time
+    my $SystemTime = $Kernel::OM->Get('Kernel::System::Time')->Date2SystemTime(
+        Year   => $Param{Year},
+        Month  => $Param{Month},
+        Day    => 1,
+        Hour   => 12,
+        Minute => 0,
+        Second => 0,
     );
-    my $DateTimeValues = $DateTimeObject->Get();
+
+    my $TimePiece = localtime($SystemTime);    ## no critic
 
     my @Data;
     my @Days      = ();
     my %StateDate = ();
 
     # execute for all days of this month
-    while ( $DateTimeValues->{Month} == int $Param{Month} ) {
+    while ( $TimePiece->mon() == $Param{Month} ) {
 
         # x-label is of format 'Mon 1, Tue 2,' etc
-        my $Text = $LanguageObject->Translate( $DateTimeValues->{DayAbbr} ) . ' ' . $DateTimeValues->{Day};
+        my $Text = $LanguageObject->Translate( $TimePiece->wdayname() ) . ' ' . $TimePiece->mday();
 
         push @Days, $Text;
         my @Row = ();
@@ -126,7 +127,7 @@ sub Run {
             my $Count = $Self->_GetDBDataPerDay(
                 Year    => $Year,
                 Month   => $Month,
-                Day     => $DateTimeValues->{Day},
+                Day     => $TimePiece->mday(),
                 StateID => $StateID,
             );
             push @Row, $Count;
@@ -135,8 +136,7 @@ sub Run {
         }
 
         # move to next day
-        $DateTimeObject->Add( Days => 1 );
-        $DateTimeValues = $DateTimeObject->Get();
+        $TimePiece += ( 3600 * 24 );
     }
     for my $StateID ( sort { $States{$a} cmp $States{$b} } keys %States ) {
         my @Row = ( $States{$StateID} );

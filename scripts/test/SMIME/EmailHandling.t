@@ -19,13 +19,13 @@ use Kernel::Output::HTML::ArticleCheck::SMIME;
 my $ConfigObject    = $Kernel::OM->Get('Kernel::Config');
 my $MainObject      = $Kernel::OM->Get('Kernel::System::Main');
 my $TicketObject    = $Kernel::OM->Get('Kernel::System::Ticket');
-my $ArticleObject   = $Kernel::OM->Get('Kernel::System::Ticket::Article');
 my $HTMLUtilsObject = $Kernel::OM->Get('Kernel::System::HTMLUtils');
 
 # get helper object
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase  => 1,
+        UseTmpArticleDir => 1,
         UseTmpArticleDir => 1,
     },
 );
@@ -49,7 +49,7 @@ $ConfigObject->Set(
     Value => $PrivatePath,
 );
 
-my $OpenSSLBin = $ConfigObject->Get('SMIME::Bin') || '/usr/bin/openssl';
+my $OpenSSLBin = $ConfigObject->Get('SMIME::Bin');
 
 # get the openssl version string, e.g. OpenSSL 0.9.8e 23 Feb 2007
 my $OpenSSLVersionString = qx{$OpenSSLBin version};
@@ -78,7 +78,7 @@ $ConfigObject->Set(
 );
 
 # check if openssl is located there
-if ( !-e $OpenSSLBin ) {
+if ( !-e $ConfigObject->Get('SMIME::Bin') ) {
 
     # maybe it's a mac with macport
     if ( -e '/opt/local/bin/openssl' ) {
@@ -365,7 +365,7 @@ my @TestVariations;
 for my $Test (@Tests) {
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) sign only",
+        Name        => $Test->{Name} . " sign only",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From => 'unittest@example.org',
@@ -382,7 +382,7 @@ for my $Test (@Tests) {
 
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) crypt only",
+        Name        => $Test->{Name} . " crypt only",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From  => 'unittest@example.org',
@@ -398,7 +398,7 @@ for my $Test (@Tests) {
 
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) sign and crypt",
+        Name        => $Test->{Name} . " sign and crypt",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From => 'unittest@example.org',
@@ -419,7 +419,7 @@ for my $Test (@Tests) {
 
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) chain CA cert sign only",
+        Name        => $Test->{Name} . " chain CA cert sign only",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From => 'smimeuser1@test.com',
@@ -436,7 +436,7 @@ for my $Test (@Tests) {
 
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) chain CA cert crypt only",
+        Name        => $Test->{Name} . " chain CA cert crypt only",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From  => 'smimeuser1@test.com',
@@ -452,7 +452,7 @@ for my $Test (@Tests) {
 
     push @TestVariations, {
         %{$Test},
-        Name        => $Test->{Name} . " (old API) chain CA cert sign and crypt",
+        Name        => $Test->{Name} . " chain CA cert sign and crypt",
         ArticleData => {
             %{ $Test->{ArticleData} },
             From => 'smimeuser1@test.com',
@@ -470,129 +470,6 @@ for my $Test (@Tests) {
         VerifySignature  => 1,
         VerifyDecryption => 1,
     };
-
-    # here starts the tests for new API
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " sign only",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'unittest@example.org',
-            To            => 'unittest@example.org',
-            EmailSecurity => {
-                Backend => 'SMIME',
-                Method  => 'Detached',
-                SignKey => $Check1Hash . '.0',
-            },
-        },
-        VerifySignature  => 1,
-        VerifyDecryption => 0,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " crypt only",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'unittest@example.org',
-            To            => 'unittest@example.org',
-            EmailSecurity => {
-                Backend     => 'SMIME',
-                Method      => 'Detached',
-                EncryptKeys => [ $Check1Hash . '.0', $OTRSUserCertHash . '.0' ],
-            },
-        },
-        VerifySignature  => 0,
-        VerifyDecryption => 1,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " crypt only (multiple recipients)",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'unittest@example.org',
-            To            => 'unittest@example.org, smimeuser1@test.com',
-            EmailSecurity => {
-                Backend     => 'SMIME',
-                Method      => 'Detached',
-                EncryptKeys => [ $Check1Hash . '.0' ],
-            },
-        },
-        VerifySignature  => 0,
-        VerifyDecryption => 1,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " sign and crypt",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'unittest@example.org',
-            To            => 'unittest@example.org',
-            EmailSecurity => {
-                Backend     => 'SMIME',
-                SubType     => 'Detached',
-                SignKey     => $Check1Hash . '.0',
-                EncryptKeys => [ $Check1Hash . '.0' ],
-            },
-        },
-        VerifySignature  => 1,
-        VerifyDecryption => 1,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " chain CA cert sign only",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'smimeuser1@test.com',
-            To            => 'smimeuser1@test.com',
-            EmailSecurity => {
-                Backend => 'SMIME',
-                SubType => 'Detached',
-                SignKey => $OTRSUserCertHash . '.0',
-            },
-        },
-        VerifySignature  => 1,
-        VerifyDecryption => 0,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " chain CA cert crypt only",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'smimeuser1@test.com',
-            To            => 'smimeuser1@test.com',
-            EmailSecurity => {
-                Backend     => 'SMIME',
-                EncryptKeys => [ $OTRSUserCertHash . '.0' ],
-            },
-        },
-        VerifySignature  => 0,
-        VerifyDecryption => 1,
-    };
-
-    push @TestVariations, {
-        %{$Test},
-        Name        => $Test->{Name} . " chain CA cert sign and crypt",
-        ArticleData => {
-            %{ $Test->{ArticleData} },
-            From          => 'smimeuser1@test.com',
-            To            => 'smimeuser1@test.com',
-            EmailSecurity => {
-                Backend     => 'SMIME',
-                SubType     => 'Detached',
-                SignKey     => $OTRSUserCertHash . '.0',
-                EncryptKeys => [ $OTRSUserCertHash . '.0' ],
-            },
-        },
-        VerifySignature  => 1,
-        VerifyDecryption => 1,
-    };
-
 }
 
 for my $Test (@TestVariations) {
@@ -600,21 +477,19 @@ for my $Test (@TestVariations) {
     # make a deep copy as the references gets modified over the tests
     $Test = Storable::dclone($Test);
 
-    my $ArticleBackendObject = $ArticleObject->BackendForChannel( ChannelName => 'Email' );
-
-    my $ArticleID = $ArticleBackendObject->ArticleSend(
-        TicketID             => $TicketID,
-        From                 => $Test->{ArticleData}->{From},
-        To                   => $Test->{ArticleData}->{To},
-        IsVisibleForCustomer => 1,
-        SenderType           => 'customer',
-        HistoryType          => 'AddNote',
-        HistoryComment       => 'note',
-        Subject              => 'Unittest data',
-        Charset              => 'utf-8',
-        MimeType             => $Test->{ArticleData}->{MimeType},    # "text/plain" or "text/html"
-        Body                 => 'Some nice text\n.',
-        Sign                 => {
+    my $ArticleID = $TicketObject->ArticleSend(
+        TicketID       => $TicketID,
+        From           => $Test->{ArticleData}->{From},
+        To             => $Test->{ArticleData}->{To},
+        ArticleType    => 'email-external',
+        SenderType     => 'customer',
+        HistoryType    => 'AddNote',
+        HistoryComment => 'note',
+        Subject        => 'Unittest data',
+        Charset        => 'utf-8',
+        MimeType       => $Test->{ArticleData}->{MimeType},    # "text/plain" or "text/html"
+        Body           => 'Some nice text\n.',
+        Sign           => {
             Type    => 'SMIME',
             SubType => 'Detached',
             Key     => $Test->{ArticleData}->{Sign}->{Key},
@@ -628,10 +503,9 @@ for my $Test (@TestVariations) {
         "$Test->{Name} - ArticleSend()",
     );
 
-    my %Article = $ArticleBackendObject->ArticleGet(
+    my %Article = $TicketObject->ArticleGet(
         TicketID  => $TicketID,
         ArticleID => $ArticleID,
-        UserID    => 1,
     );
 
     my $CheckObject = Kernel::Output::HTML::ArticleCheck::SMIME->new(
@@ -663,10 +537,9 @@ for my $Test (@TestVariations) {
         );
     }
 
-    my %FinalArticleData = $ArticleBackendObject->ArticleGet(
+    my %FinalArticleData = $TicketObject->ArticleGet(
         TicketID  => $TicketID,
         ArticleID => $ArticleID,
-        UserID    => 1,
     );
 
     my $TestBody = $Test->{ArticleData}->{Body};
@@ -686,9 +559,11 @@ for my $Test (@TestVariations) {
 
     if ( defined $Test->{ArticleData}->{Attachment} ) {
         my $Found;
-        my %Index = $ArticleBackendObject->ArticleAttachmentIndex(
-            ArticleID => $ArticleID,
-            UserID    => 1,
+        my %Index = $TicketObject->ArticleAttachmentIndex(
+            ArticleID                  => $ArticleID,
+            UserID                     => 1,
+            Article                    => \%FinalArticleData,
+            StripPlainBodyAsAttachment => 0,
         );
 
         TESTATTACHMENT:

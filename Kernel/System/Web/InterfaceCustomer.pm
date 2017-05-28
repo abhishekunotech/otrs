@@ -11,9 +11,8 @@ package Kernel::System::Web::InterfaceCustomer;
 use strict;
 use warnings;
 
-use Kernel::System::DateTime qw(:all);
 use Kernel::System::Email;
-use Kernel::System::VariableCheck qw(IsArrayRefWithData IsHashRefWithData);
+use Kernel::System::VariableCheck qw(IsArrayRefWithData);
 use Kernel::Language qw(Translatable);
 
 our @ObjectDependencies = (
@@ -24,7 +23,6 @@ our @ObjectDependencies = (
     'Kernel::System::CustomerGroup',
     'Kernel::System::CustomerUser',
     'Kernel::System::DB',
-    'Kernel::System::Group',
     'Kernel::System::Log',
     'Kernel::System::Main',
     'Kernel::System::Scheduler',
@@ -37,13 +35,17 @@ our @ObjectDependencies = (
 
 Kernel::System::Web::InterfaceCustomer - the customer web interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 the global customer web interface (authentication, session handling, ...)
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
+
+=cut
+
+=item new()
 
 create customer web interface object
 
@@ -90,7 +92,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 execute the object
 
@@ -322,6 +324,23 @@ sub Run {
             return;
         }
 
+        # get groups rw/ro
+        for my $Type (qw(rw ro)) {
+            my %GroupData = $Kernel::OM->Get('Kernel::System::CustomerGroup')->GroupMemberList(
+                Result => 'HASH',
+                Type   => $Type,
+                UserID => $UserData{UserID},
+            );
+            for ( sort keys %GroupData ) {
+                if ( $Type eq 'rw' ) {
+                    $UserData{"UserIsGroup[$GroupData{$_}]"} = 'Yes';
+                }
+                else {
+                    $UserData{"UserIsGroupRo[$GroupData{$_}]"} = 'Yes';
+                }
+            }
+        }
+
         # create new session id
         my $NewSessionID = $SessionObject->CreateSessionID(
             %UserData,
@@ -368,35 +387,31 @@ sub Run {
             },
         );
 
-        # get time zone
-        my $UserTimeZone = $UserData{UserTimeZone} || UserDefaultTimeZoneGet();
-        $SessionObject->UpdateSessionID(
-            SessionID => $NewSessionID,
-            Key       => 'UserTimeZone',
-            Value     => $UserTimeZone,
-        );
-
-        # check if the time zone offset reported by the user's browser differs from that
-        # of the OTRS user's time zone offset
-        my $DateTimeObject = $Kernel::OM->Create(
-            'Kernel::System::DateTime',
-            ObjectParams => {
-                TimeZone => $UserTimeZone,
-            },
-        );
-        my $OTRSUserTimeZoneOffset = $DateTimeObject->Format( Format => '%{offset}' ) / 60;
-        my $BrowserTimeZoneOffset = ( $ParamObject->GetParam( Param => 'TimeZoneOffset' ) || 0 ) * -1;
-
-        # TimeZoneOffsetDifference contains the difference of the time zone offset between
-        # the user's OTRS time zone setting and the one reported by the user's browser.
-        # If there is a difference it can be evaluated later to e. g. show a message
-        # for the user to check his OTRS time zone setting.
-        my $UserTimeZoneOffsetDifference = abs( $OTRSUserTimeZoneOffset - $BrowserTimeZoneOffset );
-        $SessionObject->UpdateSessionID(
-            SessionID => $NewSessionID,
-            Key       => 'UserTimeZoneOffsetDifference',
-            Value     => $UserTimeZoneOffsetDifference,
-        );
+        # set time zone offset if TimeZoneFeature is active
+        if (
+            $ConfigObject->Get('TimeZoneUser')
+            && $ConfigObject->Get('TimeZoneUserBrowserAutoOffset')
+            )
+        {
+            my $TimeOffset = $ParamObject->GetParam( Param => 'TimeOffset' ) || 0;
+            if ( $TimeOffset > 0 ) {
+                $TimeOffset = '-' . ( $TimeOffset / 60 );
+            }
+            else {
+                $TimeOffset = ( $TimeOffset / 60 );
+                $TimeOffset =~ s/-/+/;
+            }
+            $UserObject->SetPreferences(
+                UserID => $UserData{UserID},
+                Key    => 'UserTimeZone',
+                Value  => $TimeOffset,
+            );
+            $SessionObject->UpdateSessionID(
+                SessionID => $NewSessionID,
+                Key       => 'UserTimeZone',
+                Value     => $TimeOffset,
+            );
+        }
 
         $Kernel::OM->ObjectParamAdd(
             'Kernel::Output::HTML::Layout' => {
@@ -742,13 +757,7 @@ sub Run {
         # get user data
         my %UserData = $UserObject->CustomerUserDataGet( User => $GetParams{UserLogin} );
         if ( $UserData{UserID} || !$GetParams{UserLogin} ) {
-
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'SignupError',
-                Value => 1,
-            );
-
+            $LayoutObject->Block( Name => 'SignupError' );
             $LayoutObject->Print(
                 Output => \$LayoutObject->CustomerLogin(
                     Title => 'Login',
@@ -805,13 +814,7 @@ sub Run {
         }
 
         if ( ( @Whitelist && !$WhitelistMatched ) || ( @Blacklist && $BlacklistMatched ) ) {
-
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'SignupError',
-                Value => 1,
-            );
-
+            $LayoutObject->Block( Name => 'SignupError' );
             $LayoutObject->Print(
                 Output => \$LayoutObject->CustomerLogin(
                     Title => 'Login',
@@ -838,13 +841,7 @@ sub Run {
             UserID  => $ConfigObject->Get('CustomerPanelUserID'),
         );
         if ( !$Add ) {
-
-            # send data to JS
-            $LayoutObject->AddJSData(
-                Key   => 'SignupError',
-                Value => 1,
-            );
-
+            $LayoutObject->Block( Name => 'SignupError' );
             $LayoutObject->Print(
                 Output => \$LayoutObject->CustomerLogin(
                     Title         => 'Login',
@@ -1066,13 +1063,7 @@ sub Run {
         }
 
         # module permission check for action
-        if (
-            ref $ModuleReg->{GroupRo} eq 'ARRAY'
-            && !scalar @{ $ModuleReg->{GroupRo} }
-            && ref $ModuleReg->{Group} eq 'ARRAY'
-            && !scalar @{ $ModuleReg->{Group} }
-            )
-        {
+        if ( !$ModuleReg->{GroupRo} && !$ModuleReg->{Group} ) {
             $Param{AccessRo} = 1;
             $Param{AccessRw} = 1;
         }
@@ -1099,39 +1090,26 @@ sub Run {
 
         }
 
-        my $NavigationConfig = $ConfigObject->Get('CustomerFrontend::Navigation')->{ $Param{Action} };
-
         # module permission check for submenu item
-        if ( IsHashRefWithData($NavigationConfig) ) {
+        if ( IsArrayRefWithData( $ModuleReg->{NavBar} ) ) {
             LINKCHECK:
-            for my $Key ( %{$NavigationConfig} ) {
-                next LINKCHECK if $Key !~ m/^\d+$/i;
+            for my $ModuleReg ( @{ $ModuleReg->{NavBar} } ) {
                 next LINKCHECK if $Param{RequestedURL} !~ m/Subaction/i;
-                if (
-                    $NavigationConfig->{$Key}->{Link} =~ m/Subaction=/i
-                    && $NavigationConfig->{$Key}->{Link} !~ m/$Param{Subaction}/i
-                    )
-                {
+                if ( $ModuleReg->{Link} =~ m/Subaction=/i && $ModuleReg->{Link} !~ m/$Param{Subaction}/i ) {
                     next LINKCHECK;
                 }
                 $Param{AccessRo} = 0;
                 $Param{AccessRw} = 0;
 
                 # module permission check for submenu item
-                if (
-                    ref $NavigationConfig->{$Key}->{GroupRo} eq 'ARRAY'
-                    && !scalar @{ $NavigationConfig->{$Key}->{GroupRo} }
-                    && ref $NavigationConfig->{$Key}->{Group} eq 'ARRAY'
-                    && !scalar @{ $NavigationConfig->{$Key}->{Group} }
-                    )
-                {
+                if ( !$ModuleReg->{GroupRo} && !$ModuleReg->{Group} ) {
                     $Param{AccessRo} = 1;
                     $Param{AccessRw} = 1;
                 }
                 else {
 
                     ( $Param{AccessRo}, $Param{AccessRw} ) = $Self->_CheckModulePermission(
-                        ModuleReg => $NavigationConfig->{$Key},
+                        ModuleReg => $ModuleReg,
                         %UserData,
                     );
 
@@ -1257,7 +1235,7 @@ sub Run {
                     . "::$UserData{UserLogin}::$QueryString\n";
                 close $Out;
                 $Kernel::OM->Get('Kernel::System::Log')->Log(
-                    Priority => 'debug',
+                    Priority => 'notice',
                     Message  => 'Response::Customer: '
                         . ( time() - $Self->{PerformanceLogStart} )
                         . "s taken (URL:$QueryString:$UserData{UserLogin})",
@@ -1292,7 +1270,7 @@ sub Run {
 
 =begin Internal:
 
-=head2 _CheckModulePermission()
+=item _CheckModulePermission()
 
 module permission check
 
@@ -1314,31 +1292,21 @@ sub _CheckModulePermission {
         my $AccessOk = 0;
         my $Group    = $Param{ModuleReg}->{$Permission};
 
+        my $Key = "UserIs$Permission";
         next PERMISSION if !$Group;
-
-        my $GroupObject = $Kernel::OM->Get('Kernel::System::CustomerGroup');
-
         if ( IsArrayRefWithData($Group) ) {
             GROUP:
             for my $Item ( @{$Group} ) {
                 next GROUP if !$Item;
-                next GROUP if !$GroupObject->PermissionCheck(
-                    UserID    => $Param{UserID},
-                    GroupName => $Item,
-                    Type      => $Permission eq 'GroupRo' ? 'ro' : 'rw',
-                );
-
+                next GROUP if !$Param{ $Key . "[$Item]" };
+                next GROUP if $Param{ $Key . "[$Item]" } ne 'Yes';
                 $AccessOk = 1;
                 last GROUP;
             }
         }
         else {
-            my $HasPermission = $GroupObject->PermissionCheck(
-                UserID    => $Param{UserID},
-                GroupName => $Group,
-                Type      => $Permission eq 'GroupRo' ? 'ro' : 'rw',
-            );
-            if ($HasPermission) {
+            if ( $Param{ $Key . "[$Group]" } && $Param{ $Key . "[$Group]" } eq 'Yes' )
+            {
                 $AccessOk = 1;
             }
         }
@@ -1373,6 +1341,8 @@ sub DESTROY {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

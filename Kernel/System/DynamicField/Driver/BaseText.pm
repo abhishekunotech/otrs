@@ -14,7 +14,7 @@ use warnings;
 use Kernel::System::VariableCheck qw(:all);
 use Kernel::Language qw(Translatable);
 
-use parent qw(Kernel::System::DynamicField::Driver::Base);
+use base qw(Kernel::System::DynamicField::Driver::Base);
 
 our @ObjectDependencies = (
     'Kernel::System::DB',
@@ -28,11 +28,13 @@ Kernel::System::DynamicField::Driver::BaseText - sub module of
 Kernel::System::DynamicField::Driver::Text and
 Kernel::System::DynamicField::Driver::TextArea
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Text common functions.
 
 =head1 PUBLIC INTERFACE
+
+=over 4
 
 =cut
 
@@ -108,15 +110,6 @@ sub ValueValidate {
 sub SearchSQLGet {
     my ( $Self, %Param ) = @_;
 
-    if ( $Param{Operator} eq 'Like' ) {
-        my $SQL = $Kernel::OM->Get('Kernel::System::DB')->QueryCondition(
-            Key   => "$Param{TableAlias}.value_text",
-            Value => $Param{SearchTerm},
-        );
-
-        return $SQL;
-    }
-
     my %Operators = (
         Equals            => '=',
         GreaterThan       => '>',
@@ -125,38 +118,37 @@ sub SearchSQLGet {
         SmallerThanEquals => '<=',
     );
 
-    if ( $Param{Operator} eq 'Empty' ) {
-        if ( $Param{SearchTerm} ) {
-            return " $Param{TableAlias}.value_text IS NULL ";
-        }
-        else {
-            my $DatabaseType = $Kernel::OM->Get('Kernel::System::DB')->{'DB::Type'};
-            if ( $DatabaseType eq 'oracle' ) {
-                return " $Param{TableAlias}.value_text IS NOT NULL ";
-            }
-            else {
-                return " $Param{TableAlias}.value_text <> '' ";
-            }
-        }
-    }
-    elsif ( !$Operators{ $Param{Operator} } ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
-            'Priority' => 'error',
-            'Message'  => "Unsupported Operator $Param{Operator}",
-        );
-        return;
-    }
-
+    # get database object
     my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
-    my $Lower    = '';
-    if ( $DBObject->GetDatabaseFunction('CaseSensitive') ) {
-        $Lower = 'LOWER';
+
+    if ( $Operators{ $Param{Operator} } ) {
+        my $Lower = '';
+        if ( $DBObject->GetDatabaseFunction('CaseSensitive') ) {
+            $Lower = 'LOWER';
+        }
+
+        my $SQL = " $Lower($Param{TableAlias}.value_text) $Operators{ $Param{Operator} } ";
+        $SQL .= "$Lower('" . $DBObject->Quote( $Param{SearchTerm} ) . "') ";
+
+        return $SQL;
     }
 
-    my $SQL = " $Lower($Param{TableAlias}.value_text) $Operators{ $Param{Operator} } ";
-    $SQL .= "$Lower('" . $DBObject->Quote( $Param{SearchTerm} ) . "') ";
+    if ( $Param{Operator} eq 'Like' ) {
 
-    return $SQL;
+        my $SQL = $DBObject->QueryCondition(
+            Key   => "$Param{TableAlias}.value_text",
+            Value => $Param{SearchTerm},
+        );
+
+        return $SQL;
+    }
+
+    $Kernel::OM->Get('Kernel::System::Log')->Log(
+        'Priority' => 'error',
+        'Message'  => "Unsupported Operator $Param{Operator}",
+    );
+
+    return;
 }
 
 sub SearchSQLOrderFieldGet {
@@ -181,7 +173,7 @@ sub EditFieldRender {
     }
     $Value = $Param{Value} // $Value;
 
-    # extract the dynamic field value from the web request
+    # extract the dynamic field value form the web request
     my $FieldValue = $Self->EditFieldValueGet(
         %Param,
     );
@@ -347,7 +339,7 @@ sub EditFieldValueValidate {
 sub DisplayValueRender {
     my ( $Self, %Param ) = @_;
 
-    # set HTMLOutput as default if not specified
+    # set HTMLOuput as default if not specified
     if ( !defined $Param{HTMLOutput} ) {
         $Param{HTMLOutput} = 1;
     }
@@ -356,7 +348,7 @@ sub DisplayValueRender {
     my $Value = defined $Param{Value} ? $Param{Value} : '';
     my $Title = $Value;
 
-    # HTMLOutput transformations
+    # HTMLOuput transformations
     if ( $Param{HTMLOutput} ) {
         $Value = $Param{LayoutObject}->Ascii2Html(
             Text => $Value,
@@ -645,6 +637,8 @@ sub ValueLookup {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

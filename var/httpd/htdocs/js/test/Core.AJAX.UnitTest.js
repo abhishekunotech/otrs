@@ -20,7 +20,7 @@ Core.AJAX = (function (Namespace) {
             ErrorHandlingFunc,
             OldBaselink;
 
-        QUnit.module('Core.AJAX');
+        module('Core.AJAX');
 
         /*
          * Core.AJAX.SerializeForm
@@ -163,11 +163,9 @@ Core.AJAX = (function (Namespace) {
              }
         ];
 
-        QUnit.test('Core.AJAX.SerializeForm()', function(Assert){
+        test('Core.AJAX.SerializeForm()', SerializeFormTests.length, function(){
 
-            Assert.expect(SerializeFormTests.length);
-
-            // Create a form container for the tests
+            // Create a form containter for the tests
             $('body').append('<form id="CORE_AJAX_SerializeFormTest"></form>');
 
             // Run the tests
@@ -175,12 +173,12 @@ Core.AJAX = (function (Namespace) {
                 var Test = this;
 
                 $('#CORE_AJAX_SerializeFormTest').empty().append(Test.HTML);
-                Assert.equal(Core.AJAX.SerializeForm($('#CORE_AJAX_SerializeFormTest'), Test.Ignore), Test.Result, Test.Name);
+                equal(Core.AJAX.SerializeForm($('#CORE_AJAX_SerializeFormTest'), Test.Ignore), Test.Result, Test.Name);
 
             });
 
             // Cleanup form container and contents
-            $('#CORE_AJAX_SerializeFormTest').remove();
+            $('#CORE_AJAX_TestForm1').remove();
         });
 
         /*
@@ -193,9 +191,9 @@ Core.AJAX = (function (Namespace) {
                  Expect: 2,
                  Name: 'Core.AJAX.ContentUpdate() simple select',
                  URL: 'sample/Core.AJAX.ContentUpdate1.html',
-                 ResultCheck: function(Assert) {
-                     Assert.equal($('#Core_AJAX_ContentUpdateTest_Element').val(), 2, 'Simple select');
-                     Assert.equal($('#CORE_AJAX_ContentUpdateTest').children().length, 1, 'Number of form children');
+                 ResultCheck: function() {
+                     equal($('#Core_AJAX_ContentUpdateTest_Element').val(), 2, 'Simple select');
+                     equal($('#CORE_AJAX_ContentUpdateTest').children().length, 1, 'Number of form children');
                  }
              }
         ];
@@ -203,27 +201,23 @@ Core.AJAX = (function (Namespace) {
         $.each(ContentUpdateTests, function(){
             var Test = this;
 
-            QUnit.test(Test.Name, function(Assert){
-                var Done = Assert.async();
-
-                Assert.expect(Test.Expect);
-
+            asyncTest(Test.Name, Test.Expect, function(){
                 try {
                     $('body').append('<form id="CORE_AJAX_ContentUpdateTest"></form>');
 
                     Core.AJAX.ContentUpdate($('#CORE_AJAX_ContentUpdateTest'), Test.URL, function(){
                         try {
-                            Test.ResultCheck(Assert);
+                            Test.ResultCheck();
                         }
                         finally {
                             $('#CORE_AJAX_ContentUpdateTest').remove();
-                            Done();
+                            start();
                         }
                     });
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Exception was thrown');
-                    Done();
+                    equal(true, false, 'Exception was thrown');
+                    start();
                 }
             });
         });
@@ -238,9 +232,9 @@ Core.AJAX = (function (Namespace) {
                  Expect: 1,
                  Name: 'Core.AJAX.FunctionCall() simple select',
                  URL: 'sample/Core.AJAX.FunctionCall1.html',
-                 Callback: function(Result, Assert, Done) {
-                     Assert.equal(Result, "1\n2\n3\n-\n", 'Function call with simple data');
-                     Done();
+                 Callback: function(Result) {
+                     equal(Result, "1\n2\n3\n-\n", 'Function call with simple data');
+                     start();
                  }
              }
          ];
@@ -248,21 +242,13 @@ Core.AJAX = (function (Namespace) {
         $.each(FunctionCallTests, function(){
             var Test = this;
 
-            QUnit.test(Test.Name, function(Assert){
-                var Done = Assert.async();
-
-                Assert.expect(Test.Expect);
-
-                Core.App.Subscribe('Event.AJAX.FunctionCall.Callback', function (Response) {
-                    Test.Callback(Response, Assert, Done);
-                });
-
+            asyncTest(Test.Name, Test.Expect, function(){
                 try {
-                    Core.AJAX.FunctionCall(Test.URL, {}, $.noop, 'text');
+                    Core.AJAX.FunctionCall(Test.URL, {}, Test.Callback, 'text');
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Exception was thrown');
-                    Done();
+                    equal(true, false, 'Exception was thrown');
+                    start();
                 }
             }, 'text');
         });
@@ -274,6 +260,17 @@ Core.AJAX = (function (Namespace) {
         function RestoreOrignal() {
             Core.Exception.HandleFinalError = ErrorHandlingFunc;
             Core.Config.Set('Baselink', OldBaselink);
+        }
+
+        function ChangeErrorHandlingForTest() {
+            ErrorHandlingFunc = Core.Exception.HandleFinalError;
+            Core.Exception.HandleFinalError = function (Exception) {
+                equal(Exception.GetType(), 'CommunicationError', 'Error handling called');
+                start();
+                RestoreOrignal();
+            };
+
+            OldBaselink = Core.Config.Get('Baselink');
         }
 
         // FormUpdate
@@ -296,35 +293,20 @@ Core.AJAX = (function (Namespace) {
         $.each(FormUpdateTests, function () {
             var Test = this;
 
-            QUnit.test(Test.Name, function (Assert) {
-                var Done = Assert.async();
-
-                function ChangeErrorHandlingForTest() {
-                    ErrorHandlingFunc = Core.Exception.HandleFinalError;
-                    Core.Exception.HandleFinalError = function (Exception) {
-                        Assert.equal(Exception.GetType(), 'CommunicationError', 'Error handling called');
-                        RestoreOrignal();
-                        Done();
-                    };
-
-                    OldBaselink = Core.Config.Get('Baselink');
-                }
-
-                Assert.expect(Test.Expect);
-
+            asyncTest(Test.Name, Test.Expect, function () {
                 ChangeErrorHandlingForTest();
                 Core.Config.Set('Baselink', Test.URL);
                 try {
                     Core.AJAX.FormUpdate($('#FormUpdateErrorHandlingForm'), 'Subaction', 'Test1', ['Test2'], function () {
-                        Assert.equal(true, false, 'Error handling was not called');
+                        equal(true, false, 'Error handling was not called');
+                        start();
                         RestoreOrignal();
-                        Done();
                     });
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Error caught, Exception was thrown');
+                    equal(true, false, 'Error caught, Exception was thrown');
+                    start();
                     RestoreOrignal();
-                    Done();
                 }
             });
         });
@@ -350,32 +332,18 @@ Core.AJAX = (function (Namespace) {
         $.each(ContentUpdateTests, function () {
             var Test = this;
 
-            QUnit.test(Test.Name, function (Assert) {
-                var Done = Assert.async();
-
-                function ChangeErrorHandlingForTest() {
-                    ErrorHandlingFunc = Core.Exception.HandleFinalError;
-                    Core.Exception.HandleFinalError = function (Exception) {
-                        Assert.equal(Exception.GetType(), 'CommunicationError', 'Error handling called');
-                    };
-
-                    OldBaselink = Core.Config.Get('Baselink');
-                }
-
-                Assert.expect(Test.Expect + 1);
-
+            asyncTest(Test.Name, Test.Expect + 1, function () {
                 ChangeErrorHandlingForTest();
                 try {
                     Core.AJAX.ContentUpdate($('#ContentUpdateErrorHandling'), Test.URL, function () {
-                        Assert.ok(true, 'Complete callback called');
+                        ok(true, 'Complete callback called');
                         RestoreOrignal();
-                        Done();
                     });
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Error caught, Exception was thrown');
+                    equal(true, false, 'Error caught, Exception was thrown');
+                    start();
                     RestoreOrignal();
-                    Done();
                 }
             });
         });
@@ -399,30 +367,15 @@ Core.AJAX = (function (Namespace) {
         $.each(FunctionCallTests, function () {
             var Test = this;
 
-            QUnit.test(Test.Name, function (Assert) {
-                var Done = Assert.async();
-
-                function ChangeErrorHandlingForTest() {
-                    ErrorHandlingFunc = Core.Exception.HandleFinalError;
-                    Core.Exception.HandleFinalError = function (Exception) {
-                        Assert.equal(Exception.GetType(), 'CommunicationError', 'Error handling called');
-                        RestoreOrignal();
-                        Done();
-                    };
-
-                    OldBaselink = Core.Config.Get('Baselink');
-                }
-
-                Assert.expect(Test.Expect);
-
+            asyncTest(Test.Name, Test.Expect, function () {
                 ChangeErrorHandlingForTest();
                 try {
                     Core.AJAX.FunctionCall(Test.URL, {}, Test.Callback);
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Error caught, Exception was thrown');
+                    equal(true, false, 'Error caught, Exception was thrown');
+                    start();
                     RestoreOrignal();
-                    Done();
                 }
             });
         });
@@ -441,57 +394,39 @@ Core.AJAX = (function (Namespace) {
         $.each(FunctionCallTests, function () {
             var Test = this;
 
-            QUnit.test(Test.Name, function (Assert) {
-                var Done = Assert.async();
-
-                function ChangeErrorHandlingForTest() {
-                    ErrorHandlingFunc = Core.Exception.HandleFinalError;
-                    Core.Exception.HandleFinalError = function (Exception) {
-                        Assert.equal(Exception.GetType(), 'CommunicationError', 'Error handling called');
-                        RestoreOrignal();
-                        Done();
-                    };
-
-                    OldBaselink = Core.Config.Get('Baselink');
-                }
-
-                Assert.expect(Test.Expect);
-
+            asyncTest(Test.Name, Test.Expect, function () {
                 ChangeErrorHandlingForTest();
                 // Special callback for this test
                 Core.Exception.HandleFinalError = function (Exception) {
                     var ExceptionMessage = Exception.GetMessage();
 
-                    Assert.ok(ExceptionMessage.match(/^Invalid callback method.+$/), 'Error handling called');
+                    ok(ExceptionMessage.match(/^Invalid callback method.+$/), 'Error handling called');
+                    start();
                     RestoreOrignal();
-                    Done();
                 };
                 try {
                     Core.AJAX.FunctionCall(Test.URL, {}, Test.Callback, 'html');
                 }
                 catch (Error) {
-                    Assert.equal(true, false, 'Error caught, Exception was thrown');
+                    equal(true, false, 'Error caught, Exception was thrown');
+                    start();
                     RestoreOrignal();
-                    Done();
                 }
             });
         });
 
         // test AJAX error message suppression on leaving the page
-        QUnit.test('AJAX error handling on leaving the page', function (Assert) {
-            var Done = Assert.async(),
-                AboutToLeaveOriginal = Core.Exception.AboutToLeave,
+        asyncTest('AJAX error handling on leaving the page', 1, function () {
+            var AboutToLeaveOriginal = Core.Exception.AboutToLeave,
                 HandleFinalErrorOriginal = Core.Exception.HandleFinalError;
-
-            Assert.expect(1);
 
             Core.Exception.AboutToLeave = true;
 
-            Core.Exception.HandleFinalError = function (ErrorObject) {
-                var ErrorShownToUser = HandleFinalErrorOriginal(ErrorObject);
+            Core.Exception.HandleFinalError = function (ErrorObject, Trace) {
+                var ErrorShownToUser = HandleFinalErrorOriginal(ErrorObject, Trace);
 
-                Assert.equal(ErrorShownToUser, false, 'AJAX errors should be suppressed when leaving the page (custom error handler called)');
-                Done();
+                equal(ErrorShownToUser, false, 'AJAX errors should be suppressed when leaving the page (custom error handler called)');
+                start();
 
                 Core.Exception.HandleFinalError = HandleFinalErrorOriginal;
                 Core.Exception.AboutToLeave = AboutToLeaveOriginal;
@@ -500,13 +435,13 @@ Core.AJAX = (function (Namespace) {
             //ChangeErrorHandlingForTest();
             try {
                 Core.AJAX.FunctionCall('nonexisting.url', {}, function () {
-                    Assert.equal(true, false, 'Callback on nonexisting URL');
-                    Done();
+                    equal(true, false, 'Callback on nonexisting URL');
+                    start();
                 });
             }
             catch (Error) {
-                Assert.equal(true, false, 'Error caught, unexpected Exception was thrown');
-                Done();
+                equal(true, false, 'Error caught, unexpected Exception was thrown');
+                start();
             }
         });
     };

@@ -20,16 +20,22 @@ our @ObjectDependencies = (
 
 Kernel::System::Console::InterfaceConsole - console interface
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 ...
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $InterfaceConsoleObject = $Kernel::OM->Get('Kernel::System::Console::InterfaceConsole');
 
 =cut
@@ -43,7 +49,7 @@ sub new {
     return $Self;
 }
 
-=head2 Run()
+=item Run()
 
 execute a command. Returns the shell status code to be used by exit().
 
@@ -88,6 +94,8 @@ sub Run {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

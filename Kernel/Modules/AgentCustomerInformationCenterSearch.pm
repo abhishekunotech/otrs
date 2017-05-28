@@ -128,7 +128,6 @@ sub Run {
             my %CustomerData = $CustomerUserObject->CustomerUserDataGet(
                 User => $CustomerLogin,
             );
-
             if ( !( grep { $_->{Value} eq $CustomerData{UserCustomerID} } @Result ) ) {
                 push @Result,
                     {

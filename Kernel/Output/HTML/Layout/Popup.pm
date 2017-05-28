@@ -17,13 +17,17 @@ our $ObjectManagerDisabled = 1;
 
 Kernel::Output::HTML::Layout::Popup - CSS/JavaScript
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 All valid functions.
 
 =head1 PUBLIC INTERFACE
 
-=head2 PopupClose()
+=over 4
+
+=cut
+
+=item PopupClose()
 
 Generate a small HTML page which closes the pop-up window and
 executes an action in the main window.
@@ -63,30 +67,27 @@ sub PopupClose {
             $Param{URL} .= ';' . $Self->{SessionName} . '=' . $Self->{SessionID};
         }
 
-        # send data to JS
-        $Self->AddJSData(
-            Key   => 'PopupClose',
-            Value => 'LoadParentURLAndClose',
-        );
-        $Self->AddJSData(
-            Key   => 'PopupURL',
-            Value => $Param{URL},
+        $Self->Block(
+            Name => 'LoadParentURLAndClose',
+            Data => {
+                URL => $Param{URL},
+            },
         );
     }
     else {
-
-        # send data to JS
-        $Self->AddJSData(
-            Key   => 'PopupClose',
-            Value => 'ReloadParentAndClose',
+        $Self->Block(
+            Name => 'ReloadParentAndClose',
         );
     }
 
+    $Output .= $Self->Output( TemplateFile => 'AgentTicketActionPopupClose' );
     $Output .= $Self->Footer( Type => 'Small' );
     return $Output;
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

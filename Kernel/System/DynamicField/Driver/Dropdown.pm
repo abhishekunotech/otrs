@@ -13,7 +13,7 @@ use warnings;
 
 use Kernel::System::VariableCheck qw(:all);
 
-use parent qw(Kernel::System::DynamicField::Driver::BaseSelect);
+use base qw(Kernel::System::DynamicField::Driver::BaseSelect);
 
 our @ObjectDependencies = (
     'Kernel::Config',
@@ -25,7 +25,7 @@ our @ObjectDependencies = (
 
 Kernel::System::DynamicField::Driver::Dropdown
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 DynamicFields Dropdown Driver delegate
 
@@ -34,7 +34,9 @@ DynamicFields Dropdown Driver delegate
 This module implements the public interface of L<Kernel::System::DynamicField::Backend>.
 Please look there for a detailed reference of the functions.
 
-=head2 new()
+=over 4
+
+=item new()
 
 usually, you want to create an instance of this
 by using Kernel::System::DynamicField::Backend->new();
@@ -56,7 +58,6 @@ sub new {
         'IsFiltrable'                  => 1,
         'IsStatsCondition'             => 1,
         'IsCustomerInterfaceCapable'   => 1,
-        'IsLikeOperatorCapable'        => 1,
     };
 
     # get the Dynamic Field Backend custom extensions
@@ -99,6 +100,8 @@ sub new {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

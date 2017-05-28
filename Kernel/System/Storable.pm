@@ -21,15 +21,20 @@ our @ObjectDependencies = (
 
 Kernel::System::Storable - Storable wrapper functions
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Functions for Storable serialization / deserialization.
 
+=over 4
 
-=head2 new()
+=cut
+
+=item new()
 
 create a Storable object. Do not use it directly, instead use:
 
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $StorableObject = $Kernel::OM->Get('Kernel::System::Storable');
 
 =cut
@@ -44,7 +49,7 @@ sub new {
     return $Self;
 }
 
-=head2 Serialize()
+=item Serialize()
 
 Dump a Perl data structure to an storable string.
 
@@ -94,7 +99,7 @@ sub Serialize {
     return $Result;
 }
 
-=head2 Deserialize()
+=item Deserialize()
 
 Load a serialized storable string to a Perl data structure.
 
@@ -128,11 +133,11 @@ sub Deserialize {
     return $Result;
 }
 
-=head2 Clone()
+=item Clone()
 
 Creates a deep copy a Perl data structure.
 
-    my $StorableData = $StorableObject->Clone(
+    my $StoableData = $StorableObject->Clone(
         Data => $Data,          # must be a reference
     );
 
@@ -176,6 +181,8 @@ sub Clone {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

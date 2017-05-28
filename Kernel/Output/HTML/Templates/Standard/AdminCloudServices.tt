@@ -11,16 +11,6 @@
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
     <h1>[% Translate("Cloud Service Management") | html %]</h1>
 
-    [% BreadcrumbPath = [
-            {
-                Name => Translate('Cloud Service Management'),
-                Link => Env("Action"),
-            },
-        ]
-    %]
-
-    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="SidebarColumn">
         <div class="WidgetSimple">
             <div class="Header">
@@ -98,3 +88,16 @@
     </div>
     <div class="Clear"></div>
 </div>
+
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+$('.MasterAction').bind('click', function (Event) {
+    var $MasterActionLink = $(this).find('.MasterActionLink');
+    // only act if the link was not clicked directly
+    if (Event.target !== $MasterActionLink.get(0)) {
+        window.location = $MasterActionLink.attr('href');
+        return false;
+    }
+});
+//]]></script>
+[% END %]

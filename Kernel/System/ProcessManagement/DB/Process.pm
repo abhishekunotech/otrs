@@ -22,7 +22,6 @@ use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = (
     'Kernel::Config',
-    'Kernel::Language',
     'Kernel::System::Cache',
     'Kernel::System::DB',
     'Kernel::System::DynamicField',
@@ -37,16 +36,22 @@ our @ObjectDependencies = (
 
 Kernel::System::ProcessManagement::DB::Process
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
 
 Process Management DB Process backend
 
 =head1 PUBLIC INTERFACE
 
-=head2 new()
+=over 4
 
-Don't use the constructor directly, use the ObjectManager instead:
+=cut
 
+=item new()
+
+create an object. Do not use it directly, instead use:
+
+    use Kernel::System::ObjectManager;
+    local $Kernel::OM = Kernel::System::ObjectManager->new();
     my $ProcessObject = $Kernel::OM->Get('Kernel::System::ProcessManagement::DB::Process');
 
 =cut
@@ -77,7 +82,7 @@ sub new {
     return $Self;
 }
 
-=head2 ProcessAdd()
+=item ProcessAdd()
 
 add new Process
 
@@ -200,7 +205,7 @@ sub ProcessAdd {
     return $ID;
 }
 
-=head2 ProcessDelete()
+=item ProcessDelete()
 
 delete a Process
 
@@ -248,7 +253,7 @@ sub ProcessDelete {
     return 1;
 }
 
-=head2 ProcessGet()
+=item ProcessGet()
 
 get Process attributes
 
@@ -561,7 +566,7 @@ sub ProcessGet {
     return \%Data;
 }
 
-=head2 ProcessUpdate()
+=item ProcessUpdate()
 
 update Process attributes
 
@@ -702,7 +707,7 @@ sub ProcessUpdate {
     return 1;
 }
 
-=head2 ProcessList()
+=item ProcessList()
 
 get a Process list
 
@@ -803,7 +808,7 @@ sub ProcessList {
     return \%Data;
 }
 
-=head2 ProcessListGet()
+=item ProcessListGet()
 
 get a Process list with all process details
 
@@ -903,7 +908,7 @@ sub ProcessListGet {
     return \@Data;
 }
 
-=head2 ProcessDump()
+=item ProcessDump()
 
 gets a complete processes information dump from the DB including: Process State, Activities,
 ActivityDialogs, Transitions and TransitionActions
@@ -1383,7 +1388,7 @@ EOF
     }
 }
 
-=head2 ProcessImport()
+=item ProcessImport()
 
 import a process YAML file/content
 
@@ -1757,10 +1762,9 @@ sub ProcessImport {
     }
 
     return (
-        Message => $Kernel::OM->Get('Kernel::Language')->Translate(
-            'The process "%s" and all of its data has been imported successfully.',
-            $ProcessData->{Process}->{Name}
-        ),
+        Message => 'Process '
+            . $ProcessData->{Process}->{Name}
+            . ' and all its data has been imported successfully.',
         Success => 1,
     );
 }
@@ -2107,6 +2111,8 @@ sub _ProcessImportRollBack {
 }
 
 1;
+
+=back
 
 =head1 TERMS AND CONDITIONS
 

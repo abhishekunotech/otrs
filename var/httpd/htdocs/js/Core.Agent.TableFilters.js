@@ -36,15 +36,9 @@ Core.Agent.TableFilters = (function (TargetNS) {
      *      Initialize autocompletion for CustomerID.
      */
     TargetNS.InitCustomerIDAutocomplete = function ($Input) {
-        var AutoCompleteConfig = Core.Config.Get('CustomerIDAutocomplete');
-
-        if (typeof AutoCompleteConfig === 'undefined') {
-            return;
-        }
-
         $Input.autocomplete({
-            minLength: AutoCompleteConfig.MinQueryLength,
-            delay: AutoCompleteConfig.QueryDelay,
+            minLength: Core.Config.Get('CustomerIDAutocomplete.MinQueryLength'),
+            delay: Core.Config.Get('CustomerIDAutocomplete.QueryDelay'),
             open: function() {
                 // force a higher z-index than the overlay/dialog
                 $(this).autocomplete('widget').addClass('ui-overlay-autocomplete');
@@ -52,11 +46,11 @@ Core.Agent.TableFilters = (function (TargetNS) {
             },
             source: function (Request, Response) {
                 var URL = Core.Config.Get('Baselink'), Data = {
-                    Action: 'AgentCustomerSearch',
+                    Action: 'AgentCustomerInformationCenterSearch',
                     Subaction: 'SearchCustomerID',
-                    IncludeUnknownTicketCustomers: parseInt(Core.Config.Get('IncludeUnknownTicketCustomers'), 10),
+                    IncludeUnknownTicketCustomers: Core.Config.Get('IncludeUnknownTicketCustomers'),
                     Term: Request.term,
-                    MaxResults: AutoCompleteConfig.MaxResultsDisplayed
+                    MaxResults: Core.Config.Get('CustomerIDAutocomplete.MaxResultsDisplayed')
                 };
 
                 // if an old ajax request is already running, stop the old request and start the new one
@@ -99,15 +93,9 @@ Core.Agent.TableFilters = (function (TargetNS) {
      *      Initialize autocompletion for Customer User.
      */
     TargetNS.InitCustomerUserAutocomplete = function ($Input) {
-        var AutoCompleteConfig = Core.Config.Get('CustomerUserAutocomplete');
-
-        if (typeof AutoCompleteConfig === 'undefined') {
-            return;
-        }
-
         $Input.autocomplete({
-            minLength: AutoCompleteConfig.MinQueryLength,
-            delay: AutoCompleteConfig.QueryDelay,
+            minLength: Core.Config.Get('CustomerUserAutocomplete.MinQueryLength'),
+            delay: Core.Config.Get('CustomerUserAutocomplete.QueryDelay'),
             open: function() {
                 // force a higher z-index than the overlay/dialog
                 $(this).autocomplete('widget').addClass('ui-overlay-autocomplete');
@@ -116,9 +104,9 @@ Core.Agent.TableFilters = (function (TargetNS) {
             source: function (Request, Response) {
                 var URL = Core.Config.Get('Baselink'), Data = {
                     Action: 'AgentCustomerSearch',
-                    IncludeUnknownTicketCustomers: parseInt(Core.Config.Get('IncludeUnknownTicketCustomers'), 10),
+                    IncludeUnknownTicketCustomers: Core.Config.Get('IncludeUnknownTicketCustomers'),
                     Term: Request.term,
-                    MaxResults: AutoCompleteConfig.MaxResultsDisplayed
+                    MaxResults: Core.Config.Get('CustomerUserAutocomplete.MaxResultsDisplayed')
                 };
 
                 // if an old ajax request is already running, stop the old request and start the new one
@@ -134,9 +122,9 @@ Core.Agent.TableFilters = (function (TargetNS) {
                     $Input.removeData('AutoCompleteXHR');
                     $.each(Result, function () {
                         ValueData.push({
-                            label: this.Label + " (" + this.Value + ")",
-                            value: this.Label,
-                            key: this.Value
+                            label: this.CustomerValue + " (" + this.CustomerKey + ")",
+                            value: this.CustomerValue,
+                            key: this.CustomerKey
                         });
                     });
                     Response(ValueData);
@@ -163,15 +151,9 @@ Core.Agent.TableFilters = (function (TargetNS) {
      *      Initialize autocompletion for User.
      */
     TargetNS.InitUserAutocomplete = function ($Input, Subaction) {
-        var AutoCompleteConfig = Core.Config.Get('UserAutocomplete');
-
-        if (typeof AutoCompleteConfig === 'undefined') {
-            return;
-        }
-
         $Input.autocomplete({
-            minLength: AutoCompleteConfig.MinQueryLength,
-            delay: AutoCompleteConfig.QueryDelay,
+            minLength: Core.Config.Get('UserAutocomplete.MinQueryLength'),
+            delay: Core.Config.Get('UserAutocomplete.QueryDelay'),
             open: function() {
                 // force a higher z-index than the overlay/dialog
                 $(this).autocomplete('widget').addClass('ui-overlay-autocomplete');
@@ -182,7 +164,7 @@ Core.Agent.TableFilters = (function (TargetNS) {
                     Action: 'AgentUserSearch',
                     Subaction: Subaction,
                     Term: Request.term,
-                    MaxResults: AutoCompleteConfig.MaxResultsDisplayed
+                    MaxResults: Core.Config.Get('UserAutocomplete.MaxResultsDisplayed')
                 };
 
                 // if an old ajax request is already running, stop the old request and start the new one
@@ -335,6 +317,7 @@ Core.Agent.TableFilters = (function (TargetNS) {
             });
         }
     };
+
 
     return TargetNS;
 }(Core.Agent.TableFilters || {}));
